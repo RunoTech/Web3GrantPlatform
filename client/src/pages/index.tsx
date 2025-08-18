@@ -144,11 +144,11 @@ export default function HomePage() {
       <section className="py-20 bg-surface-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-8 mb-20">
-            <h2 className="text-4xl md:text-6xl font-bold text-foreground uppercase tracking-wider">
-              NEDEN <span className="neon-text">DUXXAN</span>?
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground uppercase tracking-wider">
+              {t('features.why_title')}
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Futuristik blockchain teknolojisi ile güvenli ve şeffaf bağış deneyimi
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+              {t('features.subtitle')}
             </p>
           </div>
 
@@ -157,9 +157,9 @@ export default function HomePage() {
               <div className="w-20 h-20 cyber-cyan-bg rounded-lg flex items-center justify-center mx-auto mb-6">
                 <Shield className="w-10 h-10 text-background" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-4 uppercase tracking-wide">BLOCKCHAİN GÜVENLİĞİ</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.blockchain_security')}</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Ethereum ve BSC ağlarında çalışan akıllı kontratlar ile %100 güvenli işlemler
+                {t('features.blockchain_desc')}
               </p>
             </div>
 
@@ -167,9 +167,9 @@ export default function HomePage() {
               <div className="w-20 h-20 cyber-green-bg rounded-lg flex items-center justify-center mx-auto mb-6">
                 <DollarSign className="w-10 h-10 text-background" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-4 uppercase tracking-wide">KOMİSYONSUZ</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.commission_free')}</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Bağışlarınız doğrudan kampanya sahiplerine ulaşır, hiçbir komisyon kesilmez
+                {t('features.commission_desc')}
               </p>
             </div>
 
@@ -177,9 +177,9 @@ export default function HomePage() {
               <div className="w-20 h-20 cyber-purple-bg rounded-lg flex items-center justify-center mx-auto mb-6">
                 <Zap className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-4 uppercase tracking-wide">HIZLI VE KOLAY</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.fast_easy')}</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Cüzdanınızı bağlayın ve dakikalar içinde kampanya oluşturun veya bağış yapın
+                {t('features.fast_desc')}
               </p>
             </div>
           </div>

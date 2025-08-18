@@ -50,6 +50,16 @@ const translations = {
     'popular.create_first': 'Create the first campaign and make a difference',
     'popular.view_all': 'VIEW ALL CAMPAIGNS',
     
+    // Features Section
+    'features.why_title': 'WHY DUXXAN?',
+    'features.subtitle': 'Secure and transparent donation experience with futuristic blockchain technology',
+    'features.blockchain_security': 'BLOCKCHAIN SECURITY',
+    'features.blockchain_desc': '100% secure transactions with smart contracts running on Ethereum and BSC networks',
+    'features.commission_free': 'COMMISSION FREE',
+    'features.commission_desc': 'Your donations go directly to campaign owners, no commission is deducted',
+    'features.fast_easy': 'FAST & EASY',
+    'features.fast_desc': 'Connect your wallet and create campaigns or donate within minutes',
+    
     // Footer
     'footer.platform': 'PLATFORM',
     'footer.support': 'SUPPORT',
@@ -100,6 +110,16 @@ const translations = {
     'popular.no_campaigns': 'HENÜZ POPÜLER KAMPANYA YOK',
     'popular.create_first': 'İlk kampanyayı oluşturun ve fark yaratın',
     'popular.view_all': 'TÜM KAMPANYALARI GÖRÜNTÜLE',
+    
+    // Features Section
+    'features.why_title': 'NEDEN DUXXAN?',
+    'features.subtitle': 'Futuristik blockchain teknolojisi ile güvenli ve şeffaf bağış deneyimi',
+    'features.blockchain_security': 'BLOCKCHAİN GÜVENLİĞİ',
+    'features.blockchain_desc': 'Ethereum ve BSC ağlarında çalışan akıllı kontratlar ile %100 güvenli işlemler',
+    'features.commission_free': 'KOMİSYONSUZ',
+    'features.commission_desc': 'Bağışlarınız doğrudan kampanya sahiplerine ulaşır, hiçbir komisyon kesilmez',
+    'features.fast_easy': 'HIZLI VE KOLAY',
+    'features.fast_desc': 'Cüzdanınızı bağlayın ve dakikalar içinde kampanya oluşturun veya bağış yapın',
     
     // Footer
     'footer.platform': 'PLATFORM',
@@ -152,6 +172,16 @@ const translations = {
     'popular.create_first': 'Crea la primera campaña y marca la diferencia',
     'popular.view_all': 'VER TODAS LAS CAMPAÑAS',
     
+    // Features Section
+    'features.why_title': '¿POR QUÉ DUXXAN?',
+    'features.subtitle': 'Experiencia de donación segura y transparente con tecnología blockchain futurista',
+    'features.blockchain_security': 'SEGURIDAD BLOCKCHAIN',
+    'features.blockchain_desc': 'Transacciones 100% seguras con contratos inteligentes en redes Ethereum y BSC',
+    'features.commission_free': 'SIN COMISIONES',
+    'features.commission_desc': 'Tus donaciones van directamente a los creadores de campañas, sin comisiones',
+    'features.fast_easy': 'RÁPIDO Y FÁCIL',
+    'features.fast_desc': 'Conecta tu billetera y crea campañas o dona en minutos',
+    
     // Footer
     'footer.platform': 'PLATAFORMA',
     'footer.support': 'SOPORTE',
@@ -203,6 +233,16 @@ const translations = {
     'popular.create_first': 'Créez la première campagne et faites la différence',
     'popular.view_all': 'VOIR TOUTES LES CAMPAGNES',
     
+    // Features Section
+    'features.why_title': 'POURQUOI DUXXAN ?',
+    'features.subtitle': 'Expérience de don sécurisée et transparente avec la technologie blockchain futuriste',
+    'features.blockchain_security': 'SÉCURITÉ BLOCKCHAIN',
+    'features.blockchain_desc': 'Transactions 100% sécurisées avec des contrats intelligents sur les réseaux Ethereum et BSC',
+    'features.commission_free': 'SANS COMMISSION',
+    'features.commission_desc': 'Vos dons vont directement aux créateurs de campagnes, aucune commission prélevée',
+    'features.fast_easy': 'RAPIDE ET FACILE',
+    'features.fast_desc': 'Connectez votre portefeuille et créez des campagnes ou donnez en minutes',
+    
     // Footer
     'footer.platform': 'PLATEFORME',
     'footer.support': 'SUPPORT',
@@ -253,6 +293,16 @@ const translations = {
     'popular.no_campaigns': 'NOCH KEINE BELIEBTEN KAMPAGNEN',
     'popular.create_first': 'Erstelle die erste Kampagne und mache einen Unterschied',
     'popular.view_all': 'ALLE KAMPAGNEN ANZEIGEN',
+    
+    // Features Section
+    'features.why_title': 'WARUM DUXXAN?',
+    'features.subtitle': 'Sichere und transparente Spendenerfahrung mit futuristischer Blockchain-Technologie',
+    'features.blockchain_security': 'BLOCKCHAIN SICHERHEIT',
+    'features.blockchain_desc': '100% sichere Transaktionen mit Smart Contracts auf Ethereum und BSC Netzwerken',
+    'features.commission_free': 'PROVISIONSFREI',
+    'features.commission_desc': 'Ihre Spenden gehen direkt an Kampagnenersteller, keine Provisionen werden abgezogen',
+    'features.fast_easy': 'SCHNELL & EINFACH',
+    'features.fast_desc': 'Verbinden Sie Ihr Wallet und erstellen Sie Kampagnen oder spenden Sie innerhalb von Minuten',
     
     // Footer
     'footer.platform': 'PLATTFORM',

@@ -108,16 +108,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Activate account (public)
+  // Activate account with payment verification (public)
   app.post("/api/activate-account", async (req, res) => {
     try {
-      const { wallet, txHash } = req.body;
+      const { wallet, txHash, network } = req.body;
+      
+      if (!wallet || !txHash || !network) {
+        return res.status(400).json({ error: "Wallet, transaction hash, and network are required" });
+      }
+
+      // Check if account exists
+      const account = await storage.getAccount(wallet);
+      if (!account) {
+        return res.status(404).json({ error: "Account not found" });
+      }
+
+      if (account.active) {
+        return res.status(400).json({ error: "Account is already active" });
+      }
+
+      // Get network fee and platform wallet
+      const networkFees = await storage.getActiveNetworkFees();
+      const networkFee = networkFees.find(fee => fee.network === network);
+      
+      if (!networkFee) {
+        return res.status(400).json({ error: "Network fee not found" });
+      }
+
+      // Get platform wallet address
+      const settings = await storage.getPlatformSettings("payment");
+      const platformWalletSetting = settings.find(s => s.key === `${network}_wallet_address`);
+      
+      if (!platformWalletSetting) {
+        return res.status(400).json({ error: "Platform wallet address not configured" });
+      }
+
+      // Verify payment using blockchain
+      const { verifyPayment } = await import("./blockchain");
+      const verification = await verifyPayment(
+        network,
+        txHash,
+        networkFee.amount || "0",
+        networkFee.tokenAddress || "",
+        platformWalletSetting.value || ""
+      );
+
+      if (!verification.success) {
+        return res.status(400).json({ error: verification.error || "Payment verification failed" });
+      }
+
+      // Activate account
       await storage.updateAccount(wallet, {
         active: true,
         activationTxHash: txHash,
         activationDate: new Date(),
       });
-      res.json({ success: true });
+
+      res.json({ 
+        success: true,
+        verified: true,
+        amount: verification.amount,
+        message: "Account activated successfully"
+      });
     } catch (error) {
       console.error("Error activating account:", error);
       res.status(500).json({ error: "Failed to activate account" });
@@ -200,6 +252,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching announcements:", error);
       res.status(500).json({ error: "Failed to fetch announcements" });
+    }
+  });
+
+  // Get platform wallet addresses (public)
+  app.get("/api/platform-wallets", async (req, res) => {
+    try {
+      const settings = await storage.getPlatformSettings("payment");
+      const wallets: any = {};
+      
+      settings.forEach(setting => {
+        if (setting.key.includes("wallet_address")) {
+          const network = setting.key.replace("_wallet_address", "");
+          wallets[network] = setting.value;
+        }
+      });
+      
+      res.json(wallets);
+    } catch (error) {
+      console.error("Error fetching platform wallets:", error);
+      res.status(500).json({ error: "Failed to fetch platform wallets" });
+    }
+  });
+
+  // Verify transaction (public - for frontend validation)
+  app.post("/api/verify-transaction", async (req, res) => {
+    try {
+      const { network, txHash } = req.body;
+      
+      if (!network || !txHash) {
+        return res.status(400).json({ error: "Network and transaction hash are required" });
+      }
+
+      const { verifyPayment } = await import("./blockchain");
+      const networkFees = await storage.getActiveNetworkFees();
+      const networkFee = networkFees.find(fee => fee.network === network);
+      
+      if (!networkFee) {
+        return res.status(400).json({ error: "Network not supported" });
+      }
+
+      const settings = await storage.getPlatformSettings("payment");
+      const platformWalletSetting = settings.find(s => s.key === `${network}_wallet_address`);
+      
+      if (!platformWalletSetting) {
+        return res.status(400).json({ error: "Platform wallet not configured" });
+      }
+
+      const verification = await verifyPayment(
+        network,
+        txHash,
+        networkFee.amount || "0",
+        networkFee.tokenAddress || "",
+        platformWalletSetting.value || ""
+      );
+
+      res.json({
+        valid: verification.success,
+        error: verification.error,
+        amount: verification.amount,
+        expectedAmount: networkFee.amount,
+        tokenSymbol: networkFee.tokenSymbol
+      });
+    } catch (error) {
+      console.error("Error verifying transaction:", error);
+      res.status(500).json({ error: "Failed to verify transaction" });
     }
   });
 

@@ -12,6 +12,7 @@ import CreateCampaignPage from "@/pages/create-campaign";
 import ProfilePage from "@/pages/profile";
 import DonationsPage from "@/pages/donations";
 import FundsPage from "@/pages/funds";
+import PaymentPage from "@/pages/payment";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/campaigns" component={CampaignsPage} />
       <Route path="/donations" component={DonationsPage} />
       <Route path="/funds" component={FundsPage} />
+      <Route path="/payment" component={PaymentPage} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/campaign/:id" component={CampaignDetailPage} />
       <Route path="/create-campaign" component={CreateCampaignPage} />

@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import CampaignCard from "@/components/CampaignCard";
+import LanguageSelector from "@/components/LanguageSelector";
 import { useWallet } from "@/hooks/useWallet";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { api } from "@/utils/api";
 import { 
   Heart, 
@@ -24,6 +26,7 @@ import {
 
 export default function HomePage() {
   const { isConnected, address } = useWallet();
+  const { t } = useLanguage();
 
   const { data: popularCampaigns = [] } = useQuery({
     queryKey: ["/api/get-popular-campaigns"],
@@ -54,28 +57,31 @@ export default function HomePage() {
                 <Heart className="w-6 h-6 text-background" />
               </div>
               <h1 className="text-xl font-bold neon-text uppercase tracking-wide">
-                DUXXAN
+                {t('duxxan')}
               </h1>
             </div>
 
             <nav className="hidden md:flex space-x-8">
-              <Link href="/" className="text-cyber-cyan font-semibold uppercase tracking-wide">
-                ANA SAYFA
+              <Link href="/campaigns" className="text-muted-foreground hover:text-cyber-cyan font-medium transition-colors uppercase tracking-wide">
+                {t('campaigns')}
               </Link>
               <Link href="/donations" className="text-muted-foreground hover:text-cyber-cyan font-medium transition-colors uppercase tracking-wide">
-                BAĞIŞLAR
+                {t('donations')}
               </Link>
               <Link href="/funds" className="text-muted-foreground hover:text-cyber-cyan font-medium transition-colors uppercase tracking-wide">
-                FONLAR
+                {t('funds')}
               </Link>
               {isConnected && (
                 <Link href="/profile" className="text-muted-foreground hover:text-cyber-cyan font-medium transition-colors uppercase tracking-wide">
-                  PROFİL
+                  {t('profile')}
                 </Link>
               )}
             </nav>
 
-            <WalletConnectButton />
+            <div className="flex items-center space-x-3">
+              <LanguageSelector />
+              <WalletConnectButton />
+            </div>
           </div>
         </div>
       </header>
@@ -95,19 +101,14 @@ export default function HomePage() {
             </div>
             
             <div className="space-y-6">
-              <h1 className="text-6xl md:text-8xl font-bold text-foreground leading-tight tracking-wider">
-                WEB3'TE 
-                <span className="neon-text block mt-4">
-                  GELECEĞİ
-                </span>
-                <span className="text-4xl md:text-5xl block mt-4 text-muted-foreground">
-                  BİRLİKTE İNŞA EDELİM
+              <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight tracking-wider uppercase">
+                <span className="neon-text">
+                  {t('hero.title')}
                 </span>
               </h1>
               
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-                Ethereum ve BSC ağlarında güvenli, şeffaf ve komisyonsuz bağış platformu. 
-                Projelerinizi destekleyin, toplumsal değişime katkıda bulunun.
+              <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+                {t('hero.subtitle')}
               </p>
             </div>
             
@@ -115,23 +116,23 @@ export default function HomePage() {
               <Button 
                 asChild
                 size="lg"
-                className="cyber-cyan-bg px-12 py-6 text-lg font-bold uppercase tracking-wider btn-cyber"
+                className="cyber-cyan-bg px-8 py-4 font-bold uppercase tracking-wide btn-cyber"
                 data-testid="button-create-campaign"
               >
                 <Link href="/funds">
-                  <Target className="w-6 h-6 mr-3" />
-                  KAMPANYA OLUŞTUR
+                  <Target className="w-5 h-5 mr-2" />
+                  {t('hero.create_campaign')}
                 </Link>
               </Button>
               <Button 
                 asChild
                 size="lg"
-                className="btn-cyber px-12 py-6 text-lg"
+                className="btn-cyber px-8 py-4"
                 data-testid="button-explore-campaigns"
               >
-                <Link href="/donations">
-                  <Search className="w-6 h-6 mr-3" />
-                  BAĞIŞLARI KEŞFET
+                <Link href="/campaigns">
+                  <Search className="w-5 h-5 mr-2" />
+                  {t('hero.explore_campaigns')}
                 </Link>
               </Button>
             </div>
@@ -206,14 +207,13 @@ export default function HomePage() {
               </div>
               <div>
                 <h2 className="text-2xl md:text-3xl font-bold neon-text uppercase tracking-wide">
-                  GÜNLÜK TETHER ÖDÜLÜ
+                  {t('daily.title')}
                 </h2>
               </div>
             </div>
             
             <p className="text-base text-muted-foreground max-w-xl mx-auto">
-              Her gün katılım gösterin ve <span className="text-cyber-green font-semibold">USDT ödülü</span> kazanma şansı yakalayın. 
-              Futuristik topluluğa <span className="text-cyber-cyan font-semibold">günlük ödüller</span> dağıtılıyor!
+              {t('daily.description')}
             </p>
           </div>
           
@@ -229,26 +229,26 @@ export default function HomePage() {
                     <div className="w-6 h-6 cyber-green-bg rounded flex items-center justify-center">
                       <span className="text-xs font-bold text-background">1</span>
                     </div>
-                    <span>KATILIM SÜRECİ</span>
+                    <span>{t('daily.participation_process')}</span>
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                     <div className="cyber-card p-3 border border-cyber-cyan/30">
                       <div className="w-6 h-6 cyber-cyan-bg rounded mb-2 flex items-center justify-center">
                         <span className="text-xs font-bold text-background">1</span>
                       </div>
-                      <span className="text-cyber-cyan font-medium uppercase tracking-wide">Cüzdan Bağla</span>
+                      <span className="text-cyber-cyan font-medium uppercase tracking-wide">{t('daily.step1')}</span>
                     </div>
                     <div className="cyber-card p-3 border border-cyber-purple/30">
                       <div className="w-6 h-6 cyber-purple-bg rounded mb-2 flex items-center justify-center">
                         <span className="text-xs font-bold text-white">2</span>
                       </div>
-                      <span className="text-cyber-purple font-medium uppercase tracking-wide">Butona Tıkla</span>
+                      <span className="text-cyber-purple font-medium uppercase tracking-wide">{t('daily.step2')}</span>
                     </div>
                     <div className="cyber-card p-3 border border-cyber-green/30">
                       <div className="w-6 h-6 cyber-green-bg rounded mb-2 flex items-center justify-center">
                         <span className="text-xs font-bold text-background">3</span>
                       </div>
-                      <span className="text-cyber-green font-medium uppercase tracking-wide">Ödül Kazan</span>
+                      <span className="text-cyber-green font-medium uppercase tracking-wide">{t('daily.step3')}</span>
                     </div>
                   </div>
                 </div>
@@ -264,13 +264,13 @@ export default function HomePage() {
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                       <DollarSign className="w-5 h-5 mr-2" />
-                      BUGÜN KATIL
+                      {t('daily.participate_today')}
                     </Button>
                   ) : (
                     <div className="cyber-card px-6 py-3 neon-border relative">
                       <div className="absolute inset-0 bg-gradient-to-r from-cyber-cyan/10 to-cyber-purple/10 rounded-lg"></div>
                       <span className="text-cyber-cyan font-medium uppercase tracking-wide relative z-10">
-                        Günlük ödüle katılmak için cüzdan bağlayın
+                        {t('daily.connect_wallet')}
                       </span>
                     </div>
                   )}
@@ -286,7 +286,7 @@ export default function HomePage() {
                 <div className="flex items-center space-x-2 mb-4">
                   <Award className="w-5 h-5 text-cyber-yellow" />
                   <h3 className="text-lg font-bold text-foreground uppercase tracking-wide">
-                    DÜNKÜ KAZANANLAR
+                    {t('daily.yesterday_winners')}
                   </h3>
                 </div>
                 
@@ -315,10 +315,10 @@ export default function HomePage() {
                       </div>
                       <div className="space-y-1">
                         <div className="text-foreground font-semibold uppercase tracking-wide text-sm">
-                          HENÜZ KAZANAN YOK
+                          {t('daily.no_winners')}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          İlk katılan sen ol!
+                          {t('daily.be_first')}
                         </div>
                       </div>
                     </div>
@@ -332,15 +332,15 @@ export default function HomePage() {
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center p-4 cyber-card border border-cyber-cyan/30">
               <div className="text-xl font-bold text-cyber-cyan mb-1">∞</div>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">Toplam Ödül</div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">{t('stats.total_rewards')}</div>
             </div>
             <div className="text-center p-4 cyber-card border border-cyber-purple/30">
               <div className="text-xl font-bold text-cyber-purple mb-1">24</div>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">Saat Aktif</div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">{t('stats.hours_active')}</div>
             </div>
             <div className="text-center p-4 cyber-card border border-cyber-green/30">
               <div className="text-xl font-bold text-cyber-green mb-1">100%</div>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">Güvenli</div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">{t('stats.secure')}</div>
             </div>
           </div>
         </div>
@@ -350,11 +350,11 @@ export default function HomePage() {
       <section className="py-20 bg-surface">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-8 mb-20">
-            <h2 className="text-4xl md:text-6xl font-bold text-foreground uppercase tracking-wider">
-              POPÜLER <span className="neon-text">KAMPANYALAR</span>
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground uppercase tracking-wider">
+              <span className="neon-text">{t('popular.title')}</span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Futuristik etkisi yüksek, güvenilir projeleri keşfedin ve destekleyin
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+              {t('popular.subtitle')}
             </p>
           </div>
 
@@ -375,12 +375,12 @@ export default function HomePage() {
                 <div className="w-24 h-24 cyber-cyan-bg rounded-lg flex items-center justify-center mx-auto mb-6 neon-border">
                   <Target className="w-12 h-12 text-background" />
                 </div>
-                <h3 className="text-2xl font-semibold text-foreground mb-2 uppercase tracking-wide">HENÜZ POPÜLER KAMPANYA YOK</h3>
-                <p className="text-muted-foreground mb-8">İlk kampanyayı oluşturun ve fark yaratın</p>
+                <h3 className="text-xl font-semibold text-foreground mb-2 uppercase tracking-wide">{t('popular.no_campaigns')}</h3>
+                <p className="text-muted-foreground mb-8">{t('popular.create_first')}</p>
                 <Button asChild className="btn-cyber">
                   <Link href="/funds">
                     <Plus className="w-5 h-5 mr-2" />
-                    KAMPANYA OLUŞTUR
+                    {t('hero.create_campaign')}
                   </Link>
                 </Button>
               </div>
@@ -394,7 +394,7 @@ export default function HomePage() {
               data-testid="button-view-all-campaigns"
             >
               <Link href="/campaigns">
-                TÜM KAMPANYALARI GÖRÜNTÜLE
+                {t('popular.view_all')}
                 <Search className="w-5 h-5 ml-2" />
               </Link>
             </Button>
@@ -413,33 +413,33 @@ export default function HomePage() {
                 <div className="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center neon-border">
                   <Heart className="w-6 h-6 text-background" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground neon-text uppercase tracking-wide">DUXXAN</h3>
+                <h3 className="text-xl font-bold text-foreground neon-text uppercase tracking-wide">{t('duxxan')}</h3>
               </div>
               <p className="text-muted-foreground">
-                Futuristik blockchain teknolojisi ile güvenli ve şeffaf bağış platformu
+                {t('footer.description')}
               </p>
             </div>
             
             <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">PLATFORM</h4>
+              <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.platform')}</h4>
               <ul className="space-y-2 text-muted-foreground">
-                <li><Link href="/campaigns" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">KAMPANYALAR</Link></li>
-                <li><Link href="/funds" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">KAMPANYA OLUŞTUR</Link></li>
-                <li><a href="#odul-sistemi" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">GÜNLÜK ÖDÜL</a></li>
+                <li><Link href="/campaigns" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">{t('campaigns')}</Link></li>
+                <li><Link href="/funds" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">{t('hero.create_campaign')}</Link></li>
+                <li><a href="#odul-sistemi" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">{t('daily.title')}</a></li>
               </ul>
             </div>
             
             <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">DESTEK</h4>
+              <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.support')}</h4>
               <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">NASIL ÇALIŞIR</a></li>
-                <li><a href="#" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">GÜVENLİK</a></li>
-                <li><a href="#" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">SSS</a></li>
+                <li><a href="#" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">{t('footer.how_it_works')}</a></li>
+                <li><a href="#" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">{t('footer.security')}</a></li>
+                <li><a href="#" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">{t('footer.faq')}</a></li>
               </ul>
             </div>
             
             <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">BAĞLANTI</h4>
+              <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.connection')}</h4>
               <div className="flex space-x-4">
                 <a href="#" className="w-10 h-10 cyber-card rounded-lg flex items-center justify-center hover:neon-border transition-colors">
                   <span className="text-sm text-cyber-cyan">TW</span>
@@ -455,7 +455,7 @@ export default function HomePage() {
           </div>
           
           <div className="border-t border-border mt-12 pt-8 text-center text-muted-foreground">
-            <p>&copy; 2025 DUXXAN. TÜM HAKLARI SAKLIDIR.</p>
+            <p>&copy; 2025 {t('duxxan')}. {t('footer.rights')}.</p>
           </div>
         </div>
       </footer>

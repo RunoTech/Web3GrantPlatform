@@ -1,211 +1,482 @@
-import Database from "better-sqlite3";
-import { 
-  type Fee, type InsertFee,
+import { db } from "./db";
+import { eq, desc, and, sql } from "drizzle-orm";
+import {
+  type Admin, type InsertAdmin,
+  type PlatformSetting, type InsertPlatformSetting,
+  type NetworkFee, type InsertNetworkFee,
   type Account, type InsertAccount,
   type Campaign, type InsertCampaign,
+  type Donation, type InsertDonation,
   type DailyEntry, type InsertDailyEntry,
-  type Winner, type InsertWinner,
-  fees, accounts, campaigns, dailyEntries, winners
-} from "@shared/schema";
-import path from "path";
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+  type DailyWinner, type InsertDailyWinner,
+  type FooterLink, type InsertFooterLink,
+  type Announcement, type InsertAnnouncement,
+  type AdminLog, type InsertAdminLog,
+  admins,
+  platformSettings,
+  networkFees,
+  accounts,
+  campaigns,
+  donations,
+  dailyEntries,
+  dailyWinners,
+  footerLinks,
+  announcements,
+  adminLogs,
+} from "../shared/schema";
 
 export interface IStorage {
-  // Fees
-  getFees(): Promise<Fee[]>;
-  updateFee(fee: InsertFee): Promise<void>;
-  
+  // Admin Management
+  getAdmin(id: number): Promise<Admin | undefined>;
+  getAdminByUsername(username: string): Promise<Admin | undefined>;
+  getAdminByEmail(email: string): Promise<Admin | undefined>;
+  createAdmin(admin: InsertAdmin): Promise<Admin>;
+  updateAdmin(id: number, updates: Partial<Admin>): Promise<void>;
+  getAllAdmins(): Promise<Admin[]>;
+
+  // Platform Settings
+  getPlatformSettings(category?: string): Promise<PlatformSetting[]>;
+  getPlatformSetting(key: string): Promise<PlatformSetting | undefined>;
+  setPlatformSetting(setting: InsertPlatformSetting): Promise<PlatformSetting>;
+  updatePlatformSetting(key: string, value: string, updatedBy: number): Promise<void>;
+
+  // Network Fees
+  getNetworkFees(): Promise<NetworkFee[]>;
+  getActiveNetworkFees(): Promise<NetworkFee[]>;
+  getNetworkFee(network: string): Promise<NetworkFee | undefined>;
+  createNetworkFee(fee: InsertNetworkFee): Promise<NetworkFee>;
+  updateNetworkFee(id: number, updates: Partial<NetworkFee>): Promise<void>;
+
   // Accounts
   getAccount(wallet: string): Promise<Account | undefined>;
   createAccount(account: InsertAccount): Promise<Account>;
   updateAccount(wallet: string, updates: Partial<Account>): Promise<void>;
-  
+  getAllAccounts(limit?: number, offset?: number): Promise<Account[]>;
+  getActiveAccountsCount(): Promise<number>;
+
   // Campaigns
-  getCampaigns(): Promise<Campaign[]>;
+  getCampaigns(limit?: number, offset?: number): Promise<Campaign[]>;
   getCampaign(id: number): Promise<Campaign | undefined>;
   createCampaign(campaign: InsertCampaign): Promise<Campaign>;
   updateCampaign(id: number, updates: Partial<Campaign>): Promise<void>;
   getPopularCampaigns(limit: number): Promise<Campaign[]>;
-  
-  // Daily Entries
+  getPendingCampaigns(): Promise<Campaign[]>;
+  approveCampaign(id: number, adminId: number): Promise<void>;
+
+  // Donations
+  createDonation(donation: InsertDonation): Promise<Donation>;
+  getDonationsByCampaign(campaignId: number): Promise<Donation[]>;
+  getDonationsByWallet(wallet: string): Promise<Donation[]>;
+  getTotalDonations(): Promise<{ total: string; count: number }>;
+
+  // Daily Rewards
   createDailyEntry(entry: InsertDailyEntry): Promise<DailyEntry>;
   getDailyEntries(date: string): Promise<DailyEntry[]>;
   checkDailyEntry(wallet: string, date: string): Promise<boolean>;
-  
-  // Winners
-  createWinner(winner: InsertWinner): Promise<Winner>;
-  getWinners(limit?: number): Promise<Winner[]>;
-  getWinnersByDate(date: string): Promise<Winner[]>;
+  createDailyWinner(winner: InsertDailyWinner): Promise<DailyWinner>;
+  getDailyWinners(limit?: number): Promise<DailyWinner[]>;
+  getDailyWinnersByDate(date: string): Promise<DailyWinner[]>;
+
+  // Footer Links
+  getFooterLinks(section?: string): Promise<FooterLink[]>;
+  createFooterLink(link: InsertFooterLink): Promise<FooterLink>;
+  updateFooterLink(id: number, updates: Partial<FooterLink>): Promise<void>;
+  deleteFooterLink(id: number): Promise<void>;
+
+  // Announcements
+  getActiveAnnouncements(): Promise<Announcement[]>;
+  getAllAnnouncements(): Promise<Announcement[]>;
+  createAnnouncement(announcement: InsertAnnouncement): Promise<Announcement>;
+  updateAnnouncement(id: number, updates: Partial<Announcement>): Promise<void>;
+  deleteAnnouncement(id: number): Promise<void>;
+
+  // Admin Logs
+  createAdminLog(log: InsertAdminLog): Promise<AdminLog>;
+  getAdminLogs(adminId?: number, limit?: number): Promise<AdminLog[]>;
+
+  // Statistics for Admin Dashboard
+  getStatistics(): Promise<{
+    totalUsers: number;
+    activeUsers: number;
+    totalCampaigns: number;
+    pendingCampaigns: number;
+    totalDonations: string;
+    totalDonationCount: number;
+    todayEntries: number;
+  }>;
 }
 
-export class SQLiteStorage implements IStorage {
-  private db: Database.Database;
-
-  constructor() {
-    const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '..', 'database.sqlite');
-    this.db = new Database(dbPath);
-    this.initDatabase();
+export class DatabaseStorage implements IStorage {
+  // Admin Management
+  async getAdmin(id: number): Promise<Admin | undefined> {
+    const [admin] = await db.select().from(admins).where(eq(admins.id, id));
+    return admin || undefined;
   }
 
-  private initDatabase() {
-    // Create tables
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS fees (
-        network TEXT PRIMARY KEY,
-        token_symbol TEXT NOT NULL,
-        token_address TEXT NOT NULL,
-        decimals INTEGER NOT NULL,
-        amount INTEGER NOT NULL
-      );
-      
-      CREATE TABLE IF NOT EXISTS accounts (
-        wallet TEXT PRIMARY KEY,
-        active INTEGER DEFAULT 0,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-      );
-      
-      CREATE TABLE IF NOT EXISTS campaigns (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        description TEXT NOT NULL,
-        imageUrl TEXT NOT NULL,
-        ownerWallet TEXT NOT NULL,
-        totalDonations INTEGER DEFAULT 0,
-        donationCount INTEGER DEFAULT 0,
-        featured INTEGER DEFAULT 0,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-      );
-      
-      CREATE TABLE IF NOT EXISTS daily_entries (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        wallet TEXT NOT NULL,
-        date TEXT NOT NULL,
-        UNIQUE(wallet, date)
-      );
-      
-      CREATE TABLE IF NOT EXISTS winners (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        wallet TEXT NOT NULL,
-        date TEXT NOT NULL
-      );
-    `);
+  async getAdminByUsername(username: string): Promise<Admin | undefined> {
+    const [admin] = await db.select().from(admins).where(eq(admins.username, username));
+    return admin || undefined;
+  }
 
-    // Seed default fees
-    const ethFeeExists = this.db.prepare('SELECT 1 FROM fees WHERE network = ?').get('ethereum');
-    const bscFeeExists = this.db.prepare('SELECT 1 FROM fees WHERE network = ?').get('bsc');
-    
-    if (!ethFeeExists) {
-      this.db.prepare(`
-        INSERT INTO fees (network, token_symbol, token_address, decimals, amount)
-        VALUES (?, ?, ?, ?, ?)
-      `).run('ethereum', 'USDT', '0xdAC17F958D2ee523a2206206994597C13D831ec7', 6, 50000000);
+  async getAdminByEmail(email: string): Promise<Admin | undefined> {
+    const [admin] = await db.select().from(admins).where(eq(admins.email, email));
+    return admin || undefined;
+  }
+
+  async createAdmin(admin: InsertAdmin): Promise<Admin> {
+    const [newAdmin] = await db
+      .insert(admins)
+      .values(admin)
+      .returning();
+    return newAdmin;
+  }
+
+  async updateAdmin(id: number, updates: Partial<Admin>): Promise<void> {
+    await db
+      .update(admins)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(admins.id, id));
+  }
+
+  async getAllAdmins(): Promise<Admin[]> {
+    return await db.select().from(admins).orderBy(desc(admins.createdAt));
+  }
+
+  // Platform Settings
+  async getPlatformSettings(category?: string): Promise<PlatformSetting[]> {
+    if (category) {
+      return await db.select().from(platformSettings).where(eq(platformSettings.category, category));
     }
-    
-    if (!bscFeeExists) {
-      this.db.prepare(`
-        INSERT INTO fees (network, token_symbol, token_address, decimals, amount)
-        VALUES (?, ?, ?, ?, ?)
-      `).run('bsc', 'BUSD', '0xe9e7cea3dedca5984780bafc599bd69add087d56', 18, '25000000000000000000');
-    }
+    return await db.select().from(platformSettings);
   }
 
-  async getFees(): Promise<Fee[]> {
-    return this.db.prepare('SELECT * FROM fees').all() as Fee[];
+  async getPlatformSetting(key: string): Promise<PlatformSetting | undefined> {
+    const [setting] = await db.select().from(platformSettings).where(eq(platformSettings.key, key));
+    return setting || undefined;
   }
 
-  async updateFee(fee: InsertFee): Promise<void> {
-    this.db.prepare(`
-      INSERT OR REPLACE INTO fees (network, token_symbol, token_address, decimals, amount)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(fee.network, fee.tokenSymbol, fee.tokenAddress, fee.decimals, fee.amount);
+  async setPlatformSetting(setting: InsertPlatformSetting): Promise<PlatformSetting> {
+    const [newSetting] = await db
+      .insert(platformSettings)
+      .values(setting)
+      .onConflictDoUpdate({
+        target: platformSettings.key,
+        set: {
+          value: setting.value,
+          description: setting.description,
+          updatedAt: new Date(),
+          updatedBy: setting.updatedBy,
+        },
+      })
+      .returning();
+    return newSetting;
   }
 
+  async updatePlatformSetting(key: string, value: string, updatedBy: number): Promise<void> {
+    await db
+      .update(platformSettings)
+      .set({ value, updatedAt: new Date(), updatedBy })
+      .where(eq(platformSettings.key, key));
+  }
+
+  // Network Fees
+  async getNetworkFees(): Promise<NetworkFee[]> {
+    return await db.select().from(networkFees).orderBy(networkFees.network);
+  }
+
+  async getActiveNetworkFees(): Promise<NetworkFee[]> {
+    return await db.select().from(networkFees).where(eq(networkFees.active, true));
+  }
+
+  async getNetworkFee(network: string): Promise<NetworkFee | undefined> {
+    const [fee] = await db.select().from(networkFees)
+      .where(and(eq(networkFees.network, network), eq(networkFees.active, true)));
+    return fee || undefined;
+  }
+
+  async createNetworkFee(fee: InsertNetworkFee): Promise<NetworkFee> {
+    const [newFee] = await db.insert(networkFees).values(fee).returning();
+    return newFee;
+  }
+
+  async updateNetworkFee(id: number, updates: Partial<NetworkFee>): Promise<void> {
+    await db
+      .update(networkFees)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(networkFees.id, id));
+  }
+
+  // Accounts
   async getAccount(wallet: string): Promise<Account | undefined> {
-    return this.db.prepare('SELECT * FROM accounts WHERE wallet = ?').get(wallet) as Account | undefined;
+    const [account] = await db.select().from(accounts).where(eq(accounts.wallet, wallet));
+    return account || undefined;
   }
 
   async createAccount(account: InsertAccount): Promise<Account> {
-    this.db.prepare(`
-      INSERT INTO accounts (wallet, active)
-      VALUES (?, ?)
-    `).run(account.wallet, account.active ? 1 : 0);
-    return this.getAccount(account.wallet) as Promise<Account>;
+    const [newAccount] = await db.insert(accounts).values(account).returning();
+    return newAccount;
   }
 
   async updateAccount(wallet: string, updates: Partial<Account>): Promise<void> {
-    const fields = Object.keys(updates).map(key => `${key} = ?`).join(', ');
-    const values = Object.values(updates);
-    this.db.prepare(`UPDATE accounts SET ${fields} WHERE wallet = ?`).run(...values, wallet);
+    await db
+      .update(accounts)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(accounts.wallet, wallet));
   }
 
-  async getCampaigns(): Promise<Campaign[]> {
-    return this.db.prepare('SELECT * FROM campaigns ORDER BY created_at DESC').all() as Campaign[];
+  async getAllAccounts(limit: number = 100, offset: number = 0): Promise<Account[]> {
+    return await db.select().from(accounts)
+      .orderBy(desc(accounts.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getActiveAccountsCount(): Promise<number> {
+    const [result] = await db.select({ count: sql`count(*)` })
+      .from(accounts)
+      .where(eq(accounts.active, true));
+    return Number(result.count);
+  }
+
+  // Campaigns
+  async getCampaigns(limit: number = 50, offset: number = 0): Promise<Campaign[]> {
+    return await db.select().from(campaigns)
+      .orderBy(desc(campaigns.createdAt))
+      .limit(limit)
+      .offset(offset);
   }
 
   async getCampaign(id: number): Promise<Campaign | undefined> {
-    return this.db.prepare('SELECT * FROM campaigns WHERE id = ?').get(id) as Campaign | undefined;
+    const [campaign] = await db.select().from(campaigns).where(eq(campaigns.id, id));
+    return campaign || undefined;
   }
 
   async createCampaign(campaign: InsertCampaign): Promise<Campaign> {
-    const result = this.db.prepare(`
-      INSERT INTO campaigns (title, description, imageUrl, ownerWallet)
-      VALUES (?, ?, ?, ?)
-    `).run(campaign.title, campaign.description, campaign.imageUrl, campaign.ownerWallet);
-    
-    return this.getCampaign(result.lastInsertRowid as number) as Promise<Campaign>;
+    const [newCampaign] = await db.insert(campaigns).values(campaign).returning();
+    return newCampaign;
   }
 
   async updateCampaign(id: number, updates: Partial<Campaign>): Promise<void> {
-    const fields = Object.keys(updates).map(key => `${key} = ?`).join(', ');
-    const values = Object.values(updates);
-    this.db.prepare(`UPDATE campaigns SET ${fields} WHERE id = ?`).run(...values, id);
+    await db
+      .update(campaigns)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(campaigns.id, id));
   }
 
   async getPopularCampaigns(limit: number): Promise<Campaign[]> {
-    return this.db.prepare(`
-      SELECT * FROM campaigns 
-      ORDER BY totalDonations DESC, donationCount DESC 
-      LIMIT ?
-    `).all(limit) as Campaign[];
+    return await db.select().from(campaigns)
+      .where(and(eq(campaigns.active, true), eq(campaigns.approved, true)))
+      .orderBy(desc(campaigns.totalDonations), desc(campaigns.donationCount))
+      .limit(limit);
   }
 
-  async createDailyEntry(entry: InsertDailyEntry): Promise<DailyEntry> {
-    const result = this.db.prepare(`
-      INSERT INTO daily_entries (wallet, date)
-      VALUES (?, ?)
-    `).run(entry.wallet, entry.date);
+  async getPendingCampaigns(): Promise<Campaign[]> {
+    return await db.select().from(campaigns)
+      .where(eq(campaigns.approved, false))
+      .orderBy(desc(campaigns.createdAt));
+  }
+
+  async approveCampaign(id: number, adminId: number): Promise<void> {
+    await db
+      .update(campaigns)
+      .set({
+        approved: true,
+        approvedBy: adminId,
+        approvedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(campaigns.id, id));
+  }
+
+  // Donations
+  async createDonation(donation: InsertDonation): Promise<Donation> {
+    const [newDonation] = await db.insert(donations).values(donation).returning();
     
-    return this.db.prepare('SELECT * FROM daily_entries WHERE id = ?').get(result.lastInsertRowid) as DailyEntry;
+    // Update campaign totals
+    await db
+      .update(campaigns)
+      .set({
+        totalDonations: sql`${campaigns.totalDonations} + ${donation.amount}`,
+        donationCount: sql`${campaigns.donationCount} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(campaigns.id, donation.campaignId));
+    
+    return newDonation;
+  }
+
+  async getDonationsByCampaign(campaignId: number): Promise<Donation[]> {
+    return await db.select().from(donations)
+      .where(eq(donations.campaignId, campaignId))
+      .orderBy(desc(donations.createdAt));
+  }
+
+  async getDonationsByWallet(wallet: string): Promise<Donation[]> {
+    return await db.select().from(donations)
+      .where(eq(donations.donorWallet, wallet))
+      .orderBy(desc(donations.createdAt));
+  }
+
+  async getTotalDonations(): Promise<{ total: string; count: number }> {
+    const [result] = await db.select({
+      total: sql`COALESCE(SUM(${donations.amount}), 0)`,
+      count: sql`COUNT(*)`
+    }).from(donations);
+    
+    return {
+      total: result.total?.toString() || "0",
+      count: Number(result.count)
+    };
+  }
+
+  // Daily Rewards
+  async createDailyEntry(entry: InsertDailyEntry): Promise<DailyEntry> {
+    const [newEntry] = await db.insert(dailyEntries).values(entry).returning();
+    return newEntry;
   }
 
   async getDailyEntries(date: string): Promise<DailyEntry[]> {
-    return this.db.prepare('SELECT * FROM daily_entries WHERE date = ?').all(date) as DailyEntry[];
+    return await db.select().from(dailyEntries).where(eq(dailyEntries.date, date));
   }
 
   async checkDailyEntry(wallet: string, date: string): Promise<boolean> {
-    const entry = this.db.prepare('SELECT 1 FROM daily_entries WHERE wallet = ? AND date = ?').get(wallet, date);
+    const [entry] = await db.select().from(dailyEntries)
+      .where(and(eq(dailyEntries.wallet, wallet), eq(dailyEntries.date, date)));
     return !!entry;
   }
 
-  async createWinner(winner: InsertWinner): Promise<Winner> {
-    const result = this.db.prepare(`
-      INSERT INTO winners (wallet, date)
-      VALUES (?, ?)
-    `).run(winner.wallet, winner.date);
+  async createDailyWinner(winner: InsertDailyWinner): Promise<DailyWinner> {
+    const [newWinner] = await db.insert(dailyWinners).values(winner).returning();
+    return newWinner;
+  }
+
+  async getDailyWinners(limit: number = 10): Promise<DailyWinner[]> {
+    return await db.select().from(dailyWinners)
+      .orderBy(desc(dailyWinners.date))
+      .limit(limit);
+  }
+
+  async getDailyWinnersByDate(date: string): Promise<DailyWinner[]> {
+    return await db.select().from(dailyWinners).where(eq(dailyWinners.date, date));
+  }
+
+  // Footer Links
+  async getFooterLinks(section?: string): Promise<FooterLink[]> {
+    if (section) {
+      return await db.select().from(footerLinks)
+        .where(and(eq(footerLinks.section, section), eq(footerLinks.active, true)))
+        .orderBy(footerLinks.order);
+    }
+    return await db.select().from(footerLinks)
+      .where(eq(footerLinks.active, true))
+      .orderBy(footerLinks.section, footerLinks.order);
+  }
+
+  async createFooterLink(link: InsertFooterLink): Promise<FooterLink> {
+    const [newLink] = await db.insert(footerLinks).values(link).returning();
+    return newLink;
+  }
+
+  async updateFooterLink(id: number, updates: Partial<FooterLink>): Promise<void> {
+    await db
+      .update(footerLinks)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(footerLinks.id, id));
+  }
+
+  async deleteFooterLink(id: number): Promise<void> {
+    await db.delete(footerLinks).where(eq(footerLinks.id, id));
+  }
+
+  // Announcements
+  async getActiveAnnouncements(): Promise<Announcement[]> {
+    const now = new Date();
+    return await db.select().from(announcements)
+      .where(and(
+        eq(announcements.active, true),
+        sql`${announcements.showUntil} IS NULL OR ${announcements.showUntil} > ${now}`
+      ))
+      .orderBy(desc(announcements.createdAt));
+  }
+
+  async getAllAnnouncements(): Promise<Announcement[]> {
+    return await db.select().from(announcements)
+      .orderBy(desc(announcements.createdAt));
+  }
+
+  async createAnnouncement(announcement: InsertAnnouncement): Promise<Announcement> {
+    const [newAnnouncement] = await db.insert(announcements).values(announcement).returning();
+    return newAnnouncement;
+  }
+
+  async updateAnnouncement(id: number, updates: Partial<Announcement>): Promise<void> {
+    await db
+      .update(announcements)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(announcements.id, id));
+  }
+
+  async deleteAnnouncement(id: number): Promise<void> {
+    await db.delete(announcements).where(eq(announcements.id, id));
+  }
+
+  // Admin Logs
+  async createAdminLog(log: InsertAdminLog): Promise<AdminLog> {
+    const [newLog] = await db.insert(adminLogs).values(log).returning();
+    return newLog;
+  }
+
+  async getAdminLogs(adminId?: number, limit: number = 100): Promise<AdminLog[]> {
+    let query = db.select().from(adminLogs);
     
-    return this.db.prepare('SELECT * FROM winners WHERE id = ?').get(result.lastInsertRowid) as Winner;
+    if (adminId) {
+      query = query.where(eq(adminLogs.adminId, adminId)) as any;
+    }
+    
+    return await query.orderBy(desc(adminLogs.createdAt)).limit(limit);
   }
 
-  async getWinners(limit: number = 10): Promise<Winner[]> {
-    return this.db.prepare('SELECT * FROM winners ORDER BY date DESC LIMIT ?').all(limit) as Winner[];
-  }
+  // Statistics
+  async getStatistics(): Promise<{
+    totalUsers: number;
+    activeUsers: number;
+    totalCampaigns: number;
+    pendingCampaigns: number;
+    totalDonations: string;
+    totalDonationCount: number;
+    todayEntries: number;
+  }> {
+    const today = new Date().toISOString().split('T')[0];
+    
+    const [userStats] = await db.select({
+      total: sql`COUNT(*)`,
+      active: sql`COUNT(CASE WHEN ${accounts.active} THEN 1 END)`
+    }).from(accounts);
 
-  async getWinnersByDate(date: string): Promise<Winner[]> {
-    return this.db.prepare('SELECT * FROM winners WHERE date = ?').all(date) as Winner[];
+    const [campaignStats] = await db.select({
+      total: sql`COUNT(*)`,
+      pending: sql`COUNT(CASE WHEN NOT ${campaigns.approved} THEN 1 END)`
+    }).from(campaigns);
+
+    const [donationStats] = await db.select({
+      total: sql`COALESCE(SUM(${donations.amount}), 0)`,
+      count: sql`COUNT(*)`
+    }).from(donations);
+
+    const [todayStats] = await db.select({
+      entries: sql`COUNT(*)`
+    }).from(dailyEntries).where(eq(dailyEntries.date, today));
+
+    return {
+      totalUsers: Number(userStats.total),
+      activeUsers: Number(userStats.active),
+      totalCampaigns: Number(campaignStats.total),
+      pendingCampaigns: Number(campaignStats.pending),
+      totalDonations: donationStats.total?.toString() || "0",
+      totalDonationCount: Number(donationStats.count),
+      todayEntries: Number(todayStats.entries),
+    };
   }
 }
 
-export const storage = new SQLiteStorage();
+export const storage = new DatabaseStorage();

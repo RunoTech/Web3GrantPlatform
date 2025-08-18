@@ -20,23 +20,41 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js framework
 - **Development**: TypeScript with tsx for development server
-- **Database**: SQLite with Drizzle ORM for type-safe database operations
+- **Database**: PostgreSQL with Drizzle ORM for type-safe database operations
 - **Session Management**: Express sessions with PostgreSQL session store (connect-pg-simple)
-- **API Design**: RESTful endpoints with structured error handling and request logging middleware
+- **Authentication**: JWT-based admin authentication with bcrypt password hashing
+- **API Design**: RESTful endpoints with structured error handling and comprehensive admin management
+- **Admin System**: Complete admin panel with role-based access, activity logging, and platform control
 
 ### Database Design
-The system uses SQLite as the primary database with the following core entities:
-- **Fees**: Network-specific activation costs (Ethereum USDT, BSC BUSD/USDT)
-- **Accounts**: Wallet-based user accounts with activation status
-- **Campaigns**: Donation campaigns with metadata and statistics
-- **Daily Entries**: Daily reward participation tracking
-- **Winners**: Historical record of daily reward winners
+The system uses PostgreSQL as the primary database with the following comprehensive entities:
+
+**Core Platform Tables:**
+- **Admins**: System administrators with roles and authentication
+- **Platform Settings**: Dynamic configuration management for all platform aspects
+- **Network Fees**: Multi-network activation fee management
+- **Sessions**: Admin and user session storage
+
+**User & Campaign Tables:**
+- **Accounts**: Wallet-based user accounts with activation tracking
+- **Campaigns**: Donation campaigns with approval workflow and statistics
+- **Donations**: Comprehensive donation tracking with blockchain verification
+- **Daily Entries**: Daily reward participation system
+- **Daily Winners**: Admin-managed winner selection with rewards
+
+**Content Management Tables:**
+- **Footer Links**: Dynamic footer management with sections and ordering
+- **Announcements**: Platform announcements with scheduling
+- **Admin Logs**: Comprehensive audit trail for all admin actions
 
 ### Authentication & Authorization
-- **Wallet-based Identity**: No traditional user accounts; wallet addresses serve as user identifiers
+- **Dual Authentication System**: 
+  - **User Level**: Wallet-based identity for public platform access
+  - **Admin Level**: JWT-based authentication with username/password
 - **Account Activation**: Pay-to-activate model using blockchain token transfers
-- **Admin Access**: API key-based admin authentication for fee management and winner selection
-- **Session Persistence**: Browser-based session management for connected wallet state
+- **Admin Access**: Complete admin panel with role-based permissions (admin, super_admin)
+- **Session Management**: PostgreSQL-based session storage for both users and admins
+- **Security Features**: bcrypt password hashing, activity logging, and token-based API access
 
 ### Blockchain Integration
 - **Multi-chain Support**: Ethereum Mainnet (Chain ID: 1) and BSC Mainnet (Chain ID: 56)

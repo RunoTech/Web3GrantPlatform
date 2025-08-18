@@ -1,248 +1,651 @@
-import type { Express, Request, Response } from "express";
+import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { networks, ERC20_ABI } from "./config/networks.js";
-import { ethers } from "ethers";
-import { insertCampaignSchema, insertDailyEntrySchema } from "@shared/schema";
+import { 
+  insertNetworkFeeSchema,
+  insertAccountSchema,
+  insertCampaignSchema,
+  insertDonationSchema,
+  insertDailyEntrySchema,
+  insertDailyWinnerSchema,
+  insertFooterLinkSchema,
+  insertAnnouncementSchema,
+  insertPlatformSettingSchema,
+  insertAdminSchema,
+} from "../shared/schema";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
-const ADMIN_KEY = process.env.ADMIN_KEY || 'admin123';
+// JWT Secret - in production this should be in environment variables
+const JWT_SECRET = process.env.JWT_SECRET || "duxxan-secret-key-2024";
 
-function requireAdmin(req: Request, res: Response, next: Function) {
-  const adminKey = req.headers['x-admin-key'] || req.body.adminKey;
-  if (adminKey !== ADMIN_KEY) {
-    return res.status(401).json({ error: 'Admin anahtarı gerekli' });
+// Admin authentication middleware
+async function authenticateAdmin(req: any, res: any, next: any) {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ error: "Token required" });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const admin = await storage.getAdmin(decoded.adminId);
+    
+    if (!admin || !admin.active) {
+      return res.status(401).json({ error: "Invalid or inactive admin" });
+    }
+
+    req.admin = admin;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: "Invalid token" });
   }
-  next();
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Public API Routes (existing functionality)
   
-  // Get current fees
-  app.get('/api/fees', async (req: Request, res: Response) => {
+  // Get network fees (public)
+  app.get("/api/get-fees", async (req, res) => {
     try {
-      const fees = await storage.getFees();
-      const result: any = {};
-      
-      fees.forEach(fee => {
-        result[fee.network] = {
-          symbol: fee.tokenSymbol,
-          address: fee.tokenAddress,
-          decimals: fee.decimals,
-          amount: fee.amount
-        };
-      });
-      
-      res.json(result);
+      const fees = await storage.getActiveNetworkFees();
+      res.json(fees);
     } catch (error) {
-      res.status(500).json({ error: 'Ücretler alınamadı' });
+      console.error("Error fetching fees:", error);
+      res.status(500).json({ error: "Failed to fetch fees" });
     }
   });
 
-  // Update fee (admin only)
-  app.post('/api/admin/update-fee', requireAdmin, async (req: Request, res: Response) => {
+  // Get popular campaigns (public)
+  app.get("/api/get-popular-campaigns", async (req, res) => {
     try {
-      const { network, token_symbol, token_address, decimals, amount } = req.body;
-      
-      await storage.updateFee({
-        network,
-        tokenSymbol: token_symbol,
-        tokenAddress: token_address,
-        decimals,
-        amount
-      });
-      
-      res.json({ success: true });
-    } catch (error) {
-      res.status(500).json({ error: 'Ücret güncellenemedi' });
-    }
-  });
-
-  // Verify payment and activate account
-  app.post('/api/verify-payment', async (req: Request, res: Response) => {
-    try {
-      const { network, wallet, txHash } = req.body;
-      
-      if (!networks[network]) {
-        return res.status(400).json({ error: 'Desteklenmeyen ağ' });
-      }
-
-      const provider = new ethers.JsonRpcProvider(networks[network].rpcUrl);
-      const receipt = await provider.getTransactionReceipt(txHash);
-      
-      if (!receipt) {
-        return res.status(400).json({ error: 'İşlem bulunamadı' });
-      }
-
-      const fees = await storage.getFees();
-      const networkFee = fees.find(f => f.network === network);
-      
-      if (!networkFee) {
-        return res.status(400).json({ error: 'Ağ ücreti bulunamadı' });
-      }
-
-      const tokenContract = new ethers.Contract(networkFee.tokenAddress, ERC20_ABI, provider);
-      
-      // Parse transfer events
-      const transferEvents = receipt.logs
-        .map(log => {
-          try {
-            return tokenContract.interface.parseLog(log);
-          } catch {
-            return null;
-          }
-        })
-        .filter(event => event && event.name === 'Transfer');
-
-      const validTransfer = transferEvents.find(event => {
-        const to = event.args.to.toLowerCase();
-        const value = BigInt(event.args.value.toString());
-        const requiredAmount = BigInt(networkFee.amount);
-        
-        return to === networks[network].platformWallet.toLowerCase() && value >= requiredAmount;
-      });
-
-      if (!validTransfer) {
-        return res.status(400).json({ error: 'Geçerli ödeme bulunamadı' });
-      }
-
-      // Activate account
-      const existingAccount = await storage.getAccount(wallet);
-      if (existingAccount) {
-        await storage.updateAccount(wallet, { active: true });
-      } else {
-        await storage.createAccount({ wallet, active: true });
-      }
-
-      res.json({ success: true, message: 'Hesap başarıyla aktifleştirildi' });
-    } catch (error) {
-      console.error('Payment verification error:', error);
-      res.status(500).json({ error: 'Ödeme doğrulanamadı' });
-    }
-  });
-
-  // Create campaign
-  app.post('/api/create-campaign', async (req: Request, res: Response) => {
-    try {
-      const { wallet } = req.headers;
-      
-      if (!wallet) {
-        return res.status(400).json({ error: 'Cüzdan adresi gerekli' });
-      }
-
-      const account = await storage.getAccount(wallet as string);
-      if (!account || !account.active) {
-        return res.status(403).json({ error: 'Hesap aktif değil' });
-      }
-
-      const validatedData = insertCampaignSchema.parse({
-        ...req.body,
-        ownerWallet: wallet
-      });
-
-      const campaign = await storage.createCampaign(validatedData);
-      res.json(campaign);
-    } catch (error) {
-      res.status(500).json({ error: 'Kampanya oluşturulamadı' });
-    }
-  });
-
-  // Get all campaigns
-  app.get('/api/get-campaigns', async (req: Request, res: Response) => {
-    try {
-      const campaigns = await storage.getCampaigns();
+      const campaigns = await storage.getPopularCampaigns(6);
       res.json(campaigns);
     } catch (error) {
-      res.status(500).json({ error: 'Kampanyalar alınamadı' });
+      console.error("Error fetching popular campaigns:", error);
+      res.status(500).json({ error: "Failed to fetch campaigns" });
     }
   });
 
-  // Get popular campaigns
-  app.get('/api/get-popular-campaigns', async (req: Request, res: Response) => {
+  // Get all campaigns (public)
+  app.get("/api/get-campaigns", async (req, res) => {
     try {
-      const campaigns = await storage.getPopularCampaigns(10);
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const campaigns = await storage.getCampaigns(limit, offset);
       res.json(campaigns);
     } catch (error) {
-      res.status(500).json({ error: 'Popüler kampanyalar alınamadı' });
+      console.error("Error fetching campaigns:", error);
+      res.status(500).json({ error: "Failed to fetch campaigns" });
     }
   });
 
-  // Get single campaign
-  app.get('/api/campaign/:id', async (req: Request, res: Response) => {
+  // Get daily winners (public)
+  app.get("/api/get-last-winners", async (req, res) => {
     try {
-      const campaign = await storage.getCampaign(parseInt(req.params.id));
-      if (!campaign) {
-        return res.status(404).json({ error: 'Kampanya bulunamadı' });
-      }
-      res.json(campaign);
-    } catch (error) {
-      res.status(500).json({ error: 'Kampanya alınamadı' });
-    }
-  });
-
-  // Update campaign (admin only)
-  app.post('/api/admin/update-campaign', requireAdmin, async (req: Request, res: Response) => {
-    try {
-      const { id, featured } = req.body;
-      await storage.updateCampaign(id, { featured });
-      res.json({ success: true });
-    } catch (error) {
-      res.status(500).json({ error: 'Kampanya güncellenemedi' });
-    }
-  });
-
-  // Join daily reward
-  app.post('/api/join-daily-reward', async (req: Request, res: Response) => {
-    try {
-      const { wallet } = req.body;
-      const today = new Date().toISOString().split('T')[0];
-      
-      const existingEntry = await storage.checkDailyEntry(wallet, today);
-      if (existingEntry) {
-        return res.status(400).json({ error: 'Bugün zaten katıldınız' });
-      }
-
-      await storage.createDailyEntry({ wallet, date: today });
-      res.json({ success: true, message: 'Günlük ödüle başarıyla katıldınız' });
-    } catch (error) {
-      res.status(500).json({ error: 'Günlük ödüle katılamadınız' });
-    }
-  });
-
-  // Get last winners
-  app.get('/api/get-last-winners', async (req: Request, res: Response) => {
-    try {
-      const winners = await storage.getWinners(10);
+      const winners = await storage.getDailyWinners(10);
       res.json(winners);
     } catch (error) {
-      res.status(500).json({ error: 'Kazananlar alınamadı' });
+      console.error("Error fetching winners:", error);
+      res.status(500).json({ error: "Failed to fetch winners" });
     }
   });
 
-  // Select winners (admin only)
-  app.post('/api/admin/select-winners', requireAdmin, async (req: Request, res: Response) => {
+  // Create account (public)
+  app.post("/api/create-account", async (req, res) => {
     try {
-      const { date, count } = req.body;
-      const entries = await storage.getDailyEntries(date);
+      const accountData = insertAccountSchema.parse(req.body);
+      const existingAccount = await storage.getAccount(accountData.wallet);
       
-      if (entries.length === 0) {
-        return res.status(400).json({ error: 'Bu tarih için katılım bulunamadı' });
+      if (existingAccount) {
+        return res.status(409).json({ error: "Account already exists" });
       }
 
-      // Randomly select winners
-      const shuffled = entries.sort(() => 0.5 - Math.random());
-      const selectedWinners = shuffled.slice(0, Math.min(count, entries.length));
+      const account = await storage.createAccount(accountData);
+      res.json(account);
+    } catch (error) {
+      console.error("Error creating account:", error);
+      res.status(500).json({ error: "Failed to create account" });
+    }
+  });
+
+  // Activate account (public)
+  app.post("/api/activate-account", async (req, res) => {
+    try {
+      const { wallet, txHash } = req.body;
+      await storage.updateAccount(wallet, {
+        active: true,
+        activationTxHash: txHash,
+        activationDate: new Date(),
+      });
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error activating account:", error);
+      res.status(500).json({ error: "Failed to activate account" });
+    }
+  });
+
+  // Create campaign (public - but requires active account)
+  app.post("/api/create-campaign", async (req, res) => {
+    try {
+      const campaignData = insertCampaignSchema.parse(req.body);
       
-      for (const entry of selectedWinners) {
-        await storage.createWinner({ wallet: entry.wallet, date });
+      // Check if owner account is active
+      const account = await storage.getAccount(campaignData.ownerWallet);
+      if (!account || !account.active) {
+        return res.status(403).json({ error: "Account must be activated first" });
       }
 
-      res.json({ 
-        success: true, 
-        winners: selectedWinners.map(w => w.wallet),
-        message: `${selectedWinners.length} kazanan seçildi`
+      const campaign = await storage.createCampaign(campaignData);
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error creating campaign:", error);
+      res.status(500).json({ error: "Failed to create campaign" });
+    }
+  });
+
+  // Create daily entry (public - but requires active account)
+  app.post("/api/daily-entry", async (req, res) => {
+    try {
+      const entryData = insertDailyEntrySchema.parse(req.body);
+      
+      // Check if account exists and is active
+      const account = await storage.getAccount(entryData.wallet);
+      if (!account || !account.active) {
+        return res.status(403).json({ error: "Account must be activated first" });
+      }
+
+      // Check if entry already exists for today
+      const alreadyEntered = await storage.checkDailyEntry(entryData.wallet, entryData.date);
+      if (alreadyEntered) {
+        return res.status(409).json({ error: "Already entered today" });
+      }
+
+      const entry = await storage.createDailyEntry(entryData);
+      res.json(entry);
+    } catch (error) {
+      console.error("Error creating daily entry:", error);
+      res.status(500).json({ error: "Failed to create daily entry" });
+    }
+  });
+
+  // Record donation (public)
+  app.post("/api/record-donation", async (req, res) => {
+    try {
+      const donationData = insertDonationSchema.parse(req.body);
+      const donation = await storage.createDonation(donationData);
+      res.json(donation);
+    } catch (error) {
+      console.error("Error recording donation:", error);
+      res.status(500).json({ error: "Failed to record donation" });
+    }
+  });
+
+  // Get footer links (public)
+  app.get("/api/footer-links", async (req, res) => {
+    try {
+      const section = req.query.section as string;
+      const links = await storage.getFooterLinks(section);
+      res.json(links);
+    } catch (error) {
+      console.error("Error fetching footer links:", error);
+      res.status(500).json({ error: "Failed to fetch footer links" });
+    }
+  });
+
+  // Get active announcements (public)
+  app.get("/api/announcements", async (req, res) => {
+    try {
+      const announcements = await storage.getActiveAnnouncements();
+      res.json(announcements);
+    } catch (error) {
+      console.error("Error fetching announcements:", error);
+      res.status(500).json({ error: "Failed to fetch announcements" });
+    }
+  });
+
+  // ADMIN API ROUTES
+  
+  // Admin login
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ error: "Username and password required" });
+      }
+
+      const admin = await storage.getAdminByUsername(username);
+      if (!admin || !admin.active) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      const isValidPassword = await bcrypt.compare(password, admin.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      const token = jwt.sign({ adminId: admin.id }, JWT_SECRET, { expiresIn: "24h" });
+      
+      // Log admin login
+      await storage.createAdminLog({
+        adminId: admin.id,
+        action: "login",
+        details: { ip: req.ip, userAgent: req.get('User-Agent') },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json({
+        token,
+        admin: {
+          id: admin.id,
+          username: admin.username,
+          email: admin.email,
+          role: admin.role,
+        }
       });
     } catch (error) {
-      res.status(500).json({ error: 'Kazananlar seçilemedi' });
+      console.error("Error during admin login:", error);
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  // Admin dashboard statistics
+  app.get("/api/admin/dashboard", authenticateAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getStatistics();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+      res.status(500).json({ error: "Failed to fetch statistics" });
+    }
+  });
+
+  // Admin - Get all campaigns
+  app.get("/api/admin/campaigns", authenticateAdmin, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const campaigns = await storage.getCampaigns(limit, offset);
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching campaigns:", error);
+      res.status(500).json({ error: "Failed to fetch campaigns" });
+    }
+  });
+
+  // Admin - Get pending campaigns
+  app.get("/api/admin/campaigns/pending", authenticateAdmin, async (req, res) => {
+    try {
+      const campaigns = await storage.getPendingCampaigns();
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching pending campaigns:", error);
+      res.status(500).json({ error: "Failed to fetch pending campaigns" });
+    }
+  });
+
+  // Admin - Approve campaign
+  app.post("/api/admin/campaigns/:id/approve", authenticateAdmin, async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      await storage.approveCampaign(campaignId, req.admin.id);
+      
+      // Log the action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "approve_campaign",
+        details: { campaignId },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error approving campaign:", error);
+      res.status(500).json({ error: "Failed to approve campaign" });
+    }
+  });
+
+  // Admin - Update campaign
+  app.put("/api/admin/campaigns/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      const updates = req.body;
+      
+      await storage.updateCampaign(campaignId, updates);
+      
+      // Log the action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "update_campaign",
+        details: { campaignId, updates },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating campaign:", error);
+      res.status(500).json({ error: "Failed to update campaign" });
+    }
+  });
+
+  // Admin - Get all accounts
+  app.get("/api/admin/accounts", authenticateAdmin, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const accounts = await storage.getAllAccounts(limit, offset);
+      res.json(accounts);
+    } catch (error) {
+      console.error("Error fetching accounts:", error);
+      res.status(500).json({ error: "Failed to fetch accounts" });
+    }
+  });
+
+  // Admin - Network fees management
+  app.get("/api/admin/network-fees", authenticateAdmin, async (req, res) => {
+    try {
+      const fees = await storage.getNetworkFees();
+      res.json(fees);
+    } catch (error) {
+      console.error("Error fetching network fees:", error);
+      res.status(500).json({ error: "Failed to fetch network fees" });
+    }
+  });
+
+  app.post("/api/admin/network-fees", authenticateAdmin, async (req: any, res) => {
+    try {
+      const feeData = insertNetworkFeeSchema.parse({
+        ...req.body,
+        updatedBy: req.admin.id,
+      });
+      
+      const fee = await storage.createNetworkFee(feeData);
+      
+      // Log the action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "create_network_fee",
+        details: feeData,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json(fee);
+    } catch (error) {
+      console.error("Error creating network fee:", error);
+      res.status(500).json({ error: "Failed to create network fee" });
+    }
+  });
+
+  app.put("/api/admin/network-fees/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const feeId = parseInt(req.params.id);
+      const updates = { ...req.body, updatedBy: req.admin.id };
+      
+      await storage.updateNetworkFee(feeId, updates);
+      
+      // Log the action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "update_network_fee",
+        details: { feeId, updates },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating network fee:", error);
+      res.status(500).json({ error: "Failed to update network fee" });
+    }
+  });
+
+  // Admin - Platform settings
+  app.get("/api/admin/settings", authenticateAdmin, async (req, res) => {
+    try {
+      const category = req.query.category as string;
+      const settings = await storage.getPlatformSettings(category);
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching platform settings:", error);
+      res.status(500).json({ error: "Failed to fetch settings" });
+    }
+  });
+
+  app.post("/api/admin/settings", authenticateAdmin, async (req: any, res) => {
+    try {
+      const settingData = insertPlatformSettingSchema.parse({
+        ...req.body,
+        updatedBy: req.admin.id,
+      });
+      
+      const setting = await storage.setPlatformSetting(settingData);
+      
+      // Log the action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "update_platform_setting",
+        details: settingData,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json(setting);
+    } catch (error) {
+      console.error("Error updating platform setting:", error);
+      res.status(500).json({ error: "Failed to update setting" });
+    }
+  });
+
+  // Admin - Footer links management
+  app.get("/api/admin/footer-links", authenticateAdmin, async (req, res) => {
+    try {
+      const section = req.query.section as string;
+      const links = await storage.getFooterLinks(section);
+      res.json(links);
+    } catch (error) {
+      console.error("Error fetching footer links:", error);
+      res.status(500).json({ error: "Failed to fetch footer links" });
+    }
+  });
+
+  app.post("/api/admin/footer-links", authenticateAdmin, async (req: any, res) => {
+    try {
+      const linkData = insertFooterLinkSchema.parse(req.body);
+      const link = await storage.createFooterLink(linkData);
+      
+      // Log the action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "create_footer_link",
+        details: linkData,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json(link);
+    } catch (error) {
+      console.error("Error creating footer link:", error);
+      res.status(500).json({ error: "Failed to create footer link" });
+    }
+  });
+
+  app.put("/api/admin/footer-links/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const linkId = parseInt(req.params.id);
+      const updates = req.body;
+      
+      await storage.updateFooterLink(linkId, updates);
+      
+      // Log the action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "update_footer_link",
+        details: { linkId, updates },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating footer link:", error);
+      res.status(500).json({ error: "Failed to update footer link" });
+    }
+  });
+
+  app.delete("/api/admin/footer-links/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const linkId = parseInt(req.params.id);
+      
+      await storage.deleteFooterLink(linkId);
+      
+      // Log the action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "delete_footer_link",
+        details: { linkId },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting footer link:", error);
+      res.status(500).json({ error: "Failed to delete footer link" });
+    }
+  });
+
+  // Admin - Announcements management
+  app.get("/api/admin/announcements", authenticateAdmin, async (req, res) => {
+    try {
+      const announcements = await storage.getAllAnnouncements();
+      res.json(announcements);
+    } catch (error) {
+      console.error("Error fetching announcements:", error);
+      res.status(500).json({ error: "Failed to fetch announcements" });
+    }
+  });
+
+  app.post("/api/admin/announcements", authenticateAdmin, async (req: any, res) => {
+    try {
+      const announcementData = insertAnnouncementSchema.parse({
+        ...req.body,
+        createdBy: req.admin.id,
+      });
+      
+      const announcement = await storage.createAnnouncement(announcementData);
+      
+      // Log the action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "create_announcement",
+        details: announcementData,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json(announcement);
+    } catch (error) {
+      console.error("Error creating announcement:", error);
+      res.status(500).json({ error: "Failed to create announcement" });
+    }
+  });
+
+  app.put("/api/admin/announcements/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const announcementId = parseInt(req.params.id);
+      const updates = req.body;
+      
+      await storage.updateAnnouncement(announcementId, updates);
+      
+      // Log the action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "update_announcement",
+        details: { announcementId, updates },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating announcement:", error);
+      res.status(500).json({ error: "Failed to update announcement" });
+    }
+  });
+
+  app.delete("/api/admin/announcements/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const announcementId = parseInt(req.params.id);
+      
+      await storage.deleteAnnouncement(announcementId);
+      
+      // Log the action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "delete_announcement",
+        details: { announcementId },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting announcement:", error);
+      res.status(500).json({ error: "Failed to delete announcement" });
+    }
+  });
+
+  // Admin - Daily winners management
+  app.get("/api/admin/daily-winners", authenticateAdmin, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const winners = await storage.getDailyWinners(limit);
+      res.json(winners);
+    } catch (error) {
+      console.error("Error fetching daily winners:", error);
+      res.status(500).json({ error: "Failed to fetch daily winners" });
+    }
+  });
+
+  app.post("/api/admin/daily-winners", authenticateAdmin, async (req: any, res) => {
+    try {
+      const winnerData = insertDailyWinnerSchema.parse({
+        ...req.body,
+        selectedBy: req.admin.id,
+      });
+      
+      const winner = await storage.createDailyWinner(winnerData);
+      
+      // Log the action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "select_daily_winner",
+        details: winnerData,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json(winner);
+    } catch (error) {
+      console.error("Error creating daily winner:", error);
+      res.status(500).json({ error: "Failed to create daily winner" });
+    }
+  });
+
+  // Admin - Activity logs
+  app.get("/api/admin/logs", authenticateAdmin, async (req: any, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const adminId = req.query.adminId ? parseInt(req.query.adminId as string) : undefined;
+      const logs = await storage.getAdminLogs(adminId, limit);
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching admin logs:", error);
+      res.status(500).json({ error: "Failed to fetch logs" });
     }
   });
 

@@ -197,7 +197,7 @@ export default function SimplePayButton({ onPaymentSuccess }: SimplePayButtonPro
                       {fee.amount} {fee.tokenSymbol}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      ≈ ${fee.network === 'ethereum' ? '50' : '25'} USD
+                      Activation Fee
                     </div>
                   </div>
 

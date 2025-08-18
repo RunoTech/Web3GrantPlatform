@@ -186,7 +186,7 @@ export default function HomePage() {
       </section>
 
       {/* Daily Tether Reward Section */}
-      <section id="odul-sistemi" className="py-24 bg-gradient-to-b from-surface-2 to-surface relative overflow-hidden">
+      <section id="odul-sistemi" className="py-16 bg-gradient-to-b from-surface-2 to-surface relative overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0">
           <div className="absolute top-0 left-1/4 w-96 h-96 cyber-cyan-bg opacity-5 rounded-full blur-3xl"></div>
@@ -196,25 +196,22 @@ export default function HomePage() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Section Header */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center space-x-4 mb-6">
-              <div className="w-20 h-20 gradient-primary rounded-lg flex items-center justify-center neon-border relative">
-                <Gift className="w-10 h-10 text-background" />
-                <div className="absolute -top-2 -right-2 w-6 h-6 cyber-yellow-bg rounded-full flex items-center justify-center">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center space-x-3 mb-4">
+              <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center neon-border relative">
+                <Gift className="w-6 h-6 text-background" />
+                <div className="absolute -top-1 -right-1 w-4 h-4 cyber-yellow-bg rounded-full flex items-center justify-center">
                   <span className="text-xs font-bold text-background">!</span>
                 </div>
               </div>
-              <div className="space-y-2">
-                <h2 className="text-5xl md:text-7xl font-bold neon-text uppercase tracking-wider">
-                  GÜNLÜK
+              <div>
+                <h2 className="text-2xl md:text-3xl font-bold neon-text uppercase tracking-wide">
+                  GÜNLÜK TETHER ÖDÜLÜ
                 </h2>
-                <div className="text-3xl md:text-4xl font-bold text-cyber-yellow uppercase tracking-wider">
-                  TETHER ÖDÜLÜ
-                </div>
               </div>
             </div>
             
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base text-muted-foreground max-w-xl mx-auto">
               Her gün katılım gösterin ve <span className="text-cyber-green font-semibold">USDT ödülü</span> kazanma şansı yakalayın. 
               Futuristik topluluğa <span className="text-cyber-cyan font-semibold">günlük ödüller</span> dağıtılıyor!
             </p>
@@ -223,32 +220,32 @@ export default function HomePage() {
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Participation Card */}
-            <div className="lg:col-span-2 cyber-card p-8 relative">
-              <div className="absolute top-0 right-0 w-24 h-24 cyber-cyan-bg opacity-10 rounded-full blur-xl"></div>
+            <div className="lg:col-span-2 cyber-card p-6 relative">
+              <div className="absolute top-0 right-0 w-16 h-16 cyber-cyan-bg opacity-10 rounded-full blur-xl"></div>
               
-              <div className="space-y-8 relative z-10">
-                <div className="space-y-4">
-                  <h3 className="text-2xl font-bold text-foreground uppercase tracking-wide flex items-center space-x-3">
-                    <div className="w-8 h-8 cyber-green-bg rounded-lg flex items-center justify-center">
+              <div className="space-y-6 relative z-10">
+                <div className="space-y-3">
+                  <h3 className="text-lg font-bold text-foreground uppercase tracking-wide flex items-center space-x-2">
+                    <div className="w-6 h-6 cyber-green-bg rounded flex items-center justify-center">
                       <span className="text-xs font-bold text-background">1</span>
                     </div>
                     <span>KATILIM SÜRECİ</span>
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div className="cyber-card p-4 border border-cyber-cyan/30">
-                      <div className="w-8 h-8 cyber-cyan-bg rounded mb-2 flex items-center justify-center">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                    <div className="cyber-card p-3 border border-cyber-cyan/30">
+                      <div className="w-6 h-6 cyber-cyan-bg rounded mb-2 flex items-center justify-center">
                         <span className="text-xs font-bold text-background">1</span>
                       </div>
                       <span className="text-cyber-cyan font-medium uppercase tracking-wide">Cüzdan Bağla</span>
                     </div>
-                    <div className="cyber-card p-4 border border-cyber-purple/30">
-                      <div className="w-8 h-8 cyber-purple-bg rounded mb-2 flex items-center justify-center">
+                    <div className="cyber-card p-3 border border-cyber-purple/30">
+                      <div className="w-6 h-6 cyber-purple-bg rounded mb-2 flex items-center justify-center">
                         <span className="text-xs font-bold text-white">2</span>
                       </div>
                       <span className="text-cyber-purple font-medium uppercase tracking-wide">Butona Tıkla</span>
                     </div>
-                    <div className="cyber-card p-4 border border-cyber-green/30">
-                      <div className="w-8 h-8 cyber-green-bg rounded mb-2 flex items-center justify-center">
+                    <div className="cyber-card p-3 border border-cyber-green/30">
+                      <div className="w-6 h-6 cyber-green-bg rounded mb-2 flex items-center justify-center">
                         <span className="text-xs font-bold text-background">3</span>
                       </div>
                       <span className="text-cyber-green font-medium uppercase tracking-wide">Ödül Kazan</span>
@@ -261,18 +258,18 @@ export default function HomePage() {
                   {isConnected ? (
                     <Button 
                       onClick={handleDailyReward}
-                      size="lg"
-                      className="cyber-cyan-bg px-12 py-6 text-xl font-bold uppercase tracking-wider btn-cyber relative overflow-hidden group"
+                      size="default"
+                      className="cyber-cyan-bg px-8 py-3 font-bold uppercase tracking-wide btn-cyber relative overflow-hidden group"
                       data-testid="button-daily-reward"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                      <DollarSign className="w-8 h-8 mr-4" />
+                      <DollarSign className="w-5 h-5 mr-2" />
                       BUGÜN KATIL
                     </Button>
                   ) : (
-                    <div className="cyber-card px-8 py-6 neon-border relative">
+                    <div className="cyber-card px-6 py-3 neon-border relative">
                       <div className="absolute inset-0 bg-gradient-to-r from-cyber-cyan/10 to-cyber-purple/10 rounded-lg"></div>
-                      <span className="text-cyber-cyan font-bold text-lg uppercase tracking-wide relative z-10">
+                      <span className="text-cyber-cyan font-medium uppercase tracking-wide relative z-10">
                         Günlük ödüle katılmak için cüzdan bağlayın
                       </span>
                     </div>
@@ -282,45 +279,45 @@ export default function HomePage() {
             </div>
             
             {/* Winners Leaderboard */}
-            <div className="cyber-card p-6 relative">
-              <div className="absolute top-0 left-0 w-20 h-20 cyber-yellow-bg opacity-10 rounded-full blur-xl"></div>
+            <div className="cyber-card p-4 relative">
+              <div className="absolute top-0 left-0 w-12 h-12 cyber-yellow-bg opacity-10 rounded-full blur-lg"></div>
               
-              <div className="space-y-6 relative z-10">
-                <div className="flex items-center space-x-3 mb-6">
-                  <Award className="w-6 h-6 text-cyber-yellow" />
-                  <h3 className="text-xl font-bold text-foreground uppercase tracking-wide">
+              <div className="space-y-4 relative z-10">
+                <div className="flex items-center space-x-2 mb-4">
+                  <Award className="w-5 h-5 text-cyber-yellow" />
+                  <h3 className="text-lg font-bold text-foreground uppercase tracking-wide">
                     DÜNKÜ KAZANANLAR
                   </h3>
                 </div>
                 
-                <div className="space-y-3" data-testid="winners-list">
+                <div className="space-y-2" data-testid="winners-list">
                   {(lastWinners as any[]).length > 0 ? (
                     (lastWinners as any[]).slice(0, 5).map((winner: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between py-3 px-4 bg-surface-3 rounded-lg border border-cyber-green/20 hover:border-cyber-green/40 transition-colors">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 cyber-green-bg rounded-full flex items-center justify-center text-xs font-bold text-background">
+                      <div key={index} className="flex items-center justify-between py-2 px-3 bg-surface-3 rounded border border-cyber-green/20 hover:border-cyber-green/40 transition-colors">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-6 h-6 cyber-green-bg rounded-full flex items-center justify-center text-xs font-bold text-background">
                             #{index + 1}
                           </div>
-                          <span className="font-mono text-sm text-muted-foreground">
+                          <span className="font-mono text-xs text-muted-foreground">
                             {winner.wallet.slice(0, 6)}...{winner.wallet.slice(-4)}
                           </span>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm font-bold text-cyber-green">USDT</span>
-                          <div className="w-2 h-2 cyber-green-bg rounded-full"></div>
+                        <div className="flex items-center space-x-1">
+                          <span className="text-xs font-bold text-cyber-green">USDT</span>
+                          <div className="w-1.5 h-1.5 cyber-green-bg rounded-full"></div>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-8 space-y-4">
-                      <div className="w-16 h-16 bg-surface-3 rounded-lg flex items-center justify-center mx-auto">
-                        <Award className="w-8 h-8 text-muted-foreground" />
+                    <div className="text-center py-6 space-y-3">
+                      <div className="w-12 h-12 bg-surface-3 rounded flex items-center justify-center mx-auto">
+                        <Award className="w-6 h-6 text-muted-foreground" />
                       </div>
-                      <div className="space-y-2">
-                        <div className="text-foreground font-semibold uppercase tracking-wide">
+                      <div className="space-y-1">
+                        <div className="text-foreground font-semibold uppercase tracking-wide text-sm">
                           HENÜZ KAZANAN YOK
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-xs text-muted-foreground">
                           İlk katılan sen ol!
                         </div>
                       </div>
@@ -332,18 +329,18 @@ export default function HomePage() {
           </div>
           
           {/* Statistics Footer */}
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-6 cyber-card border border-cyber-cyan/30">
-              <div className="text-3xl font-bold text-cyber-cyan mb-2">∞</div>
-              <div className="text-sm uppercase tracking-wide text-muted-foreground">Toplam Ödül</div>
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-center p-4 cyber-card border border-cyber-cyan/30">
+              <div className="text-xl font-bold text-cyber-cyan mb-1">∞</div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">Toplam Ödül</div>
             </div>
-            <div className="text-center p-6 cyber-card border border-cyber-purple/30">
-              <div className="text-3xl font-bold text-cyber-purple mb-2">24</div>
-              <div className="text-sm uppercase tracking-wide text-muted-foreground">Saat Aktif</div>
+            <div className="text-center p-4 cyber-card border border-cyber-purple/30">
+              <div className="text-xl font-bold text-cyber-purple mb-1">24</div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">Saat Aktif</div>
             </div>
-            <div className="text-center p-6 cyber-card border border-cyber-green/30">
-              <div className="text-3xl font-bold text-cyber-green mb-2">100%</div>
-              <div className="text-sm uppercase tracking-wide text-muted-foreground">Güvenli</div>
+            <div className="text-center p-4 cyber-card border border-cyber-green/30">
+              <div className="text-xl font-bold text-cyber-green mb-1">100%</div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">Güvenli</div>
             </div>
           </div>
         </div>

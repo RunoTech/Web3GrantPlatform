@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import CampaignCard from "@/components/CampaignCard";
 import { useWallet } from "@/hooks/useWallet";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   User, 
   Heart, 
@@ -27,6 +28,7 @@ import type { Campaign } from "@shared/schema";
 
 export default function ProfilePage() {
   const { isConnected, address } = useWallet();
+  const { language, t } = useLanguage();
   const [activeTab, setActiveTab] = useState("overview");
 
   const { data: campaigns = [] } = useQuery({
@@ -48,9 +50,9 @@ export default function ProfilePage() {
               <Wallet className="w-16 h-16 text-white" />
             </div>
             <div className="space-y-4">
-              <h1 className="text-4xl font-bold text-slate-800">Profil Erişimi</h1>
+              <h1 className="text-4xl font-bold text-slate-800">{t('profile.access_title')}</h1>
               <p className="text-lg text-slate-600">
-                Profilinizi görüntülemek için cüzdanınızı bağlayın
+                {t('profile.connect_wallet_message')}
               </p>
             </div>
             <WalletConnectButton />
@@ -106,7 +108,7 @@ export default function ProfilePage() {
         <Button variant="ghost" asChild className="mb-8" data-testid="button-back-home">
           <Link href="/">
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Ana Sayfaya Dön
+            {t('common.back_to_home')}
           </Link>
         </Button>
 
@@ -126,7 +128,7 @@ export default function ProfilePage() {
             
             <div className="flex-1 space-y-4">
               <div>
-                <h1 className="text-3xl font-bold text-slate-800 mb-2">Profilim</h1>
+                <h1 className="text-3xl font-bold text-slate-800 mb-2">{t('profile.my_profile')}</h1>
                 <p className="text-slate-600 font-mono text-sm bg-slate-100 px-3 py-1 rounded-lg inline-block">
                   {address?.slice(0, 8)}...{address?.slice(-6)}
                 </p>
@@ -136,22 +138,22 @@ export default function ProfilePage() {
                 <div className="text-center p-4 modern-blue rounded-xl">
                   <Target className="w-8 h-8 text-blue-600 mx-auto mb-2" />
                   <p className="text-2xl font-bold text-slate-800">{userCampaigns.length}</p>
-                  <p className="text-sm text-slate-600">Kampanya</p>
+                  <p className="text-sm text-slate-600">{t('profile.campaigns')}</p>
                 </div>
                 <div className="text-center p-4 modern-green rounded-xl">
                   <DollarSign className="w-8 h-8 text-green-600 mx-auto mb-2" />
                   <p className="text-2xl font-bold text-slate-800">{totalDonationsReceived}</p>
-                  <p className="text-sm text-slate-600">ETH Toplandı</p>
+                  <p className="text-sm text-slate-600">{t('profile.eth_raised')}</p>
                 </div>
                 <div className="text-center p-4 modern-purple rounded-xl">
                   <Users className="w-8 h-8 text-purple-600 mx-auto mb-2" />
                   <p className="text-2xl font-bold text-slate-800">{totalSupporters}</p>
-                  <p className="text-sm text-slate-600">Destekçi</p>
+                  <p className="text-sm text-slate-600">{t('profile.supporters')}</p>
                 </div>
                 <div className="text-center p-4 modern-orange rounded-xl">
                   <Gift className="w-8 h-8 text-orange-600 mx-auto mb-2" />
                   <p className="text-2xl font-bold text-slate-800">{dailyEntries.length}</p>
-                  <p className="text-sm text-slate-600">Günlük Katılım</p>
+                  <p className="text-sm text-slate-600">{t('profile.daily_participation')}</p>
                 </div>
               </div>
             </div>
@@ -162,13 +164,13 @@ export default function ProfilePage() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="grid w-full grid-cols-3 glass-card p-1">
             <TabsTrigger value="overview" className="data-[state=active]:gradient-primary data-[state=active]:text-white">
-              Genel Bakış
+              {t('profile.overview')}
             </TabsTrigger>
             <TabsTrigger value="campaigns" className="data-[state=active]:gradient-primary data-[state=active]:text-white">
-              Kampanyalarım
+              {t('profile.my_campaigns')}
             </TabsTrigger>
             <TabsTrigger value="rewards" className="data-[state=active]:gradient-primary data-[state=active]:text-white">
-              Günlük Ödüller
+              {t('profile.daily_rewards')}
             </TabsTrigger>
           </TabsList>
 
@@ -179,21 +181,21 @@ export default function ProfilePage() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center space-x-2 text-lg">
                     <TrendingUp className="w-5 h-5 text-blue-600" />
-                    <span>Kampanya Performansı</span>
+                    <span>{t('profile.campaign_performance')}</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-slate-600">En Başarılı</span>
+                    <span className="text-slate-600">{t('profile.most_successful')}</span>
                     <Badge className="modern-green text-green-800">
                       {userCampaigns.length > 0 ? 
                         userCampaigns.reduce((a, b) => (a.totalDonations || 0) > (b.totalDonations || 0) ? a : b).title.slice(0, 15) + '...' : 
-                        'Henüz yok'
+                        t('profile.none_yet')
                       }
                     </Badge>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Ortalama Bağış</span>
+                    <span className="text-slate-600">{t('profile.average_donation')}</span>
                     <span className="font-semibold">
                       {totalSupporters > 0 ? (totalDonationsReceived / totalSupporters).toFixed(3) : '0'} ETH
                     </span>
@@ -205,22 +207,22 @@ export default function ProfilePage() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center space-x-2 text-lg">
                     <Calendar className="w-5 h-5 text-purple-600" />
-                    <span>Aktivite</span>
+                    <span>{t('profile.activity')}</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Bu Ay Katılım</span>
+                    <span className="text-slate-600">{t('profile.this_month_participation')}</span>
                     <Badge className="modern-purple text-purple-800">
-                      {dailyEntries.filter((e: any) => new Date(e.date).getMonth() === new Date().getMonth()).length} Gün
+                      {dailyEntries.filter((e: any) => new Date(e.date).getMonth() === new Date().getMonth()).length} {t('profile.days')}
                     </Badge>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Son Kampanya</span>
+                    <span className="text-slate-600">{t('profile.last_campaign')}</span>
                     <span className="text-sm text-slate-500">
                       {userCampaigns.length > 0 ? 
-                        new Date(userCampaigns[userCampaigns.length - 1].createdAt).toLocaleDateString('tr-TR') : 
-                        'Henüz yok'
+                        new Date(userCampaigns[userCampaigns.length - 1].createdAt).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US') : 
+                        t('profile.none_yet')
                       }
                     </span>
                   </div>
@@ -231,24 +233,24 @@ export default function ProfilePage() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center space-x-2 text-lg">
                     <Award className="w-5 h-5 text-yellow-600" />
-                    <span>Başarılar</span>
+                    <span>{t('profile.achievements')}</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="space-y-2">
                     {userCampaigns.length >= 1 && (
                       <Badge className="w-full justify-start modern-green text-green-800">
-                        🎯 İlk Kampanya
+                        🎯 {t('profile.first_campaign')}
                       </Badge>
                     )}
                     {totalSupporters >= 10 && (
                       <Badge className="w-full justify-start modern-blue text-blue-800">
-                        👥 10 Destekçi
+                        👥 {t('profile.ten_supporters')}
                       </Badge>
                     )}
                     {dailyEntries.length >= 7 && (
                       <Badge className="w-full justify-start modern-purple text-purple-800">
-                        ⭐ Haftalık Katılım
+                        ⭐ {t('profile.weekly_participation')}
                       </Badge>
                     )}
                   </div>
@@ -260,11 +262,11 @@ export default function ProfilePage() {
           {/* My Campaigns Tab */}
           <TabsContent value="campaigns" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-slate-800">Kampanyalarım</h2>
+              <h2 className="text-2xl font-bold text-slate-800">{t('profile.my_campaigns')}</h2>
               <Button asChild className="gradient-primary text-white btn-modern">
                 <Link href="/funds">
                   <Target className="w-4 h-4 mr-2" />
-                  Yeni Kampanya
+                  {t('profile.new_campaign')}
                 </Link>
               </Button>
             </div>
@@ -281,14 +283,14 @@ export default function ProfilePage() {
                   <Target className="w-12 h-12 text-blue-600" />
                 </div>
                 <h3 className="text-2xl font-semibold text-slate-800 mb-2">
-                  Henüz kampanyanız yok
+                  {t('profile.no_campaigns_yet')}
                 </h3>
                 <p className="text-slate-600 mb-8">
-                  İlk kampanyanızı oluşturun ve toplumsal değişime öncülük edin
+                  {t('profile.create_first_campaign')}
                 </p>
                 <Button asChild className="gradient-primary text-white btn-modern">
                   <Link href="/funds">
-                    Kampanya Oluştur
+                    {t('profile.create_campaign')}
                   </Link>
                 </Button>
               </div>
@@ -303,9 +305,9 @@ export default function ProfilePage() {
                   <Gift className="w-10 h-10 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-slate-800 mb-2">Günlük Ödül Sistemine Katılım</h2>
+                  <h2 className="text-3xl font-bold text-slate-800 mb-2">{t('profile.daily_reward_participation')}</h2>
                   <p className="text-lg text-slate-600">
-                    Toplam {dailyEntries.length} gün katılım gösterdiniz
+                    {t('profile.total_participation_days', { days: dailyEntries.length })}
                   </p>
                 </div>
                 
@@ -313,25 +315,25 @@ export default function ProfilePage() {
                   <div className="text-center p-6 modern-green rounded-xl">
                     <Calendar className="w-8 h-8 text-green-600 mx-auto mb-3" />
                     <p className="text-2xl font-bold text-slate-800">{dailyEntries.length}</p>
-                    <p className="text-sm text-slate-600">Toplam Katılım</p>
+                    <p className="text-sm text-slate-600">{t('profile.total_participation')}</p>
                   </div>
                   <div className="text-center p-6 modern-orange rounded-xl">
                     <TrendingUp className="w-8 h-8 text-orange-600 mx-auto mb-3" />
                     <p className="text-2xl font-bold text-slate-800">
                       {dailyEntries.filter((e: any) => new Date(e.date).getMonth() === new Date().getMonth()).length}
                     </p>
-                    <p className="text-sm text-slate-600">Bu Ay</p>
+                    <p className="text-sm text-slate-600">{t('profile.this_month')}</p>
                   </div>
                   <div className="text-center p-6 modern-purple rounded-xl">
                     <Award className="w-8 h-8 text-purple-600 mx-auto mb-3" />
                     <p className="text-2xl font-bold text-slate-800">0</p>
-                    <p className="text-sm text-slate-600">Kazanılan Ödül</p>
+                    <p className="text-sm text-slate-600">{t('profile.earned_rewards')}</p>
                   </div>
                 </div>
                 
                 <Button asChild className="gradient-primary text-white btn-modern">
                   <Link href="/#odul-sistemi">
-                    Bugün Katıl
+                    {t('profile.join_today')}
                   </Link>
                 </Button>
               </div>

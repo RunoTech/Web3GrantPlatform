@@ -1,6 +1,6 @@
 # Overview
 
-This is a Web3 donation platform built for Ethereum Mainnet and BSC Mainnet networks. The platform enables commission-free donations where funds go directly to campaign creators, with revenue generated through one-time account activation fees paid in USDT/BUSD. The system includes campaign management, daily reward mechanisms, and admin controls for fee management and winner selection.
+DUXXAN is a futuristic Web3 donation platform built for Ethereum Mainnet and BSC Mainnet networks. The platform features a dark, cyber-tech aesthetic without animations and enables commission-free donations where funds go directly to campaign creators. Revenue is generated through one-time account activation fees paid in USDT/BUSD. The system includes campaign management, daily reward mechanisms, and admin controls for fee management and winner selection.
 
 ## User Preferences
 
@@ -10,8 +10,9 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend Architecture
 - **Framework**: React with Vite as the build tool
-- **Styling**: Tailwind CSS with custom pastel color scheme optimized for Web3 applications
-- **UI Components**: Radix UI primitives through shadcn/ui component library for consistent, accessible interface
+- **Styling**: Tailwind CSS with futuristic dark theme featuring cyber-tech colors (cyan, purple, green) without animations
+- **Design System**: Dark background with neon accents, cyber cards with subtle borders, and uppercase typography with wide letter spacing
+- **UI Components**: Radix UI primitives through shadcn/ui component library customized for futuristic aesthetic
 - **State Management**: TanStack React Query for server state management and caching
 - **Routing**: Wouter for lightweight client-side routing
 - **Wallet Integration**: ethers.js for blockchain interactions with support for MetaMask, Trust Wallet, and WalletConnect

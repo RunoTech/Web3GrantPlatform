@@ -4,104 +4,94 @@
 @tailwind utilities;
 
 :root {
-  /* Modern Web3 Color Palette */
-  --background: hsl(0 0% 100%);
-  --foreground: hsl(220 14% 14%);
-  --card: hsl(0 0% 100%);
-  --card-foreground: hsl(220 14% 14%);
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(220 14% 14%);
+  /* Futuristic Color Palette */
+  --background: hsl(240 5% 6%);
+  --foreground: hsl(0 0% 95%);
+  --card: hsl(240 6% 9%);
+  --card-foreground: hsl(0 0% 95%);
+  --popover: hsl(240 6% 9%);
+  --popover-foreground: hsl(0 0% 95%);
   
-  /* Primary Colors - Modern Blue Gradient */
-  --primary: hsl(217 91% 60%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(210 40% 98%);
-  --secondary-foreground: hsl(220 14% 14%);
+  /* Primary Colors - Cyan Tech */
+  --primary: hsl(180 100% 50%);
+  --primary-foreground: hsl(240 5% 6%);
+  --secondary: hsl(240 6% 12%);
+  --secondary-foreground: hsl(0 0% 95%);
   
-  /* Accent Colors - Purple/Blue Gradient */
-  --accent: hsl(217 91% 60%);
+  /* Accent Colors - Electric Purple */
+  --accent: hsl(270 100% 60%);
   --accent-foreground: hsl(0 0% 100%);
-  --muted: hsl(210 40% 98%);
-  --muted-foreground: hsl(215 16% 47%);
+  --muted: hsl(240 6% 12%);
+  --muted-foreground: hsl(240 5% 65%);
   
   /* Destructive Colors */
-  --destructive: hsl(0 84% 60%);
+  --destructive: hsl(0 100% 55%);
   --destructive-foreground: hsl(0 0% 100%);
   
   /* Border and Input */
-  --border: hsl(214 32% 91%);
-  --input: hsl(214 32% 91%);
-  --ring: hsl(217 91% 60%);
+  --border: hsl(240 6% 18%);
+  --input: hsl(240 6% 12%);
+  --ring: hsl(180 100% 50%);
   
   /* Chart Colors */
-  --chart-1: hsl(217 91% 60%);
-  --chart-2: hsl(142 76% 36%);
-  --chart-3: hsl(38 92% 50%);
-  --chart-4: hsl(168 76% 42%);
-  --chart-5: hsl(335 75% 51%);
+  --chart-1: hsl(180 100% 50%);
+  --chart-2: hsl(120 100% 45%);
+  --chart-3: hsl(45 100% 55%);
+  --chart-4: hsl(270 100% 60%);
+  --chart-5: hsl(330 100% 60%);
   
   /* Typography */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --font-serif: Georgia, 'Times New Roman', serif;
-  --font-mono: 'SF Mono', Consolas, 'Liberation Mono', monospace;
-  --radius: 0.75rem;
+  --font-sans: 'Inter', 'JetBrains Mono', system-ui, sans-serif;
+  --font-serif: 'Inter', system-ui, serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  --radius: 0.5rem;
   
-  /* Modern Web3 Gradient Colors */
-  --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(245 100% 70%) 100%);
-  --gradient-secondary: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(168 76% 42%) 100%);
-  --gradient-accent: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(335 75% 51%) 100%);
+  /* Futuristic Gradient Colors */
+  --gradient-primary: linear-gradient(135deg, hsl(180 100% 50%) 0%, hsl(270 100% 60%) 100%);
+  --gradient-secondary: linear-gradient(135deg, hsl(120 100% 45%) 0%, hsl(180 100% 50%) 100%);
+  --gradient-accent: linear-gradient(135deg, hsl(270 100% 60%) 0%, hsl(330 100% 60%) 100%);
+  --gradient-warning: linear-gradient(135deg, hsl(45 100% 55%) 0%, hsl(30 100% 55%) 100%);
   
-  /* Glass Effect Variables */
-  --glass-bg: rgba(255, 255, 255, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.2);
+  /* Neon Effects */
+  --neon-cyan: 0 0 20px hsl(180 100% 50%), 0 0 40px hsl(180 100% 50%), 0 0 60px hsl(180 100% 50%);
+  --neon-purple: 0 0 20px hsl(270 100% 60%), 0 0 40px hsl(270 100% 60%), 0 0 60px hsl(270 100% 60%);
+  --neon-green: 0 0 20px hsl(120 100% 45%), 0 0 40px hsl(120 100% 45%), 0 0 60px hsl(120 100% 45%);
   
-  /* Modern Pastel Colors */
-  --modern-blue: hsl(217 91% 95%);
-  --modern-purple: hsl(245 100% 95%);
-  --modern-green: hsl(142 76% 92%);
-  --modern-orange: hsl(38 92% 92%);
-  --modern-pink: hsl(335 75% 92%);
-  --modern-cyan: hsl(168 76% 92%);
+  /* Futuristic Colors */
+  --cyber-cyan: hsl(180 100% 50%);
+  --cyber-purple: hsl(270 100% 60%);
+  --cyber-green: hsl(120 100% 45%);
+  --cyber-orange: hsl(30 100% 55%);
+  --cyber-pink: hsl(330 100% 60%);
+  --cyber-yellow: hsl(45 100% 55%);
+  
+  /* Surface Colors */
+  --surface-primary: hsl(240 6% 12%);
+  --surface-secondary: hsl(240 6% 15%);
+  --surface-tertiary: hsl(240 6% 18%);
 }
 
 .dark {
-  /* Dark Mode - Modern Web3 */
-  --background: hsl(220 13% 9%);
-  --foreground: hsl(220 14% 95%);
-  --card: hsl(220 13% 11%);
-  --card-foreground: hsl(220 14% 95%);
-  --popover: hsl(220 13% 11%);
-  --popover-foreground: hsl(220 14% 95%);
-  --primary: hsl(217 91% 65%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(220 13% 15%);
-  --secondary-foreground: hsl(220 14% 95%);
-  --muted: hsl(220 13% 15%);
-  --muted-foreground: hsl(215 16% 60%);
-  --accent: hsl(217 91% 65%);
+  /* Enhanced Dark Mode for Futuristic Look */
+  --background: hsl(240 5% 4%);
+  --foreground: hsl(0 0% 98%);
+  --card: hsl(240 6% 7%);
+  --card-foreground: hsl(0 0% 98%);
+  --popover: hsl(240 6% 7%);
+  --popover-foreground: hsl(0 0% 98%);
+  --primary: hsl(180 100% 45%);
+  --primary-foreground: hsl(240 5% 4%);
+  --secondary: hsl(240 6% 10%);
+  --secondary-foreground: hsl(0 0% 98%);
+  --muted: hsl(240 6% 10%);
+  --muted-foreground: hsl(240 5% 70%);
+  --accent: hsl(270 100% 55%);
   --accent-foreground: hsl(0 0% 100%);
-  --destructive: hsl(0 84% 65%);
+  --destructive: hsl(0 100% 50%);
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(220 13% 18%);
-  --input: hsl(220 13% 18%);
-  --ring: hsl(217 91% 65%);
-  
-  /* Dark Mode Gradients */
-  --gradient-primary: linear-gradient(135deg, hsl(217 91% 65%) 0%, hsl(245 100% 75%) 100%);
-  --gradient-secondary: linear-gradient(135deg, hsl(142 76% 40%) 0%, hsl(168 76% 46%) 100%);
-  --gradient-accent: linear-gradient(135deg, hsl(38 92% 55%) 0%, hsl(335 75% 56%) 100%);
-  
-  /* Dark Glass Effect */
-  --glass-bg: rgba(0, 0, 0, 0.2);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  
-  /* Dark Mode Modern Colors */
-  --modern-blue: hsl(217 91% 15%);
-  --modern-purple: hsl(245 100% 15%);
-  --modern-green: hsl(142 76% 15%);
-  --modern-orange: hsl(38 92% 15%);
-  --modern-pink: hsl(335 75% 15%);
-  --modern-cyan: hsl(168 76% 15%);
+  --border: hsl(240 6% 15%);
+  --input: hsl(240 6% 8%);
+  --ring: hsl(180 100% 45%);
 }
 
 @layer base {
@@ -117,43 +107,60 @@
 }
 
 @layer components {
-  /* Modern Glass Effect Components */
-  .glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
+  /* Futuristic Components */
+  .cyber-card {
+    background: var(--surface-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    position: relative;
   }
   
-  .glass-card {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  .cyber-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: var(--radius);
+    padding: 1px;
+    background: var(--gradient-primary);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: subtract;
+    opacity: 0.3;
+    pointer-events: none;
   }
   
-  /* Modern Color Classes */
-  .modern-blue {
-    background-color: var(--modern-blue);
+  .neon-border {
+    border: 1px solid var(--cyber-cyan);
+    box-shadow: 0 0 10px var(--cyber-cyan), inset 0 0 10px rgba(0, 255, 255, 0.1);
   }
   
-  .modern-purple {
-    background-color: var(--modern-purple);
+  .neon-text {
+    color: var(--cyber-cyan);
+    text-shadow: 0 0 10px var(--cyber-cyan), 0 0 20px var(--cyber-cyan), 0 0 30px var(--cyber-cyan);
   }
   
-  .modern-green {
-    background-color: var(--modern-green);
+  /* Cyber Color Classes */
+  .cyber-cyan-bg {
+    background: var(--cyber-cyan);
+    color: var(--background);
   }
   
-  .modern-orange {
-    background-color: var(--modern-orange);
+  .cyber-purple-bg {
+    background: var(--cyber-purple);
+    color: white;
   }
   
-  .modern-pink {
-    background-color: var(--modern-pink);
+  .cyber-green-bg {
+    background: var(--cyber-green);
+    color: var(--background);
   }
   
-  .modern-cyan {
-    background-color: var(--modern-cyan);
+  .cyber-orange-bg {
+    background: var(--cyber-orange);
+    color: var(--background);
   }
   
   /* Gradient Classes */
@@ -169,39 +176,79 @@
     background: var(--gradient-accent);
   }
   
-  /* Modern Button Styles */
-  .btn-modern {
-    @apply px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  .gradient-warning {
+    background: var(--gradient-warning);
   }
   
-  .btn-modern:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  /* Futuristic Button Styles */
+  .btn-cyber {
+    @apply px-6 py-3 font-semibold transition-all duration-200;
+    border-radius: var(--radius);
+    border: 1px solid var(--cyber-cyan);
+    background: transparent;
+    color: var(--cyber-cyan);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
   }
   
-  /* Modern Card Styles */
-  .card-modern {
-    @apply rounded-2xl border-0 shadow-lg hover:shadow-xl transition-all duration-300;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
+  .btn-cyber:hover {
+    background: var(--cyber-cyan);
+    color: var(--background);
+    box-shadow: 0 0 20px var(--cyber-cyan);
   }
   
-  /* Animation Classes */
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
+  .btn-cyber::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
   }
   
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+  .btn-cyber:hover::before {
+    left: 100%;
   }
   
-  .animate-glow {
-    animation: glow 2s ease-in-out infinite alternate;
+  /* Futuristic Card Styles */
+  .card-cyber {
+    @apply rounded-lg border transition-all duration-200;
+    background: var(--surface-primary);
+    border-color: var(--border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   }
   
-  @keyframes glow {
-    from { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
-    to { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
+  .card-cyber:hover {
+    border-color: var(--cyber-cyan);
+    box-shadow: 0 8px 30px rgba(0, 255, 255, 0.2);
+  }
+  
+  /* Utility Classes */
+  .text-cyber-cyan {
+    color: var(--cyber-cyan);
+  }
+  
+  .text-cyber-purple {
+    color: var(--cyber-purple);
+  }
+  
+  .text-cyber-green {
+    color: var(--cyber-green);
+  }
+  
+  .bg-surface {
+    background: var(--surface-primary);
+  }
+  
+  .bg-surface-2 {
+    background: var(--surface-secondary);
+  }
+  
+  .bg-surface-3 {
+    background: var(--surface-tertiary);
   }
 }

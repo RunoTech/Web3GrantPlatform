@@ -8,12 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import WalletConnectButton from "@/components/WalletConnectButton";
+import Header from "@/components/Header";
 import NetworkOption from "@/components/NetworkOption";
 import { useWallet } from "@/hooks/useWallet";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { api } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -36,6 +34,7 @@ import type { z } from "zod";
 type CampaignFormData = z.infer<typeof insertCampaignSchema>;
 
 export default function FundsPage() {
+  const { t } = useLanguage();
   const [, setLocation] = useLocation();
   const { isConnected, address } = useWallet();
   const { toast } = useToast();
@@ -132,22 +131,24 @@ export default function FundsPage() {
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
         <div className="text-center space-y-8 max-w-md mx-auto p-8">
-          <div className="w-32 h-32 gradient-primary rounded-3xl flex items-center justify-center mx-auto animate-float">
-            <WalletIcon className="w-16 h-16 text-white" />
+          <div className="w-32 h-32 gradient-primary rounded-lg flex items-center justify-center mx-auto neon-border">
+            <WalletIcon className="w-16 h-16 text-background" />
           </div>
           <div className="space-y-4">
-            <h1 className="text-4xl font-bold text-slate-800">Fon Toplama Merkezi</h1>
-            <p className="text-lg text-slate-600">
-              Kampanya oluşturmak için cüzdanınızı bağlayın
+            <h1 className="text-4xl font-bold text-foreground uppercase tracking-wider">{t('funds.title')}</h1>
+            <p className="text-lg text-muted-foreground">
+              {t('funds.connect_wallet')}
             </p>
           </div>
-          <WalletConnectButton />
+          <div className="btn-cyber p-4">
+            <WalletConnectButton />
+          </div>
           <Button variant="ghost" asChild className="mt-6">
             <Link href="/">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Ana Sayfaya Dön
+              {t('funds.back_home')}
             </Link>
           </Button>
         </div>
@@ -156,60 +157,29 @@ export default function FundsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Navigation Header */}
-      <header className="sticky top-0 z-50 glass-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 gradient-primary rounded-2xl flex items-center justify-center">
-                <Heart className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Web3Bağış
-              </h1>
-            </div>
-
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/" className="text-slate-600 hover:text-slate-800 font-medium transition-colors">
-                Ana Sayfa
-              </Link>
-              <Link href="/donations" className="text-slate-600 hover:text-slate-800 font-medium transition-colors">
-                Bağışlar
-              </Link>
-              <Link href="/funds" className="text-blue-600 font-semibold">
-                Fonlar
-              </Link>
-              <Link href="/profile" className="text-slate-600 hover:text-slate-800 font-medium transition-colors">
-                Profil
-              </Link>
-            </nav>
-
-            <WalletConnectButton />
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background text-foreground">
+      <Header currentPage="funds" />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Button variant="ghost" asChild className="mb-8" data-testid="button-back-home">
           <Link href="/">
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Ana Sayfaya Dön
+            {t('funds.back_home')}
           </Link>
         </Button>
 
         {/* Progress Steps */}
-        <div className="card-modern p-6 mb-8">
+        <div className="cyber-card p-6 mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                activationStep >= 1 ? 'gradient-primary text-white' : 'bg-slate-200 text-slate-400'
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                activationStep >= 1 ? 'gradient-primary text-background' : 'bg-surface-2 text-muted-foreground'
               }`}>
                 <WalletIcon className="w-5 h-5" />
               </div>
               <div className="hidden sm:block">
-                <p className="font-semibold text-slate-800">Cüzdan Bağlantısı</p>
-                <p className="text-sm text-slate-600">Cüzdanınızı bağlayın</p>
+                <p className="font-semibold text-foreground uppercase tracking-wide">{t('funds.steps.wallet_connection')}</p>
+                <p className="text-sm text-muted-foreground">{t('funds.steps.connect_wallet')}</p>
               </div>
             </div>
             

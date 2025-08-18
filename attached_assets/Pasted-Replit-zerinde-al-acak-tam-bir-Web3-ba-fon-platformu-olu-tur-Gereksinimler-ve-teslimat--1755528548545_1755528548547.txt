@@ -1,0 +1,130 @@
+Replit üzerinde çalışacak tam bir Web3 bağış/fon platformu oluştur. Gereksinimler ve teslimat:
+
+# 1) GENEL
+- Sadece şu ağlar desteklenecek: **Ethereum Mainnet** ve **BSC Mainnet** (başka ağ istemiyorum).
+- Kullanıcı kimliği yok; **hesap = cüzdan adresi**. Cüzdanlar: MetaMask, Trust Wallet, WalletConnect.
+- Platform bağışlardan **komisyon ALMAZ**. Bağışlar doğrudan kampanya sahibinin cüzdanına gider.
+- Gelir modeli: **Hesap açma ücreti** (USDT/BUSD) → ücretler backend DB’den yönetilecek ve değiştirilebilir.
+- Ana sayfada: **Popüler Kampanyalar** (grid) + **Günlük Tether Ödülü** (Katıl butonu).
+- UI “soft & sofistike” olacak (pastel tonlar, modern, minimal, mobil uyumlu).
+
+# 2) TEKNOLOJİLER
+- Frontend: **Next.js (React) + Tailwind CSS**
+- Backend: **Node.js + Express**
+- Blockchain: **ethers.js**
+- DB: **SQLite** (tercih) veya JSON dosyası (fallback)
+- Proje Replit’te tek repo içinde çalışacak.
+
+# 3) FRONTEND GEREKSİNİMLERİ
+- “Cüzdan Bağla” butonu; bağlanınca adres göster.
+- Backend’den `GET /fees` ile güncel ücretleri çek ve göster:
+  - Ethereum için USDT ücreti (ör: 50 USDT)
+  - BSC için BUSD veya USDT ücreti (örn. 25 BUSD). (Token sembolünü backend belirtecek)
+- **Hesap Açma Akışı (direkt platform cüzdanına transfer):**
+  - Kullanıcı, ağını seçer (Ethereum ya da BSC).
+  - Ekranda platformun ilgili ağdaki **cüzdan adresi** ve gerektiren **token/ücret** açıkça yazılı olur.
+  - Kullanıcı cüzdanından transferi yapar ve **tx hash** girer.
+  - “Ödemeyi Doğrula” düğmesi `/verify-payment`’e gönderir; onaylanınca “hesap aktif”.
+- **Kampanya Oluşturma Sayfası** (yalnızca hesabı aktif cüzdanlar):
+  - Form alanları: Başlık, Açıklama, Görsel URL.
+  - Kaydet → `/create-campaign`.
+- **Kampanya Listesi Sayfası**:
+  - `/get-campaigns` ile tüm kampanyalar (kart/gird).
+- **Kampanya Detay Sayfası**:
+  - Başlık, açıklama, görsel, sahibi cüzdan, toplam bağış, bağış adresi (kopyala).
+- **Ana Sayfa**:
+  - Üstte “Cüzdan Bağla”.
+  - Bölüm 1: “🎁 Günlük Tether Ödülü” → “Katıl” butonu
+    - Bağlandıysa aktif, tıklandığında `/join-daily-reward`’a POST.
+    - Katıldıktan sonra “Bugün katıldınız ✅”.
+    - Altında “Dünkü Kazananlar” listesini `/get-last-winners` ile göster (cüzdanlar kısaltılmış).
+  - Bölüm 2: “Popüler Kampanyalar” (grid) → `/get-popular-campaigns` (ilk 10).
+- **Tasarım (Tailwind)**
+  - Arka plan: #f8fafc veya #ffffff, metin: nötr gri tonları.
+  - Kart arka planları: #e0f2fe (pastel mavi), #ede9fe (soft mor), #fefce8 (açık krem) varyasyonları.
+  - Vurgular: #dcfce7 (pastel yeşil) veya #ffedd5 (pastel turuncu).
+  - Font: **Inter** veya **Poppins**.
+  - Butonlar: `rounded-2xl`, `shadow-md`, hover’da yumuşak büyüme.
+  - Mobil uyumlu gridler.
+
+# 4) BACKEND GEREKSİNİMLERİ (Express)
+- Ortak:
+  - Ağ yapılandırmaları ve token adresleri konfigürasyonda tutulacak:
+    - Ethereum Mainnet: USDT adresi
+    - BSC Mainnet: BUSD veya USDT adresi (hangisini kullanacağımızı config ile belirt)
+  - **Platform cüzdan adresleri** (ETH ve BSC için ayrı) .env veya config’ten.
+  - **Ücretler DB’den yönetilir**:
+    - Tablo/Model: `fees(network TEXT PRIMARY KEY, token_symbol TEXT, token_address TEXT, decimals INT, amount INTEGER)`
+    - Örnek: (“ethereum”, “USDT”, “0xdAC17F958D2ee523a2206206994597C13D831ec7”, 6, 50000000) // 50 USDT
+             (“bsc”,      “BUSD”, “0xe9e7cea3dedca5984780bafc599bd69add087d56”, 18, 25000000000000000000) // 25 BUSD
+- Endpoint’ler:
+  - `GET /fees` → { ethereum: {symbol,address,decimals,amount}, bsc: {...} }
+  - `POST /admin/update-fee` → body: { network, token_symbol, token_address, decimals, amount }  (Basit admin anahtarı ile koru)
+  - `POST /verify-payment` → body: { network, wallet, txHash }
+    - İşlem:
+      1) `network`’e göre doğru RPC’ye bağlan (ETH/BSC).
+      2) `txHash` için tx receipt al.
+      3) İlgili token sözleşmesinin `Transfer` event’ini parse et (ethers.js ABI).
+      4) `to == platformWallet(network)` ve `value >= fee(network)` ise **geçerli**.
+      5) Geçerli ise `accounts` tablosunda `wallet` için `active=1` işaretle (yoksa oluştur).
+  - `POST /create-campaign` → body: { title, description, imageUrl } (auth: wallet imzası veya header’da wallet, ve `accounts.active==1` kontrolü)
+  - `GET /get-campaigns` → tüm kampanyalar (id, title, description, imageUrl, ownerWallet, totalDonations, donationCount, featured BOOLEAN)
+  - `GET /get-popular-campaigns` → en çok bağış alan ilk 10 (totalDonations ve donationCount’a göre sıralama)
+  - `POST /admin/update-campaign` → { id, featured } (admin key ile)
+  - Günlük ödül:
+    - `POST /join-daily-reward` → body: { wallet, date? }  (tarih server’dan alınır, aynı gün ikinci kayıt olmasın)
+    - `GET /get-last-winners` → son 1-7 gün kazanan listesi
+    - `POST /admin/select-winners` → { date, count } → aynı güne katılanlardan rastgele seç, `winners` tablosuna yaz. (Ödül dağıtımı off-chain; admin cüzdanından manuel veya ayrı script)
+- DB Şeması (SQLite):
+  - `fees(network TEXT PRIMARY KEY, token_symbol TEXT, token_address TEXT, decimals INT, amount INTEGER)`
+  - `accounts(wallet TEXT PRIMARY KEY, active INTEGER DEFAULT 0, created_at DATETIME)`
+  - `campaigns(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, description TEXT, imageUrl TEXT, ownerWallet TEXT, totalDonations INTEGER DEFAULT 0, donationCount INTEGER DEFAULT 0, featured INTEGER DEFAULT 0, created_at DATETIME)`
+  - `daily_entries(id INTEGER PRIMARY KEY AUTOINCREMENT, wallet TEXT, date TEXT, UNIQUE(wallet, date))`
+  - `winners(id INTEGER PRIMARY KEY AUTOINCREMENT, wallet TEXT, date TEXT)`
+- Bağış toplamlarını güncelleme:
+  - Backend periyodik job (basit cron) veya kullanıcı isteğinde, kampanya sahibi wallet’a gelen ilgili token transferlerini (seçilen ağlarda) okur ve `totalDonations`, `donationCount`’ı günceller (ethers.js log taraması veya üçüncü taraf API; mümkünse ethers.js ile temel okuma).
+
+# 5) PROJE YAPISI
+- `package.json` (scripts: dev, build, start; bağımlılıklar: express, ethers, sqlite3, next, react, react-dom, tailwindcss, autoprefixer, postcss, dotenv, cors)
+- Backend:
+  - `server.js` (Express app, endpoints, ethers provider, SQLite bağlantısı, basit admin key middleware)
+  - `config/networks.js` (RPC URL’leri, token ABIs, vs.)
+  - `db/init.sql` veya `db.js` (şema oluşturma ve seed: varsayılan fee kayıtları)
+- Frontend:
+  - `pages/_app.js` (global stiller)
+  - `pages/index.js` (Ana sayfa: Cüzdan Bağla + Günlük Ödül Katılım + Dünkü Kazananlar + Popüler Kampanyalar)
+  - `pages/campaigns.js` (tüm kampanyalar)
+  - `pages/campaign/[id].js` (kampanya detay)
+  - `pages/create-campaign.js` (kampanya açma formu + hesap durumu kontrolü + tx hash doğrulama akışı)
+  - `components/WalletConnectButton.jsx`
+  - `components/CampaignCard.jsx`
+  - `utils/api.js` (fetch helper)
+  - `utils/wallet.js` (cüzdan bağlantı yardımcıları)
+- Tailwind:
+  - `tailwind.config.js`, `postcss.config.js`, `styles/globals.css`
+  - Soft pastel tema sınıfları (buton, kart, grid)
+- `README.md`:
+  - ENV değişkenleri (ETH_RPC_URL, BSC_RPC_URL, PLATFORM_WALLET_ETH, PLATFORM_WALLET_BSC, ADMIN_KEY)
+  - Ücret güncelleme talimatı (`POST /admin/update-fee`)
+  - Günlük ödül seçimi (`POST /admin/select-winners`) ve ödeme süreci
+  - Cüzdan bağlama ve hesap açma ücreti doğrulama akışı
+  - Kampanya oluşturma ve bağış gösterimi
+
+# 6) TASARIM DETAYLARI (UI)
+- Pastel renk paleti:
+  - bg: #f8fafc / #ffffff
+  - card: #e0f2fe / #ede9fe / #fefce8 (rastgele varyasyon veya kategoriye göre)
+  - accent: #dcfce7 / #ffedd5
+- Font: Inter veya Poppins
+- Kart: `rounded-2xl shadow-md hover:scale-[1.01] transition`
+- Buton: `rounded-2xl px-4 py-2 shadow-md` (soft gradient opsiyonel)
+- Grid: responsive (xs:1, sm:2, md:3, lg:4 sütun)
+
+# 7) DİĞER
+- Kod basit, temiz ve üretime yakın olsun; güvenlik olarak:
+  - Admin endpoint’leri basit `ADMIN_KEY` ile korunur.
+  - Giriş/üyelik yok; wallet adresi client’tan gelir; hassas doğrulamalar blockchain üzerinden yapılır.
+- Üçüncü taraf servis paylaşma yok; yalnız ethers.js ve RPC’lerle çalış.
+- Tüm metinler ve UI Türkçe.
+
+ÇIKTI: Çalışır halde bir Replit projesi (frontend + backend + DB) ve README; veritabanı otomatik inşa/seed; tüm endpoint’ler ve sayfalar tanımlı; UI soft & sofistike; Ethereum & BSC destekli; popüler kampanyalar; günlük ödül katılım sistemi; komisyon yok; ücretler backend DB’den yönetilebilir.

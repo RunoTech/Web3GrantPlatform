@@ -4,71 +4,104 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(248 50% 98%);
-  --foreground: hsl(210 25% 7.8431%);
-  --card: hsl(180 6.6667% 97.0588%);
-  --card-foreground: hsl(210 25% 7.8431%);
+  /* Modern Web3 Color Palette */
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(220 14% 14%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(220 14% 14%);
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(210 25% 7.8431%);
-  --primary: hsl(203.8863 88.2845% 53.1373%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(210 25% 7.8431%);
-  --secondary-foreground: hsl(0 0% 100%);
-  --muted: hsl(240 1.9608% 90%);
-  --muted-foreground: hsl(210 25% 7.8431%);
-  --accent: hsl(211.5789 51.3514% 92.7451%);
-  --accent-foreground: hsl(203.8863 88.2845% 53.1373%);
-  --destructive: hsl(356.3033 90.5579% 54.3137%);
-  --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(201.4286 30.4348% 90.9804%);
-  --input: hsl(200 23.0769% 97.4510%);
-  --ring: hsl(202.8169 89.1213% 53.1373%);
-  --chart-1: hsl(203.8863 88.2845% 53.1373%);
-  --chart-2: hsl(159.7826 100% 36.0784%);
-  --chart-3: hsl(42.0290 92.8251% 56.2745%);
-  --chart-4: hsl(147.1429 78.5047% 41.9608%);
-  --chart-5: hsl(341.4894 75.2000% 50.9804%);
-  --sidebar: hsl(180 6.6667% 97.0588%);
-  --sidebar-foreground: hsl(210 25% 7.8431%);
-  --sidebar-primary: hsl(203.8863 88.2845% 53.1373%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(211.5789 51.3514% 92.7451%);
-  --sidebar-accent-foreground: hsl(203.8863 88.2845% 53.1373%);
-  --sidebar-border: hsl(205.0000 25.0000% 90.5882%);
-  --sidebar-ring: hsl(202.8169 89.1213% 53.1373%);
-  --font-sans: 'Inter', 'Poppins', system-ui, sans-serif;
-  --font-serif: Georgia, serif;
-  --font-mono: Menlo, monospace;
-  --radius: 1.3rem;
+  --popover-foreground: hsl(220 14% 14%);
   
-  /* Custom Web3 Pastel Colors */
-  --pastel-blue: hsl(199 100% 94.5%);
-  --pastel-purple: hsl(254 100% 94.1%);
-  --pastel-cream: hsl(55 100% 95.3%);
-  --pastel-green: hsl(120 100% 93.3%);
-  --pastel-orange: hsl(34 100% 92.4%);
+  /* Primary Colors - Modern Blue Gradient */
+  --primary: hsl(217 91% 60%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(210 40% 98%);
+  --secondary-foreground: hsl(220 14% 14%);
+  
+  /* Accent Colors - Purple/Blue Gradient */
+  --accent: hsl(217 91% 60%);
+  --accent-foreground: hsl(0 0% 100%);
+  --muted: hsl(210 40% 98%);
+  --muted-foreground: hsl(215 16% 47%);
+  
+  /* Destructive Colors */
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  
+  /* Border and Input */
+  --border: hsl(214 32% 91%);
+  --input: hsl(214 32% 91%);
+  --ring: hsl(217 91% 60%);
+  
+  /* Chart Colors */
+  --chart-1: hsl(217 91% 60%);
+  --chart-2: hsl(142 76% 36%);
+  --chart-3: hsl(38 92% 50%);
+  --chart-4: hsl(168 76% 42%);
+  --chart-5: hsl(335 75% 51%);
+  
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
+  --font-mono: 'SF Mono', Consolas, 'Liberation Mono', monospace;
+  --radius: 0.75rem;
+  
+  /* Modern Web3 Gradient Colors */
+  --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(245 100% 70%) 100%);
+  --gradient-secondary: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(168 76% 42%) 100%);
+  --gradient-accent: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(335 75% 51%) 100%);
+  
+  /* Glass Effect Variables */
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  
+  /* Modern Pastel Colors */
+  --modern-blue: hsl(217 91% 95%);
+  --modern-purple: hsl(245 100% 95%);
+  --modern-green: hsl(142 76% 92%);
+  --modern-orange: hsl(38 92% 92%);
+  --modern-pink: hsl(335 75% 92%);
+  --modern-cyan: hsl(168 76% 92%);
 }
 
 .dark {
-  --background: hsl(0 0% 0%);
-  --foreground: hsl(200 6.6667% 91.1765%);
-  --card: hsl(228 9.8039% 10%);
-  --card-foreground: hsl(0 0% 85.0980%);
-  --popover: hsl(0 0% 0%);
-  --popover-foreground: hsl(200 6.6667% 91.1765%);
-  --primary: hsl(203.7736 87.6033% 52.5490%);
+  /* Dark Mode - Modern Web3 */
+  --background: hsl(220 13% 9%);
+  --foreground: hsl(220 14% 95%);
+  --card: hsl(220 13% 11%);
+  --card-foreground: hsl(220 14% 95%);
+  --popover: hsl(220 13% 11%);
+  --popover-foreground: hsl(220 14% 95%);
+  --primary: hsl(217 91% 65%);
   --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(195.0000 15.3846% 94.9020%);
-  --secondary-foreground: hsl(210 25% 7.8431%);
-  --muted: hsl(0 0% 9.4118%);
-  --muted-foreground: hsl(210 3.3898% 46.2745%);
-  --accent: hsl(205.7143 70% 7.8431%);
-  --accent-foreground: hsl(203.7736 87.6033% 52.5490%);
-  --destructive: hsl(356.3033 90.5579% 54.3137%);
+  --secondary: hsl(220 13% 15%);
+  --secondary-foreground: hsl(220 14% 95%);
+  --muted: hsl(220 13% 15%);
+  --muted-foreground: hsl(215 16% 60%);
+  --accent: hsl(217 91% 65%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 84% 65%);
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(210 5.2632% 14.9020%);
-  --input: hsl(207.6923 27.6596% 18.4314%);
-  --ring: hsl(202.8169 89.1213% 53.1373%);
+  --border: hsl(220 13% 18%);
+  --input: hsl(220 13% 18%);
+  --ring: hsl(217 91% 65%);
+  
+  /* Dark Mode Gradients */
+  --gradient-primary: linear-gradient(135deg, hsl(217 91% 65%) 0%, hsl(245 100% 75%) 100%);
+  --gradient-secondary: linear-gradient(135deg, hsl(142 76% 40%) 0%, hsl(168 76% 46%) 100%);
+  --gradient-accent: linear-gradient(135deg, hsl(38 92% 55%) 0%, hsl(335 75% 56%) 100%);
+  
+  /* Dark Glass Effect */
+  --glass-bg: rgba(0, 0, 0, 0.2);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  
+  /* Dark Mode Modern Colors */
+  --modern-blue: hsl(217 91% 15%);
+  --modern-purple: hsl(245 100% 15%);
+  --modern-green: hsl(142 76% 15%);
+  --modern-orange: hsl(38 92% 15%);
+  --modern-pink: hsl(335 75% 15%);
+  --modern-cyan: hsl(168 76% 15%);
 }
 
 @layer base {
@@ -84,23 +117,91 @@
 }
 
 @layer components {
-  .pastel-blue {
-    background-color: var(--pastel-blue);
+  /* Modern Glass Effect Components */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
   }
   
-  .pastel-purple {
-    background-color: var(--pastel-purple);
+  .glass-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
   
-  .pastel-cream {
-    background-color: var(--pastel-cream);
+  /* Modern Color Classes */
+  .modern-blue {
+    background-color: var(--modern-blue);
   }
   
-  .pastel-green {
-    background-color: var(--pastel-green);
+  .modern-purple {
+    background-color: var(--modern-purple);
   }
   
-  .pastel-orange {
-    background-color: var(--pastel-orange);
+  .modern-green {
+    background-color: var(--modern-green);
+  }
+  
+  .modern-orange {
+    background-color: var(--modern-orange);
+  }
+  
+  .modern-pink {
+    background-color: var(--modern-pink);
+  }
+  
+  .modern-cyan {
+    background-color: var(--modern-cyan);
+  }
+  
+  /* Gradient Classes */
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .gradient-secondary {
+    background: var(--gradient-secondary);
+  }
+  
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+  
+  /* Modern Button Styles */
+  .btn-modern {
+    @apply px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-modern:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Modern Card Styles */
+  .card-modern {
+    @apply rounded-2xl border-0 shadow-lg hover:shadow-xl transition-all duration-300;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+  }
+  
+  /* Animation Classes */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  
+  @keyframes glow {
+    from { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+    to { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
   }
 }

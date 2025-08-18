@@ -8,12 +8,18 @@ import HomePage from "@/pages/index";
 import CampaignsPage from "@/pages/campaigns";
 import CampaignDetailPage from "@/pages/campaign/[id]";
 import CreateCampaignPage from "@/pages/create-campaign";
+import ProfilePage from "@/pages/profile";
+import DonationsPage from "@/pages/donations";
+import FundsPage from "@/pages/funds";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/campaigns" component={CampaignsPage} />
+      <Route path="/donations" component={DonationsPage} />
+      <Route path="/funds" component={FundsPage} />
+      <Route path="/profile" component={ProfilePage} />
       <Route path="/campaign/:id" component={CampaignDetailPage} />
       <Route path="/create-campaign" component={CreateCampaignPage} />
       <Route component={NotFound} />

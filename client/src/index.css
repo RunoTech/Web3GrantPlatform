@@ -163,6 +163,11 @@
     color: var(--background);
   }
   
+  .cyber-yellow-bg {
+    background: var(--cyber-yellow);
+    color: var(--background);
+  }
+  
   /* Gradient Classes */
   .gradient-primary {
     background: var(--gradient-primary);

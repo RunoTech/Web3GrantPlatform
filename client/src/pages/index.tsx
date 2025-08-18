@@ -186,72 +186,164 @@ export default function HomePage() {
       </section>
 
       {/* Daily Tether Reward Section */}
-      <section id="odul-sistemi" className="py-20 bg-surface-2">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="cyber-card p-12 gradient-accent text-foreground relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 cyber-cyan-bg opacity-10 rounded-full blur-2xl"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 cyber-purple-bg opacity-10 rounded-full blur-2xl"></div>
+      <section id="odul-sistemi" className="py-24 bg-gradient-to-b from-surface-2 to-surface relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-96 h-96 cyber-cyan-bg opacity-5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 cyber-purple-bg opacity-5 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 cyber-green-bg opacity-5 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center space-x-4 mb-6">
+              <div className="w-20 h-20 gradient-primary rounded-lg flex items-center justify-center neon-border relative">
+                <Gift className="w-10 h-10 text-background" />
+                <div className="absolute -top-2 -right-2 w-6 h-6 cyber-yellow-bg rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-background">!</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-5xl md:text-7xl font-bold neon-text uppercase tracking-wider">
+                  GÜNLÜK
+                </h2>
+                <div className="text-3xl md:text-4xl font-bold text-cyber-yellow uppercase tracking-wider">
+                  TETHER ÖDÜLÜ
+                </div>
+              </div>
+            </div>
             
-            <div className="relative z-10">
-              <div className="text-center space-y-8">
-                <div className="flex items-center justify-center space-x-4">
-                  <div className="w-16 h-16 neon-border rounded-lg flex items-center justify-center">
-                    <Gift className="w-8 h-8 text-cyber-cyan" />
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Her gün katılım gösterin ve <span className="text-cyber-green font-semibold">USDT ödülü</span> kazanma şansı yakalayın. 
+              Futuristik topluluğa <span className="text-cyber-cyan font-semibold">günlük ödüller</span> dağıtılıyor!
+            </p>
+          </div>
+          
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Participation Card */}
+            <div className="lg:col-span-2 cyber-card p-8 relative">
+              <div className="absolute top-0 right-0 w-24 h-24 cyber-cyan-bg opacity-10 rounded-full blur-xl"></div>
+              
+              <div className="space-y-8 relative z-10">
+                <div className="space-y-4">
+                  <h3 className="text-2xl font-bold text-foreground uppercase tracking-wide flex items-center space-x-3">
+                    <div className="w-8 h-8 cyber-green-bg rounded-lg flex items-center justify-center">
+                      <span className="text-xs font-bold text-background">1</span>
+                    </div>
+                    <span>KATILIM SÜRECİ</span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="cyber-card p-4 border border-cyber-cyan/30">
+                      <div className="w-8 h-8 cyber-cyan-bg rounded mb-2 flex items-center justify-center">
+                        <span className="text-xs font-bold text-background">1</span>
+                      </div>
+                      <span className="text-cyber-cyan font-medium uppercase tracking-wide">Cüzdan Bağla</span>
+                    </div>
+                    <div className="cyber-card p-4 border border-cyber-purple/30">
+                      <div className="w-8 h-8 cyber-purple-bg rounded mb-2 flex items-center justify-center">
+                        <span className="text-xs font-bold text-white">2</span>
+                      </div>
+                      <span className="text-cyber-purple font-medium uppercase tracking-wide">Butona Tıkla</span>
+                    </div>
+                    <div className="cyber-card p-4 border border-cyber-green/30">
+                      <div className="w-8 h-8 cyber-green-bg rounded mb-2 flex items-center justify-center">
+                        <span className="text-xs font-bold text-background">3</span>
+                      </div>
+                      <span className="text-cyber-green font-medium uppercase tracking-wide">Ödül Kazan</span>
+                    </div>
                   </div>
-                  <h2 className="text-4xl md:text-5xl font-bold text-foreground uppercase tracking-wide">
-                    GÜNLÜK TETHER ÖDÜLÜ
-                  </h2>
                 </div>
                 
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  Her gün katılım gösterin ve USDT ödülü kazanma şansı yakalayın. 
-                  Futuristik topluluğa günlük ödüller dağıtılıyor!
-                </p>
-                
-                <div className="space-y-6">
+                {/* Action Button */}
+                <div className="text-center">
                   {isConnected ? (
                     <Button 
                       onClick={handleDailyReward}
                       size="lg"
-                      className="cyber-cyan-bg px-8 py-4 btn-cyber"
+                      className="cyber-cyan-bg px-12 py-6 text-xl font-bold uppercase tracking-wider btn-cyber relative overflow-hidden group"
                       data-testid="button-daily-reward"
                     >
-                      <DollarSign className="w-6 h-6 mr-3" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                      <DollarSign className="w-8 h-8 mr-4" />
                       BUGÜN KATIL
                     </Button>
                   ) : (
-                    <div className="cyber-card px-6 py-4 neon-border">
-                      <span className="text-cyber-cyan font-medium uppercase tracking-wide">
+                    <div className="cyber-card px-8 py-6 neon-border relative">
+                      <div className="absolute inset-0 bg-gradient-to-r from-cyber-cyan/10 to-cyber-purple/10 rounded-lg"></div>
+                      <span className="text-cyber-cyan font-bold text-lg uppercase tracking-wide relative z-10">
                         Günlük ödüle katılmak için cüzdan bağlayın
                       </span>
                     </div>
                   )}
-                  
-                  {/* Daily Winners List */}
-                  <div className="cyber-card p-6 max-w-md mx-auto">
-                    <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center space-x-2 uppercase tracking-wide">
-                      <Award className="w-5 h-5 text-cyber-yellow" />
-                      <span>DÜNKÜ KAZANANLAR</span>
-                    </h3>
-                    <div className="space-y-3" data-testid="winners-list">
-                      {(lastWinners as any[]).length > 0 ? (
-                        (lastWinners as any[]).slice(0, 5).map((winner: any, index: number) => (
-                          <div key={index} className="flex items-center justify-between py-2 px-3 bg-surface-2 rounded-lg neon-border">
-                            <span className="font-mono text-sm text-muted-foreground">
-                              {winner.wallet.slice(0, 6)}...{winner.wallet.slice(-4)}
-                            </span>
-                            <span className="text-sm font-medium text-cyber-green">USDT</span>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-4 text-muted-foreground">
-                          HENÜZ KAZANAN YOK
-                        </div>
-                      )}
-                    </div>
-                  </div>
                 </div>
               </div>
+            </div>
+            
+            {/* Winners Leaderboard */}
+            <div className="cyber-card p-6 relative">
+              <div className="absolute top-0 left-0 w-20 h-20 cyber-yellow-bg opacity-10 rounded-full blur-xl"></div>
+              
+              <div className="space-y-6 relative z-10">
+                <div className="flex items-center space-x-3 mb-6">
+                  <Award className="w-6 h-6 text-cyber-yellow" />
+                  <h3 className="text-xl font-bold text-foreground uppercase tracking-wide">
+                    DÜNKÜ KAZANANLAR
+                  </h3>
+                </div>
+                
+                <div className="space-y-3" data-testid="winners-list">
+                  {(lastWinners as any[]).length > 0 ? (
+                    (lastWinners as any[]).slice(0, 5).map((winner: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between py-3 px-4 bg-surface-3 rounded-lg border border-cyber-green/20 hover:border-cyber-green/40 transition-colors">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 cyber-green-bg rounded-full flex items-center justify-center text-xs font-bold text-background">
+                            #{index + 1}
+                          </div>
+                          <span className="font-mono text-sm text-muted-foreground">
+                            {winner.wallet.slice(0, 6)}...{winner.wallet.slice(-4)}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-bold text-cyber-green">USDT</span>
+                          <div className="w-2 h-2 cyber-green-bg rounded-full"></div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 space-y-4">
+                      <div className="w-16 h-16 bg-surface-3 rounded-lg flex items-center justify-center mx-auto">
+                        <Award className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="text-foreground font-semibold uppercase tracking-wide">
+                          HENÜZ KAZANAN YOK
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          İlk katılan sen ol!
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Statistics Footer */}
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center p-6 cyber-card border border-cyber-cyan/30">
+              <div className="text-3xl font-bold text-cyber-cyan mb-2">∞</div>
+              <div className="text-sm uppercase tracking-wide text-muted-foreground">Toplam Ödül</div>
+            </div>
+            <div className="text-center p-6 cyber-card border border-cyber-purple/30">
+              <div className="text-3xl font-bold text-cyber-purple mb-2">24</div>
+              <div className="text-sm uppercase tracking-wide text-muted-foreground">Saat Aktif</div>
+            </div>
+            <div className="text-center p-6 cyber-card border border-cyber-green/30">
+              <div className="text-3xl font-bold text-cyber-green mb-2">100%</div>
+              <div className="text-sm uppercase tracking-wide text-muted-foreground">Güvenli</div>
             </div>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import PaymentInfo from "@/components/PaymentInfo";
+import AutoPayment from "@/components/AutoPayment";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import LanguageSelector from "@/components/LanguageSelector";
 import { useWallet } from "@/hooks/useWallet";
@@ -29,7 +29,7 @@ export default function PaymentPage() {
   const [isActivating, setIsActivating] = useState(false);
   const [isActivated, setIsActivated] = useState(false);
 
-  const handlePaymentVerified = async (txHash: string, network: string) => {
+  const handlePaymentSuccess = async (txHash: string, network: string) => {
     if (!address) {
       toast({
         title: t('error'),
@@ -194,14 +194,14 @@ export default function PaymentPage() {
         {/* Payment Process */}
         {isConnected && !isActivated && (
           <>
-            <Alert className="mb-6 border-cyber-cyan">
-              <AlertCircle className="h-4 w-4" />
+            <Alert className="mb-6 border-cyber-green">
+              <CheckCircle className="h-4 w-4" />
               <AlertDescription>
-                {t('paymentProcessWarning')}
+                <strong>NEW:</strong> Instant payment with MetaMask! Just click "Instant Pay" for automatic activation.
               </AlertDescription>
             </Alert>
 
-            <PaymentInfo onPaymentVerified={handlePaymentVerified} />
+            <AutoPayment onPaymentSuccess={handlePaymentSuccess} />
 
             {isActivating && (
               <Card className="cyber-card p-6 mt-6 text-center">

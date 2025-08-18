@@ -307,7 +307,7 @@ export default function ProfilePage() {
                 <div>
                   <h2 className="text-3xl font-bold text-slate-800 mb-2">{t('profile.daily_reward_participation')}</h2>
                   <p className="text-lg text-slate-600">
-                    {t('profile.total_participation_days', { days: dailyEntries.length })}
+                    {t('profile.total_participation_days').replace('{{days}}', dailyEntries.length.toString())}
                   </p>
                 </div>
                 

@@ -177,6 +177,43 @@ const translations = {
     'connectWalletFirst': 'Please connect your wallet first',
     'back': 'BACK',
 
+    // Common
+    'common.back_to_home': 'Back to Home',
+
+    // Profile Page
+    'profile.access_title': 'Profile Access',
+    'profile.connect_wallet_message': 'Connect your wallet to view your profile',
+    'profile.my_profile': 'My Profile',
+    'profile.campaigns': 'Campaigns',
+    'profile.eth_raised': 'ETH Raised',
+    'profile.supporters': 'Supporters',
+    'profile.daily_participation': 'Daily Participation',
+    'profile.overview': 'Overview',
+    'profile.my_campaigns': 'My Campaigns', 
+    'profile.daily_rewards': 'Daily Rewards',
+    'profile.campaign_performance': 'Campaign Performance',
+    'profile.most_successful': 'Most Successful',
+    'profile.none_yet': 'None Yet',
+    'profile.average_donation': 'Average Donation',
+    'profile.activity': 'Activity',
+    'profile.this_month_participation': 'This Month Participation',
+    'profile.days': 'Days',
+    'profile.last_campaign': 'Last Campaign',
+    'profile.achievements': 'Achievements',
+    'profile.first_campaign': 'First Campaign',
+    'profile.ten_supporters': '10 Supporters',
+    'profile.weekly_participation': 'Weekly Participation',
+    'profile.new_campaign': 'New Campaign',
+    'profile.no_campaigns_yet': 'No campaigns yet',
+    'profile.create_first_campaign': 'Create your first campaign and lead social change',
+    'profile.create_campaign': 'Create Campaign',
+    'profile.daily_reward_participation': 'Daily Reward System Participation',
+    'profile.total_participation_days': 'You have participated for a total of {{days}} days',
+    'profile.total_participation': 'Total Participation',
+    'profile.this_month': 'This Month',
+    'profile.earned_rewards': 'Earned Rewards',
+    'profile.join_today': 'Join Today',
+
     // Footer
     'footer.platform': 'PLATFORM',
     'footer.support': 'SUPPORT',
@@ -330,6 +367,9 @@ const translations = {
     'profile.this_month': 'Bu Ay',
     'profile.earned_rewards': 'Kazanılan Ödül',
     'profile.join_today': 'Bugün Katıl',
+
+    // Common
+    'common.back_to_home': 'Ana Sayfaya Dön',
 
     // Footer
     'footer.platform': 'PLATFORM',

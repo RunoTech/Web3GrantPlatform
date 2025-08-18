@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import Header from "@/components/Header";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import NetworkOption from "@/components/NetworkOption";
+import SimplePayButton from "@/components/SimplePayButton";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { api } from "@/utils/api";
@@ -222,151 +223,35 @@ export default function FundsPage() {
           </div>
         </div>
 
-        {/* Account Activation Section */}
+        {/* Simple Account Activation */}
         {!accountActive && (
           <div className="space-y-8">
             {/* Hero Section */}
-            <div className="text-center space-y-6 card-modern p-12">
-              <div className="w-24 h-24 gradient-primary rounded-3xl flex items-center justify-center mx-auto animate-glow">
-                <Target className="w-12 h-12 text-white" />
+            <div className="text-center space-y-6 cyber-card p-8">
+              <div className="w-20 h-20 gradient-primary rounded-lg flex items-center justify-center mx-auto neon-border">
+                <Target className="w-10 h-10 text-background" />
               </div>
               
               <div>
-                <h1 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
-                  Fon Toplama <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Merkezi</span>
+                <h1 className="text-3xl md:text-4xl font-bold neon-text mb-4 uppercase tracking-wide">
+                  {t('funds.title')}
                 </h1>
-                <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-                  Projenizi hayata geçirmek için güvenli ve şeffaf fon toplama platformuna hoş geldiniz
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  {t('funds.subtitle')}
                 </p>
               </div>
             </div>
 
-            {/* Features Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="card-modern p-6 text-center">
-                <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Shield className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Güvenli Platform</h3>
-                <p className="text-slate-600 text-sm">Blockchain teknolojisi ile güvenli işlemler</p>
-              </div>
-              
-              <div className="card-modern p-6 text-center">
-                <div className="w-16 h-16 gradient-secondary rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Zap className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Hızlı Başlangıç</h3>
-                <p className="text-slate-600 text-sm">Dakikalar içinde kampanyanızı oluşturun</p>
-              </div>
-              
-              <div className="card-modern p-6 text-center">
-                <div className="w-16 h-16 gradient-accent rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <DollarSign className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Komisyonsuz</h3>
-                <p className="text-slate-600 text-sm">Bağışlar doğrudan size ulaşır</p>
-              </div>
-            </div>
-
-            {/* Activation Panel */}
-            <div className="card-modern p-8">
-              <div className="text-center space-y-6">
-                <div className="w-16 h-16 modern-orange rounded-3xl flex items-center justify-center mx-auto">
-                  <Lock className="w-8 h-8 text-orange-600" />
-                </div>
-                
-                <div>
-                  <h2 className="text-3xl font-bold text-slate-800 mb-2">
-                    Hesap Aktivasyonu
-                  </h2>
-                  <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                    Kampanya oluşturmak için hesabınızı aktive edin. Sadece bir kerelik ücret ile platform kullanımına başlayın.
-                  </p>
-                </div>
-                
-                <div className="space-y-6 pt-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                    <NetworkOption
-                      network="ethereum"
-                      name="Ethereum Mainnet"
-                      fee={fees?.ethereum ? `${fees.ethereum.amount / Math.pow(10, fees.ethereum.decimals)} ${fees.ethereum.symbol}` : "50 USDT"}
-                      color="blue"
-                      selected={selectedNetwork === 'ethereum'}
-                      onSelect={() => {
-                        setSelectedNetwork('ethereum');
-                        setActivationStep(2);
-                      }}
-                    />
-                    <NetworkOption
-                      network="bsc"
-                      name="BSC Mainnet"
-                      fee={fees?.bsc ? `${fees.bsc.amount / Math.pow(10, fees.bsc.decimals)} ${fees.bsc.symbol}` : "25 BUSD"}
-                      color="yellow"
-                      selected={selectedNetwork === 'bsc'}
-                      onSelect={() => {
-                        setSelectedNetwork('bsc');
-                        setActivationStep(2);
-                      }}
-                    />
-                  </div>
-                  
-                  {selectedNetwork && (
-                    <div className="max-w-md mx-auto space-y-6">
-                      <div className="card-modern p-6 space-y-4">
-                        <div className="space-y-3">
-                          <label className="block text-sm font-semibold text-slate-700">
-                            1. Platform Cüzdan Adresine Ödeme Yapın
-                          </label>
-                          <div className="flex items-center space-x-2">
-                            <Input 
-                              type="text" 
-                              value={platformWallet}
-                              className="flex-1 font-mono bg-slate-50 text-sm"
-                              readOnly
-                              data-testid="platform-wallet-address"
-                            />
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => copyToClipboard(platformWallet)}
-                              data-testid="button-copy-platform-wallet"
-                            >
-                              <Copy className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-3">
-                          <label className="block text-sm font-semibold text-slate-700">
-                            2. İşlem Hash'ini (TX Hash) Girin
-                          </label>
-                          <Input 
-                            type="text" 
-                            placeholder="0x..." 
-                            value={txHash}
-                            onChange={(e) => setTxHash(e.target.value)}
-                            className="font-mono text-sm"
-                            data-testid="input-tx-hash"
-                          />
-                        </div>
-                        
-                        <Button 
-                          onClick={() => {
-                            setActivationStep(3);
-                            verifyPayment();
-                          }}
-                          disabled={!txHash || verifyingPayment}
-                          className="w-full gradient-primary text-white btn-modern"
-                          data-testid="button-verify-payment"
-                        >
-                          {verifyingPayment ? "Doğrulanıyor..." : "3. Ödemeyi Doğrula"}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <SimplePayButton 
+              onPaymentSuccess={(txHash, network) => {
+                setAccountActive(true);
+                setActivationStep(4);
+                toast({
+                  title: t('funds.account_activated'),
+                  description: `${network} ağında ödemeniz onaylandı`,
+                });
+              }}
+            />
           </div>
         )}
 

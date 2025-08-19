@@ -110,43 +110,43 @@ export default function CryptoOnramp({
         onClick={openCryptoOnramp}
         disabled={!isConnected}
         style={{
-          background: 'linear-gradient(45deg, #00d4ff, #ff00ff)',
-          color: '#000',
-          fontFamily: "'Orbitron', monospace",
-          fontSize: '0.9rem',
-          fontWeight: '600',
-          textTransform: 'uppercase',
-          letterSpacing: '0.1em',
-          padding: '12px 24px',
-          borderRadius: '20px',
+          background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+          color: '#ffffff',
+          fontFamily: "'Inter', sans-serif",
+          fontSize: '0.85rem',
+          fontWeight: '500',
+          padding: '10px 20px',
+          borderRadius: '8px',
           border: 'none',
-          boxShadow: '0 4px 15px rgba(0, 212, 255, 0.3)',
-          transition: 'all 0.3s ease'
+          transition: 'all 0.2s ease'
         }}
-        className="hover:scale-105"
+        className="hover:opacity-90"
         data-testid="button-buy-crypto"
       >
-        <CreditCard className="w-5 h-5 mr-2" />
+        <CreditCard className="w-4 h-4 mr-2" />
         Kripto Satın Al
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-md p-0" style={{
-          background: 'linear-gradient(135deg, rgba(10, 10, 10, 0.95), rgba(20, 20, 20, 0.95))',
-          border: '2px solid rgba(0, 212, 255, 0.3)',
-          borderRadius: '20px',
+        <DialogContent className="max-w-lg p-0" style={{
+          background: 'linear-gradient(135deg, rgba(12, 12, 15, 0.98), rgba(18, 18, 25, 0.98))',
+          border: '1px solid rgba(0, 212, 255, 0.2)',
+          borderRadius: '16px',
           backdropFilter: 'blur(20px)',
-          minHeight: '600px'
-        }}>
-          <DialogHeader className="p-4 border-b border-border">
+          maxHeight: '90vh',
+          overflow: 'hidden'
+        }} aria-describedby="crypto-onramp-description">
+          <div id="crypto-onramp-description" className="sr-only">
+            Kripto para satın alma formu
+          </div>
+          <DialogHeader className="px-6 py-4 border-b border-gray-800">
             <div className="flex items-center justify-between">
               <DialogTitle style={{
-                fontSize: '1.2rem',
-                fontWeight: '700',
+                fontSize: '1rem',
+                fontWeight: '600',
                 color: '#ffffff',
-                fontFamily: "'Orbitron', monospace",
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em'
+                fontFamily: "'Inter', sans-serif",
+                letterSpacing: '0.02em'
               }}>
                 Kripto Satın Al
               </DialogTitle>
@@ -166,25 +166,27 @@ export default function CryptoOnramp({
             </div>
           </DialogHeader>
           
-          <div className="p-6">
+          <div className="px-6 py-4 max-h-[70vh] overflow-y-auto">
             {/* Step: Amount Selection */}
             {step === 'amount' && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {/* Wallet Info */}
                 <div style={{
-                  background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1))',
-                  border: '1px solid rgba(0, 255, 136, 0.3)',
-                  borderRadius: '15px',
-                  padding: '16px'
+                  background: 'rgba(0, 255, 136, 0.05)',
+                  border: '1px solid rgba(0, 255, 136, 0.15)',
+                  borderRadius: '12px',
+                  padding: '14px'
                 }}>
                   <div className="flex items-center space-x-3">
-                    <Wallet className="w-5 h-5" style={{ color: '#00ff88' }} />
+                    <Wallet className="w-4 h-4" style={{ color: '#00d4ff' }} />
                     <div>
-                      <p style={{ color: '#ffffff', fontSize: '0.9rem', margin: 0 }}>
+                      <p style={{ color: '#e5e5e5', fontSize: '0.85rem', margin: 0, fontWeight: '500' }}>
                         Bağlı Cüzdan
                       </p>
-                      <p style={{ color: '#888', fontSize: '0.8rem', margin: 0 }}>
-                        <code style={{ color: '#00d4ff', fontSize: '0.75rem' }}>{address}</code>
+                      <p style={{ color: '#a0a0a0', fontSize: '0.75rem', margin: 0, marginTop: '2px' }}>
+                        <code style={{ color: '#00d4ff', fontSize: '0.7rem', fontFamily: 'monospace' }}>
+                          {address?.slice(0, 8)}...{address?.slice(-6)}
+                        </code>
                       </p>
                     </div>
                   </div>
@@ -192,14 +194,14 @@ export default function CryptoOnramp({
 
                 {/* Amount Input */}
                 <div>
-                  <label style={{ color: '#ffffff', fontSize: '0.9rem', fontWeight: '600', display: 'block', marginBottom: '8px' }}>
+                  <label style={{ color: '#e5e5e5', fontSize: '0.85rem', fontWeight: '500', display: 'block', marginBottom: '8px' }}>
                     Satın Alınacak Miktar
                   </label>
                   <div style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(0, 255, 136, 0.3)',
-                    borderRadius: '12px',
-                    padding: '12px',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '10px',
+                    padding: '14px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px'
@@ -213,13 +215,14 @@ export default function CryptoOnramp({
                         background: 'transparent',
                         border: 'none',
                         color: '#ffffff',
-                        fontSize: '1.1rem',
-                        fontWeight: '600',
+                        fontSize: '1rem',
+                        fontWeight: '500',
                         outline: 'none',
-                        flex: 1
+                        flex: 1,
+                        fontFamily: "'Inter', sans-serif"
                       }}
                     />
-                    <span style={{ color: '#00ff88', fontSize: '0.9rem', fontWeight: '600' }}>
+                    <span style={{ color: '#00d4ff', fontSize: '0.85rem', fontWeight: '500' }}>
                       {targetCurrency}
                     </span>
                   </div>
@@ -229,43 +232,44 @@ export default function CryptoOnramp({
                 <div 
                   onClick={() => setStep('payment')}
                   style={{
-                    background: 'linear-gradient(135deg, #00ff88, #00d4ff)',
-                    borderRadius: '15px',
-                    padding: '16px',
+                    background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+                    borderRadius: '10px',
+                    padding: '14px',
                     cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    textAlign: 'center'
+                    transition: 'all 0.2s ease',
+                    textAlign: 'center',
+                    marginTop: '20px'
                   }}
-                  className="hover:scale-105"
+                  className="hover:opacity-90"
                 >
-                  <div className="flex items-center justify-center space-x-2">
-                    <span style={{ 
-                      color: '#000000', 
-                      fontSize: '1.1rem', 
-                      fontWeight: '700',
-                      fontFamily: "'Orbitron', monospace"
-                    }}>
-                      DEVAM ET
-                    </span>
-                  </div>
+                  <span style={{ 
+                    color: '#ffffff', 
+                    fontSize: '0.9rem', 
+                    fontWeight: '600',
+                    fontFamily: "'Inter', sans-serif"
+                  }}>
+                    Devam Et
+                  </span>
                 </div>
               </div>
             )}
 
             {/* Step: Payment Method */}
             {step === 'payment' && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {/* Back Button */}
                 <button 
                   onClick={() => setStep('amount')}
                   style={{ 
                     background: 'transparent', 
                     border: 'none', 
-                    color: '#00d4ff', 
+                    color: '#0ea5e9', 
                     display: 'flex', 
                     alignItems: 'center', 
-                    gap: '8px',
-                    cursor: 'pointer'
+                    gap: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    fontWeight: '500'
                   }}
                 >
                   <ArrowLeft className="w-4 h-4" />
@@ -274,30 +278,29 @@ export default function CryptoOnramp({
 
                 {/* Payment Method Selection */}
                 <div>
-                  <label style={{ color: '#ffffff', fontSize: '0.9rem', fontWeight: '600', display: 'block', marginBottom: '12px' }}>
-                    Ödeme Yöntemi Seçin
+                  <label style={{ color: '#e5e5e5', fontSize: '0.85rem', fontWeight: '500', display: 'block', marginBottom: '10px' }}>
+                    Ödeme Yöntemi
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2">
                     {/* Credit Card */}
                     <div 
                       onClick={() => setSelectedPayment('card')}
                       style={{
                         background: selectedPayment === 'card' 
-                          ? 'linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1))'
-                          : 'linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 255, 136, 0.05))',
+                          ? 'rgba(14, 165, 233, 0.15)'
+                          : 'rgba(255, 255, 255, 0.04)',
                         border: selectedPayment === 'card' 
-                          ? '2px solid #00ff88'
-                          : '2px solid rgba(0, 255, 136, 0.3)',
-                        borderRadius: '12px',
-                        padding: '16px',
+                          ? '1px solid #0ea5e9'
+                          : '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '8px',
+                        padding: '12px',
                         cursor: 'pointer',
-                        transition: 'all 0.3s ease'
+                        transition: 'all 0.2s ease'
                       }}
-                      className="hover:scale-105"
                     >
                       <div className="flex items-center justify-center space-x-2">
-                        <CreditCard className="w-5 h-5" style={{ color: '#00ff88' }} />
-                        <span style={{ color: '#ffffff', fontSize: '0.9rem', fontWeight: '600' }}>
+                        <CreditCard className="w-4 h-4" style={{ color: selectedPayment === 'card' ? '#0ea5e9' : '#a0a0a0' }} />
+                        <span style={{ color: selectedPayment === 'card' ? '#e5e5e5' : '#a0a0a0', fontSize: '0.8rem', fontWeight: '500' }}>
                           Kredi Kartı
                         </span>
                       </div>
@@ -308,21 +311,20 @@ export default function CryptoOnramp({
                       onClick={() => setSelectedPayment('bank')}
                       style={{
                         background: selectedPayment === 'bank'
-                          ? 'linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.1))'
-                          : 'linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 212, 255, 0.05))',
+                          ? 'rgba(14, 165, 233, 0.15)'
+                          : 'rgba(255, 255, 255, 0.04)',
                         border: selectedPayment === 'bank'
-                          ? '2px solid #00d4ff'
-                          : '2px solid rgba(0, 212, 255, 0.3)',
-                        borderRadius: '12px',
-                        padding: '16px',
+                          ? '1px solid #0ea5e9'
+                          : '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '8px',
+                        padding: '12px',
                         cursor: 'pointer',
-                        transition: 'all 0.3s ease'
+                        transition: 'all 0.2s ease'
                       }}
-                      className="hover:scale-105"
                     >
                       <div className="flex items-center justify-center space-x-2">
-                        <Building2 className="w-5 h-5" style={{ color: '#00d4ff' }} />
-                        <span style={{ color: '#ffffff', fontSize: '0.9rem', fontWeight: '600' }}>
+                        <Building2 className="w-4 h-4" style={{ color: selectedPayment === 'bank' ? '#0ea5e9' : '#a0a0a0' }} />
+                        <span style={{ color: selectedPayment === 'bank' ? '#e5e5e5' : '#a0a0a0', fontSize: '0.8rem', fontWeight: '500' }}>
                           Banka Kartı
                         </span>
                       </div>
@@ -332,9 +334,9 @@ export default function CryptoOnramp({
 
                 {/* Card Details Form */}
                 {selectedPayment === 'card' && (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div>
-                      <label style={{ color: '#ffffff', fontSize: '0.8rem', fontWeight: '600', display: 'block', marginBottom: '6px' }}>
+                      <label style={{ color: '#e5e5e5', fontSize: '0.75rem', fontWeight: '500', display: 'block', marginBottom: '6px' }}>
                         Kart Numarası
                       </label>
                       <input
@@ -345,21 +347,22 @@ export default function CryptoOnramp({
                         maxLength={19}
                         style={{
                           width: '100%',
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(0, 255, 136, 0.3)',
+                          background: 'rgba(255, 255, 255, 0.04)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
                           borderRadius: '8px',
                           padding: '12px',
                           color: '#ffffff',
-                          fontSize: '0.9rem',
-                          outline: 'none'
+                          fontSize: '0.85rem',
+                          outline: 'none',
+                          fontFamily: "'Inter', sans-serif"
                         }}
                       />
                     </div>
                     
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label style={{ color: '#ffffff', fontSize: '0.8rem', fontWeight: '600', display: 'block', marginBottom: '6px' }}>
-                          MM/YY
+                        <label style={{ color: '#e5e5e5', fontSize: '0.75rem', fontWeight: '500', display: 'block', marginBottom: '6px' }}>
+                          Son Kullanma
                         </label>
                         <input
                           type="text"
@@ -369,18 +372,19 @@ export default function CryptoOnramp({
                           maxLength={5}
                           style={{
                             width: '100%',
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(0, 255, 136, 0.3)',
+                            background: 'rgba(255, 255, 255, 0.04)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
                             borderRadius: '8px',
                             padding: '12px',
                             color: '#ffffff',
-                            fontSize: '0.9rem',
-                            outline: 'none'
+                            fontSize: '0.85rem',
+                            outline: 'none',
+                            fontFamily: "'Inter', sans-serif"
                           }}
                         />
                       </div>
                       <div>
-                        <label style={{ color: '#ffffff', fontSize: '0.8rem', fontWeight: '600', display: 'block', marginBottom: '6px' }}>
+                        <label style={{ color: '#e5e5e5', fontSize: '0.75rem', fontWeight: '500', display: 'block', marginBottom: '6px' }}>
                           CVV
                         </label>
                         <input
@@ -391,36 +395,38 @@ export default function CryptoOnramp({
                           maxLength={4}
                           style={{
                             width: '100%',
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(0, 255, 136, 0.3)',
+                            background: 'rgba(255, 255, 255, 0.04)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
                             borderRadius: '8px',
                             padding: '12px',
                             color: '#ffffff',
-                            fontSize: '0.9rem',
-                            outline: 'none'
+                            fontSize: '0.85rem',
+                            outline: 'none',
+                            fontFamily: "'Inter', sans-serif"
                           }}
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label style={{ color: '#ffffff', fontSize: '0.8rem', fontWeight: '600', display: 'block', marginBottom: '6px' }}>
+                      <label style={{ color: '#e5e5e5', fontSize: '0.75rem', fontWeight: '500', display: 'block', marginBottom: '6px' }}>
                         Kart Sahibi
                       </label>
                       <input
                         type="text"
                         value={cardDetails.name}
                         onChange={(e) => setCardDetails(prev => ({ ...prev, name: e.target.value }))}
-                        placeholder="JOHN DOE"
+                        placeholder="John Doe"
                         style={{
                           width: '100%',
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(0, 255, 136, 0.3)',
+                          background: 'rgba(255, 255, 255, 0.04)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
                           borderRadius: '8px',
                           padding: '12px',
                           color: '#ffffff',
-                          fontSize: '0.9rem',
-                          outline: 'none'
+                          fontSize: '0.85rem',
+                          outline: 'none',
+                          fontFamily: "'Inter', sans-serif"
                         }}
                       />
                     </div>
@@ -429,29 +435,29 @@ export default function CryptoOnramp({
 
                 {/* Purchase Summary */}
                 <div style={{
-                  background: 'linear-gradient(135deg, rgba(255, 0, 255, 0.1), rgba(0, 212, 255, 0.1))',
-                  border: '1px solid rgba(255, 0, 255, 0.3)',
-                  borderRadius: '15px',
-                  padding: '16px'
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '10px',
+                  padding: '14px'
                 }}>
-                  <h4 style={{ color: '#ff00ff', fontSize: '0.9rem', fontWeight: '600', margin: '0 0 8px 0' }}>
+                  <h4 style={{ color: '#e5e5e5', fontSize: '0.8rem', fontWeight: '500', margin: '0 0 10px 0' }}>
                     İşlem Özeti
                   </h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span style={{ color: '#888', fontSize: '0.8rem' }}>Miktar:</span>
-                      <span style={{ color: '#ffffff', fontSize: '0.8rem' }}>${amount} → {amount} {targetCurrency}</span>
+                      <span style={{ color: '#a0a0a0', fontSize: '0.75rem' }}>Miktar:</span>
+                      <span style={{ color: '#e5e5e5', fontSize: '0.75rem' }}>${amount} → {amount} {targetCurrency}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span style={{ color: '#888', fontSize: '0.8rem' }}>Ödeme:</span>
-                      <span style={{ color: '#ffffff', fontSize: '0.8rem' }}>
+                      <span style={{ color: '#a0a0a0', fontSize: '0.75rem' }}>Ödeme:</span>
+                      <span style={{ color: '#e5e5e5', fontSize: '0.75rem' }}>
                         {selectedPayment === 'card' ? 'Kredi Kartı' : 'Banka Kartı'}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span style={{ color: '#888', fontSize: '0.8rem' }}>Cüzdan:</span>
-                      <span style={{ color: '#00d4ff', fontSize: '0.7rem' }}>
-                        {address?.slice(0, 6)}...{address?.slice(-4)}
+                      <span style={{ color: '#a0a0a0', fontSize: '0.75rem' }}>Cüzdan:</span>
+                      <span style={{ color: '#0ea5e9', fontSize: '0.7rem', fontFamily: 'monospace' }}>
+                        {address?.slice(0, 8)}...{address?.slice(-6)}
                       </span>
                     </div>
                   </div>
@@ -461,25 +467,26 @@ export default function CryptoOnramp({
                 <div 
                   onClick={handlePayment}
                   style={{
-                    background: 'linear-gradient(135deg, #ff00ff, #00d4ff)',
-                    borderRadius: '15px',
-                    padding: '16px',
+                    background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+                    borderRadius: '10px',
+                    padding: '14px',
                     cursor: 'pointer',
-                    transition: 'all 0.3s ease',
+                    transition: 'all 0.2s ease',
                     textAlign: 'center',
-                    opacity: (selectedPayment === 'card' && (!cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name)) ? 0.5 : 1
+                    opacity: (selectedPayment === 'card' && (!cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name)) ? 0.5 : 1,
+                    marginTop: '16px'
                   }}
-                  className="hover:scale-105"
+                  className="hover:opacity-90"
                 >
                   <div className="flex items-center justify-center space-x-2">
-                    <ShoppingCart className="w-5 h-5" style={{ color: '#000000' }} />
+                    <ShoppingCart className="w-4 h-4" style={{ color: '#ffffff' }} />
                     <span style={{ 
-                      color: '#000000', 
-                      fontSize: '1.1rem', 
-                      fontWeight: '700',
-                      fontFamily: "'Orbitron', monospace"
+                      color: '#ffffff', 
+                      fontSize: '0.9rem', 
+                      fontWeight: '600',
+                      fontFamily: "'Inter', sans-serif"
                     }}>
-                      ${amount} ÖDE
+                      ${amount} Öde
                     </span>
                   </div>
                 </div>
@@ -488,31 +495,31 @@ export default function CryptoOnramp({
 
             {/* Step: Processing */}
             {step === 'processing' && (
-              <div className="space-y-6 text-center">
+              <div className="space-y-4 text-center py-8">
                 <div style={{
-                  background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 0, 255, 0.1))',
-                  border: '1px solid rgba(0, 212, 255, 0.3)',
-                  borderRadius: '20px',
-                  padding: '40px 20px'
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '12px',
+                  padding: '32px 20px'
                 }}>
                   <div 
                     style={{
-                      width: '60px',
-                      height: '60px',
-                      border: '4px solid rgba(0, 212, 255, 0.3)',
-                      borderTop: '4px solid #00d4ff',
+                      width: '40px',
+                      height: '40px',
+                      border: '3px solid rgba(14, 165, 233, 0.3)',
+                      borderTop: '3px solid #0ea5e9',
                       borderRadius: '50%',
-                      margin: '0 auto 20px',
+                      margin: '0 auto 16px',
                       animation: 'spin 1s linear infinite'
                     }}
                   ></div>
                   
-                  <h3 style={{ color: '#ffffff', fontSize: '1.2rem', fontWeight: '700', margin: '0 0 12px 0', fontFamily: "'Orbitron', monospace" }}>
+                  <h3 style={{ color: '#e5e5e5', fontSize: '1rem', fontWeight: '600', margin: '0 0 8px 0', fontFamily: "'Inter', sans-serif" }}>
                     İşlem İşleniyor
                   </h3>
                   
-                  <p style={{ color: '#888', fontSize: '0.9rem', margin: 0 }}>
-                    MoonPay üzerinden ödemeniz işleniyor...
+                  <p style={{ color: '#a0a0a0', fontSize: '0.8rem', margin: 0 }}>
+                    Ödemeniz güvenli olarak işleniyor...
                   </p>
                 </div>
               </div>
@@ -520,31 +527,31 @@ export default function CryptoOnramp({
 
             {/* Step: Success */}
             {step === 'success' && (
-              <div className="space-y-6 text-center">
+              <div className="space-y-4 text-center py-8">
                 <div style={{
-                  background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 255, 136, 0.05))',
-                  border: '1px solid rgba(0, 255, 136, 0.3)',
-                  borderRadius: '20px',
-                  padding: '40px 20px'
+                  background: 'rgba(34, 197, 94, 0.1)',
+                  border: '1px solid rgba(34, 197, 94, 0.2)',
+                  borderRadius: '12px',
+                  padding: '32px 20px'
                 }}>
                   <CheckCircle 
                     style={{ 
-                      color: '#00ff88', 
-                      width: '60px', 
-                      height: '60px', 
-                      margin: '0 auto 20px'
+                      color: '#22c55e', 
+                      width: '40px', 
+                      height: '40px', 
+                      margin: '0 auto 16px'
                     }} 
                   />
                   
-                  <h3 style={{ color: '#00ff88', fontSize: '1.2rem', fontWeight: '700', margin: '0 0 12px 0', fontFamily: "'Orbitron', monospace" }}>
-                    Başarılı!
+                  <h3 style={{ color: '#22c55e', fontSize: '1rem', fontWeight: '600', margin: '0 0 8px 0', fontFamily: "'Inter', sans-serif" }}>
+                    İşlem Başarılı
                   </h3>
                   
-                  <p style={{ color: '#ffffff', fontSize: '0.9rem', margin: '0 0 8px 0' }}>
+                  <p style={{ color: '#e5e5e5', fontSize: '0.85rem', margin: '0 0 6px 0' }}>
                     {amount} {targetCurrency} cüzdanınıza gönderildi
                   </p>
                   
-                  <p style={{ color: '#888', fontSize: '0.8rem', margin: 0 }}>
+                  <p style={{ color: '#a0a0a0', fontSize: '0.75rem', margin: 0 }}>
                     Bu pencere otomatik kapanacak...
                   </p>
                 </div>

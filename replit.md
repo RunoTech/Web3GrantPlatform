@@ -63,7 +63,7 @@ The system uses PostgreSQL as the primary database with the following comprehens
 - **Direct Donations**: Commission-free transfers directly to campaign creator wallets
 
 ### Revenue Model
-- **Account Activation Fees**: One-time payment required to create campaigns or participate in daily rewards
+- **Account Activation Fees**: One-time payment of 50 USDT required to create campaigns or participate in daily rewards (consistent across both Ethereum and BSC networks)
 - **Dynamic Fee Management**: Admin-configurable fees per network with token flexibility
 - **Zero Commission Donations**: All donations transfer directly to campaign creators without platform fees
 

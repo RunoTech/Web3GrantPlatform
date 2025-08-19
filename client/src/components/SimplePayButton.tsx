@@ -120,13 +120,43 @@ export default function SimplePayButton({ onPaymentSuccess }: SimplePayButtonPro
       const receipt = await tx.wait();
       
       if (receipt.status === 1) {
-        setStep(3);
-        toast({
-          title: "Ödeme Başarılı!",
-          description: `${fee.amount} ${fee.tokenSymbol} gönderildi`,
-        });
-        
-        onPaymentSuccess?.(tx.hash, network);
+        // Auto-activate account with direct activation API
+        try {
+          const activationResponse = await fetch("/api/direct-activate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              wallet: address,
+              network: network,
+              txHash: tx.hash,
+            }),
+          });
+          
+          const activationResult = await activationResponse.json();
+          
+          if (activationResult.success) {
+            setStep(3);
+            toast({
+              title: "Hesap Aktif Edildi!",
+              description: `${fee.amount} ${fee.tokenSymbol} ödeme başarılı`,
+            });
+            
+            onPaymentSuccess?.(tx.hash, network);
+          } else {
+            throw new Error(activationResult.error || "Aktivasyon başarısız");
+          }
+        } catch (activationError) {
+          console.error("Activation error:", activationError);
+          // Still show success for payment but indicate activation issue
+          setStep(3);
+          toast({
+            title: "Ödeme Tamamlandı",
+            description: "Aktivasyon işlemi için lütfen sayfayı yenileyin",
+            variant: "destructive"
+          });
+          
+          onPaymentSuccess?.(tx.hash, network);
+        }
       } else {
         throw new Error("İşlem başarısız");
       }

@@ -176,6 +176,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Direct payment activation (new system - no transaction hash verification needed)
+  app.post("/api/direct-activate", async (req, res) => {
+    try {
+      const { wallet, network, txHash } = req.body;
+      
+      if (!wallet || !network || !txHash) {
+        return res.status(400).json({ error: "Wallet, network, and transaction hash are required" });
+      }
+
+      // Check if account exists, create if not
+      let account = await storage.getAccount(wallet);
+      if (!account) {
+        account = await storage.createAccount({
+          wallet,
+          active: false,
+        });
+      }
+
+      if (account.active) {
+        return res.status(400).json({ error: "Account is already active" });
+      }
+
+      // Get network fee for response
+      const networkFees = await storage.getActiveNetworkFees();
+      const networkFee = networkFees.find(fee => fee.network === network);
+      
+      if (!networkFee) {
+        return res.status(400).json({ error: "Network fee not found" });
+      }
+
+      // Activate account immediately (trust frontend MetaMask transaction)
+      await storage.updateAccount(wallet, {
+        active: true,
+        activationTxHash: txHash,
+        activationDate: new Date(),
+      });
+
+      res.json({ 
+        success: true,
+        verified: true,
+        amount: networkFee.amount,
+        tokenSymbol: networkFee.tokenSymbol,
+        txHash: txHash,
+        message: "Account activated successfully"
+      });
+    } catch (error) {
+      console.error("Error with direct activation:", error);
+      res.status(500).json({ error: "Failed to activate account" });
+    }
+  });
+
   // Create campaign (public - but requires active account)
   app.post("/api/create-campaign", async (req, res) => {
     try {

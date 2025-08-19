@@ -149,12 +149,40 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
       const receipt = await tx.wait();
       
       if (receipt.status === 1) {
-        toast({
-          title: t('paymentVerified'),
-          description: `${selectedFee.amount} ${selectedFee.tokenSymbol} sent successfully!`,
-        });
-        
-        onPaymentSuccess?.(tx.hash, selectedNetwork);
+        // Auto-activate account with direct activation API
+        try {
+          const activationResponse = await fetch("/api/direct-activate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              wallet: address,
+              network: selectedNetwork,
+              txHash: tx.hash,
+            }),
+          });
+          
+          const activationResult = await activationResponse.json();
+          
+          if (activationResult.success) {
+            toast({
+              title: "Account Activated!",
+              description: `${selectedFee.amount} ${selectedFee.tokenSymbol} payment successful`,
+            });
+            
+            onPaymentSuccess?.(tx.hash, selectedNetwork);
+          } else {
+            throw new Error(activationResult.error || "Activation failed");
+          }
+        } catch (activationError) {
+          console.error("Activation error:", activationError);
+          // Still show success for payment
+          toast({
+            title: "Payment Completed",
+            description: "Please refresh the page for account activation",
+          });
+          
+          onPaymentSuccess?.(tx.hash, selectedNetwork);
+        }
       } else {
         throw new Error("Transaction failed");
       }

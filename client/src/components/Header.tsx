@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import LanguageSelector from "@/components/LanguageSelector";
+import CryptoOnramp from "@/components/CryptoOnramp";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useWallet } from "@/hooks/useWallet";
 import { Heart } from "lucide-react";
@@ -74,6 +75,7 @@ export default function Header({ currentPage }: HeaderProps) {
           </nav>
 
           <div className="flex items-center space-x-4">
+            <CryptoOnramp />
             <LanguageSelector />
             <WalletConnectButton />
           </div>

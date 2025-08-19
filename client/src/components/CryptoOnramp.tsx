@@ -113,7 +113,7 @@ export default function CryptoOnramp({
         data-testid="button-buy-crypto"
       >
         <CreditCard className="w-4 h-4 mr-2" />
-        Kripto Satın Al
+        {t('crypto.buy_crypto')}
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -124,7 +124,7 @@ export default function CryptoOnramp({
           <DialogHeader className="px-6 py-4 border-b border-border">
             <div className="flex items-center justify-between">
               <DialogTitle className="text-lg font-semibold text-foreground">
-                Kripto Satın Al
+                {t('crypto.buy_crypto_with_card')}
               </DialogTitle>
               <Button
                 variant="ghost"

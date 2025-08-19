@@ -85,45 +85,81 @@ export default function ProfilePage() {
   const totalSupporters = userCampaigns.reduce((sum: number, c: Campaign) => sum + (c.donationCount || 0), 0);
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#000000' }}>
-      {/* Modern Cyber Header */}
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 50%, #0a1a1a 100%)',
+      position: 'relative'
+    }}>
+      {/* Animated Background Grid */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundImage: `
+          linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px)
+        `,
+        backgroundSize: '50px 50px',
+        pointerEvents: 'none',
+        zIndex: 1
+      }}></div>
+
+      {/* Cyber Header with Neon Effects */}
       <header style={{ 
-        borderBottom: '1px solid rgba(6, 182, 212, 0.2)', 
-        backgroundColor: 'rgba(0, 0, 0, 0.9)', 
-        backdropFilter: 'blur(12px)',
+        background: 'linear-gradient(90deg, rgba(0,0,0,0.95) 0%, rgba(10,10,26,0.95) 50%, rgba(0,0,0,0.95) 100%)',
+        borderBottom: '2px solid transparent',
+        borderImage: 'linear-gradient(90deg, #00d4ff, #ff00ff, #00d4ff) 1',
+        backdropFilter: 'blur(20px)',
         position: 'sticky',
         top: 0,
-        zIndex: 50
+        zIndex: 100,
+        boxShadow: '0 4px 20px rgba(0, 212, 255, 0.2)'
       }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center" style={{ height: '80px' }}>
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex justify-between items-center" style={{ height: '90px' }}>
+            {/* DUXXAN Logo with Neon Effect */}
             <Link href="/" style={{
-              fontSize: '1.875rem',
-              fontWeight: 'bold',
-              background: 'linear-gradient(to right, #22d3ee, #a855f7)',
+              fontSize: '2.5rem',
+              fontWeight: '900',
+              background: 'linear-gradient(45deg, #00d4ff, #ff00ff, #00ff88)',
+              backgroundSize: '300% 300%',
               WebkitBackgroundClip: 'text',
               backgroundClip: 'text',
               color: 'transparent',
-              letterSpacing: '0.1em',
-              fontFamily: 'monospace'
+              letterSpacing: '0.2em',
+              fontFamily: "'Orbitron', monospace",
+              textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
+              animation: 'gradient 3s ease infinite, glow 2s ease-in-out infinite alternate'
             }}>
               DUXXAN
             </Link>
-            <div className="flex items-center space-x-4">
-              <div className="hidden md:flex items-center space-x-2" style={{ color: '#22d3ee' }}>
+            
+            {/* Status & Wallet */}
+            <div className="flex items-center space-x-6">
+              <div className="hidden md:flex items-center space-x-3" style={{
+                background: 'rgba(0, 212, 255, 0.1)',
+                border: '1px solid rgba(0, 212, 255, 0.3)',
+                borderRadius: '25px',
+                padding: '8px 16px'
+              }}>
                 <div style={{
-                  width: '8px',
-                  height: '8px',
-                  backgroundColor: '#4ade80',
+                  width: '10px',
+                  height: '10px',
+                  background: 'radial-gradient(circle, #00ff88, #00d4ff)',
                   borderRadius: '50%',
-                  animation: 'pulse 2s infinite'
+                  animation: 'pulse 1.5s infinite',
+                  boxShadow: '0 0 10px #00ff88'
                 }}></div>
                 <span style={{
-                  fontSize: '0.875rem',
-                  fontFamily: 'monospace',
+                  fontSize: '0.8rem',
+                  fontFamily: "'Orbitron', monospace",
+                  color: '#00d4ff',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.1em'
-                }}>SYSTEM ACTIVE</span>
+                  letterSpacing: '0.1em',
+                  fontWeight: '600'
+                }}>NEURAL LINK ACTIVE</span>
               </div>
               <WalletConnectButton />
             </div>
@@ -131,13 +167,21 @@ export default function ProfilePage() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Button variant="ghost" asChild className="mb-8" data-testid="button-back-home" style={{
-          color: '#22d3ee',
-          border: '1px solid rgba(6, 182, 212, 0.2)',
-          fontFamily: 'monospace',
+      <div className="max-w-7xl mx-auto px-6 py-12" style={{ position: 'relative', zIndex: 10 }}>
+        {/* Back Button with Holographic Effect */}
+        <Button variant="ghost" asChild className="mb-12" data-testid="button-back-home" style={{
+          background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 0, 255, 0.1))',
+          border: '1px solid rgba(0, 212, 255, 0.5)',
+          borderRadius: '20px',
+          color: '#00d4ff',
+          fontFamily: "'Orbitron', monospace",
           textTransform: 'uppercase',
-          letterSpacing: '0.05em'
+          letterSpacing: '0.1em',
+          padding: '12px 24px',
+          fontSize: '0.9rem',
+          fontWeight: '600',
+          transition: 'all 0.3s ease',
+          boxShadow: '0 4px 15px rgba(0, 212, 255, 0.2)'
         }}>
           <Link href="/">
             <ArrowLeft className="w-5 h-5 mr-2" />
@@ -145,152 +189,263 @@ export default function ProfilePage() {
           </Link>
         </Button>
 
-        {/* Modern Profile Header */}
+        {/* Holographic Profile Header */}
         <div style={{
-          backgroundColor: 'rgba(17, 24, 39, 0.5)',
-          border: '1px solid rgba(6, 182, 212, 0.2)',
-          borderRadius: '12px',
-          padding: '32px',
-          marginBottom: '32px',
-          backdropFilter: 'blur(4px)'
+          background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.05), rgba(255, 0, 255, 0.05), rgba(0, 255, 136, 0.05))',
+          border: '2px solid transparent',
+          borderImage: 'linear-gradient(135deg, #00d4ff, #ff00ff, #00ff88) 1',
+          borderRadius: '25px',
+          padding: '40px',
+          marginBottom: '40px',
+          backdropFilter: 'blur(20px)',
+          boxShadow: '0 8px 32px rgba(0, 212, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          <div className="flex flex-col md:flex-row items-start md:items-center space-y-6 md:space-y-0 md:space-x-8">
+          {/* Animated Background Effect */}
+          <div style={{
+            position: 'absolute',
+            top: '-50%',
+            left: '-50%',
+            width: '200%',
+            height: '200%',
+            background: 'conic-gradient(from 0deg, transparent, rgba(0, 212, 255, 0.03), transparent, rgba(255, 0, 255, 0.03), transparent)',
+            animation: 'rotate 20s linear infinite',
+            pointerEvents: 'none'
+          }}></div>
+
+          <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-8 lg:space-y-0 lg:space-x-12" style={{ position: 'relative', zIndex: 1 }}>
+            {/* Holographic Avatar */}
             <div className="relative">
               <div style={{
-                width: '112px',
-                height: '112px',
-                background: 'linear-gradient(to bottom right, #06b6d4, #9333ea)',
-                borderRadius: '12px',
-                padding: '4px'
+                width: '140px',
+                height: '140px',
+                background: 'linear-gradient(45deg, #00d4ff, #ff00ff, #00ff88)',
+                borderRadius: '50%',
+                padding: '3px',
+                animation: 'pulse 3s ease-in-out infinite'
               }}>
                 <div style={{
                   width: '100%',
                   height: '100%',
-                  backgroundColor: '#000000',
-                  borderRadius: '8px',
+                  background: 'radial-gradient(circle at 30% 30%, rgba(0, 212, 255, 0.2), rgba(0, 0, 0, 0.9))',
+                  borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  border: '1px solid rgba(0, 212, 255, 0.3)'
                 }}>
                   <span style={{
-                    fontSize: '1.5rem',
-                    fontWeight: 'bold',
-                    background: 'linear-gradient(to right, #22d3ee, #a855f7)',
+                    fontSize: '2rem',
+                    fontWeight: '900',
+                    background: 'linear-gradient(45deg, #00d4ff, #ff00ff)',
                     WebkitBackgroundClip: 'text',
                     backgroundClip: 'text',
-                    color: 'transparent'
+                    color: 'transparent',
+                    fontFamily: "'Orbitron', monospace",
+                    textShadow: '0 0 20px rgba(0, 212, 255, 0.8)'
                   }}>
                     {address?.slice(2, 4).toUpperCase()}
                   </span>
                 </div>
               </div>
+              
+              {/* Elite Badge */}
               <div style={{
                 position: 'absolute',
-                bottom: '-8px',
-                right: '-8px',
-                width: '32px',
-                height: '32px',
-                background: 'linear-gradient(to right, #facc15, #f97316)',
+                bottom: '10px',
+                right: '10px',
+                width: '40px',
+                height: '40px',
+                background: 'linear-gradient(45deg, #ffaa00, #ff6600)',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                border: '2px solid #000',
+                boxShadow: '0 0 15px rgba(255, 170, 0, 0.6)'
               }}>
-                <Crown className="w-4 h-4" style={{ color: '#000000' }} />
+                <Crown className="w-5 h-5" style={{ color: '#000' }} />
               </div>
             </div>
             
-            <div className="flex-1 space-y-4">
+            {/* Profile Info */}
+            <div className="flex-1 space-y-6">
               <div>
                 <h1 style={{
-                  fontSize: '2.25rem',
-                  fontWeight: 'bold',
-                  color: '#ffffff',
-                  marginBottom: '8px',
-                  letterSpacing: '0.025em',
-                  fontFamily: 'monospace',
-                  textTransform: 'uppercase'
+                  fontSize: '3rem',
+                  fontWeight: '900',
+                  background: 'linear-gradient(45deg, #00d4ff, #ff00ff, #00ff88)',
+                  backgroundSize: '300% 300%',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  color: 'transparent',
+                  marginBottom: '16px',
+                  letterSpacing: '0.1em',
+                  fontFamily: "'Orbitron', monospace",
+                  animation: 'gradient 4s ease infinite'
                 }}>{t('profile.my_profile')}</h1>
-                <div className="flex items-center space-x-3">
+                
+                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                  {/* Wallet Address */}
                   <div style={{
-                    backgroundColor: '#1f2937',
-                    border: '1px solid rgba(6, 182, 212, 0.3)',
-                    padding: '8px 16px',
-                    borderRadius: '8px'
+                    background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 0, 255, 0.1))',
+                    border: '1px solid rgba(0, 212, 255, 0.4)',
+                    borderRadius: '15px',
+                    padding: '12px 20px'
                   }}>
                     <span style={{
-                      color: '#22d3ee',
-                      fontFamily: 'monospace',
-                      fontSize: '0.875rem'
+                      color: '#00d4ff',
+                      fontFamily: "'Fira Code', monospace",
+                      fontSize: '0.9rem',
+                      letterSpacing: '0.05em'
                     }}>
-                      {address?.slice(0, 12)}...{address?.slice(-8)}
+                      {address?.slice(0, 16)}...{address?.slice(-12)}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-1" style={{ color: '#4ade80' }}>
+                  
+                  {/* Verification Badge */}
+                  <div className="flex items-center space-x-2" style={{
+                    background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1))',
+                    border: '1px solid rgba(0, 255, 136, 0.4)',
+                    borderRadius: '15px',
+                    padding: '8px 16px'
+                  }}>
                     <div style={{
-                      width: '8px',
-                      height: '8px',
-                      backgroundColor: '#4ade80',
+                      width: '10px',
+                      height: '10px',
+                      background: 'radial-gradient(circle, #00ff88, #00d4ff)',
                       borderRadius: '50%',
-                      animation: 'pulse 2s infinite'
+                      animation: 'pulse 2s infinite',
+                      boxShadow: '0 0 10px #00ff88'
                     }}></div>
                     <span style={{
-                      fontSize: '0.75rem',
-                      fontFamily: 'monospace',
-                      textTransform: 'uppercase'
-                    }}>VERIFIED</span>
+                      fontSize: '0.8rem',
+                      fontFamily: "'Orbitron', monospace",
+                      color: '#00ff88',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      fontWeight: '600'
+                    }}>NEURAL VERIFIED</span>
                   </div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-6 bg-gray-800/50 border border-cyan-500/20 rounded-lg hover:border-cyan-400/50 transition-all">
-                  <Target className="w-8 h-8 text-cyan-400 mx-auto mb-3" />
-                  <p className="text-3xl font-bold text-white mb-1">{userCampaigns.length}</p>
-                  <p className="text-sm text-gray-400 uppercase tracking-wider">{t('profile.campaigns')}</p>
-                </div>
-                <div className="text-center p-6 bg-gray-800/50 border border-green-500/20 rounded-lg hover:border-green-400/50 transition-all">
-                  <DollarSign className="w-8 h-8 text-green-400 mx-auto mb-3" />
-                  <p className="text-3xl font-bold text-white mb-1">{totalDonationsReceived.toFixed(3)}</p>
-                  <p className="text-sm text-gray-400 uppercase tracking-wider">{t('profile.eth_raised')}</p>
-                </div>
-                <div className="text-center p-6 bg-gray-800/50 border border-purple-500/20 rounded-lg hover:border-purple-400/50 transition-all">
-                  <Users className="w-8 h-8 text-purple-400 mx-auto mb-3" />
-                  <p className="text-3xl font-bold text-white mb-1">{totalSupporters}</p>
-                  <p className="text-sm text-gray-400 uppercase tracking-wider">{t('profile.supporters')}</p>
-                </div>
-                <div className="text-center p-6 bg-gray-800/50 border border-orange-500/20 rounded-lg hover:border-orange-400/50 transition-all">
-                  <Gift className="w-8 h-8 text-orange-400 mx-auto mb-3" />
-                  <p className="text-3xl font-bold text-white mb-1">{dailyEntries.length}</p>
-                  <p className="text-sm text-gray-400 uppercase tracking-wider">{t('profile.daily_participation')}</p>
-                </div>
+              {/* Holographic Stats Grid */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { icon: Target, value: userCampaigns.length, label: t('profile.campaigns'), color: '#00d4ff', bg: 'rgba(0, 212, 255, 0.1)' },
+                  { icon: DollarSign, value: totalDonationsReceived.toFixed(3), label: t('profile.eth_raised'), color: '#00ff88', bg: 'rgba(0, 255, 136, 0.1)' },
+                  { icon: Users, value: totalSupporters, label: t('profile.supporters'), color: '#ff00ff', bg: 'rgba(255, 0, 255, 0.1)' },
+                  { icon: Gift, value: dailyEntries.length, label: t('profile.daily_participation'), color: '#ffaa00', bg: 'rgba(255, 170, 0, 0.1)' }
+                ].map((stat, index) => (
+                  <div key={index} style={{
+                    background: `linear-gradient(135deg, ${stat.bg}, rgba(0, 0, 0, 0.2))`,
+                    border: `1px solid ${stat.color}40`,
+                    borderRadius: '20px',
+                    padding: '24px',
+                    textAlign: 'center',
+                    backdropFilter: 'blur(10px)',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }} className="group hover:scale-105">
+                    {/* Hover Effect */}
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: '-100%',
+                      width: '100%',
+                      height: '100%',
+                      background: `linear-gradient(90deg, transparent, ${stat.color}20, transparent)`,
+                      transition: 'left 0.5s ease',
+                      pointerEvents: 'none'
+                    }} className="group-hover:left-full"></div>
+                    
+                    <stat.icon className="w-10 h-10 mx-auto mb-4" style={{ color: stat.color }} />
+                    <p style={{
+                      fontSize: '2.5rem',
+                      fontWeight: '900',
+                      color: '#ffffff',
+                      marginBottom: '8px',
+                      fontFamily: "'Orbitron', monospace",
+                      textShadow: `0 0 10px ${stat.color}50`
+                    }}>{stat.value}</p>
+                    <p style={{
+                      fontSize: '0.8rem',
+                      color: stat.color,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      fontFamily: "'Orbitron', monospace",
+                      fontWeight: '600'
+                    }}>{stat.label}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Modern Cyber Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3 bg-gray-900/50 border border-cyan-500/20 rounded-xl p-2">
-            <TabsTrigger 
-              value="overview" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-purple-600 data-[state=active]:text-white text-gray-400 font-mono uppercase tracking-wider hover:text-cyan-400 transition-all"
-            >
-              {t('profile.overview')}
-            </TabsTrigger>
-            <TabsTrigger 
-              value="campaigns" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-purple-600 data-[state=active]:text-white text-gray-400 font-mono uppercase tracking-wider hover:text-cyan-400 transition-all"
-            >
-              {t('profile.my_campaigns')}
-            </TabsTrigger>
-            <TabsTrigger 
-              value="rewards" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-purple-600 data-[state=active]:text-white text-gray-400 font-mono uppercase tracking-wider hover:text-cyan-400 transition-all"
-            >
-              {t('profile.daily_rewards')}
-            </TabsTrigger>
-          </TabsList>
+        {/* Holographic Navigation Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-12">
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '8px',
+            background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.05), rgba(255, 0, 255, 0.05))',
+            border: '1px solid rgba(0, 212, 255, 0.3)',
+            borderRadius: '25px',
+            padding: '8px',
+            backdropFilter: 'blur(10px)'
+          }}>
+            {[
+              { value: 'overview', label: t('profile.overview') },
+              { value: 'campaigns', label: t('profile.my_campaigns') },
+              { value: 'rewards', label: t('profile.daily_rewards') }
+            ].map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                style={{
+                  background: activeTab === tab.value 
+                    ? 'linear-gradient(45deg, #00d4ff, #ff00ff)' 
+                    : 'transparent',
+                  border: activeTab === tab.value 
+                    ? 'none' 
+                    : '1px solid rgba(0, 212, 255, 0.2)',
+                  borderRadius: '20px',
+                  padding: '16px 24px',
+                  color: activeTab === tab.value ? '#000' : '#00d4ff',
+                  fontFamily: "'Orbitron', monospace",
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+                className="hover:scale-105"
+              >
+                {activeTab === tab.value && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'linear-gradient(45deg, #00d4ff, #ff00ff)',
+                    borderRadius: '20px',
+                    zIndex: -1,
+                    boxShadow: '0 0 20px rgba(0, 212, 255, 0.5)'
+                  }}></div>
+                )}
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
           {/* Overview Tab - Cyber Style */}
           <TabsContent value="overview" className="space-y-6">

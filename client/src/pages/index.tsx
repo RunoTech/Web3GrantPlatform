@@ -110,12 +110,12 @@ export default function HomePage() {
             <div className="space-y-6">
               <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight tracking-wider uppercase">
                 <span className="neon-text">
-                  {heroTitle}
+                  {t('hero.title')}
                 </span>
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-                {heroSubtitle}
+                {t('hero.subtitle')}
               </p>
             </div>
             
@@ -128,7 +128,7 @@ export default function HomePage() {
               >
                 <Link href="/create-campaign">
                   <Target className="w-5 h-5 mr-2" />
-                  {getSetting('hero_button_text', 'KAMPANYA OLUŞTUR')}
+                  {t('hero.create_campaign')}
                 </Link>
               </Button>
               <Button 
@@ -164,9 +164,9 @@ export default function HomePage() {
               <div className="w-20 h-20 cyber-cyan-bg rounded-lg flex items-center justify-center mx-auto mb-6">
                 <Shield className="w-10 h-10 text-background" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{getSetting('feature1_title', 'ŞEFFAFLİK')}</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.blockchain_security')}</h3>
               <p className="text-muted-foreground leading-relaxed">
-                {getSetting('feature1_desc', 'Tüm bağışlar blockchain üzerinde kayıtlı')}
+                {t('features.blockchain_desc')}
               </p>
             </div>
 
@@ -174,9 +174,9 @@ export default function HomePage() {
               <div className="w-20 h-20 cyber-green-bg rounded-lg flex items-center justify-center mx-auto mb-6">
                 <DollarSign className="w-10 h-10 text-background" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{getSetting('feature2_title', 'KOMİSYONSUZ')}</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.commission_free')}</h3>
               <p className="text-muted-foreground leading-relaxed">
-                {getSetting('feature2_desc', 'Bağışların %100ü kampanya sahibine ulaşır')}
+                {t('features.commission_desc')}
               </p>
             </div>
 
@@ -184,9 +184,9 @@ export default function HomePage() {
               <div className="w-20 h-20 cyber-purple-bg rounded-lg flex items-center justify-center mx-auto mb-6">
                 <Zap className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{getSetting('feature3_title', 'GÜVENLİK')}</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.fast_easy')}</h3>
               <p className="text-muted-foreground leading-relaxed">
-                {getSetting('feature3_desc', 'Smart contract güvencesi ile korumalı')}
+                {t('features.fast_desc')}
               </p>
             </div>
           </div>

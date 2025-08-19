@@ -65,7 +65,7 @@ export default function FundsPage() {
   const createCampaignMutation = useMutation({
     mutationFn: (data: CampaignFormData) => 
       api.post("/api/create-campaign", data, { 
-        headers: { wallet: address } 
+        headers: { wallet: address || "" } 
       }),
     onSuccess: (data) => {
       toast({
@@ -198,8 +198,8 @@ export default function FundsPage() {
                 <Shield className="w-5 h-5" />
               </div>
               <div className="hidden sm:block">
-                <p className="font-semibold text-slate-800">Hesap Aktivasyonu</p>
-                <p className="text-sm text-slate-600">Aktivasyon ücreti ödeyin</p>
+                <p className="font-semibold text-slate-800">{t('funds.steps.account_activation')}</p>
+                <p className="text-sm text-slate-600">{t('funds.steps.pay_activation')}</p>
               </div>
             </div>
 
@@ -216,8 +216,8 @@ export default function FundsPage() {
                 <Rocket className="w-5 h-5" />
               </div>
               <div className="hidden sm:block">
-                <p className="font-semibold text-slate-800">Kampanya Oluştur</p>
-                <p className="text-sm text-slate-600">Projenizi başlatın</p>
+                <p className="font-semibold text-slate-800">{t('funds.steps.create_campaign')}</p>
+                <p className="text-sm text-slate-600">{t('funds.steps.prepare_campaign')}</p>
               </div>
             </div>
           </div>
@@ -259,9 +259,9 @@ export default function FundsPage() {
         {accountActive && !createCampaignMutation.data && (
           <div className="card-modern p-8 mb-8 text-center gradient-secondary text-white">
             <CheckCircle className="w-16 h-16 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Tebrikler! 🎉</h2>
+            <h2 className="text-2xl font-bold mb-2">{t('funds.payment_success')}</h2>
             <p className="text-lg opacity-90">
-              Hesabınız başarıyla aktifleştirildi. Artık kampanya oluşturabilirsiniz.
+              {t('funds.account_activated')}
             </p>
           </div>
         )}
@@ -274,8 +274,8 @@ export default function FundsPage() {
                 <Rocket className="w-10 h-10 text-white" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-slate-800 mb-2">Yeni Kampanya Oluştur</h2>
-                <p className="text-lg text-slate-600">Projenizi tanıtın ve hedeflediğiniz desteği toplayın</p>
+                <h2 className="text-3xl font-bold text-slate-800 mb-2">{t('funds.campaign_form_title')}</h2>
+                <p className="text-lg text-slate-600">{t('funds.campaign_subtitle')}</p>
               </div>
             </div>
 
@@ -289,11 +289,11 @@ export default function FundsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-base font-semibold text-slate-700">
-                            Kampanya Başlığı *
+                            {t('funds.campaign_title')} *
                           </FormLabel>
                           <FormControl>
                             <Input 
-                              placeholder="Projenizin etkileyici başlığını yazın" 
+                              placeholder={t('funds.campaign_title_placeholder')} 
                               className="px-4 py-3 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-base"
                               data-testid="input-campaign-title"
                               {...field} 
@@ -310,7 +310,7 @@ export default function FundsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-base font-semibold text-slate-700">
-                            Kampanya Görseli *
+                            {t('funds.campaign_image')} *
                           </FormLabel>
                           <FormControl>
                             <Input 
@@ -323,7 +323,7 @@ export default function FundsPage() {
                           </FormControl>
                           <FormMessage />
                           <p className="text-sm text-slate-500">
-                            Projenizi en iyi temsil eden yüksek kaliteli bir görsel URL'si
+                            {t('funds.image_description')}
                           </p>
                         </FormItem>
                       )}
@@ -337,12 +337,12 @@ export default function FundsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-base font-semibold text-slate-700">
-                            Kampanya Açıklaması *
+                            {t('funds.campaign_description')} *
                           </FormLabel>
                           <FormControl>
                             <Textarea 
                               rows={8}
-                              placeholder="Projenizi detaylı bir şekilde açıklayın. Hedeflerinizi, planlarınızı ve neden desteklenmesi gerektiğini anlatın..." 
+                              placeholder={t('funds.description_placeholder')} 
                               className="px-4 py-3 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500 resize-none text-base"
                               data-testid="textarea-campaign-description"
                               {...field} 
@@ -350,7 +350,7 @@ export default function FundsPage() {
                           </FormControl>
                           <FormMessage />
                           <p className="text-sm text-slate-500">
-                            Destekçilerinizi ikna edecek kapsamlı bir açıklama yazın
+                            {t('funds.description_help')}
                           </p>
                         </FormItem>
                       )}
@@ -368,7 +368,7 @@ export default function FundsPage() {
                       className="btn-modern"
                     >
                       <Link href="/donations">
-                        Önce Diğer Kampanyaları Gör
+                        {t('funds.view_other_campaigns')}
                       </Link>
                     </Button>
                     
@@ -382,12 +382,12 @@ export default function FundsPage() {
                       {createCampaignMutation.isPending ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                          Oluşturuluyor...
+                          {t('funds.creating')}...
                         </>
                       ) : (
                         <>
                           <Rocket className="w-5 h-5 mr-2" />
-                          Kampanyayı Başlat
+                          {t('funds.create_button')}
                         </>
                       )}
                     </Button>

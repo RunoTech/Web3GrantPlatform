@@ -6,6 +6,27 @@ DUXXAN is a professional Web3 donation platform built for Ethereum Mainnet and B
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### Navigation Architecture Fix (August 19, 2025)
+- Fixed "Create Campaign" button navigation issue where buttons incorrectly redirected to `/funds` instead of `/create-campaign`
+- Updated all "Create Campaign" buttons across the platform:
+  - Homepage hero section: Now redirects to `/create-campaign`
+  - Donations page: Both campaign creation buttons now redirect to `/create-campaign`  
+  - Profile page: Campaign creation buttons now redirect to `/create-campaign`
+  - Campaigns page: Already correctly linked to `/create-campaign`
+- Ensured proper separation between donation workflow (`/donations`) and funding workflow (`/funds`)
+
+### Profile Page Complete Redesign (August 19, 2025)
+- Completely redesigned profile page with Binance-style corporate design
+- Implemented clean white/yellow light theme and black/yellow dark theme
+- Added modern header with sticky navigation and proper back button
+- Created comprehensive statistics overview with 4 key metrics cards
+- Implemented tab system with Overview, Campaigns, and Daily Rewards sections
+- Added achievement badges system with progress tracking
+- Included campaign performance analytics and activity monitoring
+- Responsive design ensuring professional appearance across all devices
+
 ## System Architecture
 
 ### Frontend Architecture

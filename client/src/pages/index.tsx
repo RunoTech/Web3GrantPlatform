@@ -119,7 +119,7 @@ export default function HomePage() {
                 className="cyber-cyan-bg px-8 py-4 font-bold uppercase tracking-wide btn-cyber"
                 data-testid="button-create-campaign"
               >
-                <Link href="/funds">
+                <Link href="/create-campaign">
                   <Target className="w-5 h-5 mr-2" />
                   {t('hero.create_campaign')}
                 </Link>

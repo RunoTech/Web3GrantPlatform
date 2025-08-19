@@ -43,31 +43,47 @@ export default function CryptoOnramp({
     setIsOpen(true);
   };
 
-  // Handle custom onramp purchase API call
-  const handlePurchase = async (amount: number, currency: string, paymentMethod: string) => {
+  // MoonPay integration
+  const handleMoonPayPurchase = async () => {
     try {
-      // API call will be implemented when user provides the API
-      const response = await fetch('/api/crypto-onramp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount,
-          currency,
-          paymentMethod,
-          walletAddress: address,
-          targetToken: targetCurrency
-        })
+      if (!import.meta.env.VITE_MOONPAY_API_KEY) {
+        onError?.('MoonPay API key not configured');
+        return;
+      }
+
+      // Create MoonPay URL
+      const baseUrl = 'https://buy.moonpay.com';
+      const params = new URLSearchParams({
+        apiKey: import.meta.env.VITE_MOONPAY_API_KEY,
+        currencyCode: targetCurrency.toLowerCase(),
+        walletAddress: address || '',
+        baseCurrencyAmount: amount.toString(),
+        baseCurrencyCode: 'usd',
+        redirectURL: window.location.origin + '/payment-success',
+        theme: 'dark',
+        colorCode: '#00ff88'
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        onSuccess?.(result);
-        setIsOpen(false);
-      } else {
-        onError?.('Satın alma işlemi başarısız oldu');
-      }
+      // Open MoonPay in popup window
+      const moonpayUrl = `${baseUrl}?${params.toString()}`;
+      const popup = window.open(
+        moonpayUrl,
+        'moonpay',
+        'width=600,height=700,scrollbars=yes,resizable=yes'
+      );
+
+      // Monitor popup for completion
+      const checkClosed = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(checkClosed);
+          onSuccess?.('MoonPay transaction initiated');
+          setIsOpen(false);
+        }
+      }, 1000);
+
     } catch (error) {
-      onError?.('Bağlantı hatası oluştu');
+      console.error('MoonPay error:', error);
+      onError?.('MoonPay bağlantı hatası');
     }
   };
 
@@ -265,7 +281,7 @@ export default function CryptoOnramp({
 
             {/* Purchase Button */}
             <div 
-              onClick={() => handlePurchase(amount, 'USD', 'credit_card')}
+              onClick={handleMoonPayPurchase}
               style={{
                 background: 'linear-gradient(135deg, #00ff88, #00d4ff)',
                 borderRadius: '15px',
@@ -289,21 +305,26 @@ export default function CryptoOnramp({
               </div>
             </div>
 
-            {/* API Status */}
+            {/* MoonPay Status */}
             <div style={{
-              background: 'linear-gradient(135deg, rgba(255, 165, 0, 0.1), rgba(255, 165, 0, 0.05))',
-              border: '1px solid rgba(255, 165, 0, 0.3)',
+              background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 255, 136, 0.05))',
+              border: '1px solid rgba(0, 255, 136, 0.3)',
               borderRadius: '15px',
               padding: '16px'
             }}>
               <div className="flex items-center space-x-3">
-                <Settings className="w-5 h-5" style={{ color: '#ffa500' }} />
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: '#00ff88'
+                }}></div>
                 <div>
                   <p style={{ color: '#ffffff', fontSize: '0.9rem', margin: 0 }}>
-                    API Entegrasyonu Bekleniyor
+                    MoonPay Aktif
                   </p>
                   <p style={{ color: '#888', fontSize: '0.8rem', margin: 0 }}>
-                    Onramp API sağlandıktan sonra aktif olacak
+                    Güvenli kripto satın alma hazır
                   </p>
                 </div>
               </div>

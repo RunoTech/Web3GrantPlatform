@@ -766,30 +766,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Crypto onramp API endpoint (ready for custom API integration)
-  app.post('/api/crypto-onramp', async (req, res) => {
-    try {
-      const { amount, currency, paymentMethod, walletAddress, targetToken } = req.body;
-      
-      // TODO: Integrate with user-provided onramp API
-      // This is where the custom API integration will be implemented
-      
-      // For now, return a placeholder response
-      res.status(503).json({ 
-        message: 'Onramp API integration pending',
-        details: 'Custom API will be integrated when provided by user',
-        requestData: {
-          amount,
-          currency,
-          paymentMethod,
-          walletAddress,
-          targetToken
-        }
-      });
-    } catch (error) {
-      console.error('Crypto onramp error:', error);
-      res.status(500).json({ message: 'Onramp service error' });
-    }
+  // MoonPay payment success callback
+  app.get('/payment-success', (req, res) => {
+    // Handle successful MoonPay payment
+    res.send(`
+      <html>
+        <head>
+          <title>Payment Successful - DUXXAN</title>
+          <style>
+            body { 
+              background: #0a0a0a; 
+              color: #ffffff; 
+              font-family: 'Orbitron', monospace; 
+              text-align: center; 
+              padding: 50px;
+            }
+            .success { color: #00ff88; font-size: 24px; margin-bottom: 20px; }
+            .close-btn { 
+              background: linear-gradient(135deg, #00ff88, #00d4ff);
+              color: #000;
+              padding: 10px 20px;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-family: inherit;
+              font-weight: bold;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="success">✓ Payment Successful!</div>
+          <p>Your crypto purchase has been completed.</p>
+          <button class="close-btn" onclick="window.close()">Close Window</button>
+          <script>
+            setTimeout(() => window.close(), 3000);
+          </script>
+        </body>
+      </html>
+    `);
   });
 
   const httpServer = createServer(app);

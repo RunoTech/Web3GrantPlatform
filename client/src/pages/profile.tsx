@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,15 @@ export default function ProfilePage() {
   const { isConnected, address } = useWallet();
   const { language, t } = useLanguage();
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Force dark mode for this page
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+    document.body.style.backgroundColor = '#000000';
+    return () => {
+      document.body.style.backgroundColor = '';
+    };
+  }, []);
 
   const { data: campaigns = [] } = useQuery({
     queryKey: ["/api/get-campaigns"],
@@ -76,18 +85,45 @@ export default function ProfilePage() {
   const totalSupporters = userCampaigns.reduce((sum: number, c: Campaign) => sum + (c.donationCount || 0), 0);
 
   return (
-    <div className="min-h-screen bg-black">
+    <div style={{ minHeight: '100vh', backgroundColor: '#000000' }}>
       {/* Modern Cyber Header */}
-      <header className="border-b border-cyan-500/20 bg-black/90 backdrop-blur-xl sticky top-0 z-50">
+      <header style={{ 
+        borderBottom: '1px solid rgba(6, 182, 212, 0.2)', 
+        backgroundColor: 'rgba(0, 0, 0, 0.9)', 
+        backdropFilter: 'blur(12px)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50
+      }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            <Link href="/" className="text-3xl font-bold text-transparent bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text tracking-widest">
+          <div className="flex justify-between items-center" style={{ height: '80px' }}>
+            <Link href="/" style={{
+              fontSize: '1.875rem',
+              fontWeight: 'bold',
+              background: 'linear-gradient(to right, #22d3ee, #a855f7)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              color: 'transparent',
+              letterSpacing: '0.1em',
+              fontFamily: 'monospace'
+            }}>
               DUXXAN
             </Link>
             <div className="flex items-center space-x-4">
-              <div className="hidden md:flex items-center space-x-2 text-cyan-400">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-sm font-mono uppercase tracking-wider">SYSTEM ACTIVE</span>
+              <div className="hidden md:flex items-center space-x-2" style={{ color: '#22d3ee' }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  backgroundColor: '#4ade80',
+                  borderRadius: '50%',
+                  animation: 'pulse 2s infinite'
+                }}></div>
+                <span style={{
+                  fontSize: '0.875rem',
+                  fontFamily: 'monospace',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em'
+                }}>SYSTEM ACTIVE</span>
               </div>
               <WalletConnectButton />
             </div>
@@ -96,7 +132,13 @@ export default function ProfilePage() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Button variant="ghost" asChild className="mb-8 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 border border-cyan-500/20" data-testid="button-back-home">
+        <Button variant="ghost" asChild className="mb-8" data-testid="button-back-home" style={{
+          color: '#22d3ee',
+          border: '1px solid rgba(6, 182, 212, 0.2)',
+          fontFamily: 'monospace',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em'
+        }}>
           <Link href="/">
             <ArrowLeft className="w-5 h-5 mr-2" />
             {t('common.back_to_home')}
@@ -104,33 +146,99 @@ export default function ProfilePage() {
         </Button>
 
         {/* Modern Profile Header */}
-        <div className="bg-gray-900/50 border border-cyan-500/20 rounded-xl p-8 mb-8 backdrop-blur-sm">
+        <div style={{
+          backgroundColor: 'rgba(17, 24, 39, 0.5)',
+          border: '1px solid rgba(6, 182, 212, 0.2)',
+          borderRadius: '12px',
+          padding: '32px',
+          marginBottom: '32px',
+          backdropFilter: 'blur(4px)'
+        }}>
           <div className="flex flex-col md:flex-row items-start md:items-center space-y-6 md:space-y-0 md:space-x-8">
             <div className="relative">
-              <div className="w-28 h-28 bg-gradient-to-br from-cyan-500 to-purple-600 rounded-xl p-1">
-                <div className="w-full h-full bg-black rounded-lg flex items-center justify-center">
-                  <span className="text-2xl font-bold text-transparent bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text">
+              <div style={{
+                width: '112px',
+                height: '112px',
+                background: 'linear-gradient(to bottom right, #06b6d4, #9333ea)',
+                borderRadius: '12px',
+                padding: '4px'
+              }}>
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: '#000000',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <span style={{
+                    fontSize: '1.5rem',
+                    fontWeight: 'bold',
+                    background: 'linear-gradient(to right, #22d3ee, #a855f7)',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    color: 'transparent'
+                  }}>
                     {address?.slice(2, 4).toUpperCase()}
                   </span>
                 </div>
               </div>
-              <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                <Crown className="w-4 h-4 text-black" />
+              <div style={{
+                position: 'absolute',
+                bottom: '-8px',
+                right: '-8px',
+                width: '32px',
+                height: '32px',
+                background: 'linear-gradient(to right, #facc15, #f97316)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Crown className="w-4 h-4" style={{ color: '#000000' }} />
               </div>
             </div>
             
             <div className="flex-1 space-y-4">
               <div>
-                <h1 className="text-4xl font-bold text-white mb-2 tracking-wide">{t('profile.my_profile')}</h1>
+                <h1 style={{
+                  fontSize: '2.25rem',
+                  fontWeight: 'bold',
+                  color: '#ffffff',
+                  marginBottom: '8px',
+                  letterSpacing: '0.025em',
+                  fontFamily: 'monospace',
+                  textTransform: 'uppercase'
+                }}>{t('profile.my_profile')}</h1>
                 <div className="flex items-center space-x-3">
-                  <div className="bg-gray-800 border border-cyan-500/30 px-4 py-2 rounded-lg">
-                    <span className="text-cyan-400 font-mono text-sm">
+                  <div style={{
+                    backgroundColor: '#1f2937',
+                    border: '1px solid rgba(6, 182, 212, 0.3)',
+                    padding: '8px 16px',
+                    borderRadius: '8px'
+                  }}>
+                    <span style={{
+                      color: '#22d3ee',
+                      fontFamily: 'monospace',
+                      fontSize: '0.875rem'
+                    }}>
                       {address?.slice(0, 12)}...{address?.slice(-8)}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-1 text-green-400">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs font-mono uppercase">VERIFIED</span>
+                  <div className="flex items-center space-x-1" style={{ color: '#4ade80' }}>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      backgroundColor: '#4ade80',
+                      borderRadius: '50%',
+                      animation: 'pulse 2s infinite'
+                    }}></div>
+                    <span style={{
+                      fontSize: '0.75rem',
+                      fontFamily: 'monospace',
+                      textTransform: 'uppercase'
+                    }}>VERIFIED</span>
                   </div>
                 </div>
               </div>

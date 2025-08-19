@@ -34,21 +34,20 @@ export default function CryptoOnramp({
     setIsOpen(true);
   };
 
-  // Create iframe URL with parameters
-  const createOnramperUrl = () => {
-    const baseUrl = 'https://widget.onramper.com';
+  // Create Changelly widget URL
+  const createChangellyUrl = () => {
+    const baseUrl = 'https://widget.changelly.com';
     const params = new URLSearchParams({
-      apiKey: 'pk_test_KPhpNJqRAuDuwt7kGnDAjxRl0lZGNzRO1Kls2KCHkZw0',
-      defaultAmount: targetAmount.toString(),
-      defaultCrypto: targetCurrency,
-      wallets: JSON.stringify({ [targetCurrency]: { address } }),
+      from: 'usd',
+      to: targetCurrency.toLowerCase(),
+      amount: targetAmount.toString(),
+      address: address || '',
+      fromDefault: 'usd',
+      toDefault: targetCurrency.toLowerCase(),
       theme: 'dark',
-      primaryColor: '00d4ff',
-      secondaryColor: 'ff00ff',
-      cardColor: '1a1a1a',
-      primaryTextColor: 'ffffff',
-      secondaryTextColor: '888888',
-      containerColor: '0a0a0a'
+      merchant_id: 'changelly', // Public merchant ID
+      payment_id: '', 
+      v: '3'
     });
     
     return `${baseUrl}?${params.toString()}`;
@@ -116,7 +115,7 @@ export default function CryptoOnramp({
           
           <div className="p-0">
             <iframe
-              src={createOnramperUrl()}
+              src={createChangellyUrl()}
               style={{
                 width: '100%',
                 height: '600px',
@@ -124,6 +123,7 @@ export default function CryptoOnramp({
                 borderRadius: '0 0 20px 20px'
               }}
               title="Kripto Satın Al"
+              allow="payment"
             />
           </div>
         </DialogContent>

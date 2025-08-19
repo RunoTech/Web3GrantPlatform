@@ -126,8 +126,8 @@ export default function FundsPage() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: "Kopyalandı!",
-      description: "Adres panoya kopyalandı",
+      title: t('common.copied'),
+      description: t('common.copied'),
     });
   };
 

@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import NetworkOption from "@/components/NetworkOption";
 import { useWallet } from "@/hooks/useWallet";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { api } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
 import { Heart, ArrowLeft, Plus, Lock, Copy, CheckCircle } from "lucide-react";
@@ -20,6 +21,7 @@ import type { z } from "zod";
 type CampaignFormData = z.infer<typeof insertCampaignSchema>;
 
 export default function CreateCampaignPage() {
+  const { t } = useLanguage();
   const [, setLocation] = useLocation();
   const { isConnected, address } = useWallet();
   const { toast } = useToast();
@@ -119,9 +121,9 @@ export default function CreateCampaignPage() {
           <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto">
             <Lock className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-800">Cüzdan Bağlantısı Gerekli</h1>
+          <h1 className="text-3xl font-bold text-slate-800">{t('funds.connect_wallet')}</h1>
           <p className="text-slate-600">
-            Kampanya oluşturmak için önce cüzdanınızı bağlamanız gerekiyor.
+            {t('funds.connect_wallet')}
           </p>
           <WalletConnectButton />
         </div>
@@ -140,16 +142,16 @@ export default function CreateCampaignPage() {
                 <Heart className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Web3Bağış
+{t('duxxan')}
               </h1>
             </div>
 
             <nav className="hidden md:flex space-x-8">
               <Link href="/" className="text-slate-600 hover:text-slate-800 font-medium transition-colors">
-                Ana Sayfa
+{t('common.back_to_home')}
               </Link>
               <Link href="/campaigns" className="text-slate-600 hover:text-slate-800 font-medium transition-colors">
-                Kampanyalar
+{t('campaigns')}
               </Link>
             </nav>
 
@@ -162,7 +164,7 @@ export default function CreateCampaignPage() {
         <Button variant="ghost" asChild className="mb-8" data-testid="button-back-home">
           <Link href="/">
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Ana Sayfaya Dön
+{t('funds.back_home')}
           </Link>
         </Button>
 
@@ -175,10 +177,10 @@ export default function CreateCampaignPage() {
               </div>
               
               <h2 className="text-3xl font-bold text-slate-800">
-                Hesap Aktivasyonu
+                {t('funds.activation_title')}
               </h2>
               <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                Kampanya oluşturmak için hesabınızı aktive edin. Sadece bir kerelik ücret ile platform kullanımına başlayın.
+                {t('funds.activation_subtitle')}
               </p>
               
               <div className="space-y-6 pt-8">
@@ -204,7 +206,7 @@ export default function CreateCampaignPage() {
                 {selectedNetwork && (
                   <div className="bg-white rounded-2xl p-6 space-y-4 max-w-md mx-auto">
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-slate-700">Platform Cüzdan Adresi</label>
+                      <label className="block text-sm font-medium text-slate-700">{t('funds.platform_wallet')}</label>
                       <div className="flex items-center space-x-2">
                         <Input 
                           type="text" 
@@ -225,7 +227,7 @@ export default function CreateCampaignPage() {
                     </div>
                     
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-slate-700">İşlem Hash'i (TX Hash)</label>
+                      <label className="block text-sm font-medium text-slate-700">{t('funds.tx_hash')}</label>
                       <Input 
                         type="text" 
                         placeholder="0x..." 
@@ -242,7 +244,7 @@ export default function CreateCampaignPage() {
                       className="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
                       data-testid="button-verify-payment"
                     >
-                      {verifyingPayment ? "Doğrulanıyor..." : "Ödemeyi Doğrula"}
+{verifyingPayment ? t('verifying') : t('funds.verify_payment')}
                     </Button>
                   </div>
                 )}
@@ -258,8 +260,8 @@ export default function CreateCampaignPage() {
               <div className="w-16 h-16 bg-gradient-to-r from-purple-200 to-pink-200 rounded-3xl flex items-center justify-center mx-auto">
                 <Plus className="w-8 h-8 text-purple-600" />
               </div>
-              <h2 className="text-3xl font-bold text-slate-800">Yeni Kampanya Oluştur</h2>
-              <p className="text-slate-600">Projenizi tanıtın ve toplumsal desteği toplayın</p>
+              <h2 className="text-3xl font-bold text-slate-800">{t('funds.campaign_form_title')}</h2>
+              <p className="text-slate-600">{t('funds.subtitle')}</p>
             </div>
 
             <Form {...form}>
@@ -269,10 +271,10 @@ export default function CreateCampaignPage() {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-semibold text-slate-700">Kampanya Başlığı</FormLabel>
+                      <FormLabel className="text-sm font-semibold text-slate-700">{t('funds.campaign_title')}</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="Kampanyanızın başlığını girin" 
+placeholder={t('funds.campaign_title')} 
                           className="px-4 py-3 rounded-2xl border-slate-200 focus:border-purple-500 focus:ring-purple-500"
                           data-testid="input-campaign-title"
                           {...field} 
@@ -288,11 +290,11 @@ export default function CreateCampaignPage() {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-semibold text-slate-700">Kampanya Açıklaması</FormLabel>
+                      <FormLabel className="text-sm font-semibold text-slate-700">{t('funds.campaign_description')}</FormLabel>
                       <FormControl>
                         <Textarea 
                           rows={5}
-                          placeholder="Kampanyanızı detaylı bir şekilde açıklayın..." 
+placeholder={t('funds.campaign_description')} 
                           className="px-4 py-3 rounded-2xl border-slate-200 focus:border-purple-500 focus:ring-purple-500 resize-none"
                           data-testid="textarea-campaign-description"
                           {...field} 
@@ -308,7 +310,7 @@ export default function CreateCampaignPage() {
                   name="imageUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-semibold text-slate-700">Görsel URL</FormLabel>
+                      <FormLabel className="text-sm font-semibold text-slate-700">{t('funds.campaign_image')}</FormLabel>
                       <FormControl>
                         <Input 
                           type="url"
@@ -319,7 +321,7 @@ export default function CreateCampaignPage() {
                         />
                       </FormControl>
                       <FormMessage />
-                      <p className="text-xs text-slate-500">Kampanyanızı en iyi temsil eden bir görsel linki ekleyin</p>
+                      <p className="text-xs text-slate-500">{t('funds.campaign_image')}</p>
                     </FormItem>
                   )}
                 />
@@ -331,7 +333,7 @@ export default function CreateCampaignPage() {
                     className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
                     data-testid="button-create-campaign"
                   >
-                    {createCampaignMutation.isPending ? "Oluşturuluyor..." : "Kampanya Oluştur"}
+{createCampaignMutation.isPending ? "Oluşturuluyor..." : t('funds.create_button')}
                   </Button>
                 </div>
               </form>
@@ -343,7 +345,7 @@ export default function CreateCampaignPage() {
         {accountActive && (
           <div className="bg-pastel-green border border-green-200 rounded-2xl p-6 mt-8 flex items-center space-x-3">
             <CheckCircle className="w-6 h-6 text-green-600" />
-            <span className="text-green-800 font-medium">Hesabınız aktif! Artık kampanya oluşturabilirsiniz.</span>
+            <span className="text-green-800 font-medium">{t('funds.account_activated')}</span>
           </div>
         )}
       </div>

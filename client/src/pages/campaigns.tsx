@@ -83,10 +83,10 @@ export default function CampaignsPage() {
               <Search className="w-8 h-8 text-background" />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold neon-text uppercase tracking-wide">
-              {t('allCampaigns')}
+              {t('donations.all_campaigns')}
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              {t('discoverCampaigns')}
+              {t('donations.subtitle')}
             </p>
             
             {/* Search Bar */}
@@ -94,7 +94,7 @@ export default function CampaignsPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
               <Input
                 type="text"
-                placeholder="Kampanya ara..."
+                placeholder={t('donations.search_placeholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-3 rounded-2xl border-slate-200 focus:border-blue-400 focus:ring-blue-400"
@@ -132,18 +132,18 @@ export default function CampaignsPage() {
                 <Search className="w-12 h-12 text-slate-400" />
               </div>
               <h3 className="text-2xl font-semibold text-slate-800 mb-2">
-                {searchTerm ? "Arama sonucu bulunamadı" : "Henüz kampanya yok"}
+                {searchTerm ? t('donations.no_results') : t('donations.no_campaigns')}
               </h3>
               <p className="text-slate-600 mb-8">
                 {searchTerm 
-                  ? "Farklı anahtar kelimeler deneyerek tekrar arayın"
-                  : "İlk kampanyayı siz oluşturun ve toplumsal değişime öncülük edin"
+                  ? t('donations.search_different')
+                  : t('donations.waiting_first')
                 }
               </p>
               {!searchTerm && (
                 <Button asChild className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                   <Link href="/create-campaign">
-                    Kampanya Oluştur
+                    {t('donations.create_campaign')}
                   </Link>
                 </Button>
               )}

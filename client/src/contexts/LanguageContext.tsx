@@ -134,6 +134,10 @@ const translations = {
     'verifying': 'VERIFYING',
     'viewOnExplorer': 'VIEW ON EXPLORER',
     'howToPay': 'HOW TO PAY',
+    
+    // Common translations
+    'common.copied': 'COPIED!',
+    'common.back_to_home': 'Back to Home',
     'step1ConnectWallet': 'Connect your wallet to the platform',
     'step2SelectNetwork': 'Select Ethereum or BSC network based on your preference',
     'step3SendTokens': 'Send the exact amount of USDT/BUSD to our platform wallet',
@@ -176,9 +180,6 @@ const translations = {
     'activationError': 'Account activation error',
     'connectWalletFirst': 'Please connect your wallet first',
     'back': 'BACK',
-
-    // Common
-    'common.back_to_home': 'Back to Home',
 
     // Profile Page
     'profile.access_title': 'Profile Access',

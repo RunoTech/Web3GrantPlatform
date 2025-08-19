@@ -109,18 +109,7 @@ export default function CryptoOnramp({
       <Button 
         onClick={openCryptoOnramp}
         disabled={!isConnected}
-        style={{
-          background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
-          color: '#ffffff',
-          fontFamily: "'Inter', sans-serif",
-          fontSize: '0.85rem',
-          fontWeight: '500',
-          padding: '10px 20px',
-          borderRadius: '8px',
-          border: 'none',
-          transition: 'all 0.2s ease'
-        }}
-        className="hover:opacity-90"
+        className="bg-binance-yellow hover:bg-yellow-400 text-black font-medium text-sm px-4 py-2 rounded transition-colors duration-200 disabled:opacity-50"
         data-testid="button-buy-crypto"
       >
         <CreditCard className="w-4 h-4 mr-2" />
@@ -128,129 +117,71 @@ export default function CryptoOnramp({
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-lg p-0" style={{
-          background: 'linear-gradient(135deg, rgba(12, 12, 15, 0.98), rgba(18, 18, 25, 0.98))',
-          border: '1px solid rgba(0, 212, 255, 0.2)',
-          borderRadius: '16px',
-          backdropFilter: 'blur(20px)',
-          maxHeight: '90vh',
-          overflow: 'hidden'
-        }} aria-describedby="crypto-onramp-description">
+        <DialogContent className="max-w-md p-0 bg-background border border-border rounded-lg shadow-binance" aria-describedby="crypto-onramp-description">
           <div id="crypto-onramp-description" className="sr-only">
             Kripto para satın alma formu
           </div>
-          <DialogHeader className="px-6 py-4 border-b border-gray-800">
+          <DialogHeader className="px-6 py-4 border-b border-border">
             <div className="flex items-center justify-between">
-              <DialogTitle style={{
-                fontSize: '1rem',
-                fontWeight: '600',
-                color: '#ffffff',
-                fontFamily: "'Inter', sans-serif",
-                letterSpacing: '0.02em'
-              }}>
+              <DialogTitle className="text-lg font-semibold text-foreground">
                 Kripto Satın Al
               </DialogTitle>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsOpen(false)}
-                style={{ 
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#888',
-                  padding: '8px'
-                }}
+                className="text-muted-foreground hover:text-foreground p-2"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </Button>
             </div>
           </DialogHeader>
           
-          <div className="px-6 py-4 max-h-[70vh] overflow-y-auto">
+          <div className="px-6 py-4 space-y-4">
             {/* Step: Amount Selection */}
             {step === 'amount' && (
               <div className="space-y-4">
                 {/* Wallet Info */}
-                <div style={{
-                  background: 'rgba(0, 255, 136, 0.05)',
-                  border: '1px solid rgba(0, 255, 136, 0.15)',
-                  borderRadius: '12px',
-                  padding: '14px'
-                }}>
+                <div className="bg-muted border border-border rounded-lg p-3">
                   <div className="flex items-center space-x-3">
-                    <Wallet className="w-4 h-4" style={{ color: '#00d4ff' }} />
+                    <Wallet className="w-4 h-4 text-binance-yellow" />
                     <div>
-                      <p style={{ color: '#e5e5e5', fontSize: '0.85rem', margin: 0, fontWeight: '500' }}>
+                      <p className="text-sm font-medium text-foreground mb-1">
                         Bağlı Cüzdan
                       </p>
-                      <p style={{ color: '#a0a0a0', fontSize: '0.75rem', margin: 0, marginTop: '2px' }}>
-                        <code style={{ color: '#00d4ff', fontSize: '0.7rem', fontFamily: 'monospace' }}>
-                          {address?.slice(0, 8)}...{address?.slice(-6)}
-                        </code>
-                      </p>
+                      <code className="text-xs text-muted-foreground font-mono">
+                        {address?.slice(0, 8)}...{address?.slice(-6)}
+                      </code>
                     </div>
                   </div>
                 </div>
 
                 {/* Amount Input */}
                 <div>
-                  <label style={{ color: '#e5e5e5', fontSize: '0.85rem', fontWeight: '500', display: 'block', marginBottom: '8px' }}>
+                  <label className="text-sm font-medium text-foreground block mb-2">
                     Satın Alınacak Miktar
                   </label>
-                  <div style={{
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '10px',
-                    padding: '14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px'
-                  }}>
+                  <div className="flex items-center bg-input border border-border rounded-lg p-3">
                     <input
                       type="number"
                       value={amount}
                       onChange={(e) => setAmount(Number(e.target.value))}
                       placeholder="100"
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: '#ffffff',
-                        fontSize: '1rem',
-                        fontWeight: '500',
-                        outline: 'none',
-                        flex: 1,
-                        fontFamily: "'Inter', sans-serif"
-                      }}
+                      className="bg-transparent border-none text-foreground text-base font-medium outline-none flex-1"
                     />
-                    <span style={{ color: '#00d4ff', fontSize: '0.85rem', fontWeight: '500' }}>
+                    <span className="text-binance-yellow text-sm font-medium">
                       {targetCurrency}
                     </span>
                   </div>
                 </div>
 
                 {/* Continue Button */}
-                <div 
+                <Button 
                   onClick={() => setStep('payment')}
-                  style={{
-                    background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
-                    borderRadius: '10px',
-                    padding: '14px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    textAlign: 'center',
-                    marginTop: '20px'
-                  }}
-                  className="hover:opacity-90"
+                  className="w-full bg-binance-yellow hover:bg-yellow-400 text-black font-medium py-3 mt-4"
                 >
-                  <span style={{ 
-                    color: '#ffffff', 
-                    fontSize: '0.9rem', 
-                    fontWeight: '600',
-                    fontFamily: "'Inter', sans-serif"
-                  }}>
-                    Devam Et
-                  </span>
-                </div>
+                  Devam Et
+                </Button>
               </div>
             )}
 
@@ -260,17 +191,7 @@ export default function CryptoOnramp({
                 {/* Back Button */}
                 <button 
                   onClick={() => setStep('amount')}
-                  style={{ 
-                    background: 'transparent', 
-                    border: 'none', 
-                    color: '#0ea5e9', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '6px',
-                    cursor: 'pointer',
-                    fontSize: '0.85rem',
-                    fontWeight: '500'
-                  }}
+                  className="flex items-center gap-2 text-binance-yellow hover:text-yellow-400 text-sm font-medium cursor-pointer bg-transparent border-none p-0"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Geri
@@ -278,29 +199,22 @@ export default function CryptoOnramp({
 
                 {/* Payment Method Selection */}
                 <div>
-                  <label style={{ color: '#e5e5e5', fontSize: '0.85rem', fontWeight: '500', display: 'block', marginBottom: '10px' }}>
+                  <label className="text-sm font-medium text-foreground block mb-3">
                     Ödeme Yöntemi
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-3">
                     {/* Credit Card */}
                     <div 
                       onClick={() => setSelectedPayment('card')}
-                      style={{
-                        background: selectedPayment === 'card' 
-                          ? 'rgba(14, 165, 233, 0.15)'
-                          : 'rgba(255, 255, 255, 0.04)',
-                        border: selectedPayment === 'card' 
-                          ? '1px solid #0ea5e9'
-                          : '1px solid rgba(255, 255, 255, 0.1)',
-                        borderRadius: '8px',
-                        padding: '12px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease'
-                      }}
+                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                        selectedPayment === 'card' 
+                          ? 'border-binance-yellow bg-binance-yellow/10' 
+                          : 'border-border bg-muted hover:bg-muted/80'
+                      }`}
                     >
                       <div className="flex items-center justify-center space-x-2">
-                        <CreditCard className="w-4 h-4" style={{ color: selectedPayment === 'card' ? '#0ea5e9' : '#a0a0a0' }} />
-                        <span style={{ color: selectedPayment === 'card' ? '#e5e5e5' : '#a0a0a0', fontSize: '0.8rem', fontWeight: '500' }}>
+                        <CreditCard className={`w-4 h-4 ${selectedPayment === 'card' ? 'text-binance-yellow' : 'text-muted-foreground'}`} />
+                        <span className={`text-sm font-medium ${selectedPayment === 'card' ? 'text-foreground' : 'text-muted-foreground'}`}>
                           Kredi Kartı
                         </span>
                       </div>
@@ -309,22 +223,15 @@ export default function CryptoOnramp({
                     {/* Bank Transfer */}
                     <div 
                       onClick={() => setSelectedPayment('bank')}
-                      style={{
-                        background: selectedPayment === 'bank'
-                          ? 'rgba(14, 165, 233, 0.15)'
-                          : 'rgba(255, 255, 255, 0.04)',
-                        border: selectedPayment === 'bank'
-                          ? '1px solid #0ea5e9'
-                          : '1px solid rgba(255, 255, 255, 0.1)',
-                        borderRadius: '8px',
-                        padding: '12px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease'
-                      }}
+                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                        selectedPayment === 'bank'
+                          ? 'border-binance-yellow bg-binance-yellow/10'
+                          : 'border-border bg-muted hover:bg-muted/80'
+                      }`}
                     >
                       <div className="flex items-center justify-center space-x-2">
-                        <Building2 className="w-4 h-4" style={{ color: selectedPayment === 'bank' ? '#0ea5e9' : '#a0a0a0' }} />
-                        <span style={{ color: selectedPayment === 'bank' ? '#e5e5e5' : '#a0a0a0', fontSize: '0.8rem', fontWeight: '500' }}>
+                        <Building2 className={`w-4 h-4 ${selectedPayment === 'bank' ? 'text-binance-yellow' : 'text-muted-foreground'}`} />
+                        <span className={`text-sm font-medium ${selectedPayment === 'bank' ? 'text-foreground' : 'text-muted-foreground'}`}>
                           Banka Kartı
                         </span>
                       </div>
@@ -336,7 +243,7 @@ export default function CryptoOnramp({
                 {selectedPayment === 'card' && (
                   <div className="space-y-3">
                     <div>
-                      <label style={{ color: '#e5e5e5', fontSize: '0.75rem', fontWeight: '500', display: 'block', marginBottom: '6px' }}>
+                      <label className="text-xs font-medium text-foreground block mb-2">
                         Kart Numarası
                       </label>
                       <input
@@ -345,23 +252,13 @@ export default function CryptoOnramp({
                         onChange={(e) => setCardDetails(prev => ({ ...prev, number: e.target.value }))}
                         placeholder="1234 5678 9012 3456"
                         maxLength={19}
-                        style={{
-                          width: '100%',
-                          background: 'rgba(255, 255, 255, 0.04)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          borderRadius: '8px',
-                          padding: '12px',
-                          color: '#ffffff',
-                          fontSize: '0.85rem',
-                          outline: 'none',
-                          fontFamily: "'Inter', sans-serif"
-                        }}
+                        className="w-full bg-input border border-border rounded-lg p-3 text-foreground text-sm outline-none focus:border-binance-yellow transition-colors"
                       />
                     </div>
                     
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label style={{ color: '#e5e5e5', fontSize: '0.75rem', fontWeight: '500', display: 'block', marginBottom: '6px' }}>
+                        <label className="text-xs font-medium text-foreground block mb-2">
                           Son Kullanma
                         </label>
                         <input
@@ -370,21 +267,11 @@ export default function CryptoOnramp({
                           onChange={(e) => setCardDetails(prev => ({ ...prev, expiry: e.target.value }))}
                           placeholder="12/25"
                           maxLength={5}
-                          style={{
-                            width: '100%',
-                            background: 'rgba(255, 255, 255, 0.04)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            borderRadius: '8px',
-                            padding: '12px',
-                            color: '#ffffff',
-                            fontSize: '0.85rem',
-                            outline: 'none',
-                            fontFamily: "'Inter', sans-serif"
-                          }}
+                          className="w-full bg-input border border-border rounded-lg p-3 text-foreground text-sm outline-none focus:border-binance-yellow transition-colors"
                         />
                       </div>
                       <div>
-                        <label style={{ color: '#e5e5e5', fontSize: '0.75rem', fontWeight: '500', display: 'block', marginBottom: '6px' }}>
+                        <label className="text-xs font-medium text-foreground block mb-2">
                           CVV
                         </label>
                         <input
@@ -393,23 +280,13 @@ export default function CryptoOnramp({
                           onChange={(e) => setCardDetails(prev => ({ ...prev, cvv: e.target.value }))}
                           placeholder="123"
                           maxLength={4}
-                          style={{
-                            width: '100%',
-                            background: 'rgba(255, 255, 255, 0.04)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            borderRadius: '8px',
-                            padding: '12px',
-                            color: '#ffffff',
-                            fontSize: '0.85rem',
-                            outline: 'none',
-                            fontFamily: "'Inter', sans-serif"
-                          }}
+                          className="w-full bg-input border border-border rounded-lg p-3 text-foreground text-sm outline-none focus:border-binance-yellow transition-colors"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label style={{ color: '#e5e5e5', fontSize: '0.75rem', fontWeight: '500', display: 'block', marginBottom: '6px' }}>
+                      <label className="text-xs font-medium text-foreground block mb-2">
                         Kart Sahibi
                       </label>
                       <input
@@ -417,108 +294,60 @@ export default function CryptoOnramp({
                         value={cardDetails.name}
                         onChange={(e) => setCardDetails(prev => ({ ...prev, name: e.target.value }))}
                         placeholder="John Doe"
-                        style={{
-                          width: '100%',
-                          background: 'rgba(255, 255, 255, 0.04)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          borderRadius: '8px',
-                          padding: '12px',
-                          color: '#ffffff',
-                          fontSize: '0.85rem',
-                          outline: 'none',
-                          fontFamily: "'Inter', sans-serif"
-                        }}
+                        className="w-full bg-input border border-border rounded-lg p-3 text-foreground text-sm outline-none focus:border-binance-yellow transition-colors"
                       />
                     </div>
                   </div>
                 )}
 
                 {/* Purchase Summary */}
-                <div style={{
-                  background: 'rgba(255, 255, 255, 0.02)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '10px',
-                  padding: '14px'
-                }}>
-                  <h4 style={{ color: '#e5e5e5', fontSize: '0.8rem', fontWeight: '500', margin: '0 0 10px 0' }}>
+                <div className="bg-muted border border-border rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-foreground mb-3">
                     İşlem Özeti
                   </h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span style={{ color: '#a0a0a0', fontSize: '0.75rem' }}>Miktar:</span>
-                      <span style={{ color: '#e5e5e5', fontSize: '0.75rem' }}>${amount} → {amount} {targetCurrency}</span>
+                      <span className="text-xs text-muted-foreground">Miktar:</span>
+                      <span className="text-xs text-foreground font-medium">${amount} → {amount} {targetCurrency}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span style={{ color: '#a0a0a0', fontSize: '0.75rem' }}>Ödeme:</span>
-                      <span style={{ color: '#e5e5e5', fontSize: '0.75rem' }}>
+                      <span className="text-xs text-muted-foreground">Ödeme:</span>
+                      <span className="text-xs text-foreground font-medium">
                         {selectedPayment === 'card' ? 'Kredi Kartı' : 'Banka Kartı'}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span style={{ color: '#a0a0a0', fontSize: '0.75rem' }}>Cüzdan:</span>
-                      <span style={{ color: '#0ea5e9', fontSize: '0.7rem', fontFamily: 'monospace' }}>
+                      <span className="text-xs text-muted-foreground">Cüzdan:</span>
+                      <code className="text-xs text-binance-yellow font-mono">
                         {address?.slice(0, 8)}...{address?.slice(-6)}
-                      </span>
+                      </code>
                     </div>
                   </div>
                 </div>
 
                 {/* Pay Button */}
-                <div 
+                <Button 
                   onClick={handlePayment}
-                  style={{
-                    background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
-                    borderRadius: '10px',
-                    padding: '14px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    textAlign: 'center',
-                    opacity: (selectedPayment === 'card' && (!cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name)) ? 0.5 : 1,
-                    marginTop: '16px'
-                  }}
-                  className="hover:opacity-90"
+                  disabled={selectedPayment === 'card' && (!cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name)}
+                  className="w-full bg-binance-yellow hover:bg-yellow-400 text-black font-medium py-3 mt-4 disabled:opacity-50"
                 >
-                  <div className="flex items-center justify-center space-x-2">
-                    <ShoppingCart className="w-4 h-4" style={{ color: '#ffffff' }} />
-                    <span style={{ 
-                      color: '#ffffff', 
-                      fontSize: '0.9rem', 
-                      fontWeight: '600',
-                      fontFamily: "'Inter', sans-serif"
-                    }}>
-                      ${amount} Öde
-                    </span>
-                  </div>
-                </div>
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  ${amount} Öde
+                </Button>
               </div>
             )}
 
             {/* Step: Processing */}
             {step === 'processing' && (
-              <div className="space-y-4 text-center py-8">
-                <div style={{
-                  background: 'rgba(255, 255, 255, 0.02)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '12px',
-                  padding: '32px 20px'
-                }}>
-                  <div 
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      border: '3px solid rgba(14, 165, 233, 0.3)',
-                      borderTop: '3px solid #0ea5e9',
-                      borderRadius: '50%',
-                      margin: '0 auto 16px',
-                      animation: 'spin 1s linear infinite'
-                    }}
-                  ></div>
+              <div className="text-center py-8">
+                <div className="bg-muted border border-border rounded-lg p-8">
+                  <div className="w-8 h-8 border-2 border-muted-foreground border-t-binance-yellow rounded-full animate-spin mx-auto mb-4"></div>
                   
-                  <h3 style={{ color: '#e5e5e5', fontSize: '1rem', fontWeight: '600', margin: '0 0 8px 0', fontFamily: "'Inter', sans-serif" }}>
+                  <h3 className="text-base font-semibold text-foreground mb-2">
                     İşlem İşleniyor
                   </h3>
                   
-                  <p style={{ color: '#a0a0a0', fontSize: '0.8rem', margin: 0 }}>
+                  <p className="text-sm text-muted-foreground">
                     Ödemeniz güvenli olarak işleniyor...
                   </p>
                 </div>
@@ -527,31 +356,19 @@ export default function CryptoOnramp({
 
             {/* Step: Success */}
             {step === 'success' && (
-              <div className="space-y-4 text-center py-8">
-                <div style={{
-                  background: 'rgba(34, 197, 94, 0.1)',
-                  border: '1px solid rgba(34, 197, 94, 0.2)',
-                  borderRadius: '12px',
-                  padding: '32px 20px'
-                }}>
-                  <CheckCircle 
-                    style={{ 
-                      color: '#22c55e', 
-                      width: '40px', 
-                      height: '40px', 
-                      margin: '0 auto 16px'
-                    }} 
-                  />
+              <div className="text-center py-8">
+                <div className="bg-success/10 border border-success/20 rounded-lg p-8">
+                  <CheckCircle className="w-10 h-10 text-success mx-auto mb-4" />
                   
-                  <h3 style={{ color: '#22c55e', fontSize: '1rem', fontWeight: '600', margin: '0 0 8px 0', fontFamily: "'Inter', sans-serif" }}>
+                  <h3 className="text-base font-semibold text-success mb-2">
                     İşlem Başarılı
                   </h3>
                   
-                  <p style={{ color: '#e5e5e5', fontSize: '0.85rem', margin: '0 0 6px 0' }}>
+                  <p className="text-sm text-foreground mb-1">
                     {amount} {targetCurrency} cüzdanınıza gönderildi
                   </p>
                   
-                  <p style={{ color: '#a0a0a0', fontSize: '0.75rem', margin: 0 }}>
+                  <p className="text-xs text-muted-foreground">
                     Bu pencere otomatik kapanacak...
                   </p>
                 </div>

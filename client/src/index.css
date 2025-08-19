@@ -1,96 +1,126 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
 /* Font imports - must be first */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&family=Fira+Code:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Futuristic Color Palette */
-  --background: hsl(240 5% 6%);
-  --foreground: hsl(0 0% 95%);
-  --card: hsl(240 6% 9%);
-  --card-foreground: hsl(0 0% 95%);
-  --popover: hsl(240 6% 9%);
-  --popover-foreground: hsl(0 0% 95%);
-  
-  /* Primary Colors - Cyan Tech */
-  --primary: hsl(180 100% 50%);
-  --primary-foreground: hsl(240 5% 6%);
-  --secondary: hsl(240 6% 12%);
-  --secondary-foreground: hsl(0 0% 95%);
-  
-  /* Accent Colors - Electric Purple */
-  --accent: hsl(270 100% 60%);
-  --accent-foreground: hsl(0 0% 100%);
-  --muted: hsl(240 6% 12%);
-  --muted-foreground: hsl(240 5% 65%);
-  
-  /* Destructive Colors */
-  --destructive: hsl(0 100% 55%);
-  --destructive-foreground: hsl(0 0% 100%);
-  
-  /* Border and Input */
-  --border: hsl(240 6% 18%);
-  --input: hsl(240 6% 12%);
-  --ring: hsl(180 100% 50%);
-  
-  /* Chart Colors */
-  --chart-1: hsl(180 100% 50%);
-  --chart-2: hsl(120 100% 45%);
-  --chart-3: hsl(45 100% 55%);
-  --chart-4: hsl(270 100% 60%);
-  --chart-5: hsl(330 100% 60%);
-  
-  /* Typography */
-  --font-sans: 'Inter', 'JetBrains Mono', system-ui, sans-serif;
-  --font-serif: 'Inter', system-ui, serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  /* Binance-style Light Theme - White/Yellow */
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(0 0% 9%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(0 0% 9%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(0 0% 9%);
+  --primary: hsl(45 100% 51%); /* Binance Yellow */
+  --primary-foreground: hsl(0 0% 9%);
+  --secondary: hsl(0 0% 96%);
+  --secondary-foreground: hsl(0 0% 9%);
+  --muted: hsl(0 0% 96%);
+  --muted-foreground: hsl(0 0% 45%);
+  --accent: hsl(45 100% 51%);
+  --accent-foreground: hsl(0 0% 9%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --border: hsl(0 0% 91%);
+  --input: hsl(0 0% 96%);
+  --ring: hsl(45 100% 51%);
   --radius: 0.5rem;
-  
-  /* Futuristic Gradient Colors */
-  --gradient-primary: linear-gradient(135deg, hsl(180 100% 50%) 0%, hsl(270 100% 60%) 100%);
-  --gradient-secondary: linear-gradient(135deg, hsl(120 100% 45%) 0%, hsl(180 100% 50%) 100%);
-  --gradient-accent: linear-gradient(135deg, hsl(270 100% 60%) 0%, hsl(330 100% 60%) 100%);
-  --gradient-warning: linear-gradient(135deg, hsl(45 100% 55%) 0%, hsl(30 100% 55%) 100%);
-  
-  /* Neon Effects */
-  --neon-cyan: 0 0 20px hsl(180 100% 50%), 0 0 40px hsl(180 100% 50%), 0 0 60px hsl(180 100% 50%);
-  --neon-purple: 0 0 20px hsl(270 100% 60%), 0 0 40px hsl(270 100% 60%), 0 0 60px hsl(270 100% 60%);
-  --neon-green: 0 0 20px hsl(120 100% 45%), 0 0 40px hsl(120 100% 45%), 0 0 60px hsl(120 100% 45%);
-  
-  /* Futuristic Colors */
-  --cyber-cyan: hsl(180 100% 50%);
-  --cyber-purple: hsl(270 100% 60%);
-  --cyber-green: hsl(120 100% 45%);
-  --cyber-orange: hsl(30 100% 55%);
-  --cyber-pink: hsl(330 100% 60%);
-  --cyber-yellow: hsl(45 100% 55%);
-  
-  /* Surface Colors */
-  --surface-primary: hsl(240 6% 12%);
-  --surface-secondary: hsl(240 6% 15%);
-  --surface-tertiary: hsl(240 6% 18%);
+
+  /* Binance Color Palette */
+  --binance-yellow: #FCD535;
+  --binance-dark: #0B0E11;
+  --binance-gray: #474D57;
+  --binance-light-gray: #F5F5F5;
+  --success-green: #00D4AA;
+  --danger-red: #F84960;
 }
 
-/* Cyberpunk Animations */
-@keyframes gradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.dark {
+  /* Binance-style Dark Theme - Black/Yellow */
+  --background: hsl(210 11% 7%); /* #0B0E11 */
+  --foreground: hsl(0 0% 95%);
+  --card: hsl(210 11% 9%);
+  --card-foreground: hsl(0 0% 95%);
+  --popover: hsl(210 11% 9%);
+  --popover-foreground: hsl(0 0% 95%);
+  --primary: hsl(45 100% 51%); /* Binance Yellow */
+  --primary-foreground: hsl(210 11% 7%);
+  --secondary: hsl(210 11% 12%);
+  --secondary-foreground: hsl(0 0% 95%);
+  --muted: hsl(210 11% 12%);
+  --muted-foreground: hsl(0 0% 55%);
+  --accent: hsl(45 100% 51%);
+  --accent-foreground: hsl(210 11% 7%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --border: hsl(210 11% 15%);
+  --input: hsl(210 11% 12%);
+  --ring: hsl(45 100% 51%);
 }
 
-@keyframes glow {
-  0% { text-shadow: 0 0 20px rgba(0, 212, 255, 0.5); }
-  100% { text-shadow: 0 0 30px rgba(0, 212, 255, 0.8), 0 0 40px rgba(0, 212, 255, 0.6); }
+* {
+  border-color: hsl(var(--border));
 }
 
-@keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+body {
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 14px; /* Binance-style small font size */
+  line-height: 1.5;
+  letter-spacing: -0.01em;
 }
 
+/* Binance-style Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: 1.75rem; } /* 28px */
+h2 { font-size: 1.5rem; }  /* 24px */
+h3 { font-size: 1.25rem; } /* 20px */
+h4 { font-size: 1.125rem; } /* 18px */
+h5 { font-size: 1rem; }    /* 16px */
+h6 { font-size: 0.875rem; } /* 14px */
+
+/* Binance-style Button and Input Sizing */
+.btn-sm {
+  font-size: 0.75rem; /* 12px */
+  padding: 0.375rem 0.75rem;
+}
+
+.btn-md {
+  font-size: 0.875rem; /* 14px */
+  padding: 0.5rem 1rem;
+}
+
+.btn-lg {
+  font-size: 1rem; /* 16px */
+  padding: 0.75rem 1.5rem;
+}
+
+.text-xs { font-size: 0.625rem; } /* 10px */
+.text-sm { font-size: 0.75rem; }  /* 12px */
+.text-base { font-size: 0.875rem; } /* 14px - Binance default */
+.text-lg { font-size: 1rem; }     /* 16px */
+.text-xl { font-size: 1.125rem; } /* 18px */
+
+/* Binance-style Colors */
+.bg-binance-yellow { background-color: var(--binance-yellow); }
+.text-binance-yellow { color: var(--binance-yellow); }
+.bg-binance-dark { background-color: var(--binance-dark); }
+.text-binance-dark { color: var(--binance-dark); }
+.bg-success { background-color: var(--success-green); }
+.text-success { color: var(--success-green); }
+.bg-danger { background-color: var(--danger-red); }
+.text-danger { color: var(--danger-red); }
+
+/* Custom animations */
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.7; transform: scale(1.05); }
@@ -106,191 +136,29 @@
   100% { transform: rotate(360deg); }
 }
 
-
-
-.dark {
-  /* Enhanced Dark Mode for Futuristic Look */
-  --background: hsl(240 5% 4%);
-  --foreground: hsl(0 0% 98%);
-  --card: hsl(240 6% 7%);
-  --card-foreground: hsl(0 0% 98%);
-  --popover: hsl(240 6% 7%);
-  --popover-foreground: hsl(0 0% 98%);
-  --primary: hsl(180 100% 45%);
-  --primary-foreground: hsl(240 5% 4%);
-  --secondary: hsl(240 6% 10%);
-  --secondary-foreground: hsl(0 0% 98%);
-  --muted: hsl(240 6% 10%);
-  --muted-foreground: hsl(240 5% 70%);
-  --accent: hsl(270 100% 55%);
-  --accent-foreground: hsl(0 0% 100%);
-  --destructive: hsl(0 100% 50%);
-  --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(240 6% 15%);
-  --input: hsl(240 6% 8%);
-  --ring: hsl(180 100% 45%);
+/* Binance-style Shadows */
+.shadow-binance {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply font-sans antialiased bg-background text-foreground;
-    background: hsl(var(--background));
-    color: hsl(var(--foreground));
-  }
+.dark .shadow-binance {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-@layer components {
-  /* Futuristic Components */
-  .cyber-card {
-    background: var(--surface-primary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-    position: relative;
-  }
-  
-  .cyber-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: var(--radius);
-    padding: 1px;
-    background: var(--gradient-primary);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: subtract;
-    opacity: 0.3;
-    pointer-events: none;
-  }
-  
-  .neon-border {
-    border: 1px solid var(--cyber-cyan);
-    box-shadow: 0 0 10px var(--cyber-cyan), inset 0 0 10px rgba(0, 255, 255, 0.1);
-  }
-  
-  .neon-text {
-    color: var(--cyber-cyan);
-    text-shadow: 0 0 10px var(--cyber-cyan), 0 0 20px var(--cyber-cyan), 0 0 30px var(--cyber-cyan);
-  }
-  
-  /* Cyber Color Classes */
-  .cyber-cyan-bg {
-    background: var(--cyber-cyan);
-    color: var(--background);
-  }
-  
-  .cyber-purple-bg {
-    background: var(--cyber-purple);
-    color: white;
-  }
-  
-  .cyber-green-bg {
-    background: var(--cyber-green);
-    color: var(--background);
-  }
-  
-  .cyber-orange-bg {
-    background: var(--cyber-orange);
-    color: var(--background);
-  }
-  
-  .cyber-yellow-bg {
-    background: var(--cyber-yellow);
-    color: var(--background);
-  }
-  
-  /* Gradient Classes */
-  .gradient-primary {
-    background: var(--gradient-primary);
-  }
-  
-  .gradient-secondary {
-    background: var(--gradient-secondary);
-  }
-  
-  .gradient-accent {
-    background: var(--gradient-accent);
-  }
-  
-  .gradient-warning {
-    background: var(--gradient-warning);
-  }
-  
-  /* Futuristic Button Styles */
-  .btn-cyber {
-    @apply px-6 py-3 font-semibold transition-all duration-200;
-    border-radius: var(--radius);
-    border: 1px solid var(--cyber-cyan);
-    background: transparent;
-    color: var(--cyber-cyan);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .btn-cyber:hover {
-    background: var(--cyber-cyan);
-    color: var(--background);
-    box-shadow: 0 0 20px var(--cyber-cyan);
-  }
-  
-  .btn-cyber::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-  }
-  
-  .btn-cyber:hover::before {
-    left: 100%;
-  }
-  
-  /* Futuristic Card Styles */
-  .card-cyber {
-    @apply rounded-lg border transition-all duration-200;
-    background: var(--surface-primary);
-    border-color: var(--border);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  }
-  
-  .card-cyber:hover {
-    border-color: var(--cyber-cyan);
-    box-shadow: 0 8px 30px rgba(0, 255, 255, 0.2);
-  }
-  
-  /* Utility Classes */
-  .text-cyber-cyan {
-    color: var(--cyber-cyan);
-  }
-  
-  .text-cyber-purple {
-    color: var(--cyber-purple);
-  }
-  
-  .text-cyber-green {
-    color: var(--cyber-green);
-  }
-  
-  .bg-surface {
-    background: var(--surface-primary);
-  }
-  
-  .bg-surface-2 {
-    background: var(--surface-secondary);
-  }
-  
-  .bg-surface-3 {
-    background: var(--surface-tertiary);
-  }
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
 }

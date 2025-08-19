@@ -766,44 +766,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // MoonPay payment success callback
-  app.get('/payment-success', (req, res) => {
-    // Handle successful MoonPay payment
-    res.send(`
-      <html>
-        <head>
-          <title>Payment Successful - DUXXAN</title>
-          <style>
-            body { 
-              background: #0a0a0a; 
-              color: #ffffff; 
-              font-family: 'Orbitron', monospace; 
-              text-align: center; 
-              padding: 50px;
-            }
-            .success { color: #00ff88; font-size: 24px; margin-bottom: 20px; }
-            .close-btn { 
-              background: linear-gradient(135deg, #00ff88, #00d4ff);
-              color: #000;
-              padding: 10px 20px;
-              border: none;
-              border-radius: 8px;
-              cursor: pointer;
-              font-family: inherit;
-              font-weight: bold;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="success">✓ Payment Successful!</div>
-          <p>Your crypto purchase has been completed.</p>
-          <button class="close-btn" onclick="window.close()">Close Window</button>
-          <script>
-            setTimeout(() => window.close(), 3000);
-          </script>
-        </body>
-      </html>
-    `);
+  // MoonPay custom payment processing
+  app.post('/api/moonpay-purchase', async (req, res) => {
+    try {
+      const { amount, currency, targetCurrency, walletAddress, paymentMethod, cardDetails } = req.body;
+      
+      if (!process.env.VITE_MOONPAY_API_KEY) {
+        return res.status(500).json({ error: 'MoonPay API key not configured' });
+      }
+
+      // Simulate MoonPay API integration
+      // In production, this would call actual MoonPay API
+      
+      // Basic validation
+      if (!amount || !walletAddress || !targetCurrency) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      if (paymentMethod === 'card' && (!cardDetails?.number || !cardDetails?.expiry || !cardDetails?.cvv)) {
+        return res.status(400).json({ error: 'Invalid card details' });
+      }
+
+      // Simulate processing delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Simulate success response
+      const transactionId = `mp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      res.json({
+        success: true,
+        transactionId,
+        amount,
+        targetCurrency,
+        walletAddress,
+        status: 'completed',
+        message: 'Payment processed successfully'
+      });
+
+    } catch (error) {
+      console.error('MoonPay purchase error:', error);
+      res.status(500).json({ error: 'Payment processing failed' });
+    }
   });
 
   const httpServer = createServer(app);

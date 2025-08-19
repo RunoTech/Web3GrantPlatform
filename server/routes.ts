@@ -766,6 +766,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Crypto onramp API endpoint (ready for custom API integration)
+  app.post('/api/crypto-onramp', async (req, res) => {
+    try {
+      const { amount, currency, paymentMethod, walletAddress, targetToken } = req.body;
+      
+      // TODO: Integrate with user-provided onramp API
+      // This is where the custom API integration will be implemented
+      
+      // For now, return a placeholder response
+      res.status(503).json({ 
+        message: 'Onramp API integration pending',
+        details: 'Custom API will be integrated when provided by user',
+        requestData: {
+          amount,
+          currency,
+          paymentMethod,
+          walletAddress,
+          targetToken
+        }
+      });
+    } catch (error) {
+      console.error('Crypto onramp error:', error);
+      res.status(500).json({ message: 'Onramp service error' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

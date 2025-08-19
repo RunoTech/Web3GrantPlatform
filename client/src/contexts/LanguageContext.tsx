@@ -370,7 +370,7 @@ const translations = {
     'profile.create_first_campaign': 'İlk kampanyanızı oluşturun ve toplumsal değişime öncülük edin',
     'profile.create_campaign': 'Kampanya Oluştur',
     'profile.daily_reward_participation': 'Günlük Ödül Sistemine Katılım',
-    'profile.total_participation_days': 'Toplam {{days}} gün katılım gösterdiniz',
+    'profile.total_participation_days': 'Toplam gün katılım gösterdiniz',
     'profile.total_participation': 'Toplam Katılım',
     'profile.this_month': 'Bu Ay',
     'profile.earned_rewards': 'Kazanılan Ödül',

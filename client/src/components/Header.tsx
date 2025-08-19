@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import LanguageSelector from "@/components/LanguageSelector";
+import ThemeToggle from "@/components/ThemeToggle";
 import CryptoOnramp from "@/components/CryptoOnramp";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useWallet } from "@/hooks/useWallet";
@@ -76,6 +77,7 @@ export default function Header({ currentPage }: HeaderProps) {
 
           <div className="flex items-center space-x-4">
             <CryptoOnramp />
+            <ThemeToggle />
             <LanguageSelector />
             <WalletConnectButton />
           </div>

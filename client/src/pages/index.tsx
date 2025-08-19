@@ -7,6 +7,7 @@ import CampaignCard from "@/components/CampaignCard";
 import LanguageSelector from "@/components/LanguageSelector";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSettings } from "@/hooks/useSettings";
 import { api } from "@/utils/api";
 import { 
   Heart, 
@@ -27,6 +28,12 @@ import {
 export default function HomePage() {
   const { isConnected, address } = useWallet();
   const { t } = useLanguage();
+  const { 
+    heroTitle, 
+    heroSubtitle, 
+    getSetting,
+    siteTitle
+  } = useSettings();
 
   const { data: popularCampaigns = [] } = useQuery({
     queryKey: ["/api/get-popular-campaigns"],
@@ -57,7 +64,7 @@ export default function HomePage() {
                 <Heart className="w-6 h-6 text-background" />
               </div>
               <h1 className="text-xl font-bold neon-text uppercase tracking-wide">
-                {t('duxxan')}
+                {siteTitle}
               </h1>
             </div>
 
@@ -103,12 +110,12 @@ export default function HomePage() {
             <div className="space-y-6">
               <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight tracking-wider uppercase">
                 <span className="neon-text">
-                  {t('hero.title')}
+                  {heroTitle}
                 </span>
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-                {t('hero.subtitle')}
+                {heroSubtitle}
               </p>
             </div>
             
@@ -121,7 +128,7 @@ export default function HomePage() {
               >
                 <Link href="/create-campaign">
                   <Target className="w-5 h-5 mr-2" />
-                  {t('hero.create_campaign')}
+                  {getSetting('hero_button_text', 'KAMPANYA OLUŞTUR')}
                 </Link>
               </Button>
               <Button 
@@ -157,9 +164,9 @@ export default function HomePage() {
               <div className="w-20 h-20 cyber-cyan-bg rounded-lg flex items-center justify-center mx-auto mb-6">
                 <Shield className="w-10 h-10 text-background" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.blockchain_security')}</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{getSetting('feature1_title', 'ŞEFFAFLİK')}</h3>
               <p className="text-muted-foreground leading-relaxed">
-                {t('features.blockchain_desc')}
+                {getSetting('feature1_desc', 'Tüm bağışlar blockchain üzerinde kayıtlı')}
               </p>
             </div>
 
@@ -167,9 +174,9 @@ export default function HomePage() {
               <div className="w-20 h-20 cyber-green-bg rounded-lg flex items-center justify-center mx-auto mb-6">
                 <DollarSign className="w-10 h-10 text-background" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.commission_free')}</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{getSetting('feature2_title', 'KOMİSYONSUZ')}</h3>
               <p className="text-muted-foreground leading-relaxed">
-                {t('features.commission_desc')}
+                {getSetting('feature2_desc', 'Bağışların %100ü kampanya sahibine ulaşır')}
               </p>
             </div>
 
@@ -177,9 +184,9 @@ export default function HomePage() {
               <div className="w-20 h-20 cyber-purple-bg rounded-lg flex items-center justify-center mx-auto mb-6">
                 <Zap className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.fast_easy')}</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{getSetting('feature3_title', 'GÜVENLİK')}</h3>
               <p className="text-muted-foreground leading-relaxed">
-                {t('features.fast_desc')}
+                {getSetting('feature3_desc', 'Smart contract güvencesi ile korumalı')}
               </p>
             </div>
           </div>

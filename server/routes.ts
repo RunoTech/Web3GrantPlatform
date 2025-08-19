@@ -860,6 +860,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all settings as key-value pairs (public)
+  app.get("/api/settings-map", async (req, res) => {
+    try {
+      const settings = await storage.getPlatformSettings();
+      const settingsMap: Record<string, string> = {};
+      
+      settings.forEach(setting => {
+        settingsMap[setting.key] = setting.value || '';
+      });
+      
+      res.json(settingsMap);
+    } catch (error) {
+      console.error("Error fetching settings map:", error);
+      res.status(500).json({ error: "Failed to fetch settings map" });
+    }
+  });
+
+  // Update platform setting (admin only)
+  app.put("/api/admin/settings/:key", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { key } = req.params;
+      const { value } = req.body;
+      const adminId = req.admin?.id;
+
+      if (value === undefined) {
+        return res.status(400).json({ error: "Value is required" });
+      }
+
+      await storage.updatePlatformSetting(key, value, adminId);
+      
+      // Log admin action
+      await storage.createAdminLog({
+        adminId,
+        action: "update_setting",
+        details: `Updated setting ${key} to: ${value}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json({ success: true, message: "Setting updated successfully" });
+    } catch (error) {
+      console.error("Error updating setting:", error);
+      res.status(500).json({ error: "Failed to update setting" });
+    }
+  });
+
+  // Create new platform setting (admin only)
+  app.post("/api/admin/settings-new", authenticateAdmin, async (req: any, res) => {
+    try {
+      const settingData = insertPlatformSettingSchema.parse({
+        ...req.body,
+        updatedBy: req.admin.id
+      });
+      
+      const setting = await storage.setPlatformSetting(settingData);
+      
+      // Log admin action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "create_setting",
+        details: `Created setting ${settingData.key}: ${settingData.value}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json(setting);
+    } catch (error) {
+      console.error("Error creating setting:", error);
+      res.status(500).json({ error: "Failed to create setting" });
+    }
+  });
+
+  // Get all settings with categories for admin panel (admin only) 
+  app.get("/api/admin/settings-categorized", authenticateAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getPlatformSettings();
+      
+      // Group settings by category
+      const categorizedSettings: Record<string, any[]> = {};
+      settings.forEach(setting => {
+        const category = setting.category || 'general';
+        if (!categorizedSettings[category]) {
+          categorizedSettings[category] = [];
+        }
+        categorizedSettings[category].push(setting);
+      });
+
+      res.json(categorizedSettings);
+    } catch (error) {
+      console.error("Error fetching admin settings:", error);
+      res.status(500).json({ error: "Failed to fetch settings" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

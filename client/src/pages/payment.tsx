@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import AutoPayment from "@/components/AutoPayment";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import LanguageSelector from "@/components/LanguageSelector";
+import CryptoOnramp from "@/components/CryptoOnramp";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
@@ -194,10 +195,107 @@ export default function PaymentPage() {
         {/* Payment Process */}
         {isConnected && !isActivated && (
           <>
+            {/* Payment Options Header */}
+            <Card className="cyber-card p-6 mb-6">
+              <h2 className="text-xl font-semibold neon-text mb-4 uppercase tracking-wide text-center">
+                Ödeme Seçenekleri
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Option 1: Buy Crypto First */}
+                <div style={{
+                  background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.05), rgba(255, 0, 255, 0.05))',
+                  border: '2px solid rgba(0, 212, 255, 0.3)',
+                  borderRadius: '15px',
+                  padding: '24px',
+                  textAlign: 'center'
+                }}>
+                  <CreditCard className="w-12 h-12 mx-auto mb-4" style={{ color: '#00d4ff' }} />
+                  <h3 style={{
+                    fontSize: '1.1rem',
+                    fontWeight: '600',
+                    color: '#ffffff',
+                    marginBottom: '8px',
+                    fontFamily: "'Orbitron', monospace"
+                  }}>
+                    Kredi Kartı ile Kripto Al
+                  </h3>
+                  <p style={{
+                    color: '#888',
+                    fontSize: '0.9rem',
+                    marginBottom: '16px'
+                  }}>
+                    Önce kredi kartınızla USDT satın alın, sonra aktivasyon yapın
+                  </p>
+                  <Badge style={{
+                    background: 'rgba(0, 255, 136, 0.2)',
+                    color: '#00ff88',
+                    border: '1px solid rgba(0, 255, 136, 0.3)',
+                    marginBottom: '16px'
+                  }}>
+                    ÖNERİLEN
+                  </Badge>
+                  <div>
+                    <CryptoOnramp 
+                      targetAmount={75}
+                      targetCurrency="USDT"
+                      onSuccess={(txHash) => {
+                        toast({
+                          title: "Kripto Satın Alındı!",
+                          description: "Şimdi hesap aktivasyonu yapabilirsiniz.",
+                        });
+                      }}
+                      onError={(error) => {
+                        toast({
+                          title: "Hata",
+                          description: error,
+                          variant: "destructive",
+                        });
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Option 2: Direct MetaMask */}
+                <div style={{
+                  background: 'linear-gradient(135deg, rgba(255, 0, 255, 0.05), rgba(0, 255, 136, 0.05))',
+                  border: '2px solid rgba(255, 0, 255, 0.3)',
+                  borderRadius: '15px',
+                  padding: '24px',
+                  textAlign: 'center'
+                }}>
+                  <Wallet className="w-12 h-12 mx-auto mb-4" style={{ color: '#ff00ff' }} />
+                  <h3 style={{
+                    fontSize: '1.1rem',
+                    fontWeight: '600',
+                    color: '#ffffff',
+                    marginBottom: '8px',
+                    fontFamily: "'Orbitron', monospace"
+                  }}>
+                    MetaMask ile Direkt Öde
+                  </h3>
+                  <p style={{
+                    color: '#888',
+                    fontSize: '0.9rem',
+                    marginBottom: '16px'
+                  }}>
+                    Cüzdanınızda USDT varsa direkt aktivasyon yapın
+                  </p>
+                  <Badge style={{
+                    background: 'rgba(255, 0, 255, 0.2)',
+                    color: '#ff00ff',
+                    border: '1px solid rgba(255, 0, 255, 0.3)',
+                    marginBottom: '16px'
+                  }}>
+                    HIZLI
+                  </Badge>
+                </div>
+              </div>
+            </Card>
+
             <Alert className="mb-6 border-cyber-green">
               <CheckCircle className="h-4 w-4" />
               <AlertDescription>
-                <strong>NEW:</strong> Instant payment with MetaMask! Just click "Instant Pay" for automatic activation.
+                <strong>YENİ:</strong> Kredi kartı ile kripto satın alabilir ve direkt bağış yapabilirsiniz!
               </AlertDescription>
             </Alert>
 

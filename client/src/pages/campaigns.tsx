@@ -5,11 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import CampaignCard from "@/components/CampaignCard";
-import { Heart, Search, ArrowLeft } from "lucide-react";
+import CryptoOnramp from "@/components/CryptoOnramp";
+import LanguageSelector from "@/components/LanguageSelector";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useToast } from "@/hooks/use-toast";
+import { Heart, Search, ArrowLeft, CreditCard } from "lucide-react";
 import type { Campaign } from "@shared/schema";
 
 export default function CampaignsPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const { t } = useLanguage();
+  const { toast } = useToast();
 
   const { data: campaigns = [], isLoading } = useQuery({
     queryKey: ["/api/get-campaigns"],
@@ -21,55 +27,66 @@ export default function CampaignsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Navigation Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200">
+      <header className="sticky top-0 z-50 cyber-card border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
-                <Heart className="w-6 h-6 text-white" />
+            <div className="flex items-center space-x-4">
+              <Link href="/">
+                <Button variant="ghost" size="sm" className="hover:text-cyber-cyan">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  {t('back')}
+                </Button>
+              </Link>
+              
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center neon-border">
+                  <Heart className="w-6 h-6 text-background" />
+                </div>
+                <h1 className="text-xl font-bold neon-text uppercase tracking-wide">
+                  {t('duxxan')}
+                </h1>
               </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Web3Bağış
-              </h1>
             </div>
 
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/" className="text-slate-600 hover:text-slate-800 font-medium transition-colors">
-                Ana Sayfa
-              </Link>
-              <Link href="/campaigns" className="text-slate-600 hover:text-slate-800 font-medium transition-colors">
-                Kampanyalar
-              </Link>
-              <Link href="/create-campaign" className="text-slate-600 hover:text-slate-800 font-medium transition-colors">
-                Kampanya Oluştur
-              </Link>
-            </nav>
-
-            <WalletConnectButton />
+            <div className="flex items-center space-x-4">
+              <LanguageSelector />
+              <CryptoOnramp 
+                targetAmount={100}
+                targetCurrency="USDT"
+                onSuccess={(txHash) => {
+                  toast({
+                    title: "Kripto Satın Alındı!",
+                    description: "Artık bağış yapabilirsiniz.",
+                  });
+                }}
+                onError={(error) => {
+                  toast({
+                    title: "Hata",
+                    description: error,
+                    variant: "destructive",
+                  });
+                }}
+              />
+              <WalletConnectButton />
+            </div>
           </div>
         </div>
       </header>
 
       {/* Header Section */}
-      <section className="py-12 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <section className="py-12 cyber-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-4 mb-8">
-            <Button variant="ghost" asChild data-testid="button-back-home">
-              <Link href="/">
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Ana Sayfaya Dön
-              </Link>
-            </Button>
-          </div>
-          
           <div className="text-center space-y-6">
-            <h1 className="text-4xl md:text-5xl font-bold text-slate-800">
-              Tüm Kampanyalar
+            <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 neon-border">
+              <Search className="w-8 h-8 text-background" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold neon-text uppercase tracking-wide">
+              {t('allCampaigns')}
             </h1>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              Toplumsal değişime katkıda bulunmak için destekleyebileceğiniz kampanyaları keşfedin
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              {t('discoverCampaigns')}
             </p>
             
             {/* Search Bar */}

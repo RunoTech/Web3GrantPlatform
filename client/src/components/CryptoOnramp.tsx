@@ -27,11 +27,11 @@ export default function CryptoOnramp({
   const [isOpen, setIsOpen] = useState(false);
 
   const openCryptoOnramp = () => {
-    handleRampPurchase();
+    handleUniswapPurchase();
   };
 
-  // Ramp Network integration - no API key required
-  const handleRampPurchase = () => {
+  // Uniswap Widget integration for real onramp
+  const handleUniswapPurchase = () => {
     if (!isConnected || !address) {
       onError?.('Lütfen önce cüzdanınızı bağlayın');
       return;
@@ -39,19 +39,15 @@ export default function CryptoOnramp({
     setIsOpen(true);
   };
 
-  // Create Ramp widget URL
-  const createRampUrl = () => {
-    const baseUrl = 'https://buy.ramp.network';
+  // Create Uniswap widget URL - supports fiat onramp
+  const createUniswapUrl = () => {
+    const baseUrl = 'https://app.uniswap.org';
     const params = new URLSearchParams({
-      swapAsset: `${targetCurrency}_*`, // USDT on any supported network
-      userAddress: address || '',
-      fiatCurrency: 'USD,EUR,GBP,TRY', // Support multiple currencies including Turkish Lira
-      fiatValue: targetAmount.toString(),
-      hostAppName: 'DUXXAN',
-      hostLogoUrl: window.location.origin + '/logo.png',
-      finalUrl: window.location.origin,
-      variant: 'embedded-desktop',
-      webhookStatusUrl: window.location.origin + '/api/ramp-webhook'
+      theme: 'dark',
+      tokenList: 'default',
+      defaultOutputTokenAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT contract
+      exactAmount: targetAmount.toString(),
+      exactField: 'output'
     });
     
     return `${baseUrl}?${params.toString()}`;
@@ -117,20 +113,138 @@ export default function CryptoOnramp({
             </div>
           </DialogHeader>
           
-          <div className="p-0">
-            {/* Embedded Ramp Widget */}
-            <iframe
-              src={createRampUrl()}
+          <div className="p-6 space-y-6">
+            {/* Info Banner */}
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1))',
+              border: '1px solid rgba(0, 255, 136, 0.3)',
+              borderRadius: '15px',
+              padding: '16px'
+            }}>
+              <div className="flex items-center space-x-3">
+                <CreditCard className="w-5 h-5" style={{ color: '#00ff88' }} />
+                <div>
+                  <p style={{ color: '#ffffff', fontSize: '0.9rem', margin: 0 }}>
+                    Kripto satın almak için Uniswap'ı kullanın
+                  </p>
+                  <p style={{ color: '#888', fontSize: '0.8rem', margin: 0 }}>
+                    Cüzdan adresi: <code style={{ color: '#00d4ff', fontSize: '0.75rem' }}>{address}</code>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Direct Uniswap Access */}
+            <div 
+              onClick={() => window.open(createUniswapUrl(), '_blank')}
               style={{
-                width: '100%',
-                height: '680px',
-                border: 'none',
-                borderRadius: '0 0 20px 20px'
+                background: 'linear-gradient(135deg, rgba(255, 0, 122, 0.1), rgba(255, 0, 122, 0.05))',
+                border: '2px solid rgba(255, 0, 122, 0.3)',
+                borderRadius: '20px',
+                padding: '24px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
               }}
-              title="Kripto Satın Al - Ramp Network"
-              allow="payment; camera; microphone; fullscreen"
-              sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation"
-            />
+              className="hover:scale-105"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 style={{ color: '#FF007A', fontSize: '1.3rem', fontWeight: '700', margin: '0 0 8px 0', fontFamily: "'Orbitron', monospace" }}>
+                    Uniswap DeFi
+                  </h3>
+                  <p style={{ color: '#ffffff', fontSize: '1rem', margin: '0 0 4px 0' }}>
+                    Dünyanın en büyük DeFi borsası
+                  </p>
+                  <p style={{ color: '#888', fontSize: '0.85rem', margin: 0 }}>
+                    • Kredi kartı desteği • USDT direkt satın alma • Güvenli DeFi protokolü
+                  </p>
+                </div>
+                <ExternalLink className="w-8 h-8" style={{ color: '#FF007A' }} />
+              </div>
+            </div>
+
+            {/* Alternative Options */}
+            <div className="space-y-3">
+              <h4 style={{
+                color: '#ffffff',
+                fontSize: '1rem',
+                fontWeight: '600',
+                marginBottom: '12px',
+                fontFamily: "'Orbitron', monospace"
+              }}>
+                Alternatif Yöntemler
+              </h4>
+
+              {/* Coinbase */}
+              <div 
+                onClick={() => window.open('https://www.coinbase.com/tr/price/tether', '_blank')}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(0, 82, 255, 0.1), rgba(0, 82, 255, 0.05))',
+                  border: '1px solid rgba(0, 82, 255, 0.3)',
+                  borderRadius: '15px',
+                  padding: '16px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                className="hover:scale-105"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 style={{ color: '#0052FF', fontSize: '1rem', fontWeight: '600', margin: 0 }}>
+                      Coinbase
+                    </h4>
+                    <p style={{ color: '#888', fontSize: '0.85rem', margin: 0 }}>
+                      Dünya çapında güvenilir borsa
+                    </p>
+                  </div>
+                  <ExternalLink className="w-5 h-5" style={{ color: '#0052FF' }} />
+                </div>
+              </div>
+
+              {/* Kraken */}
+              <div 
+                onClick={() => window.open('https://www.kraken.com/tr-tr/', '_blank')}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(91, 59, 221, 0.1), rgba(91, 59, 221, 0.05))',
+                  border: '1px solid rgba(91, 59, 221, 0.3)',
+                  borderRadius: '15px',
+                  padding: '16px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                className="hover:scale-105"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 style={{ color: '#5B3BDD', fontSize: '1rem', fontWeight: '600', margin: 0 }}>
+                      Kraken
+                    </h4>
+                    <p style={{ color: '#888', fontSize: '0.85rem', margin: 0 }}>
+                      Düşük komisyon, yüksek güvenlik
+                    </p>
+                  </div>
+                  <ExternalLink className="w-5 h-5" style={{ color: '#5B3BDD' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Instructions */}
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 0, 255, 0.1))',
+              border: '1px solid rgba(0, 212, 255, 0.3)',
+              borderRadius: '15px',
+              padding: '16px'
+            }}>
+              <h4 style={{ color: '#00d4ff', fontSize: '0.9rem', fontWeight: '600', margin: '0 0 8px 0' }}>
+                ⚡ Hızlı Başlangıç:
+              </h4>
+              <ol style={{ color: '#cccccc', fontSize: '0.8rem', margin: 0, paddingLeft: '16px' }}>
+                <li>Uniswap'a tıklayın (en hızlı yöntem)</li>
+                <li>Cüzdanınızı bağlayın</li>
+                <li>Kredi kartı ile USDT satın alın</li>
+                <li>DUXXAN'a geri dönerek bağış yapın!</li>
+              </ol>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

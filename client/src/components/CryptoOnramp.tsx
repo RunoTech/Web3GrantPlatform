@@ -27,39 +27,34 @@ export default function CryptoOnramp({
   const [isOpen, setIsOpen] = useState(false);
 
   const openCryptoOnramp = () => {
-    handleDirectPurchase();
+    handleRampPurchase();
   };
 
-  // Simple direct purchase options
-  const handleDirectPurchase = () => {
+  // Ramp Network integration - no API key required
+  const handleRampPurchase = () => {
     if (!isConnected || !address) {
       onError?.('Lütfen önce cüzdanınızı bağlayın');
       return;
     }
-
-    // Show direct purchase options
     setIsOpen(true);
   };
 
-  const openBinanceP2P = () => {
-    const binanceUrl = 'https://p2p.binance.com/tr/trade/buy/USDT';
-    window.open(binanceUrl, '_blank');
-    setIsOpen(false);
-    onSuccess?.('binance-p2p-opened');
-  };
-
-  const openKuCoinP2P = () => {
-    const kucoinUrl = 'https://www.kucoin.com/tr/otc';
-    window.open(kucoinUrl, '_blank');
-    setIsOpen(false);
-    onSuccess?.('kucoin-p2p-opened');
-  };
-
-  const openBybitP2P = () => {
-    const bybitUrl = 'https://www.bybit.com/fiat/trade/otc/';
-    window.open(bybitUrl, '_blank');
-    setIsOpen(false);
-    onSuccess?.('bybit-p2p-opened');
+  // Create Ramp widget URL
+  const createRampUrl = () => {
+    const baseUrl = 'https://buy.ramp.network';
+    const params = new URLSearchParams({
+      swapAsset: `${targetCurrency}_*`, // USDT on any supported network
+      userAddress: address || '',
+      fiatCurrency: 'USD,EUR,GBP,TRY', // Support multiple currencies including Turkish Lira
+      fiatValue: targetAmount.toString(),
+      hostAppName: 'DUXXAN',
+      hostLogoUrl: window.location.origin + '/logo.png',
+      finalUrl: window.location.origin,
+      variant: 'embedded-desktop',
+      webhookStatusUrl: window.location.origin + '/api/ramp-webhook'
+    });
+    
+    return `${baseUrl}?${params.toString()}`;
   };
 
 
@@ -122,137 +117,20 @@ export default function CryptoOnramp({
             </div>
           </DialogHeader>
           
-          <div className="p-6 space-y-6">
-            {/* Info */}
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1))',
-              border: '1px solid rgba(0, 255, 136, 0.3)',
-              borderRadius: '15px',
-              padding: '16px'
-            }}>
-              <div className="flex items-center space-x-3">
-                <ExternalLink className="w-5 h-5" style={{ color: '#00ff88' }} />
-                <div>
-                  <p style={{ color: '#ffffff', fontSize: '0.9rem', margin: 0 }}>
-                    Güvenilir borsalardan USDT satın alın
-                  </p>
-                  <p style={{ color: '#888', fontSize: '0.8rem', margin: 0 }}>
-                    Satın aldıktan sonra cüzdan adresinize gönderin: <br />
-                    <code style={{ color: '#00d4ff', fontSize: '0.75rem' }}>{address}</code>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Exchange Options */}
-            <div className="space-y-3">
-              <h3 style={{
-                color: '#ffffff',
-                fontSize: '1.1rem',
-                fontWeight: '600',
-                marginBottom: '12px',
-                fontFamily: "'Orbitron', monospace"
-              }}>
-                Kripto Borsalar
-              </h3>
-
-              {/* Binance */}
-              <div 
-                onClick={openBinanceP2P}
-                style={{
-                  background: 'linear-gradient(135deg, rgba(243, 186, 47, 0.1), rgba(243, 186, 47, 0.05))',
-                  border: '1px solid rgba(243, 186, 47, 0.3)',
-                  borderRadius: '15px',
-                  padding: '16px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-                className="hover:scale-105"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 style={{ color: '#F3BA2F', fontSize: '1rem', fontWeight: '600', margin: 0 }}>
-                      Binance P2P
-                    </h4>
-                    <p style={{ color: '#888', fontSize: '0.85rem', margin: 0 }}>
-                      Türk Lirası ile USDT satın alın
-                    </p>
-                  </div>
-                  <ExternalLink className="w-5 h-5" style={{ color: '#F3BA2F' }} />
-                </div>
-              </div>
-
-              {/* KuCoin */}
-              <div 
-                onClick={openKuCoinP2P}
-                style={{
-                  background: 'linear-gradient(135deg, rgba(34, 180, 119, 0.1), rgba(34, 180, 119, 0.05))',
-                  border: '1px solid rgba(34, 180, 119, 0.3)',
-                  borderRadius: '15px',
-                  padding: '16px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-                className="hover:scale-105"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 style={{ color: '#22B477', fontSize: '1rem', fontWeight: '600', margin: 0 }}>
-                      KuCoin P2P
-                    </h4>
-                    <p style={{ color: '#888', fontSize: '0.85rem', margin: 0 }}>
-                      Düşük komisyon, hızlı işlem
-                    </p>
-                  </div>
-                  <ExternalLink className="w-5 h-5" style={{ color: '#22B477' }} />
-                </div>
-              </div>
-
-              {/* Bybit */}
-              <div 
-                onClick={openBybitP2P}
-                style={{
-                  background: 'linear-gradient(135deg, rgba(255, 180, 0, 0.1), rgba(255, 180, 0, 0.05))',
-                  border: '1px solid rgba(255, 180, 0, 0.3)',
-                  borderRadius: '15px',
-                  padding: '16px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-                className="hover:scale-105"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 style={{ color: '#FFB400', fontSize: '1rem', fontWeight: '600', margin: 0 }}>
-                      Bybit P2P
-                    </h4>
-                    <p style={{ color: '#888', fontSize: '0.85rem', margin: 0 }}>
-                      Güvenli ve kolay kullanım
-                    </p>
-                  </div>
-                  <ExternalLink className="w-5 h-5" style={{ color: '#FFB400' }} />
-                </div>
-              </div>
-            </div>
-
-            {/* Instructions */}
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 0, 255, 0.1))',
-              border: '1px solid rgba(0, 212, 255, 0.3)',
-              borderRadius: '15px',
-              padding: '16px'
-            }}>
-              <h4 style={{ color: '#00d4ff', fontSize: '0.9rem', fontWeight: '600', margin: '0 0 8px 0' }}>
-                Nasıl Kullanılır:
-              </h4>
-              <ol style={{ color: '#cccccc', fontSize: '0.8rem', margin: 0, paddingLeft: '16px' }}>
-                <li>Yukarıdaki borsalardan birini seçin</li>
-                <li>Hesap oluşturun ve kimlik doğrulama yapın</li>
-                <li>P2P bölümünden USDT satın alın</li>
-                <li>USDT'yi cüzdan adresinize gönderin</li>
-                <li>DUXXAN'da bağış yapmaya başlayın!</li>
-              </ol>
-            </div>
+          <div className="p-0">
+            {/* Embedded Ramp Widget */}
+            <iframe
+              src={createRampUrl()}
+              style={{
+                width: '100%',
+                height: '680px',
+                border: 'none',
+                borderRadius: '0 0 20px 20px'
+              }}
+              title="Kripto Satın Al - Ramp Network"
+              allow="payment; camera; microphone; fullscreen"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation"
+            />
           </div>
         </DialogContent>
       </Dialog>

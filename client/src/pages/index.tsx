@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import CampaignCard from "@/components/CampaignCard";
 import LanguageSelector from "@/components/LanguageSelector";
+import ThemeToggle from "@/components/ThemeToggle";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSettings } from "@/hooks/useSettings";
@@ -86,6 +87,7 @@ export default function HomePage() {
             </nav>
 
             <div className="flex items-center space-x-3">
+              <ThemeToggle />
               <LanguageSelector />
               <WalletConnectButton />
             </div>

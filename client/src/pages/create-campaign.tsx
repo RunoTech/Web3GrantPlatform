@@ -102,7 +102,12 @@ export default function CreateCampaignPage() {
     });
   };
 
-  const platformWallet = "0x742d35Cc9000C1b4c5aB2dBD3E47A5C6BADE3A7F"; // DUXXAN Ethereum wallet
+  // Get platform wallet dynamically
+  const { data: platformWallets } = useQuery({
+    queryKey: ["/api/platform-wallets"],
+  });
+  
+  const platformWallet = platformWallets?.ethereum || "0x742d35Cc6734C0532925a3b2f4f83233Aa5c65aa";
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);

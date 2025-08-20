@@ -228,11 +228,12 @@ export default function AdminSettingsPage() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="general">Genel</TabsTrigger>
           <TabsTrigger value="homepage">Ana Sayfa</TabsTrigger>
           <TabsTrigger value="features">Özellikler</TabsTrigger>
           <TabsTrigger value="pricing">Fiyatlar</TabsTrigger>
+          <TabsTrigger value="payment">Ödeme</TabsTrigger>
           <TabsTrigger value="contact">İletişim</TabsTrigger>
           <TabsTrigger value="social">Sosyal</TabsTrigger>
         </TabsList>

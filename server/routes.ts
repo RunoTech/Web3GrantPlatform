@@ -334,18 +334,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get platform wallet addresses (public)
+  // Get platform wallet addresses (public) - Ethereum only
   app.get("/api/platform-wallets", async (req, res) => {
     try {
       const settings = await storage.getPlatformSettings("payment");
-      const wallets: any = {};
+      const ethereumWalletSetting = settings.find(s => s.key === "ethereum_wallet_address");
       
-      settings.forEach(setting => {
-        if (setting.key.includes("wallet_address")) {
-          const network = setting.key.replace("_wallet_address", "");
-          wallets[network] = setting.value;
-        }
-      });
+      const wallets = {
+        ethereum: ethereumWalletSetting?.value || "0x742d35Cc6734C0532925a3b2f4f83233Aa5c65aa"
+      };
       
       res.json(wallets);
     } catch (error) {

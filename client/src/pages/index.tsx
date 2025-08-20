@@ -73,7 +73,7 @@ export default function HomePage() {
             <div className="flex items-center space-x-3">
               <div className="w-16 h-16 gradient-primary rounded-3xl flex items-center justify-center neon-border relative group shadow-2xl">
                 <div className="absolute inset-0 bg-gradient-to-r from-cyber-cyan/40 to-cyber-yellow/40 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                <Heart className="w-10 h-10 text-black relative z-10 drop-shadow-2xl filter brightness-0" />
+                <Heart className="w-10 h-10 text-black relative z-10 drop-shadow-2xl" />
               </div>
               <h1 className="text-xl font-bold neon-text uppercase tracking-wide">
                 {siteTitle}
@@ -117,7 +117,7 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-12">
             <div className="w-40 h-40 gradient-primary rounded-3xl flex items-center justify-center mx-auto neon-border shadow-2xl">
-              <Heart className="w-20 h-20 text-black filter brightness-0 drop-shadow-2xl" />
+              <Heart className="w-20 h-20 text-black drop-shadow-2xl" />
             </div>
             
             <div className="space-y-6">
@@ -140,7 +140,7 @@ export default function HomePage() {
                 data-testid="button-create-campaign"
               >
                 <Link href="/create-campaign">
-                  <Target className="w-6 h-6 mr-2 filter brightness-0" />
+                  <Target className="w-6 h-6 mr-2 text-black" />
                   {t('hero.create_campaign')}
                 </Link>
               </Button>
@@ -151,7 +151,7 @@ export default function HomePage() {
                 data-testid="button-explore-campaigns"
               >
                 <Link href="/campaigns">
-                  <Search className="w-6 h-6 mr-2 filter brightness-0" />
+                  <Search className="w-6 h-6 mr-2 text-black" />
                   {t('hero.explore_campaigns')}
                 </Link>
               </Button>
@@ -175,7 +175,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="cyber-card p-8 text-center group hover:scale-105 transition-transform duration-300">
               <div className="w-24 h-24 cyber-cyan-bg rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl neon-border">
-                <Shield className="w-12 h-12 text-black filter brightness-0 drop-shadow-2xl" />
+                <Shield className="w-12 h-12 text-black drop-shadow-2xl" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.blockchain_security')}</h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -185,7 +185,7 @@ export default function HomePage() {
 
             <div className="cyber-card p-8 text-center group hover:scale-105 transition-transform duration-300">
               <div className="w-24 h-24 cyber-green-bg rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl neon-border">
-                <DollarSign className="w-12 h-12 text-black filter brightness-0 drop-shadow-2xl" />
+                <DollarSign className="w-12 h-12 text-black drop-shadow-2xl" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.commission_free')}</h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -195,7 +195,7 @@ export default function HomePage() {
 
             <div className="cyber-card p-8 text-center group hover:scale-105 transition-transform duration-300">
               <div className="w-24 h-24 cyber-purple-bg rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl neon-border">
-                <Zap className="w-12 h-12 text-white filter drop-shadow-2xl" />
+                <Zap className="w-12 h-12 text-black drop-shadow-2xl" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.fast_easy')}</h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -265,7 +265,7 @@ export default function HomePage() {
               <div className="relative z-10 text-center space-y-4">
                 <div className="w-28 h-28 cyber-yellow-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl neon-border relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-orange-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                  <Sun className="w-14 h-14 text-black filter brightness-0 relative z-10 drop-shadow-2xl" />
+                  <Sun className="w-14 h-14 text-black relative z-10 drop-shadow-2xl" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-cyber-yellow mb-1">09:00 ÇEKİLİŞİ</h3>
@@ -279,13 +279,13 @@ export default function HomePage() {
             <div className="cyber-card p-6 relative overflow-hidden group hover:scale-105 transition-all duration-300">
               <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-cyber-cyan/20 to-cyber-purple/20 rounded-full blur-2xl"></div>
               <div className="absolute top-4 right-4 w-12 h-6 cyber-cyan-bg rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-background">ÖĞLE</span>
+                <span className="text-xs font-bold text-black">ÖĞLE</span>
               </div>
               
               <div className="relative z-10 text-center space-y-4">
                 <div className="w-28 h-28 cyber-cyan-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl neon-border relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-300 to-blue-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                  <Sunset className="w-14 h-14 text-black filter brightness-0 relative z-10 drop-shadow-2xl" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-yellow-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
+                  <Sunset className="w-14 h-14 text-black relative z-10 drop-shadow-2xl" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-cyber-cyan mb-1">15:00 ÇEKİLİŞİ</h3>
@@ -299,13 +299,13 @@ export default function HomePage() {
             <div className="cyber-card p-6 relative overflow-hidden group hover:scale-105 transition-all duration-300">
               <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-cyber-green/20 to-cyber-purple/20 rounded-full blur-2xl"></div>
               <div className="absolute top-4 right-4 w-12 h-6 cyber-green-bg rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-background">AKŞAM</span>
+                <span className="text-xs font-bold text-black">AKŞAM</span>
               </div>
               
               <div className="relative z-10 text-center space-y-4">
                 <div className="w-28 h-28 cyber-green-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl neon-border relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-300 to-emerald-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                  <Moon className="w-14 h-14 text-black filter brightness-0 relative z-10 drop-shadow-2xl" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-yellow-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
+                  <Moon className="w-14 h-14 text-black relative z-10 drop-shadow-2xl" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-cyber-green mb-1">21:00 ÇEKİLİŞİ</h3>
@@ -474,7 +474,7 @@ export default function HomePage() {
               <div className="relative z-10">
                 <div className="w-20 h-20 cyber-yellow-bg rounded-3xl flex items-center justify-center mx-auto mb-3 neon-border relative group shadow-2xl">
                   <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-orange-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                  <Coins className="w-12 h-12 text-black filter brightness-0 relative z-10 drop-shadow-2xl" />
+                  <Coins className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
                 </div>
                 <div className="text-2xl font-bold text-cyber-yellow mb-1">1500</div>
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">GÜNLÜK TOPLAM</div>
@@ -485,8 +485,8 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-gradient-to-br from-cyber-cyan/5 to-cyber-purple/5"></div>
               <div className="relative z-10">
                 <div className="w-20 h-20 cyber-cyan-bg rounded-3xl flex items-center justify-center mx-auto mb-3 neon-border relative group shadow-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-300 to-blue-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                  <Star className="w-12 h-12 text-black filter brightness-0 relative z-10 drop-shadow-2xl" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-yellow-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
+                  <Star className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
                 </div>
                 <div className="text-2xl font-bold text-cyber-cyan mb-1">21</div>
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">TOPLAM KAZANAN</div>
@@ -497,8 +497,8 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-gradient-to-br from-cyber-green/5 to-cyber-purple/5"></div>
               <div className="relative z-10">
                 <div className="w-20 h-20 cyber-green-bg rounded-3xl flex items-center justify-center mx-auto mb-3 neon-border relative group shadow-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-300 to-emerald-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                  <Clock className="w-12 h-12 text-black filter brightness-0 relative z-10 drop-shadow-2xl" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-yellow-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
+                  <Clock className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
                 </div>
                 <div className="text-2xl font-bold text-cyber-green mb-1">3</div>
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">ÇEKİLİŞ SAYISI</div>
@@ -509,8 +509,8 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-gradient-to-br from-cyber-purple/5 to-cyber-yellow/5"></div>
               <div className="relative z-10">
                 <div className="w-20 h-20 cyber-purple-bg rounded-3xl flex items-center justify-center mx-auto mb-3 neon-border relative group shadow-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-300 to-violet-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                  <Gem className="w-12 h-12 text-white filter drop-shadow-2xl relative z-10" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-yellow-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
+                  <Gem className="w-12 h-12 text-black drop-shadow-2xl relative z-10" />
                 </div>
                 <div className="text-2xl font-bold text-cyber-purple mb-1">100%</div>
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">GÜVENLİ</div>
@@ -547,7 +547,7 @@ export default function HomePage() {
             ) : (
               <div className="col-span-full text-center py-16">
                 <div className="w-32 h-32 cyber-cyan-bg rounded-3xl flex items-center justify-center mx-auto mb-6 neon-border shadow-2xl">
-                  <Target className="w-16 h-16 text-black filter brightness-0 drop-shadow-2xl" />
+                  <Target className="w-16 h-16 text-black drop-shadow-2xl" />
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-2 uppercase tracking-wide">{t('popular.no_campaigns')}</h3>
                 <p className="text-muted-foreground mb-8">{t('popular.create_first')}</p>

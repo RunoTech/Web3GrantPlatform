@@ -163,59 +163,59 @@ h6 { font-size: 0.875rem; } /* 14px */
   background: hsl(var(--muted-foreground));
 }
 
-/* Ultra-bright Cyber colors for maximum visibility */
+/* Binance-style colors with enhanced visibility */
 .cyber-cyan-bg { 
-  background: linear-gradient(135deg, #00FFFF, #0088FF) !important; 
-  box-shadow: 0 0 25px rgba(0, 255, 255, 0.4) !important;
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important; 
+  box-shadow: 0 0 20px hsla(45, 100%, 51%, 0.3) !important;
 }
 .cyber-green-bg { 
-  background: linear-gradient(135deg, #00FF00, #00DD00) !important; 
-  box-shadow: 0 0 25px rgba(0, 255, 0, 0.4) !important;
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important; 
+  box-shadow: 0 0 20px hsla(45, 100%, 51%, 0.3) !important;
 }
 .cyber-purple-bg { 
-  background: linear-gradient(135deg, #DD33FF, #BB00FF) !important; 
-  box-shadow: 0 0 25px rgba(221, 51, 255, 0.4) !important;
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important; 
+  box-shadow: 0 0 20px hsla(45, 100%, 51%, 0.3) !important;
 }
 .cyber-yellow-bg { 
-  background: linear-gradient(135deg, #FFFF00, #FFD700) !important; 
-  box-shadow: 0 0 25px rgba(255, 255, 0, 0.4) !important;
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important; 
+  box-shadow: 0 0 20px hsla(45, 100%, 51%, 0.3) !important;
 }
 .cyber-red-bg { 
-  background: linear-gradient(135deg, #FF0000, #FF4444) !important; 
-  box-shadow: 0 0 25px rgba(255, 0, 0, 0.4) !important;
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important; 
+  box-shadow: 0 0 20px hsla(45, 100%, 51%, 0.3) !important;
 }
 
-/* Ultra-bright text colors with strong contrast */
+/* Binance yellow text colors with enhanced visibility */
 .text-cyber-cyan { 
-  color: #00FFFF !important; 
-  text-shadow: 0 0 15px rgba(0, 255, 255, 0.6) !important;
+  color: hsl(45 100% 51%) !important; 
+  text-shadow: 0 0 10px hsla(45, 100%, 51%, 0.4) !important;
 }
 .text-cyber-green { 
-  color: #00FF00 !important; 
-  text-shadow: 0 0 15px rgba(0, 255, 0, 0.6) !important;
+  color: hsl(45 100% 51%) !important; 
+  text-shadow: 0 0 10px hsla(45, 100%, 51%, 0.4) !important;
 }
 .text-cyber-purple { 
-  color: #DD33FF !important; 
-  text-shadow: 0 0 15px rgba(221, 51, 255, 0.6) !important;
+  color: hsl(45 100% 51%) !important; 
+  text-shadow: 0 0 10px hsla(45, 100%, 51%, 0.4) !important;
 }
 .text-cyber-yellow { 
-  color: #FFFF00 !important; 
-  text-shadow: 0 0 15px rgba(255, 255, 0, 0.6) !important;
+  color: hsl(45 100% 51%) !important; 
+  text-shadow: 0 0 10px hsla(45, 100%, 51%, 0.4) !important;
 }
 .text-cyber-red { 
-  color: #FF0000 !important; 
-  text-shadow: 0 0 15px rgba(255, 0, 0, 0.6) !important;
+  color: hsl(45 100% 51%) !important; 
+  text-shadow: 0 0 10px hsla(45, 100%, 51%, 0.4) !important;
 }
 
-/* Enhanced gradients */
+/* Enhanced gradients - Binance style */
 .gradient-primary {
-  background: linear-gradient(135deg, #FFFF00, #00FFFF) !important;
-  box-shadow: 0 0 30px rgba(255, 255, 0, 0.3) !important;
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important;
+  box-shadow: 0 0 25px hsla(45, 100%, 51%, 0.3) !important;
 }
 
 .gradient-accent {
-  background: linear-gradient(135deg, #DD33FF, #00FF00) !important;
-  box-shadow: 0 0 30px rgba(221, 51, 255, 0.3) !important;
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important;
+  box-shadow: 0 0 25px hsla(45, 100%, 51%, 0.3) !important;
 }
 
 /* Enhanced cyber card */
@@ -232,24 +232,24 @@ h6 { font-size: 0.875rem; } /* 14px */
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Enhanced neon borders */
+/* Enhanced neon borders - Binance style */
 .neon-border {
   border: 2px solid transparent !important;
-  background: linear-gradient(white, white) padding-box, 
-              linear-gradient(135deg, #FFFF00, #00FFFF) border-box !important;
+  background: linear-gradient(hsl(0 0% 100%), hsl(0 0% 100%)) padding-box, 
+              linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) border-box !important;
 }
 
 .dark .neon-border {
-  background: linear-gradient(#0B0E11, #0B0E11) padding-box, 
-              linear-gradient(135deg, #FFFF00, #00FFFF) border-box !important;
+  background: linear-gradient(hsl(210 11% 7%), hsl(210 11% 7%)) padding-box, 
+              linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) border-box !important;
 }
 
-/* Enhanced neon text */
+/* Enhanced neon text - Binance style */
 .neon-text {
-  background: linear-gradient(135deg, #FFFF00, #00FFFF) !important;
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
-  text-shadow: 0 0 20px rgba(255, 255, 0, 0.5) !important;
+  text-shadow: 0 0 15px hsla(45, 100%, 51%, 0.4) !important;
 }
 
 /* Better surface colors */
@@ -277,42 +277,42 @@ h6 { font-size: 0.875rem; } /* 14px */
   background: rgba(20, 23, 26, 0.98) !important;
 }
 
-/* Enhanced button styles */
+/* Enhanced button styles - Binance style */
 .btn-cyber {
-  background: linear-gradient(135deg, #00FFFF, #0088FF) !important;
-  color: #000000 !important;
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important;
+  color: hsl(210 11% 7%) !important;
   font-weight: 700 !important;
   text-shadow: none !important;
-  box-shadow: 0 0 25px rgba(0, 255, 255, 0.4) !important;
+  box-shadow: 0 0 20px hsla(45, 100%, 51%, 0.3) !important;
   border: none !important;
   transition: all 0.3s ease !important;
 }
 
 .btn-cyber:hover {
-  background: linear-gradient(135deg, #00DDDD, #0066DD) !important;
-  box-shadow: 0 0 35px rgba(0, 255, 255, 0.6) !important;
+  background: linear-gradient(135deg, hsl(45 95% 48%), hsl(45 85% 42%)) !important;
+  box-shadow: 0 0 30px hsla(45, 100%, 51%, 0.5) !important;
   transform: translateY(-2px) !important;
 }
 
-/* Text shadow helpers */
+.dark .btn-cyber {
+  color: hsl(210 11% 7%) !important;
+}
+
+/* Text shadow helpers - Binance yellow */
 .hover\:text-shadow-cyan:hover {
-  text-shadow: 0 0 15px rgba(0, 255, 255, 0.8) !important;
+  text-shadow: 0 0 12px hsla(45, 100%, 51%, 0.6) !important;
 }
 .hover\:text-shadow-green:hover {
-  text-shadow: 0 0 15px rgba(0, 255, 0, 0.8) !important;
+  text-shadow: 0 0 12px hsla(45, 100%, 51%, 0.6) !important;
 }
 .hover\:text-shadow-purple:hover {
-  text-shadow: 0 0 15px rgba(221, 51, 255, 0.8) !important;
+  text-shadow: 0 0 12px hsla(45, 100%, 51%, 0.6) !important;
 }
 .hover\:text-shadow-yellow:hover {
-  text-shadow: 0 0 15px rgba(255, 255, 0, 0.8) !important;
+  text-shadow: 0 0 12px hsla(45, 100%, 51%, 0.6) !important;
 }
 
 /* Enhanced icon visibility for dark theme */
 .dark .text-black {
   color: #ffffff !important;
-}
-
-.dark .filter.brightness-0 {
-  filter: brightness(0) invert(1) !important;
 }

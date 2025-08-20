@@ -231,20 +231,27 @@ export default function HomePage() {
             </p>
             
             {/* Daily Prize Pool */}
-            <div className="mt-8 inline-flex items-center space-x-2 bg-gradient-to-r from-cyber-yellow/10 to-cyber-green/10 px-6 py-3 rounded-full border border-cyber-yellow/20">
-              <DollarSign className="w-5 h-5 text-cyber-yellow" />
-              <span className="text-lg font-bold text-cyber-yellow">500 USDT</span>
-              <span className="text-sm text-muted-foreground">günlük ödül havuzu</span>
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center justify-center">
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-cyber-yellow/10 to-cyber-green/10 px-6 py-3 rounded-full border border-cyber-yellow/20">
+                <DollarSign className="w-5 h-5 text-cyber-yellow" />
+                <span className="text-lg font-bold text-cyber-yellow">1500 USDT</span>
+                <span className="text-sm text-muted-foreground">günlük toplam ödül</span>
+              </div>
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-cyber-cyan/10 to-cyber-purple/10 px-4 py-2 rounded-full border border-cyber-cyan/20">
+                <Clock className="w-4 h-4 text-cyber-cyan" />
+                <span className="text-sm font-bold text-cyber-cyan">3 ÇEKILIŞ</span>
+                <span className="text-xs text-muted-foreground">günde</span>
+              </div>
             </div>
           </div>
           
-          {/* Prize Tiers */}
+          {/* Daily Draw Times */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {/* First Prize */}
-            <div className="cyber-card p-6 relative overflow-hidden group">
+            {/* Morning Draw */}
+            <div className="cyber-card p-6 relative overflow-hidden group hover:scale-105 transition-all duration-300">
               <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-cyber-yellow/20 to-cyber-green/20 rounded-full blur-2xl"></div>
-              <div className="absolute top-4 right-4 w-8 h-8 cyber-yellow-bg rounded-full flex items-center justify-center">
-                <span className="text-sm font-bold text-background">1</span>
+              <div className="absolute top-4 right-4 w-10 h-6 cyber-yellow-bg rounded-full flex items-center justify-center">
+                <span className="text-xs font-bold text-background">SABAH</span>
               </div>
               
               <div className="relative z-10 text-center space-y-4">
@@ -252,47 +259,47 @@ export default function HomePage() {
                   <Trophy className="w-8 h-8 text-background" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-cyber-yellow mb-1">BİRİNCİLİK</h3>
-                  <p className="text-3xl font-bold text-foreground">200 USDT</p>
-                  <p className="text-sm text-muted-foreground">1 kazanan</p>
+                  <h3 className="text-xl font-bold text-cyber-yellow mb-1">09:00 ÇEKİLİŞİ</h3>
+                  <p className="text-3xl font-bold text-foreground">500 USDT</p>
+                  <p className="text-sm text-muted-foreground">7 kazanan • Sabah çekilişi</p>
                 </div>
               </div>
             </div>
 
-            {/* Second Prize */}
-            <div className="cyber-card p-6 relative overflow-hidden group">
+            {/* Afternoon Draw */}
+            <div className="cyber-card p-6 relative overflow-hidden group hover:scale-105 transition-all duration-300">
               <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-cyber-cyan/20 to-cyber-purple/20 rounded-full blur-2xl"></div>
-              <div className="absolute top-4 right-4 w-8 h-8 cyber-cyan-bg rounded-full flex items-center justify-center">
-                <span className="text-sm font-bold text-background">2</span>
+              <div className="absolute top-4 right-4 w-12 h-6 cyber-cyan-bg rounded-full flex items-center justify-center">
+                <span className="text-xs font-bold text-background">ÖĞLE</span>
               </div>
               
               <div className="relative z-10 text-center space-y-4">
                 <div className="w-16 h-16 cyber-cyan-bg rounded-2xl flex items-center justify-center mx-auto shadow-xl">
-                  <Medal className="w-8 h-8 text-background" />
+                  <Award className="w-8 h-8 text-background" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-cyber-cyan mb-1">İKİNCİLİK</h3>
-                  <p className="text-3xl font-bold text-foreground">100 USDT</p>
-                  <p className="text-sm text-muted-foreground">2 kazanan</p>
+                  <h3 className="text-xl font-bold text-cyber-cyan mb-1">15:00 ÇEKİLİŞİ</h3>
+                  <p className="text-3xl font-bold text-foreground">500 USDT</p>
+                  <p className="text-sm text-muted-foreground">7 kazanan • Öğle çekilişi</p>
                 </div>
               </div>
             </div>
 
-            {/* Third Prize */}
-            <div className="cyber-card p-6 relative overflow-hidden group">
+            {/* Evening Draw */}
+            <div className="cyber-card p-6 relative overflow-hidden group hover:scale-105 transition-all duration-300">
               <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-cyber-green/20 to-cyber-purple/20 rounded-full blur-2xl"></div>
-              <div className="absolute top-4 right-4 w-8 h-8 cyber-green-bg rounded-full flex items-center justify-center">
-                <span className="text-sm font-bold text-background">3</span>
+              <div className="absolute top-4 right-4 w-12 h-6 cyber-green-bg rounded-full flex items-center justify-center">
+                <span className="text-xs font-bold text-background">AKŞAM</span>
               </div>
               
               <div className="relative z-10 text-center space-y-4">
                 <div className="w-16 h-16 cyber-green-bg rounded-2xl flex items-center justify-center mx-auto shadow-xl">
-                  <Award className="w-8 h-8 text-background" />
+                  <Gift className="w-8 h-8 text-background" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-cyber-green mb-1">ÜÇÜNCÜLÜK</h3>
-                  <p className="text-3xl font-bold text-foreground">50 USDT</p>
-                  <p className="text-sm text-muted-foreground">4 kazanan</p>
+                  <h3 className="text-xl font-bold text-cyber-green mb-1">21:00 ÇEKİLİŞİ</h3>
+                  <p className="text-3xl font-bold text-foreground">500 USDT</p>
+                  <p className="text-sm text-muted-foreground">7 kazanan • Akşam çekilişi</p>
                 </div>
               </div>
             </div>
@@ -381,7 +388,7 @@ export default function HomePage() {
               <div className="space-y-6 relative z-10">
                 <div className="text-center space-y-4">
                   <div className="w-20 h-20 cyber-yellow-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl">
-                    <Crown className="w-10 h-10 text-background" />
+                    <Trophy className="w-10 h-10 text-background" />
                   </div>
                   <h3 className="text-2xl font-bold text-foreground uppercase tracking-wide">
                     DÜN'ÜN KAZANANLARI
@@ -417,9 +424,9 @@ export default function HomePage() {
                         </div>
                         <div className="flex items-center space-x-2">
                           {index === 0 ? <Trophy className="w-5 h-5 text-cyber-yellow" /> :
-                           index === 1 ? <Medal className="w-5 h-5 text-cyber-cyan" /> :
-                           index === 2 ? <Award className="w-5 h-5 text-cyber-green" /> :
-                           <Gift className="w-5 h-5 text-muted-foreground" />}
+                           index === 1 ? <Award className="w-5 h-5 text-cyber-cyan" /> :
+                           index === 2 ? <Gift className="w-5 h-5 text-cyber-green" /> :
+                           <DollarSign className="w-5 h-5 text-muted-foreground" />}
                         </div>
                       </div>
                     ))
@@ -451,8 +458,8 @@ export default function HomePage() {
                 <div className="w-12 h-12 cyber-yellow-bg rounded-xl flex items-center justify-center mx-auto mb-3">
                   <DollarSign className="w-6 h-6 text-background" />
                 </div>
-                <div className="text-2xl font-bold text-cyber-yellow mb-1">500</div>
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">GÜNLÜK ÖDÜL</div>
+                <div className="text-2xl font-bold text-cyber-yellow mb-1">1500</div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">GÜNLÜK TOPLAM</div>
               </div>
             </div>
             
@@ -462,8 +469,8 @@ export default function HomePage() {
                 <div className="w-12 h-12 cyber-cyan-bg rounded-xl flex items-center justify-center mx-auto mb-3">
                   <Users className="w-6 h-6 text-background" />
                 </div>
-                <div className="text-2xl font-bold text-cyber-cyan mb-1">7</div>
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">KAZANAN SAYISI</div>
+                <div className="text-2xl font-bold text-cyber-cyan mb-1">21</div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">TOPLAM KAZANAN</div>
               </div>
             </div>
             
@@ -473,8 +480,8 @@ export default function HomePage() {
                 <div className="w-12 h-12 cyber-green-bg rounded-xl flex items-center justify-center mx-auto mb-3">
                   <Clock className="w-6 h-6 text-background" />
                 </div>
-                <div className="text-2xl font-bold text-cyber-green mb-1">24/7</div>
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">AKTİF SISTEM</div>
+                <div className="text-2xl font-bold text-cyber-green mb-1">3</div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">ÇEKİLİŞ SAYISI</div>
               </div>
             </div>
             

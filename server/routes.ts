@@ -274,7 +274,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create daily entry (public - but requires active account)
+  // Join daily reward (free for everyone, once per day)
+  app.post("/api/join-daily-reward", async (req, res) => {
+    try {
+      const { wallet } = req.body;
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Check if entry already exists for today
+      const alreadyEntered = await storage.checkDailyEntry(wallet, today);
+      if (alreadyEntered) {
+        return res.status(409).json({ error: "Already entered today" });
+      }
+
+      const entryData = {
+        wallet,
+        date: today
+      };
+
+      const entry = await storage.createDailyEntry(entryData);
+      res.json({ success: true, message: "Successfully joined daily reward!" });
+    } catch (error) {
+      console.error("Error creating daily entry:", error);
+      res.status(500).json({ error: "Failed to join daily reward" });
+    }
+  });
+
+  // Create daily entry (public - but requires active account for admin panel)
   app.post("/api/daily-entry", async (req, res) => {
     try {
       const entryData = insertDailyEntrySchema.parse(req.body);

@@ -53,6 +53,7 @@ export default function HomePage() {
     
     try {
       await api.post("/api/join-daily-reward", { wallet: address });
+      // Success feedback could be added here if needed
     } catch (error: any) {
       console.error("Daily reward error:", error);
     }
@@ -227,7 +228,7 @@ export default function HomePage() {
             </div>
             
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              {t('daily.description')}
+              Her gün ücretsiz katılın, şansınızı deneyin ve büyük ödüller kazanın! Sadece cüzdan bağlayın ve günde bir kez katılım hakkınızı kullanın.
             </p>
             
             {/* Daily Prize Pool */}
@@ -337,8 +338,8 @@ export default function HomePage() {
                       <span className="text-lg font-bold text-white">2</span>
                     </div>
                     <div>
-                      <h4 className="font-bold text-cyber-purple uppercase tracking-wide">Hesap Aktifleştir</h4>
-                      <p className="text-sm text-muted-foreground">50 USDT ile tek seferlik aktivasyon</p>
+                      <h4 className="font-bold text-cyber-purple uppercase tracking-wide">Günlük Katılım</h4>
+                      <p className="text-sm text-muted-foreground">Günde bir kez ücretsiz katıl</p>
                     </div>
                   </div>
                   
@@ -347,8 +348,8 @@ export default function HomePage() {
                       <span className="text-lg font-bold text-background">3</span>
                     </div>
                     <div>
-                      <h4 className="font-bold text-cyber-green uppercase tracking-wide">Günlük Katılım</h4>
-                      <p className="text-sm text-muted-foreground">Her gün bir kez ücretsiz katıl</p>
+                      <h4 className="font-bold text-cyber-green uppercase tracking-wide">Ödül Kazan</h4>
+                      <p className="text-sm text-muted-foreground">Şansını dene ve USDT kazan</p>
                     </div>
                   </div>
                 </div>

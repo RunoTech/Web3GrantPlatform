@@ -23,7 +23,11 @@ import {
   Sparkles,
   ArrowRight,
   TrendingUp,
-  Award
+  Award,
+  Trophy,
+  Medal,
+  Crown,
+  Clock
 } from "lucide-react";
 
 export default function HomePage() {
@@ -206,80 +210,163 @@ export default function HomePage() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Section Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center space-x-3 mb-4">
-              <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center neon-border relative">
-                <Gift className="w-6 h-6 text-background" />
-                <div className="absolute -top-1 -right-1 w-4 h-4 cyber-yellow-bg rounded-full flex items-center justify-center">
-                  <span className="text-xs font-bold text-background">!</span>
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center justify-center space-x-4 mb-6">
+              <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center neon-border relative shadow-2xl">
+                <Gift className="w-8 h-8 text-background" />
+                <div className="absolute -top-2 -right-2 w-6 h-6 cyber-yellow-bg rounded-full flex items-center justify-center shadow-lg">
+                  <span className="text-sm font-bold text-background">!</span>
                 </div>
               </div>
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold neon-text uppercase tracking-wide">
+              <div className="text-center">
+                <h2 className="text-3xl md:text-4xl font-bold neon-text uppercase tracking-wide mb-2">
                   {t('daily.title')}
                 </h2>
+                <div className="w-24 h-1 bg-gradient-to-r from-cyber-cyan via-cyber-yellow to-cyber-green mx-auto"></div>
               </div>
             </div>
             
-            <p className="text-base text-muted-foreground max-w-xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               {t('daily.description')}
             </p>
+            
+            {/* Daily Prize Pool */}
+            <div className="mt-8 inline-flex items-center space-x-2 bg-gradient-to-r from-cyber-yellow/10 to-cyber-green/10 px-6 py-3 rounded-full border border-cyber-yellow/20">
+              <DollarSign className="w-5 h-5 text-cyber-yellow" />
+              <span className="text-lg font-bold text-cyber-yellow">500 USDT</span>
+              <span className="text-sm text-muted-foreground">günlük ödül havuzu</span>
+            </div>
           </div>
           
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Participation Card */}
-            <div className="lg:col-span-2 cyber-card p-6 relative">
-              <div className="absolute top-0 right-0 w-16 h-16 cyber-cyan-bg opacity-10 rounded-full blur-xl"></div>
+          {/* Prize Tiers */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            {/* First Prize */}
+            <div className="cyber-card p-6 relative overflow-hidden group">
+              <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-cyber-yellow/20 to-cyber-green/20 rounded-full blur-2xl"></div>
+              <div className="absolute top-4 right-4 w-8 h-8 cyber-yellow-bg rounded-full flex items-center justify-center">
+                <span className="text-sm font-bold text-background">1</span>
+              </div>
               
-              <div className="space-y-6 relative z-10">
-                <div className="space-y-3">
-                  <h3 className="text-lg font-bold text-foreground uppercase tracking-wide flex items-center space-x-2">
-                    <div className="w-6 h-6 cyber-green-bg rounded flex items-center justify-center">
-                      <span className="text-xs font-bold text-background">1</span>
-                    </div>
-                    <span>{t('daily.participation_process')}</span>
+              <div className="relative z-10 text-center space-y-4">
+                <div className="w-16 h-16 cyber-yellow-bg rounded-2xl flex items-center justify-center mx-auto shadow-xl">
+                  <Trophy className="w-8 h-8 text-background" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-cyber-yellow mb-1">BİRİNCİLİK</h3>
+                  <p className="text-3xl font-bold text-foreground">200 USDT</p>
+                  <p className="text-sm text-muted-foreground">1 kazanan</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Second Prize */}
+            <div className="cyber-card p-6 relative overflow-hidden group">
+              <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-cyber-cyan/20 to-cyber-purple/20 rounded-full blur-2xl"></div>
+              <div className="absolute top-4 right-4 w-8 h-8 cyber-cyan-bg rounded-full flex items-center justify-center">
+                <span className="text-sm font-bold text-background">2</span>
+              </div>
+              
+              <div className="relative z-10 text-center space-y-4">
+                <div className="w-16 h-16 cyber-cyan-bg rounded-2xl flex items-center justify-center mx-auto shadow-xl">
+                  <Medal className="w-8 h-8 text-background" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-cyber-cyan mb-1">İKİNCİLİK</h3>
+                  <p className="text-3xl font-bold text-foreground">100 USDT</p>
+                  <p className="text-sm text-muted-foreground">2 kazanan</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Third Prize */}
+            <div className="cyber-card p-6 relative overflow-hidden group">
+              <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-cyber-green/20 to-cyber-purple/20 rounded-full blur-2xl"></div>
+              <div className="absolute top-4 right-4 w-8 h-8 cyber-green-bg rounded-full flex items-center justify-center">
+                <span className="text-sm font-bold text-background">3</span>
+              </div>
+              
+              <div className="relative z-10 text-center space-y-4">
+                <div className="w-16 h-16 cyber-green-bg rounded-2xl flex items-center justify-center mx-auto shadow-xl">
+                  <Award className="w-8 h-8 text-background" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-cyber-green mb-1">ÜÇÜNCÜLÜK</h3>
+                  <p className="text-3xl font-bold text-foreground">50 USDT</p>
+                  <p className="text-sm text-muted-foreground">4 kazanan</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            {/* Participation Card */}
+            <div className="cyber-card p-8 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyber-cyan/10 to-cyber-purple/10 rounded-full blur-2xl"></div>
+              
+              <div className="space-y-8 relative z-10">
+                <div className="text-center space-y-4">
+                  <div className="w-20 h-20 cyber-cyan-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl">
+                    <Zap className="w-10 h-10 text-background" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-foreground uppercase tracking-wide">
+                    KATILIM SÜRECİ
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-                    <div className="cyber-card p-3 border border-cyber-cyan/30">
-                      <div className="w-6 h-6 cyber-cyan-bg rounded mb-2 flex items-center justify-center">
-                        <span className="text-xs font-bold text-background">1</span>
-                      </div>
-                      <span className="text-cyber-cyan font-medium uppercase tracking-wide">{t('daily.step1')}</span>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="flex items-center space-x-4 p-4 cyber-card border border-cyber-cyan/30">
+                    <div className="w-12 h-12 cyber-cyan-bg rounded-xl flex items-center justify-center flex-shrink-0">
+                      <span className="text-lg font-bold text-background">1</span>
                     </div>
-                    <div className="cyber-card p-3 border border-cyber-purple/30">
-                      <div className="w-6 h-6 cyber-purple-bg rounded mb-2 flex items-center justify-center">
-                        <span className="text-xs font-bold text-white">2</span>
-                      </div>
-                      <span className="text-cyber-purple font-medium uppercase tracking-wide">{t('daily.step2')}</span>
+                    <div>
+                      <h4 className="font-bold text-cyber-cyan uppercase tracking-wide">Cüzdan Bağla</h4>
+                      <p className="text-sm text-muted-foreground">MetaMask veya Trust Wallet ile bağlan</p>
                     </div>
-                    <div className="cyber-card p-3 border border-cyber-green/30">
-                      <div className="w-6 h-6 cyber-green-bg rounded mb-2 flex items-center justify-center">
-                        <span className="text-xs font-bold text-background">3</span>
-                      </div>
-                      <span className="text-cyber-green font-medium uppercase tracking-wide">{t('daily.step3')}</span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-4 p-4 cyber-card border border-cyber-purple/30">
+                    <div className="w-12 h-12 cyber-purple-bg rounded-xl flex items-center justify-center flex-shrink-0">
+                      <span className="text-lg font-bold text-white">2</span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-cyber-purple uppercase tracking-wide">Hesap Aktifleştir</h4>
+                      <p className="text-sm text-muted-foreground">50 USDT ile tek seferlik aktivasyon</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-4 p-4 cyber-card border border-cyber-green/30">
+                    <div className="w-12 h-12 cyber-green-bg rounded-xl flex items-center justify-center flex-shrink-0">
+                      <span className="text-lg font-bold text-background">3</span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-cyber-green uppercase tracking-wide">Günlük Katılım</h4>
+                      <p className="text-sm text-muted-foreground">Her gün bir kez ücretsiz katıl</p>
                     </div>
                   </div>
                 </div>
                 
                 {/* Action Button */}
-                <div className="text-center">
+                <div className="text-center pt-4">
                   {isConnected ? (
                     <Button 
                       onClick={handleDailyReward}
-                      size="default"
-                      className="cyber-cyan-bg px-8 py-3 font-bold uppercase tracking-wide btn-cyber relative overflow-hidden group"
+                      size="lg"
+                      className="bg-gradient-to-r from-cyber-cyan to-cyber-green hover:from-cyber-cyan/80 hover:to-cyber-green/80 text-black px-12 py-4 font-bold uppercase tracking-wide rounded-2xl relative overflow-hidden group shadow-2xl"
                       data-testid="button-daily-reward"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                      <DollarSign className="w-5 h-5 mr-2" />
-                      {t('daily.participate_today')}
+                      <div className="relative z-10 flex items-center space-x-3">
+                        <DollarSign className="w-6 h-6" />
+                        <span>BUGÜN KATIL</span>
+                        <Sparkles className="w-6 h-6" />
+                      </div>
                     </Button>
                   ) : (
-                    <div className="cyber-card px-6 py-3 neon-border relative">
-                      <div className="absolute inset-0 bg-gradient-to-r from-cyber-cyan/10 to-cyber-purple/10 rounded-lg"></div>
-                      <span className="text-cyber-cyan font-medium uppercase tracking-wide relative z-10">
-                        {t('daily.connect_wallet')}
+                    <div className="cyber-card px-8 py-4 neon-border relative rounded-2xl">
+                      <div className="absolute inset-0 bg-gradient-to-r from-cyber-cyan/10 to-cyber-purple/10 rounded-2xl"></div>
+                      <span className="text-cyber-cyan font-bold uppercase tracking-wide relative z-10 text-lg">
+                        ÖNCE CÜZDAN BAĞLAYIN
                       </span>
                     </div>
                   )}
@@ -288,46 +375,65 @@ export default function HomePage() {
             </div>
             
             {/* Winners Leaderboard */}
-            <div className="cyber-card p-4 relative">
-              <div className="absolute top-0 left-0 w-12 h-12 cyber-yellow-bg opacity-10 rounded-full blur-lg"></div>
+            <div className="cyber-card p-8 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-cyber-yellow/10 to-cyber-green/10 rounded-full blur-2xl"></div>
               
-              <div className="space-y-4 relative z-10">
-                <div className="flex items-center space-x-2 mb-4">
-                  <Award className="w-5 h-5 text-cyber-yellow" />
-                  <h3 className="text-lg font-bold text-foreground uppercase tracking-wide">
-                    {t('daily.yesterday_winners')}
+              <div className="space-y-6 relative z-10">
+                <div className="text-center space-y-4">
+                  <div className="w-20 h-20 cyber-yellow-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl">
+                    <Crown className="w-10 h-10 text-background" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-foreground uppercase tracking-wide">
+                    DÜN'ÜN KAZANANLARI
                   </h3>
                 </div>
                 
-                <div className="space-y-2" data-testid="winners-list">
+                <div className="space-y-3" data-testid="winners-list">
                   {(lastWinners as any[]).length > 0 ? (
-                    (lastWinners as any[]).slice(0, 5).map((winner: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between py-2 px-3 bg-surface-3 rounded border border-cyber-green/20 hover:border-cyber-green/40 transition-colors">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-6 h-6 cyber-green-bg rounded-full flex items-center justify-center text-xs font-bold text-background">
+                    (lastWinners as any[]).slice(0, 7).map((winner: any, index: number) => (
+                      <div key={index} className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-300 hover:scale-105 ${
+                        index === 0 ? 'bg-gradient-to-r from-cyber-yellow/10 to-cyber-green/10 border-cyber-yellow/40' :
+                        index === 1 ? 'bg-gradient-to-r from-cyber-cyan/10 to-cyber-purple/10 border-cyber-cyan/40' :
+                        index === 2 ? 'bg-gradient-to-r from-cyber-green/10 to-cyber-purple/10 border-cyber-green/40' :
+                        'bg-surface-3 border-border'
+                      }`}>
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
+                            index === 0 ? 'cyber-yellow-bg text-background' :
+                            index === 1 ? 'cyber-cyan-bg text-background' :
+                            index === 2 ? 'cyber-green-bg text-background' :
+                            'bg-surface text-foreground'
+                          }`}>
                             #{index + 1}
                           </div>
-                          <span className="font-mono text-xs text-muted-foreground">
-                            {winner.wallet.slice(0, 6)}...{winner.wallet.slice(-4)}
-                          </span>
+                          <div>
+                            <span className="font-mono text-sm text-foreground font-medium">
+                              {winner.wallet.slice(0, 8)}...{winner.wallet.slice(-6)}
+                            </span>
+                            <div className="text-xs text-muted-foreground">
+                              {index === 0 ? '200 USDT' : index === 1 ? '100 USDT' : '50 USDT'}
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-1">
-                          <span className="text-xs font-bold text-cyber-green">USDT</span>
-                          <div className="w-1.5 h-1.5 cyber-green-bg rounded-full"></div>
+                        <div className="flex items-center space-x-2">
+                          {index === 0 ? <Trophy className="w-5 h-5 text-cyber-yellow" /> :
+                           index === 1 ? <Medal className="w-5 h-5 text-cyber-cyan" /> :
+                           index === 2 ? <Award className="w-5 h-5 text-cyber-green" /> :
+                           <Gift className="w-5 h-5 text-muted-foreground" />}
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-6 space-y-3">
-                      <div className="w-12 h-12 bg-surface-3 rounded flex items-center justify-center mx-auto">
-                        <Award className="w-6 h-6 text-muted-foreground" />
+                    <div className="text-center py-12 space-y-4">
+                      <div className="w-16 h-16 bg-surface-3 rounded-2xl flex items-center justify-center mx-auto">
+                        <Award className="w-8 h-8 text-muted-foreground" />
                       </div>
-                      <div className="space-y-1">
-                        <div className="text-foreground font-semibold uppercase tracking-wide text-sm">
-                          {t('daily.no_winners')}
+                      <div className="space-y-2">
+                        <div className="text-foreground font-bold uppercase tracking-wide text-lg">
+                          HENÜz KAZANAN YOK
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          {t('daily.be_first')}
+                        <div className="text-sm text-muted-foreground">
+                          İlk katılan sen ol!
                         </div>
                       </div>
                     </div>
@@ -337,19 +443,50 @@ export default function HomePage() {
             </div>
           </div>
           
-          {/* Statistics Footer */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 cyber-card border border-cyber-cyan/30">
-              <div className="text-xl font-bold text-cyber-cyan mb-1">∞</div>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">{t('stats.total_rewards')}</div>
+          {/* Enhanced Statistics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="text-center p-6 cyber-card border border-cyber-yellow/30 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyber-yellow/5 to-cyber-green/5"></div>
+              <div className="relative z-10">
+                <div className="w-12 h-12 cyber-yellow-bg rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <DollarSign className="w-6 h-6 text-background" />
+                </div>
+                <div className="text-2xl font-bold text-cyber-yellow mb-1">500</div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">GÜNLÜK ÖDÜL</div>
+              </div>
             </div>
-            <div className="text-center p-4 cyber-card border border-cyber-purple/30">
-              <div className="text-xl font-bold text-cyber-purple mb-1">24</div>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">{t('stats.hours_active')}</div>
+            
+            <div className="text-center p-6 cyber-card border border-cyber-cyan/30 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyber-cyan/5 to-cyber-purple/5"></div>
+              <div className="relative z-10">
+                <div className="w-12 h-12 cyber-cyan-bg rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <Users className="w-6 h-6 text-background" />
+                </div>
+                <div className="text-2xl font-bold text-cyber-cyan mb-1">7</div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">KAZANAN SAYISI</div>
+              </div>
             </div>
-            <div className="text-center p-4 cyber-card border border-cyber-green/30">
-              <div className="text-xl font-bold text-cyber-green mb-1">100%</div>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">{t('stats.secure')}</div>
+            
+            <div className="text-center p-6 cyber-card border border-cyber-green/30 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyber-green/5 to-cyber-purple/5"></div>
+              <div className="relative z-10">
+                <div className="w-12 h-12 cyber-green-bg rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <Clock className="w-6 h-6 text-background" />
+                </div>
+                <div className="text-2xl font-bold text-cyber-green mb-1">24/7</div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">AKTİF SISTEM</div>
+              </div>
+            </div>
+            
+            <div className="text-center p-6 cyber-card border border-cyber-purple/30 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyber-purple/5 to-cyber-yellow/5"></div>
+              <div className="relative z-10">
+                <div className="w-12 h-12 cyber-purple-bg rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <Shield className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-2xl font-bold text-cyber-purple mb-1">100%</div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">GÜVENLİ</div>
+              </div>
             </div>
           </div>
         </div>

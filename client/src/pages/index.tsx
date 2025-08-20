@@ -71,8 +71,9 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center neon-border">
-                <Heart className="w-6 h-6 text-background" />
+              <div className="w-14 h-14 gradient-primary rounded-2xl flex items-center justify-center neon-border relative group shadow-lg">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyber-cyan/30 to-cyber-yellow/30 rounded-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                <Heart className="w-8 h-8 text-background relative z-10 drop-shadow-lg" />
               </div>
               <h1 className="text-xl font-bold neon-text uppercase tracking-wide">
                 {siteTitle}

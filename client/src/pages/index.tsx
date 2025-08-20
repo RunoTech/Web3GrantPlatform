@@ -31,7 +31,8 @@ import {
   Moon,
   Star,
   Gem,
-  Coins
+  Coins,
+  Wallet
 } from "lucide-react";
 
 export default function HomePage() {
@@ -217,10 +218,11 @@ export default function HomePage() {
           {/* Section Header */}
           <div className="text-center mb-16">
             <div className="inline-flex items-center justify-center space-x-4 mb-6">
-              <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center neon-border relative shadow-2xl">
-                <Gift className="w-8 h-8 text-background" />
-                <div className="absolute -top-2 -right-2 w-6 h-6 cyber-yellow-bg rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-sm font-bold text-background">!</span>
+              <div className="w-24 h-24 gradient-primary rounded-3xl flex items-center justify-center neon-border relative shadow-2xl group">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyber-cyan/20 to-cyber-yellow/20 rounded-3xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
+                <Trophy className="w-12 h-12 text-background relative z-10 drop-shadow-2xl" />
+                <div className="absolute -top-3 -right-3 w-8 h-8 cyber-yellow-bg rounded-full flex items-center justify-center shadow-xl neon-border">
+                  <Sparkles className="w-4 h-4 text-background" />
                 </div>
               </div>
               <div className="text-center">
@@ -321,8 +323,9 @@ export default function HomePage() {
               
               <div className="space-y-8 relative z-10">
                 <div className="text-center space-y-4">
-                  <div className="w-20 h-20 cyber-cyan-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl">
-                    <Zap className="w-10 h-10 text-background" />
+                  <div className="w-24 h-24 cyber-cyan-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl neon-border relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-3xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
+                    <Zap className="w-12 h-12 text-background relative z-10 drop-shadow-2xl" />
                   </div>
                   <h3 className="text-2xl font-bold text-foreground uppercase tracking-wide">
                     KATILIM SÜRECİ
@@ -330,9 +333,10 @@ export default function HomePage() {
                 </div>
                 
                 <div className="grid grid-cols-1 gap-4">
-                  <div className="flex items-center space-x-4 p-4 cyber-card border border-cyber-cyan/30">
-                    <div className="w-12 h-12 cyber-cyan-bg rounded-xl flex items-center justify-center flex-shrink-0">
-                      <span className="text-lg font-bold text-background">1</span>
+                  <div className="flex items-center space-x-4 p-4 cyber-card border border-cyber-cyan/30 relative group hover:scale-105 transition-transform duration-300">
+                    <div className="w-16 h-16 cyber-cyan-bg rounded-2xl flex items-center justify-center flex-shrink-0 neon-border relative group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                      <Wallet className="w-8 h-8 text-background relative z-10 drop-shadow-lg" />
                     </div>
                     <div>
                       <h4 className="font-bold text-cyber-cyan uppercase tracking-wide">Cüzdan Bağla</h4>
@@ -340,9 +344,10 @@ export default function HomePage() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-4 p-4 cyber-card border border-cyber-purple/30">
-                    <div className="w-12 h-12 cyber-purple-bg rounded-xl flex items-center justify-center flex-shrink-0">
-                      <span className="text-lg font-bold text-white">2</span>
+                  <div className="flex items-center space-x-4 p-4 cyber-card border border-cyber-purple/30 relative group hover:scale-105 transition-transform duration-300">
+                    <div className="w-16 h-16 cyber-purple-bg rounded-2xl flex items-center justify-center flex-shrink-0 neon-border relative group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-violet-500 rounded-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                      <Clock className="w-8 h-8 text-white relative z-10 drop-shadow-lg" />
                     </div>
                     <div>
                       <h4 className="font-bold text-cyber-purple uppercase tracking-wide">Günlük Katılım</h4>
@@ -350,9 +355,10 @@ export default function HomePage() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-4 p-4 cyber-card border border-cyber-green/30">
-                    <div className="w-12 h-12 cyber-green-bg rounded-xl flex items-center justify-center flex-shrink-0">
-                      <span className="text-lg font-bold text-background">3</span>
+                  <div className="flex items-center space-x-4 p-4 cyber-card border border-cyber-green/30 relative group hover:scale-105 transition-transform duration-300">
+                    <div className="w-16 h-16 cyber-green-bg rounded-2xl flex items-center justify-center flex-shrink-0 neon-border relative group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                      <Gift className="w-8 h-8 text-background relative z-10 drop-shadow-lg" />
                     </div>
                     <div>
                       <h4 className="font-bold text-cyber-green uppercase tracking-wide">Ödül Kazan</h4>
@@ -395,8 +401,9 @@ export default function HomePage() {
               
               <div className="space-y-6 relative z-10">
                 <div className="text-center space-y-4">
-                  <div className="w-20 h-20 cyber-yellow-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl">
-                    <Trophy className="w-10 h-10 text-background" />
+                  <div className="w-24 h-24 cyber-yellow-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl neon-border relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-3xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
+                    <Trophy className="w-12 h-12 text-background relative z-10 drop-shadow-2xl" />
                   </div>
                   <h3 className="text-2xl font-bold text-foreground uppercase tracking-wide">
                     DÜN'ÜN KAZANANLARI
@@ -431,17 +438,18 @@ export default function HomePage() {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          {index === 0 ? <Trophy className="w-5 h-5 text-cyber-yellow" /> :
-                           index === 1 ? <Award className="w-5 h-5 text-cyber-cyan" /> :
-                           index === 2 ? <Gift className="w-5 h-5 text-cyber-green" /> :
-                           <DollarSign className="w-5 h-5 text-muted-foreground" />}
+                          {index === 0 ? <Trophy className="w-7 h-7 text-cyber-yellow drop-shadow-lg" /> :
+                           index === 1 ? <Award className="w-7 h-7 text-cyber-cyan drop-shadow-lg" /> :
+                           index === 2 ? <Gift className="w-7 h-7 text-cyber-green drop-shadow-lg" /> :
+                           <Star className="w-6 h-6 text-muted-foreground" />}
                         </div>
                       </div>
                     ))
                   ) : (
                     <div className="text-center py-12 space-y-4">
-                      <div className="w-16 h-16 bg-surface-3 rounded-2xl flex items-center justify-center mx-auto">
-                        <Award className="w-8 h-8 text-muted-foreground" />
+                      <div className="w-20 h-20 bg-surface-3 rounded-3xl flex items-center justify-center mx-auto neon-border relative group">
+                        <div className="absolute inset-0 bg-gradient-to-r from-gray-400 to-gray-500 rounded-3xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
+                        <Trophy className="w-10 h-10 text-muted-foreground relative z-10" />
                       </div>
                       <div className="space-y-2">
                         <div className="text-foreground font-bold uppercase tracking-wide text-lg">

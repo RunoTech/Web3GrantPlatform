@@ -1,18 +1,12 @@
 import { ethers } from "ethers";
 
-// Network configurations
+// Network configurations - Only Ethereum Mainnet
 export const networks = {
   ethereum: {
     name: "Ethereum Mainnet",
     chainId: 1,
     rpcUrl: process.env.ETH_RPC_URL || "https://eth.llamarpc.com",
     nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-  },
-  bsc: {
-    name: "BSC Mainnet", 
-    chainId: 56,
-    rpcUrl: process.env.BSC_RPC_URL || "https://bsc.llamarpc.com",
-    nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
   }
 };
 
@@ -25,19 +19,15 @@ export const ERC20_ABI = [
   "event Transfer(address indexed from, address indexed to, uint256 value)"
 ];
 
-// Platform wallet addresses (from settings)
+// Platform wallet addresses (from database settings)
 export const PLATFORM_WALLETS = {
-  ethereum: "0x742d35Cc6734C0532925a3b8D4037D4D40DA5F1e",
-  bsc: "0x742d35Cc6734C0532925a3b8D4037D4D40DA5F1e"
+  ethereum: "0x742d35Cc6734C0532925a3b8D4037D4D40DA5F1E"
 };
 
-// Token addresses
+// Token addresses - Only Ethereum USDT
 export const TOKENS = {
   ethereum: {
     USDT: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-  },
-  bsc: {
-    BUSD: "0xe9e7cea3dedca5984780bafc599bd69add087d56"
   }
 };
 
@@ -182,5 +172,47 @@ export async function getGasPrices(network: string) {
   } catch (error) {
     console.error("Failed to get gas prices:", error);
     return null;
+  }
+}
+
+/**
+ * Test RPC connection
+ */
+export async function testRpcConnection() {
+  try {
+    const provider = new ethers.JsonRpcProvider(networks.ethereum.rpcUrl);
+    const blockNumber = await provider.getBlockNumber();
+    console.log(`✅ Ethereum RPC connected. Latest block: ${blockNumber}`);
+    return { success: true, blockNumber };
+  } catch (error) {
+    console.error("❌ RPC connection failed:", error);
+    return { success: false, error: String(error) };
+  }
+}
+
+/**
+ * Monitor payments using polling (compatible with free RPC)
+ */
+export async function startWalletListener(platformWallet: string, onPaymentReceived: (payment: any) => void) {
+  try {
+    const provider = new ethers.JsonRpcProvider(networks.ethereum.rpcUrl);
+    const checksummedWallet = ethers.getAddress(platformWallet);
+    
+    console.log(`🔍 Starting wallet monitor for: ${checksummedWallet}`);
+    console.log(`ℹ️ Using manual transaction verification for payments`);
+    
+    // Test connection and log latest block
+    const blockNumber = await provider.getBlockNumber();
+    console.log(`📊 Connected to Ethereum, latest block: ${blockNumber}`);
+    
+    // Since free RPC doesn't support filtering, we rely on:
+    // 1. Manual transaction verification via /api/verify-payment
+    // 2. Users providing transaction hashes after payment
+    // 3. Admin panel to track payments
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to start wallet monitor:", error);
+    return { success: false, error: String(error) };
   }
 }

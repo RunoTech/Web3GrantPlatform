@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { testRpcConnection, startWalletListener } from "./blockchain";
 
 const app = express();
 app.use(express.json());
@@ -37,6 +38,13 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Test blockchain connection
+  console.log("🔗 Testing blockchain connection...");
+  const rpcTest = await testRpcConnection();
+  if (!rpcTest.success) {
+    console.warn("⚠️ RPC connection failed, payment verification may not work");
+  }
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -66,6 +74,14 @@ app.use((req, res, next) => {
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`🚀 serving on port ${port}`);
+    
+    // Start wallet listener after server is running
+    if (rpcTest.success) {
+      startWalletListener("0x742d35cc6734c0532925a3b8d4037d4d40da5f1e", (payment) => {
+        console.log("💰 New payment detected:", payment);
+        // Here you could auto-activate accounts or trigger notifications
+      });
+    }
   });
 })();

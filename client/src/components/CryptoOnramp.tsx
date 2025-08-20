@@ -32,7 +32,7 @@ export default function CryptoOnramp({
   const [isOpen, setIsOpen] = useState(false);
   const [amount, setAmount] = useState(targetAmount);
   const [step, setStep] = useState<'amount' | 'payment' | 'processing' | 'success'>('amount');
-  const [selectedPayment, setSelectedPayment] = useState<'card' | 'bank'>('card');
+  const [selectedPayment, setSelectedPayment] = useState<'card' | 'bank' | 'google-pay' | 'apple-pay'>('card');
   const [cardDetails, setCardDetails] = useState({
     number: '',
     expiry: '',
@@ -202,42 +202,123 @@ export default function CryptoOnramp({
                   <label className="text-sm font-medium text-foreground block mb-3">
                     Ödeme Yöntemi
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {/* Credit Card */}
-                    <div 
-                      onClick={() => setSelectedPayment('card')}
-                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
-                        selectedPayment === 'card' 
-                          ? 'border-binance-yellow bg-binance-yellow/10' 
-                          : 'border-border bg-muted hover:bg-muted/80'
-                      }`}
-                    >
-                      <div className="flex items-center justify-center space-x-2">
-                        <CreditCard className={`w-4 h-4 ${selectedPayment === 'card' ? 'text-binance-yellow' : 'text-muted-foreground'}`} />
-                        <span className={`text-sm font-medium ${selectedPayment === 'card' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                          Kredi Kartı
-                        </span>
+                  
+                  {/* Quick Payment Options */}
+                  <div className="space-y-3 mb-4">
+                    <div className="text-xs font-medium text-muted-foreground mb-2">
+                      Hızlı Ödeme
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Google Pay */}
+                      <div 
+                        onClick={() => setSelectedPayment('google-pay')}
+                        className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                          selectedPayment === 'google-pay' 
+                            ? 'border-binance-yellow bg-binance-yellow/10' 
+                            : 'border-border bg-muted hover:bg-muted/80'
+                        }`}
+                      >
+                        <div className="flex items-center justify-center space-x-2">
+                          <div className={`w-4 h-4 rounded ${selectedPayment === 'google-pay' ? 'bg-binance-yellow' : 'bg-muted-foreground'}`}>
+                            <span className="text-[8px] font-bold text-black flex items-center justify-center h-full">G</span>
+                          </div>
+                          <span className={`text-sm font-medium ${selectedPayment === 'google-pay' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                            Google Pay
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Apple Pay */}
+                      <div 
+                        onClick={() => setSelectedPayment('apple-pay')}
+                        className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                          selectedPayment === 'apple-pay'
+                            ? 'border-binance-yellow bg-binance-yellow/10'
+                            : 'border-border bg-muted hover:bg-muted/80'
+                        }`}
+                      >
+                        <div className="flex items-center justify-center space-x-2">
+                          <div className={`w-4 h-4 rounded ${selectedPayment === 'apple-pay' ? 'bg-binance-yellow' : 'bg-muted-foreground'}`}>
+                            <span className="text-[8px] font-bold text-black flex items-center justify-center h-full">🍎</span>
+                          </div>
+                          <span className={`text-sm font-medium ${selectedPayment === 'apple-pay' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                            Apple Pay
+                          </span>
+                        </div>
                       </div>
                     </div>
+                  </div>
 
-                    {/* Bank Transfer */}
-                    <div 
-                      onClick={() => setSelectedPayment('bank')}
-                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
-                        selectedPayment === 'bank'
-                          ? 'border-binance-yellow bg-binance-yellow/10'
-                          : 'border-border bg-muted hover:bg-muted/80'
-                      }`}
-                    >
-                      <div className="flex items-center justify-center space-x-2">
-                        <Building2 className={`w-4 h-4 ${selectedPayment === 'bank' ? 'text-binance-yellow' : 'text-muted-foreground'}`} />
-                        <span className={`text-sm font-medium ${selectedPayment === 'bank' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                          Banka Kartı
-                        </span>
+                  {/* Traditional Payment Options */}
+                  <div className="space-y-3">
+                    <div className="text-xs font-medium text-muted-foreground mb-2">
+                      Geleneksel Ödeme
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Credit Card */}
+                      <div 
+                        onClick={() => setSelectedPayment('card')}
+                        className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                          selectedPayment === 'card' 
+                            ? 'border-binance-yellow bg-binance-yellow/10' 
+                            : 'border-border bg-muted hover:bg-muted/80'
+                        }`}
+                      >
+                        <div className="flex items-center justify-center space-x-2">
+                          <CreditCard className={`w-4 h-4 ${selectedPayment === 'card' ? 'text-binance-yellow' : 'text-muted-foreground'}`} />
+                          <span className={`text-sm font-medium ${selectedPayment === 'card' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                            Kredi Kartı
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Bank Transfer */}
+                      <div 
+                        onClick={() => setSelectedPayment('bank')}
+                        className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                          selectedPayment === 'bank'
+                            ? 'border-binance-yellow bg-binance-yellow/10'
+                            : 'border-border bg-muted hover:bg-muted/80'
+                        }`}
+                      >
+                        <div className="flex items-center justify-center space-x-2">
+                          <Building2 className={`w-4 h-4 ${selectedPayment === 'bank' ? 'text-binance-yellow' : 'text-muted-foreground'}`} />
+                          <span className={`text-sm font-medium ${selectedPayment === 'bank' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                            Banka Kartı
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
+
+                {/* Quick Payment Processing */}
+                {(selectedPayment === 'google-pay' || selectedPayment === 'apple-pay') && (
+                  <div className="space-y-4">
+                    <div className="bg-success/10 border border-success/20 rounded-lg p-4">
+                      <div className="flex items-center space-x-3">
+                        <CheckCircle className="w-5 h-5 text-success" />
+                        <div>
+                          <p className="text-sm font-medium text-success">
+                            {selectedPayment === 'google-pay' ? 'Google Pay' : 'Apple Pay'} Hazır
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Kayıtlı kartınız kullanılacak
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted border border-border rounded-lg p-3">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Kart:</span>
+                        <span className="text-foreground font-medium">**** 1234 (Varsayılan)</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Card Details Form */}
                 {selectedPayment === 'card' && (
@@ -313,7 +394,10 @@ export default function CryptoOnramp({
                     <div className="flex justify-between">
                       <span className="text-xs text-muted-foreground">Ödeme:</span>
                       <span className="text-xs text-foreground font-medium">
-                        {selectedPayment === 'card' ? 'Kredi Kartı' : 'Banka Kartı'}
+                        {selectedPayment === 'card' ? 'Kredi Kartı' : 
+                         selectedPayment === 'bank' ? 'Banka Kartı' :
+                         selectedPayment === 'google-pay' ? 'Google Pay' : 
+                         selectedPayment === 'apple-pay' ? 'Apple Pay' : 'Seçilmedi'}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -331,8 +415,22 @@ export default function CryptoOnramp({
                   disabled={selectedPayment === 'card' && (!cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name)}
                   className="w-full bg-binance-yellow hover:bg-yellow-400 text-black font-medium py-3 mt-4 disabled:opacity-50"
                 >
-                  <ShoppingCart className="w-4 h-4 mr-2" />
-                  ${amount} Öde
+                  {selectedPayment === 'google-pay' ? (
+                    <>
+                      <div className="w-4 h-4 mr-2 bg-black rounded text-white flex items-center justify-center text-[8px] font-bold">G</div>
+                      ${amount} ile Öde
+                    </>
+                  ) : selectedPayment === 'apple-pay' ? (
+                    <>
+                      <span className="mr-2">🍎</span>
+                      ${amount} ile Öde
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-4 h-4 mr-2" />
+                      ${amount} Öde
+                    </>
+                  )}
                 </Button>
               </div>
             )}

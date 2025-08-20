@@ -73,15 +73,30 @@ app.use((req, res, next) => {
     port,
     host: "0.0.0.0",
     reusePort: true,
-  }, () => {
+  }, async () => {
     log(`🚀 serving on port ${port}`);
     
-    // Start wallet listener after server is running
+    // Start real-time wallet listener after server is running
     if (rpcTest.success) {
-      startWalletListener("0x742d35cc6734c0532925a3b8d4037d4d40da5f1e", (payment) => {
-        console.log("💰 New payment detected:", payment);
-        // Here you could auto-activate accounts or trigger notifications
+      const listenerResult = await startWalletListener("0x742d35cc6734c0532925a3b8d4037d4d40da5f1e", (payment) => {
+        console.log(`🎉 INSTANT PAYMENT RECEIVED!`);
+        console.log(`💵 Amount: ${payment.amount} ${payment.token}`);
+        console.log(`👤 From: ${payment.from}`);
+        console.log(`🔗 TX: ${payment.txHash}`);
+        console.log(`⏰ Time: ${payment.timestamp}`);
+        
+        // Here you could:
+        // 1. Auto-activate user accounts
+        // 2. Send notifications
+        // 3. Update database immediately
+        // 4. Trigger webhooks
       });
+      
+      if (listenerResult.success) {
+        console.log(`✅ Real-time payment monitoring active (${listenerResult.provider})`);
+      } else {
+        console.warn(`⚠️ Payment monitoring failed: ${listenerResult.error}`);
+      }
     }
   });
 })();

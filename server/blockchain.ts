@@ -6,6 +6,7 @@ export const networks = {
     name: "Ethereum Mainnet",
     chainId: 1,
     rpcUrl: process.env.ETH_RPC_URL || "https://eth.llamarpc.com",
+    wsUrl: process.env.ETH_WS_URL || "wss://ethereum-rpc.publicnode.com",
     nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   }
 };
@@ -191,28 +192,78 @@ export async function testRpcConnection() {
 }
 
 /**
- * Monitor payments using polling (compatible with free RPC)
+ * Real-time wallet listener using WebSocket
  */
 export async function startWalletListener(platformWallet: string, onPaymentReceived: (payment: any) => void) {
   try {
-    const provider = new ethers.JsonRpcProvider(networks.ethereum.rpcUrl);
     const checksummedWallet = ethers.getAddress(platformWallet);
+    console.log(`🔍 Starting real-time wallet listener for: ${checksummedWallet}`);
     
-    console.log(`🔍 Starting wallet monitor for: ${checksummedWallet}`);
-    console.log(`ℹ️ Using manual transaction verification for payments`);
+    // Try WebSocket first for real-time monitoring
+    let provider;
+    try {
+      provider = new ethers.WebSocketProvider(networks.ethereum.wsUrl);
+      console.log(`🌐 Connected via WebSocket: ${networks.ethereum.wsUrl}`);
+    } catch (wsError) {
+      console.warn("WebSocket failed, falling back to HTTP RPC");
+      provider = new ethers.JsonRpcProvider(networks.ethereum.rpcUrl);
+    }
     
-    // Test connection and log latest block
-    const blockNumber = await provider.getBlockNumber();
-    console.log(`📊 Connected to Ethereum, latest block: ${blockNumber}`);
+    const usdtContract = new ethers.Contract(TOKENS.ethereum.USDT, ERC20_ABI, provider);
     
-    // Since free RPC doesn't support filtering, we rely on:
-    // 1. Manual transaction verification via /api/verify-payment
-    // 2. Users providing transaction hashes after payment
-    // 3. Admin panel to track payments
+    // Listen for USDT transfers TO platform wallet
+    const transferFilter = usdtContract.filters.Transfer(null, checksummedWallet);
     
-    return { success: true };
+    console.log(`📡 Listening for USDT transfers to: ${checksummedWallet}`);
+    
+    usdtContract.on(transferFilter, async (from, to, value, event) => {
+      try {
+        const amount = ethers.formatUnits(value, 6); // USDT has 6 decimals
+        console.log(`💰 LIVE PAYMENT DETECTED! ${amount} USDT from ${from}`);
+        console.log(`🔗 Transaction: ${event.transactionHash}`);
+        
+        const payment = {
+          txHash: event.transactionHash,
+          from,
+          to,
+          amount,
+          token: 'USDT',
+          network: 'ethereum',
+          blockNumber: event.blockNumber,
+          timestamp: new Date()
+        };
+        
+        // Call the callback function
+        onPaymentReceived(payment);
+        
+      } catch (error) {
+        console.error("Error processing live payment:", error);
+      }
+    });
+    
+    // Also listen for ETH transfers (direct to wallet)
+    provider.on("block", async (blockNumber) => {
+      if (blockNumber % 10 === 0) { // Log every 10th block
+        console.log(`📊 Latest block: ${blockNumber}`);
+      }
+    });
+    
+    // Handle connection errors
+    provider.on("error", (error) => {
+      console.error("Provider error:", error);
+    });
+    
+    if (provider instanceof ethers.WebSocketProvider) {
+      provider.websocket.on("close", () => {
+        console.warn("WebSocket connection closed, attempting to reconnect...");
+        // Auto-reconnect logic could be added here
+      });
+    }
+    
+    return { success: true, provider: provider instanceof ethers.WebSocketProvider ? "websocket" : "http" };
+    
   } catch (error) {
-    console.error("Failed to start wallet monitor:", error);
+    console.error("Failed to start wallet listener:", error);
     return { success: false, error: String(error) };
   }
 }

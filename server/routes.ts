@@ -44,14 +44,42 @@ async function authenticateAdmin(req: any, res: any, next: any) {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Public API Routes (existing functionality)
   
-  // Get network fees (public)
+  // Get network fees (public) - Ethereum only
   app.get("/api/get-fees", async (req, res) => {
     try {
-      const fees = await storage.getActiveNetworkFees();
+      const fees = [
+        {
+          network: "ethereum",
+          tokenSymbol: "USDT",
+          tokenAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          decimals: 6,
+          amount: "50",
+          active: true
+        }
+      ];
       res.json(fees);
     } catch (error) {
       console.error("Error fetching fees:", error);
       res.status(500).json({ error: "Failed to fetch fees" });
+    }
+  });
+
+  // Get fees endpoint for frontend (Ethereum only)
+  app.get("/api/fees", async (req, res) => {
+    try {
+      const fees = {
+        ethereum: {
+          amount: 50,
+          symbol: "USDT",
+          contractAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          decimals: 6
+        }
+      };
+      
+      res.json(fees);
+    } catch (error) {
+      console.error("Error fetching fees:", error);
+      res.status(500).json({ message: "Failed to fetch fees" });
     }
   });
 

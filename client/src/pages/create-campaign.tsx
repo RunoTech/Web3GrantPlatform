@@ -27,7 +27,7 @@ export default function CreateCampaignPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  const [selectedNetwork, setSelectedNetwork] = useState<'ethereum' | 'bsc' | null>(null);
+  const [selectedNetwork, setSelectedNetwork] = useState<'ethereum'>('ethereum');
   const [txHash, setTxHash] = useState("");
   const [accountActive, setAccountActive] = useState(false);
   const [verifyingPayment, setVerifyingPayment] = useState(false);
@@ -49,7 +49,7 @@ export default function CreateCampaignPage() {
   const createCampaignMutation = useMutation({
     mutationFn: (data: CampaignFormData) => 
       api.post("/api/create-campaign", data, { 
-        headers: { wallet: address } 
+        headers: { wallet: address || "" } 
       }),
     onSuccess: (data) => {
       toast({
@@ -69,12 +69,12 @@ export default function CreateCampaignPage() {
   });
 
   const verifyPayment = async () => {
-    if (!selectedNetwork || !txHash || !address) return;
+    if (!txHash || !address) return;
     
     setVerifyingPayment(true);
     try {
       await api.post("/api/verify-payment", {
-        network: selectedNetwork,
+        network: 'ethereum',
         wallet: address,
         txHash,
       });
@@ -102,9 +102,7 @@ export default function CreateCampaignPage() {
     });
   };
 
-  const platformWallet = selectedNetwork === 'ethereum' 
-    ? "0x742d35Cc9000C1b4c5aB2dBD3E47A5C6BADE3A7F"
-    : "0x8A2d5B7A9B2F3C1D4E5F6A7B8C9D0E1F2A3B4C5D";
+  const platformWallet = "0x742d35Cc9000C1b4c5aB2dBD3E47A5C6BADE3A7F"; // DUXXAN Ethereum wallet
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -184,26 +182,18 @@ export default function CreateCampaignPage() {
               </p>
               
               <div className="space-y-6 pt-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex justify-center">
                   <NetworkOption
                     network="ethereum"
                     name="Ethereum Mainnet"
-                    fee={fees?.ethereum ? `${fees.ethereum.amount / Math.pow(10, fees.ethereum.decimals)} ${fees.ethereum.symbol}` : "50 USDT"}
+                    fee="50 USDT"
                     color="blue"
-                    selected={selectedNetwork === 'ethereum'}
-                    onSelect={() => setSelectedNetwork('ethereum')}
-                  />
-                  <NetworkOption
-                    network="bsc"
-                    name="BSC Mainnet"
-                    fee={fees?.bsc ? `${fees.bsc.amount / Math.pow(10, fees.bsc.decimals)} ${fees.bsc.symbol}` : "25 BUSD"}
-                    color="yellow"
-                    selected={selectedNetwork === 'bsc'}
-                    onSelect={() => setSelectedNetwork('bsc')}
+                    selected={true}
+                    onSelect={() => {}}
                   />
                 </div>
                 
-                {selectedNetwork && (
+                {(
                   <div className="bg-white rounded-2xl p-6 space-y-4 max-w-md mx-auto">
                     <div className="space-y-2">
                       <label className="block text-sm font-medium text-slate-700">{t('funds.platform_wallet')}</label>

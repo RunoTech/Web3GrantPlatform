@@ -54,11 +54,11 @@ export const platformSettings = pgTable("platform_settings", {
 // Network fees management
 export const networkFees = pgTable("network_fees", {
   id: serial("id").primaryKey(),
-  network: varchar("network", { length: 20 }).notNull(), // ethereum, bsc
-  tokenSymbol: varchar("token_symbol", { length: 10 }).notNull(),
-  tokenAddress: varchar("token_address", { length: 42 }).notNull(),
-  decimals: integer("decimals").notNull(),
-  amount: decimal("amount", { precision: 18, scale: 8 }).notNull(),
+  network: varchar("network", { length: 20 }).notNull().default('ethereum'), // Only ethereum
+  tokenSymbol: varchar("token_symbol", { length: 10 }).notNull().default('USDT'),
+  tokenAddress: varchar("token_address", { length: 42 }).notNull().default("0xdAC17F958D2ee523a2206206994597C13D831ec7"),
+  decimals: integer("decimals").notNull().default(6), // USDT has 6 decimals
+  amount: decimal("amount", { precision: 18, scale: 8 }).notNull().default("50"),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

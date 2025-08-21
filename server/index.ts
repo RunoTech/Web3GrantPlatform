@@ -1,7 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { testRpcConnection, startWalletListener } from "./blockchain";
+// import { testRpcConnection, startWalletListener } from "./blockchain";
 
 const app = express();
 app.use(express.json());
@@ -38,12 +38,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Test blockchain connection
-  console.log("🔗 Testing blockchain connection...");
-  const rpcTest = await testRpcConnection();
-  if (!rpcTest.success) {
-    console.warn("⚠️ RPC connection failed, payment verification may not work");
-  }
+  // Skip blockchain connection test for now
+  console.log("🔗 Skipping blockchain connection test for demo...");
 
   const server = await registerRoutes(app);
 
@@ -76,27 +72,7 @@ app.use((req, res, next) => {
   }, async () => {
     log(`🚀 serving on port ${port}`);
     
-    // Start real-time wallet listener after server is running
-    if (rpcTest.success) {
-      const listenerResult = await startWalletListener("0x742d35cc6734c0532925a3b8d4037d4d40da5f1e", (payment) => {
-        console.log(`🎉 INSTANT PAYMENT RECEIVED!`);
-        console.log(`💵 Amount: ${payment.amount} ${payment.token}`);
-        console.log(`👤 From: ${payment.from}`);
-        console.log(`🔗 TX: ${payment.txHash}`);
-        console.log(`⏰ Time: ${payment.timestamp}`);
-        
-        // Here you could:
-        // 1. Auto-activate user accounts
-        // 2. Send notifications
-        // 3. Update database immediately
-        // 4. Trigger webhooks
-      });
-      
-      if (listenerResult.success) {
-        console.log(`✅ Real-time payment monitoring active (${listenerResult.provider})`);
-      } else {
-        console.warn(`⚠️ Payment monitoring failed: ${listenerResult.error}`);
-      }
-    }
+    // Real-time wallet listener temporarily disabled for demo
+    console.log("📊 Server ready - blockchain monitoring disabled for demo");
   });
 })();

@@ -118,6 +118,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get today's stats for daily rewards (public)
+  app.get("/api/today-stats", async (req, res) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const entries = await storage.getDailyEntries(today);
+      res.json({
+        participants: entries.length,
+        date: today
+      });
+    } catch (error) {
+      console.error("Error fetching today stats:", error);
+      res.status(500).json({ error: "Failed to fetch today stats" });
+    }
+  });
+
   // Create account (public)
   app.post("/api/create-account", async (req, res) => {
     try {

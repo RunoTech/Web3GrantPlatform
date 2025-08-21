@@ -1,17 +1,11 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertCampaignSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import WalletConnectButton from "@/components/WalletConnectButton";
-import NetworkOption from "@/components/NetworkOption";
-import SimplePayButton from "@/components/SimplePayButton";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { api } from "@/utils/api";
@@ -19,384 +13,287 @@ import { useToast } from "@/hooks/use-toast";
 import { 
   Heart, 
   ArrowLeft, 
-  Plus, 
-  Lock, 
-  Copy, 
-  CheckCircle,
-  Target,
-  Rocket,
-  Shield,
-  Zap,
+  Trophy,
+  Gift,
   DollarSign,
   Users,
-  Wallet as WalletIcon
+  Wallet as WalletIcon,
+  Calendar,
+  Award,
+  Star,
+  Clock,
+  Copy,
+  CheckCircle
 } from "lucide-react";
-import type { z } from "zod";
-
-type CampaignFormData = z.infer<typeof insertCampaignSchema>;
+import type { DailyWinner } from "@shared/schema";
 
 export default function FundsPage() {
   const { t } = useLanguage();
-  const [, setLocation] = useLocation();
   const { isConnected, address } = useWallet();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  const [selectedNetwork, setSelectedNetwork] = useState<'ethereum' | 'bsc' | null>(null);
-  const [txHash, setTxHash] = useState("");
-  const [accountActive, setAccountActive] = useState(false);
-  const [verifyingPayment, setVerifyingPayment] = useState(false);
-  const [activationStep, setActivationStep] = useState(1);
+  const [isJoining, setIsJoining] = useState(false);
 
-  const { data: fees } = useQuery({
-    queryKey: ["/api/fees"],
-    enabled: isConnected,
+  const { data: lastWinners = [], isLoading: winnersLoading } = useQuery<DailyWinner[]>({
+    queryKey: ["/api/get-last-winners"],
   });
 
-  const form = useForm<CampaignFormData>({
-    resolver: zodResolver(insertCampaignSchema.omit({ ownerWallet: true })),
-    defaultValues: {
-      title: "",
-      description: "",
-      imageUrl: "",
-    },
+  const { data: todayStats } = useQuery<{ participants: number; date: string }>({
+    queryKey: ["/api/today-stats"],
   });
 
-  const createCampaignMutation = useMutation({
-    mutationFn: (data: CampaignFormData) => 
-      api.post("/api/create-campaign", data, { 
-        headers: { wallet: address || "" } 
-      }),
-    onSuccess: (data) => {
+  const joinDailyReward = useMutation({
+    mutationFn: () => api.post("/api/join-daily-reward", { wallet: address }),
+    onSuccess: () => {
       toast({
         title: "Başarılı!",
-        description: "Kampanyanız başarıyla oluşturuldu",
+        description: "Günlük ödül çekilişine katıldınız!",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/get-campaigns"] });
-      setLocation(`/campaign/${data.id}`);
+      queryClient.invalidateQueries({ queryKey: ["/api/today-stats"] });
     },
     onError: (error: any) => {
       toast({
         title: "Hata",
-        description: error.message || "Kampanya oluşturulamadı",
+        description: error.message || "Çekilişe katılım başarısız",
         variant: "destructive",
       });
     },
   });
 
-  const verifyPayment = async () => {
-    if (!selectedNetwork || !txHash || !address) return;
-    
-    setVerifyingPayment(true);
-    try {
-      await api.post("/api/verify-payment", {
-        network: selectedNetwork,
-        wallet: address,
-        txHash,
-      });
-      
-      setAccountActive(true);
-      setActivationStep(4);
-      toast({
-        title: "Başarılı!",
-        description: "Hesabınız başarıyla aktifleştirildi",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Hata",
-        description: error.message || "Ödeme doğrulanamadı",
-        variant: "destructive",
-      });
-    } finally {
-      setVerifyingPayment(false);
-    }
-  };
-
-  const onSubmit = (data: CampaignFormData) => {
-    createCampaignMutation.mutate({
-      ...data,
-      ownerWallet: address!,
-    });
-  };
-
-  const platformWallet = selectedNetwork === 'ethereum' 
-    ? "0x742d35Cc9000C1b4c5aB2dBD3E47A5C6BADE3A7F"
-    : "0x8A2d5B7A9B2F3C1D4E5F6A7B8C9D0E1F2A3B4C5D";
-
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: t('common.copied'),
-      description: t('common.copied'),
+      title: "Kopyalandı!",
+      description: "Cüzdan adresi panoya kopyalandı",
     });
   };
 
-  if (!isConnected) {
-    return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <div className="text-center space-y-8 max-w-md mx-auto p-8">
-          <div className="w-32 h-32 gradient-primary rounded-lg flex items-center justify-center mx-auto neon-border">
-            <WalletIcon className="w-16 h-16 text-background" />
-          </div>
-          <div className="space-y-4">
-            <h1 className="text-4xl font-bold text-foreground uppercase tracking-wider">{t('funds.title')}</h1>
-            <p className="text-lg text-muted-foreground">
-              {t('funds.connect_wallet')}
-            </p>
-          </div>
-          <div className="btn-cyber p-4">
-            <WalletConnectButton />
-          </div>
-          <Button variant="ghost" asChild className="mt-6">
-            <Link href="/">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              {t('funds.back_home')}
-            </Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('tr-TR', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric'
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header currentPage="funds" />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Button variant="ghost" asChild className="mb-8" data-testid="button-back-home">
           <Link href="/">
             <ArrowLeft className="w-5 h-5 mr-2" />
-            {t('funds.back_home')}
+            Ana Sayfa
           </Link>
         </Button>
 
-        {/* Progress Steps */}
-        <div className="cyber-card p-6 mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                activationStep >= 1 ? 'gradient-primary text-background' : 'bg-surface-2 text-muted-foreground'
-              }`}>
-                <WalletIcon className="w-5 h-5" />
-              </div>
-              <div className="hidden sm:block">
-                <p className="font-semibold text-foreground uppercase tracking-wide">{t('funds.steps.wallet_connection')}</p>
-                <p className="text-sm text-muted-foreground">{t('funds.steps.connect_wallet')}</p>
-              </div>
-            </div>
-            
-            <div className="h-0.5 flex-1 mx-4 bg-slate-200 rounded-full overflow-hidden">
-              <div className={`h-full transition-all duration-500 ${
-                activationStep >= 2 ? 'gradient-primary w-1/3' : 'bg-slate-200 w-0'
-              }`}></div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                activationStep >= 2 ? 'gradient-primary text-white' : 'bg-slate-200 text-slate-400'
-              }`}>
-                <Shield className="w-5 h-5" />
-              </div>
-              <div className="hidden sm:block">
-                <p className="font-semibold text-slate-800">{t('funds.steps.account_activation')}</p>
-                <p className="text-sm text-slate-600">{t('funds.steps.pay_activation')}</p>
-              </div>
-            </div>
-
-            <div className="h-0.5 flex-1 mx-4 bg-slate-200 rounded-full overflow-hidden">
-              <div className={`h-full transition-all duration-500 ${
-                activationStep >= 3 ? 'gradient-primary w-2/3' : 'bg-slate-200 w-0'
-              }`}></div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                activationStep >= 4 ? 'gradient-primary text-white' : 'bg-slate-200 text-slate-400'
-              }`}>
-                <Rocket className="w-5 h-5" />
-              </div>
-              <div className="hidden sm:block">
-                <p className="font-semibold text-slate-800">{t('funds.steps.create_campaign')}</p>
-                <p className="text-sm text-slate-600">{t('funds.steps.prepare_campaign')}</p>
-              </div>
-            </div>
+        {/* Hero Section */}
+        <div className="text-center space-y-8 mb-12">
+          <div className="w-32 h-32 gradient-primary rounded-3xl flex items-center justify-center mx-auto neon-border shadow-2xl">
+            <Trophy className="w-16 h-16 text-background drop-shadow-2xl" />
           </div>
-        </div>
-
-        {/* Simple Account Activation */}
-        {!accountActive && (
-          <div className="space-y-8">
-            {/* Hero Section */}
-            <div className="text-center space-y-6 cyber-card p-8">
-              <div className="w-20 h-20 gradient-primary rounded-lg flex items-center justify-center mx-auto neon-border">
-                <Target className="w-10 h-10 text-background" />
-              </div>
-              
-              <div>
-                <h1 className="text-3xl md:text-4xl font-bold neon-text mb-4 uppercase tracking-wide">
-                  {t('funds.title')}
-                </h1>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  {t('funds.subtitle')}
-                </p>
-              </div>
-            </div>
-
-            <SimplePayButton 
-              onPaymentSuccess={(txHash, network) => {
-                setAccountActive(true);
-                setActivationStep(4);
-                toast({
-                  title: t('funds.account_activated'),
-                  description: `${network} ağında ödemeniz onaylandı`,
-                });
-              }}
-            />
-          </div>
-        )}
-
-        {/* Success Message */}
-        {accountActive && !createCampaignMutation.data && (
-          <div className="card-modern p-8 mb-8 text-center gradient-secondary text-white">
-            <CheckCircle className="w-16 h-16 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-2">{t('funds.payment_success')}</h2>
-            <p className="text-lg opacity-90">
-              {t('funds.account_activated')}
+          
+          <div className="space-y-4">
+            <h1 className="text-4xl md:text-6xl font-bold neon-text uppercase tracking-wider">
+              Günlük Ödüller
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Her gün 3 kez ücretsiz çekiliş! 100 USDT kazanma şansı yakalayın.
             </p>
           </div>
-        )}
 
-        {/* Campaign Creation Form */}
-        {accountActive && (
-          <div className="card-modern p-8">
-            <div className="text-center space-y-6 mb-10">
-              <div className="w-20 h-20 gradient-accent rounded-3xl flex items-center justify-center mx-auto animate-glow">
-                <Rocket className="w-10 h-10 text-white" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-slate-800 mb-2">{t('funds.campaign_form_title')}</h2>
-                <p className="text-lg text-slate-600">{t('funds.campaign_subtitle')}</p>
-              </div>
+          {/* Join Daily Reward Button */}
+          {isConnected ? (
+            <div className="space-y-4">
+              <Button 
+                onClick={() => joinDailyReward.mutate()}
+                disabled={joinDailyReward.isPending}
+                className="gradient-primary hover:scale-105 transition-all duration-300 px-8 py-4 text-lg font-bold uppercase tracking-wide neon-border shadow-lg"
+                data-testid="button-join-daily-reward"
+              >
+                {joinDailyReward.isPending ? (
+                  <>
+                    <Clock className="w-6 h-6 mr-2 animate-spin" />
+                    Katılıyor...
+                  </>
+                ) : (
+                  <>
+                    <Gift className="w-6 h-6 mr-2" />
+                    Günlük Çekilişe Katıl
+                  </>
+                )}
+              </Button>
+              <p className="text-sm text-muted-foreground">
+                Ücretsiz! Sadece cüzdan bağlayın ve katılın.
+              </p>
             </div>
+          ) : (
+            <div className="space-y-4">
+              <WalletConnectButton />
+              <p className="text-sm text-muted-foreground">
+                Günlük çekilişe katılmak için cüzdanınızı bağlayın
+              </p>
+            </div>
+          )}
+        </div>
 
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="title"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-semibold text-slate-700">
-                            {t('funds.campaign_title')} *
-                          </FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder={t('funds.campaign_title_placeholder')} 
-                              className="px-4 py-3 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-base"
-                              data-testid="input-campaign-title"
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="imageUrl"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-semibold text-slate-700">
-                            {t('funds.campaign_image')} *
-                          </FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="url"
-                              placeholder="https://example.com/image.jpg" 
-                              className="px-4 py-3 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-base"
-                              data-testid="input-campaign-image"
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                          <p className="text-sm text-slate-500">
-                            {t('funds.image_description')}
-                          </p>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <Card className="cyber-card p-6 text-center">
+            <DollarSign className="w-12 h-12 text-cyber-yellow mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-foreground mb-2">100 USDT</h3>
+            <p className="text-muted-foreground">Günlük Ödül</p>
+          </Card>
+          
+          <Card className="cyber-card p-6 text-center">
+            <Clock className="w-12 h-12 text-cyber-cyan mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-foreground mb-2">3 Kez</h3>
+            <p className="text-muted-foreground">Günlük Çekiliş</p>
+          </Card>
+          
+          <Card className="cyber-card p-6 text-center">
+            <Users className="w-12 h-12 text-cyber-green mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-foreground mb-2">{todayStats?.participants || 0}</h3>
+            <p className="text-muted-foreground">Bugünkü Katılımcı</p>
+          </Card>
+        </div>
 
-                  <div className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-semibold text-slate-700">
-                            {t('funds.campaign_description')} *
-                          </FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              rows={8}
-                              placeholder={t('funds.description_placeholder')} 
-                              className="px-4 py-3 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500 resize-none text-base"
-                              data-testid="textarea-campaign-description"
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                          <p className="text-sm text-slate-500">
-                            {t('funds.description_help')}
-                          </p>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                
-                <div className="border-t pt-8">
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Button 
-                      type="button"
-                      variant="outline"
-                      size="lg"
-                      asChild
-                      className="btn-modern"
-                    >
-                      <Link href="/donations">
-                        {t('funds.view_other_campaigns')}
-                      </Link>
-                    </Button>
-                    
-                    <Button 
-                      type="submit" 
-                      disabled={createCampaignMutation.isPending}
-                      size="lg"
-                      className="gradient-primary text-white btn-modern px-12"
-                      data-testid="button-create-campaign"
-                    >
-                      {createCampaignMutation.isPending ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                          {t('funds.creating')}...
-                        </>
-                      ) : (
-                        <>
-                          <Rocket className="w-5 h-5 mr-2" />
-                          {t('funds.create_button')}
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </form>
-            </Form>
+        {/* Recent Winners Section */}
+        <div className="space-y-8">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-bold text-foreground uppercase tracking-wide">
+              Son Kazananlar
+            </h2>
+            <p className="text-muted-foreground">
+              Günlük ödül çekilişlerinde kazanan wallet adresleri
+            </p>
           </div>
-        )}
+
+          {winnersLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="cyber-card p-6 animate-pulse">
+                  <div className="space-y-4">
+                    <div className="w-12 h-12 bg-muted rounded-full mx-auto"></div>
+                    <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
+                    <div className="h-3 bg-muted rounded w-1/2 mx-auto"></div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : lastWinners.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {lastWinners.map((winner, index) => (
+                <Card key={winner.id} className="cyber-card p-6 hover:scale-105 transition-all duration-300">
+                  <div className="text-center space-y-4">
+                    <div className="relative">
+                      <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${
+                        index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
+                        index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-500' :
+                        index === 2 ? 'bg-gradient-to-r from-orange-400 to-orange-600' :
+                        'gradient-primary'
+                      }`}>
+                        {index < 3 ? (
+                          <Trophy className="w-8 h-8 text-white" />
+                        ) : (
+                          <Award className="w-8 h-8 text-white" />
+                        )}
+                      </div>
+                      {index < 3 && (
+                        <Badge className={`absolute -top-2 -right-2 ${
+                          index === 0 ? 'bg-yellow-500' :
+                          index === 1 ? 'bg-gray-400' :
+                          'bg-orange-500'
+                        }`}>
+                          #{index + 1}
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-center space-x-2">
+                        <DollarSign className="w-5 h-5 text-cyber-yellow" />
+                        <span className="text-2xl font-bold text-foreground">
+                          {parseFloat(winner.amount).toFixed(0)} USDT
+                        </span>
+                      </div>
+                      
+                      <div 
+                        className="bg-surface-2 rounded-lg p-3 cursor-pointer hover:bg-surface transition-colors group"
+                        onClick={() => copyToClipboard(winner.wallet)}
+                        data-testid={`winner-wallet-${winner.id}`}
+                      >
+                        <div className="flex items-center justify-center space-x-2">
+                          <WalletIcon className="w-4 h-4 text-muted-foreground" />
+                          <span className="font-mono text-sm text-muted-foreground group-hover:text-foreground">
+                            {winner.wallet.slice(0, 6)}...{winner.wallet.slice(-4)}
+                          </span>
+                          <Copy className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-center space-x-1 text-sm text-muted-foreground">
+                        <Calendar className="w-4 h-4" />
+                        <span>{formatDate(winner.date)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="cyber-card p-12 text-center">
+              <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-foreground mb-2">Henüz Kazanan Yok</h3>
+              <p className="text-muted-foreground">
+                Günlük çekilişlere katılın ve ilk kazanan siz olun!
+              </p>
+            </Card>
+          )}
+        </div>
+
+        {/* How It Works Section */}
+        <div className="space-y-8 mt-16">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-bold text-foreground uppercase tracking-wide">
+              Nasıl Çalışır?
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="cyber-card p-6 text-center">
+              <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <WalletIcon className="w-8 h-8 text-background" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">1. Cüzdan Bağlayın</h3>
+              <p className="text-muted-foreground">
+                MetaMask veya başka bir Web3 cüzdanı ile bağlanın
+              </p>
+            </Card>
+
+            <Card className="cyber-card p-6 text-center">
+              <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <Gift className="w-8 h-8 text-background" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">2. Çekilişe Katılın</h3>
+              <p className="text-muted-foreground">
+                Günde 3 kez yapılan ücretsiz çekilişlere katılın
+              </p>
+            </Card>
+
+            <Card className="cyber-card p-6 text-center">
+              <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trophy className="w-8 h-8 text-background" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">3. Ödül Kazanın</h3>
+              <p className="text-muted-foreground">
+                100 USDT ödülü doğrudan cüzdanınıza gönderilir
+              </p>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

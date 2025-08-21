@@ -17,11 +17,11 @@ export default function CampaignsPage() {
   const { t } = useLanguage();
   const { toast } = useToast();
 
-  const { data: campaigns = [], isLoading } = useQuery({
+  const { data: campaigns = [], isLoading } = useQuery<Campaign[]>({
     queryKey: ["/api/get-campaigns"],
   });
 
-  const filteredCampaigns = campaigns.filter((campaign: Campaign) =>
+  const filteredCampaigns = campaigns.filter((campaign) =>
     campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     campaign.description.toLowerCase().includes(searchTerm.toLowerCase())
   );

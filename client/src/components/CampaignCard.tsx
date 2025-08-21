@@ -65,7 +65,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
               <Target className="w-4 h-4 text-slate-500" />
               <div className="space-y-1">
                 <p className="text-xs text-slate-500">Toplanan</p>
-                <p className="font-semibold text-slate-800">{campaign.totalDonations} ETH</p>
+                <p className="font-semibold text-slate-800">{parseFloat(campaign.totalDonations || "0").toFixed(2)} USDT</p>
               </div>
             </div>
             <div className="flex items-center space-x-1">

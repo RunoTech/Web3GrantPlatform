@@ -24,7 +24,8 @@ import {
   Clock,
   Copy,
   CheckCircle,
-  Coins
+  Coins,
+  Building
 } from "lucide-react";
 import type { DailyWinner } from "@shared/schema";
 
@@ -107,112 +108,66 @@ export default function FundsPage() {
           </Link>
         </Button>
 
-        {/* Daily Rewards Header Section */}
-        <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-3xl p-12 mb-12">
+        {/* Funds Header Section */}
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-3xl p-12 mb-12">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center space-x-3 mb-6">
-              <Gift className="w-16 h-16 text-yellow-500" />
+              <DollarSign className="w-16 h-16 text-blue-500" />
               <h1 className="text-5xl font-bold text-black dark:text-white">
-                Daily Rewards
+                Funds
               </h1>
             </div>
             <p className="text-2xl text-gray-600 dark:text-gray-400 mb-8 max-w-4xl mx-auto">
-              Ücretsiz günlük ödüller için katıl! Her gün 100 USDT kazanma şansın var.
+              FUND kampanyaları - Şirketler için süresiz fon toplama alanı
             </p>
           </div>
 
-          {/* Daily Reward Participation Section */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border-2 border-yellow-200 dark:border-yellow-800 p-8 max-w-2xl mx-auto">
-            <div className="text-center space-y-6">
-              <div className="w-24 h-24 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto">
-                <Coins className="w-12 h-12 text-black" />
-              </div>
-              
-              <h2 className="text-3xl font-bold text-black dark:text-white">
-                Günlük Çekilişe Katıl
-              </h2>
-              
-              <p className="text-lg text-gray-600 dark:text-gray-400">
-                Her gün ücretsiz olarak çekilişe katılabilirsin. Kazanan günde 100 USDT alır!
-              </p>
+          {/* Quick Actions */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <Button 
+              asChild
+              size="lg"
+              className="bg-blue-500 hover:bg-blue-600 text-white font-bold text-lg py-4 px-8"
+            >
+              <Link href="/create-campaign">
+                <Building className="w-6 h-6 mr-2" />
+                Yeni FUND Kampanyası Oluştur
+              </Link>
+            </Button>
+            
+            <Button 
+              asChild
+              size="lg"
+              variant="outline"
+              className="border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 font-bold text-lg py-4 px-8"
+            >
+              <Link href="/campaigns">
+                <Trophy className="w-6 h-6 mr-2" />
+                Tüm Kampanyaları Gör
+              </Link>
+            </Button>
+          </div>
 
-              {/* Today's Stats */}
-              <div className="flex items-center justify-center space-x-8 text-lg bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                <div className="flex items-center space-x-2">
-                  <Users className="w-6 h-6 text-blue-500" />
-                  <span className="text-gray-700 dark:text-gray-300">
-                    Bugünkü Katılım: <span className="font-bold text-blue-600 dark:text-blue-400">{stats?.participants || 0}</span>
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Calendar className="w-6 h-6 text-green-500" />
-                  <span className="text-gray-700 dark:text-gray-300">
-                    Tarih: <span className="font-bold text-green-600 dark:text-green-400">{new Date().toLocaleDateString('tr-TR')}</span>
-                  </span>
-                </div>
-              </div>
-
-              {/* Wallet Connection and Join Button */}
-              {!isConnected ? (
-                <div className="space-y-4">
-                  <p className="text-yellow-600 dark:text-yellow-400 font-medium">
-                    Çekilişe katılmak için cüzdanını bağla
-                  </p>
-                  <WalletConnectButton />
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <p className="text-green-600 dark:text-green-400 font-medium">
-                    Cüzdan bağlı: {address?.slice(0, 6)}...{address?.slice(-4)}
-                  </p>
-                  <Button 
-                    onClick={joinDailyReward}
-                    disabled={joinRewardMutation.isPending || hasJoinedToday}
-                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold text-lg py-4 px-8"
-                  >
-                    {joinRewardMutation.isPending ? (
-                      "Katılım işleniyor..."
-                    ) : hasJoinedToday ? (
-                      "Bugün zaten katıldın ✓"
-                    ) : (
-                      "🎁 Ücretsiz Çekilişe Katıl"
-                    )}
-                  </Button>
-                  
-                  {hasJoinedToday && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Sonuçlar gün sonunda açıklanacak. İyi şanslar!
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* Reward Rules */}
-              <div className="text-left space-y-2 text-sm text-gray-600 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
-                <h3 className="font-semibold text-black dark:text-white mb-2">📋 Çekiliş Kuralları:</h3>
-                <ul className="space-y-1">
-                  <li>• Her gün sadece 1 kez katılabilirsin</li>
-                  <li>• Katılım tamamen ücretsiz</li>
-                  <li>• Günlük ödül: 100 USDT</li>
-                  <li>• Kazanan her gün rastgele seçilir</li>
-                  <li>• Sonuçlar gün sonunda açıklanır</li>
-                </ul>
-              </div>
+          {/* Info Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 text-center border border-blue-200 dark:border-blue-800">
+              <Building className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-black dark:text-white mb-2">Sadece Şirketler</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">FUND kampanyaları sadece şirketler tarafından oluşturulabilir</p>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 text-center border border-green-200 dark:border-green-800">
+              <Clock className="w-12 h-12 text-green-500 mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-black dark:text-white mb-2">Süresiz</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">FUND kampanyalarının bitiş tarihi yoktur, sürekli aktiftir</p>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 text-center border border-purple-200 dark:border-purple-800">
+              <Heart className="w-12 h-12 text-purple-500 mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-black dark:text-white mb-2">Komisyonsuz</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Tüm bağışlar doğrudan kampanya sahibine gider</p>
             </div>
           </div>
-        </div>
-
-        {/* Winners Section Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <Trophy className="w-10 h-10 text-yellow-500" />
-            <h2 className="text-3xl font-bold text-black dark:text-white">
-              Son Kazananlar
-            </h2>
-          </div>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            Geçmiş günlerin şanslı kazananları
-          </p>
         </div>
 
         {/* Statistics Cards */}

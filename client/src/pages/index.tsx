@@ -90,6 +90,9 @@ export default function HomePage() {
               <Link href="/funds" className="text-foreground hover:text-cyber-purple font-bold transition-colors uppercase tracking-wide hover:text-shadow-purple">
                 {t('funds')}
               </Link>
+              <Link href="/daily-rewards" className="text-foreground hover:text-cyber-yellow font-bold transition-colors uppercase tracking-wide hover:text-shadow-yellow">
+                Daily Rewards
+              </Link>
               {isConnected && (
                 <Link href="/profile" className="text-foreground hover:text-cyber-yellow font-bold transition-colors uppercase tracking-wide hover:text-shadow-yellow">
                   {t('profile')}

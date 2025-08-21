@@ -61,6 +61,16 @@ export default function Header({ currentPage }: HeaderProps) {
             >
               {t('funds')}
             </Link>
+            <Link 
+              href="/daily-rewards" 
+              className={`font-medium transition-colors uppercase tracking-wide ${
+                currentPage === 'daily-rewards' 
+                  ? 'text-cyber-cyan font-semibold' 
+                  : 'text-muted-foreground hover:text-cyber-cyan'
+              }`}
+            >
+              Daily Rewards
+            </Link>
             {isConnected && (
               <Link 
                 href="/profile" 

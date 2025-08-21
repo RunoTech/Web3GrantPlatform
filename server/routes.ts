@@ -273,13 +273,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create campaign (public - but requires active account)
   app.post("/api/create-campaign", async (req, res) => {
     try {
-      const campaignData = insertCampaignSchema.parse(req.body);
+      const campaignData = req.body;
       
-      // Check if owner account is active
-      const account = await storage.getAccount(campaignData.ownerWallet);
-      if (!account || !account.active) {
-        return res.status(403).json({ error: "Account must be activated first" });
+      // Validate FUND/DONATE rules
+      if (campaignData.campaignType === "FUND" && campaignData.creatorType !== "company") {
+        return res.status(400).json({ error: "FUND campaigns can only be created by companies" });
       }
+      
+      if (campaignData.campaignType === "DONATE" && campaignData.creatorType === "company") {
+        return res.status(400).json({ error: "DONATE campaigns cannot be created by companies" });
+      }
+      
+      if (campaignData.campaignType === "DONATE" && (!campaignData.startDate || !campaignData.endDate)) {
+        return res.status(400).json({ error: "DONATE campaigns must have start and end dates" });
+      }
+      
+      // Check if owner account is active (for now skip this requirement)
+      // const account = await storage.getAccount(campaignData.ownerWallet);
+      // if (!account || !account.active) {
+      //   return res.status(403).json({ error: "Account must be activated first" });
+      // }
 
       const campaign = await storage.createCampaign(campaignData);
       res.json(campaign);

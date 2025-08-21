@@ -251,8 +251,15 @@ export class DatabaseStorage implements IStorage {
     return campaign || undefined;
   }
 
-  async createCampaign(campaign: InsertCampaign): Promise<Campaign> {
-    const [newCampaign] = await db.insert(campaigns).values(campaign).returning();
+  async createCampaign(campaign: any): Promise<Campaign> {
+    // Convert date strings to Date objects if provided
+    const campaignData = {
+      ...campaign,
+      startDate: campaign.startDate ? new Date(campaign.startDate) : null,
+      endDate: campaign.endDate ? new Date(campaign.endDate) : null,
+    };
+    
+    const [newCampaign] = await db.insert(campaigns).values(campaignData).returning();
     return newCampaign;
   }
 

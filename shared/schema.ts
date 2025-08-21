@@ -76,6 +76,10 @@ export const accounts = pgTable("accounts", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Campaign type and creator type enums
+export const campaignTypeEnum = pgEnum("campaign_type", ["FUND", "DONATE"]);
+export const creatorTypeEnum = pgEnum("creator_type", ["company", "citizen", "association", "foundation"]);
+
 // Campaigns
 export const campaigns = pgTable("campaigns", {
   id: serial("id").primaryKey(),
@@ -83,9 +87,14 @@ export const campaigns = pgTable("campaigns", {
   description: text("description").notNull(),
   imageUrl: varchar("image_url", { length: 500 }).notNull(),
   ownerWallet: varchar("owner_wallet", { length: 42 }).notNull(),
+  campaignType: campaignTypeEnum("campaign_type").notNull().default("DONATE"), // FUND or DONATE
+  creatorType: creatorTypeEnum("creator_type").notNull().default("citizen"), // company, citizen, association, foundation
   targetAmount: decimal("target_amount", { precision: 18, scale: 8 }).default("0"),
   totalDonations: decimal("total_donations", { precision: 18, scale: 8 }).default("0"),
   donationCount: integer("donation_count").default(0),
+  // Time-limited fields (only for DONATE campaigns)
+  startDate: timestamp("start_date"), // Required for DONATE, null for FUND
+  endDate: timestamp("end_date"), // Required for DONATE, null for FUND
   featured: boolean("featured").default(false),
   active: boolean("active").default(true),
   approved: boolean("approved").default(false),
@@ -239,11 +248,20 @@ export const insertCampaignSchema = createInsertSchema(campaigns).omit({
   id: true, 
   totalDonations: true, 
   donationCount: true, 
+  featured: true,
+  active: true,
   approved: true, 
   approvedBy: true, 
   approvedAt: true, 
   createdAt: true, 
   updatedAt: true 
+}).extend({
+  // Custom validation for campaign types
+  campaignType: z.enum(["FUND", "DONATE"]),
+  creatorType: z.enum(["company", "citizen", "association", "foundation"]),
+  // Start and end dates are conditional based on campaign type
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
 });
 
 export const insertDonationSchema = createInsertSchema(donations).omit({ 

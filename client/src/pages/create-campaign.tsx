@@ -2,23 +2,18 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertCampaignSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import WalletConnectButton from "@/components/WalletConnectButton";
-import NetworkOption from "@/components/NetworkOption";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { api } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, ArrowLeft, Plus, Lock, Copy, CheckCircle } from "lucide-react";
-import type { z } from "zod";
-
-type CampaignFormData = z.infer<typeof insertCampaignSchema>;
+import { Heart, ArrowLeft, Building, Users, Calendar, CheckCircle, Lock } from "lucide-react";
 
 export default function CreateCampaignPage() {
   const { t } = useLanguage();
@@ -27,29 +22,27 @@ export default function CreateCampaignPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  const [selectedNetwork, setSelectedNetwork] = useState<'ethereum'>('ethereum');
-  const [txHash, setTxHash] = useState("");
-  const [accountActive, setAccountActive] = useState(false);
-  const [verifyingPayment, setVerifyingPayment] = useState(false);
+  const [campaignType, setCampaignType] = useState<"FUND" | "DONATE">("DONATE");
+  const [creatorType, setCreatorType] = useState<"company" | "citizen" | "association" | "foundation">("citizen");
 
-  const { data: fees } = useQuery({
-    queryKey: ["/api/fees"],
-    enabled: isConnected,
-  });
-
-  const form = useForm<CampaignFormData>({
-    resolver: zodResolver(insertCampaignSchema.omit({ ownerWallet: true })),
+  const form = useForm({
     defaultValues: {
       title: "",
       description: "",
       imageUrl: "",
+      targetAmount: "0",
+      startDate: "",
+      endDate: "",
     },
   });
 
   const createCampaignMutation = useMutation({
-    mutationFn: (data: CampaignFormData) => 
-      api.post("/api/create-campaign", data, { 
-        headers: { wallet: address || "" } 
+    mutationFn: (data: any) => 
+      api.post("/api/create-campaign", {
+        ...data,
+        campaignType,
+        creatorType,
+        ownerWallet: address,
       }),
     onSuccess: (data) => {
       toast({
@@ -68,65 +61,61 @@ export default function CreateCampaignPage() {
     },
   });
 
-  const verifyPayment = async () => {
-    if (!txHash || !address) return;
-    
-    setVerifyingPayment(true);
-    try {
-      await api.post("/api/verify-payment", {
-        network: 'ethereum',
-        wallet: address,
-        txHash,
-      });
-      
-      setAccountActive(true);
-      toast({
-        title: "Başarılı!",
-        description: "Hesabınız başarıyla aktifleştirildi",
-      });
-    } catch (error: any) {
+  const onSubmit = (data: any) => {
+    // Validate FUND/DONATE rules
+    if (campaignType === "FUND" && creatorType !== "company") {
       toast({
         title: "Hata",
-        description: error.message || "Ödeme doğrulanamadı",
+        description: "FUND kampanyaları yalnızca şirketler tarafından oluşturulabilir",
         variant: "destructive",
       });
-    } finally {
-      setVerifyingPayment(false);
+      return;
     }
+
+    if (campaignType === "DONATE" && creatorType === "company") {
+      toast({
+        title: "Hata", 
+        description: "DONATE kampanyaları şirketler tarafından oluşturulamaz",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (campaignType === "DONATE" && (!data.startDate || !data.endDate)) {
+      toast({
+        title: "Hata",
+        description: "DONATE kampanyaları için başlangıç ve bitiş tarihi zorunludur",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createCampaignMutation.mutate(data);
   };
 
-  const onSubmit = (data: CampaignFormData) => {
-    createCampaignMutation.mutate({
-      ...data,
-      ownerWallet: address!,
-    });
-  };
-
-  // Get platform wallet dynamically
-  const { data: platformWallets } = useQuery({
-    queryKey: ["/api/platform-wallets"],
-  });
-  
-  const platformWallet = platformWallets?.ethereum || "0x742d35Cc6734C0532925a3b2f4f83233Aa5c65aa";
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Kopyalandı!",
-      description: "Adres panoya kopyalandı",
-    });
+  // Update creator type options based on campaign type
+  const getCreatorTypeOptions = () => {
+    if (campaignType === "FUND") {
+      return [{ value: "company", label: "Şirket" }];
+    } else {
+      return [
+        { value: "citizen", label: "Birey" },
+        { value: "association", label: "Dernek" },
+        { value: "foundation", label: "Vakıf" }
+      ];
+    }
   };
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
         <div className="text-center space-y-6 max-w-md mx-auto p-8">
-          <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto">
-            <Lock className="w-12 h-12 text-white" />
+          <div className="w-24 h-24 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-3xl flex items-center justify-center mx-auto">
+            <Lock className="w-12 h-12 text-black" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-800">{t('funds.connect_wallet')}</h1>
-          <p className="text-slate-600">
-            {t('funds.connect_wallet')}
+          <h1 className="text-3xl font-bold text-black dark:text-white">Cüzdan Bağlayın</h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Kampanya oluşturmak için önce cüzdanınızı bağlamanız gerekiyor.
           </p>
           <WalletConnectButton />
         </div>
@@ -135,214 +124,292 @@ export default function CreateCampaignPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Navigation Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200">
+    <div className="min-h-screen bg-white dark:bg-black">
+      {/* Navigation Header - Binance Style */}
+      <header className="sticky top-0 z-50 bg-white/95 dark:bg-black/95 backdrop-blur-lg border-b border-yellow-200 dark:border-yellow-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
-                <Heart className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
+                <Heart className="w-6 h-6 text-black" />
               </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-{t('duxxan')}
-              </h1>
+              <span className="text-xl font-bold text-black dark:text-white">DUXXAN</span>
             </div>
-
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/" className="text-slate-600 hover:text-slate-800 font-medium transition-colors">
-{t('common.back_to_home')}
-              </Link>
-              <Link href="/campaigns" className="text-slate-600 hover:text-slate-800 font-medium transition-colors">
-{t('campaigns')}
-              </Link>
-            </nav>
-
-            <WalletConnectButton />
+            <Link href="/" className="flex items-center text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Ana Sayfa
+            </Link>
           </div>
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Button variant="ghost" asChild className="mb-8" data-testid="button-back-home">
-          <Link href="/">
-            <ArrowLeft className="w-5 h-5 mr-2" />
-{t('funds.back_home')}
-          </Link>
-        </Button>
+      {/* Campaign Creation Form */}
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-black dark:text-white mb-4">Kampanya Oluştur</h1>
+          <p className="text-gray-600 dark:text-gray-400">Hangi tür kampanya oluşturmak istiyorsunuz?</p>
+        </div>
 
-        {/* Account Activation Section */}
-        {!accountActive && (
-          <div className="bg-gradient-to-br from-pastel-blue to-pastel-purple rounded-3xl p-8 mb-8">
-            <div className="text-center space-y-6">
-              <div className="w-16 h-16 bg-blue-200 rounded-3xl flex items-center justify-center mx-auto">
-                <Lock className="w-8 h-8 text-blue-600" />
-              </div>
+        {/* Campaign Type Selection */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {/* FUND Campaign */}
+          <div 
+            className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
+              campaignType === "FUND" 
+                ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" 
+                : "border-gray-200 dark:border-gray-700 hover:border-yellow-300 dark:hover:border-yellow-600"
+            }`}
+            onClick={() => {
+              setCampaignType("FUND");
+              setCreatorType("company");
+            }}
+          >
+            <div className="flex items-center space-x-3 mb-4">
+              <Building className="w-8 h-8 text-yellow-600" />
+              <h3 className="text-xl font-bold text-black dark:text-white">FUND Kampanyası</h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Şirketler için süresiz fonlama kampanyası
+            </p>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <li className="flex items-center space-x-2">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <span>Yalnızca şirketler oluşturabilir</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <span>Süresiz (kalıcı) kampanya</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <span>Sürekli fonlama imkanı</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* DONATE Campaign */}
+          <div 
+            className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
+              campaignType === "DONATE" 
+                ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" 
+                : "border-gray-200 dark:border-gray-700 hover:border-yellow-300 dark:hover:border-yellow-600"
+            }`}
+            onClick={() => {
+              setCampaignType("DONATE");
+              if (creatorType === "company") setCreatorType("citizen");
+            }}
+          >
+            <div className="flex items-center space-x-3 mb-4">
+              <Users className="w-8 h-8 text-yellow-600" />
+              <h3 className="text-xl font-bold text-black dark:text-white">DONATE Kampanyası</h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Bireyler ve dernekler için süreli bağış kampanyası
+            </p>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <li className="flex items-center space-x-2">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <span>Bireyler, dernekler, vakıflar</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4 text-blue-500" />
+                <span>Başlangıç ve bitiş tarihi zorunlu</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <span>Süreli bağış kampanyası</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Campaign Form */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               
-              <h2 className="text-3xl font-bold text-slate-800">
-                {t('funds.activation_title')}
-              </h2>
-              <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                {t('funds.activation_subtitle')}
-              </p>
-              
-              <div className="space-y-6 pt-8">
-                <div className="flex justify-center">
-                  <NetworkOption
-                    network="ethereum"
-                    name="Ethereum Mainnet"
-                    fee="50 USDT"
-                    color="blue"
-                    selected={true}
-                    onSelect={() => {}}
+              {/* Creator Type Selection */}
+              <FormField
+                control={form.control}
+                name="creatorType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-black dark:text-white">Kuruluş Türü</FormLabel>
+                    <Select 
+                      value={creatorType} 
+                      onValueChange={(value: any) => setCreatorType(value)}
+                      disabled={campaignType === "FUND"}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Kuruluş türünü seçin" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {getCreatorTypeOptions().map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Campaign Title */}
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-black dark:text-white">Kampanya Başlığı</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Kampanyanızın başlığını girin" 
+                        {...field} 
+                        className="border-gray-300 dark:border-gray-600"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Campaign Description */}
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-black dark:text-white">Kampanya Açıklaması</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Kampanyanızın detaylı açıklaması" 
+                        {...field} 
+                        className="border-gray-300 dark:border-gray-600 min-h-[120px]"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Campaign Image */}
+              <FormField
+                control={form.control}
+                name="imageUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-black dark:text-white">Kampanya Görseli URL</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="https://example.com/image.jpg" 
+                        {...field} 
+                        className="border-gray-300 dark:border-gray-600"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Target Amount */}
+              <FormField
+                control={form.control}
+                name="targetAmount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-black dark:text-white">Hedef Tutar (USDT)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="0" 
+                        {...field} 
+                        className="border-gray-300 dark:border-gray-600"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Date Fields - Only for DONATE campaigns */}
+              {campaignType === "DONATE" && (
+                <div className="grid md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="startDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-black dark:text-white">Başlangıç Tarihi</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date" 
+                            {...field} 
+                            className="border-gray-300 dark:border-gray-600"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="endDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-black dark:text-white">Bitiş Tarihi</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date" 
+                            {...field} 
+                            className="border-gray-300 dark:border-gray-600"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
-                
-                {(
-                  <div className="bg-white rounded-2xl p-6 space-y-4 max-w-md mx-auto">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-slate-700">{t('funds.platform_wallet')}</label>
-                      <div className="flex items-center space-x-2">
-                        <Input 
-                          type="text" 
-                          value={platformWallet}
-                          className="flex-1 font-mono bg-slate-50 text-sm"
-                          readOnly
-                          data-testid="platform-wallet-address"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => copyToClipboard(platformWallet)}
-                          data-testid="button-copy-platform-wallet"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-slate-700">{t('funds.tx_hash')}</label>
-                      <Input 
-                        type="text" 
-                        placeholder="0x..." 
-                        value={txHash}
-                        onChange={(e) => setTxHash(e.target.value)}
-                        className="font-mono text-sm"
-                        data-testid="input-tx-hash"
-                      />
-                    </div>
-                    
-                    <Button 
-                      onClick={verifyPayment}
-                      disabled={!txHash || verifyingPayment}
-                      className="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-                      data-testid="button-verify-payment"
-                    >
-{verifyingPayment ? t('verifying') : t('funds.verify_payment')}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+              )}
 
-        {/* Campaign Creation Form */}
-        {accountActive && (
-          <div className="bg-white rounded-3xl shadow-lg p-8">
-            <div className="text-center space-y-4 mb-10">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-200 to-pink-200 rounded-3xl flex items-center justify-center mx-auto">
-                <Plus className="w-8 h-8 text-purple-600" />
-              </div>
-              <h2 className="text-3xl font-bold text-slate-800">{t('funds.campaign_form_title')}</h2>
-              <p className="text-slate-600">{t('funds.subtitle')}</p>
-            </div>
+              {/* Submit Button */}
+              <Button 
+                type="submit" 
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                disabled={createCampaignMutation.isPending}
+              >
+                {createCampaignMutation.isPending ? "Oluşturuluyor..." : "Kampanya Oluştur"}
+              </Button>
 
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-semibold text-slate-700">{t('funds.campaign_title')}</FormLabel>
-                      <FormControl>
-                        <Input 
-placeholder={t('funds.campaign_title')} 
-                          className="px-4 py-3 rounded-2xl border-slate-200 focus:border-purple-500 focus:ring-purple-500"
-                          data-testid="input-campaign-title"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-semibold text-slate-700">{t('funds.campaign_description')}</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          rows={5}
-placeholder={t('funds.campaign_description')} 
-                          className="px-4 py-3 rounded-2xl border-slate-200 focus:border-purple-500 focus:ring-purple-500 resize-none"
-                          data-testid="textarea-campaign-description"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="imageUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-semibold text-slate-700">{t('funds.campaign_image')}</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="url"
-                          placeholder="https://example.com/image.jpg" 
-                          className="px-4 py-3 rounded-2xl border-slate-200 focus:border-purple-500 focus:ring-purple-500"
-                          data-testid="input-campaign-image"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                      <p className="text-xs text-slate-500">{t('funds.campaign_image')}</p>
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                  <Button 
-                    type="submit" 
-                    disabled={createCampaignMutation.isPending}
-                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-                    data-testid="button-create-campaign"
-                  >
-{createCampaignMutation.isPending ? "Oluşturuluyor..." : t('funds.create_button')}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </div>
-        )}
+            </form>
+          </Form>
+        </div>
 
-        {/* Success State */}
-        {accountActive && (
-          <div className="bg-pastel-green border border-green-200 rounded-2xl p-6 mt-8 flex items-center space-x-3">
-            <CheckCircle className="w-6 h-6 text-green-600" />
-            <span className="text-green-800 font-medium">{t('funds.account_activated')}</span>
-          </div>
-        )}
+        {/* Campaign Type Info */}
+        <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <h3 className="font-semibold text-black dark:text-white mb-2">
+            {campaignType === "FUND" ? "FUND Kampanyası" : "DONATE Kampanyası"} Bilgileri:
+          </h3>
+          <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+            {campaignType === "FUND" ? (
+              <>
+                <li>• Yalnızca şirketler tarafından oluşturulabilir</li>
+                <li>• Süresiz (kalıcı) kampanya - başlangıç/bitiş tarihi yok</li>
+                <li>• Sürekli fonlama imkanı</li>
+              </>
+            ) : (
+              <>
+                <li>• Bireyler, dernekler ve vakıflar tarafından oluşturulabilir</li>
+                <li>• Başlangıç ve bitiş tarihi zorunlu</li>
+                <li>• Süreli bağış kampanyası</li>
+              </>
+            )}
+          </ul>
+        </div>
       </div>
     </div>
   );

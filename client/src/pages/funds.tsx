@@ -23,7 +23,8 @@ import {
   Star,
   Clock,
   Copy,
-  CheckCircle
+  CheckCircle,
+  Coins
 } from "lucide-react";
 import type { DailyWinner } from "@shared/schema";
 
@@ -39,27 +40,44 @@ export default function FundsPage() {
     queryKey: ["/api/get-last-winners"],
   });
 
-  const { data: todayStats } = useQuery<{ participants: number; date: string }>({
+  const { data: stats } = useQuery<{ participants: number; date: string }>({
     queryKey: ["/api/today-stats"],
   });
 
-  const joinDailyReward = useMutation({
+  // Check if user has joined today
+  const [hasJoinedToday, setHasJoinedToday] = useState(false);
+
+  const joinRewardMutation = useMutation({
     mutationFn: () => api.post("/api/join-daily-reward", { wallet: address }),
     onSuccess: () => {
       toast({
         title: "Başarılı!",
         description: "Günlük ödül çekilişine katıldınız!",
       });
+      setHasJoinedToday(true);
       queryClient.invalidateQueries({ queryKey: ["/api/today-stats"] });
     },
     onError: (error: any) => {
-      toast({
-        title: "Hata",
-        description: error.message || "Çekilişe katılım başarısız",
-        variant: "destructive",
-      });
+      const errorMsg = error.message || "Çekilişe katılım başarısız";
+      if (errorMsg.includes("Already entered")) {
+        setHasJoinedToday(true);
+        toast({
+          title: "Bilgi",
+          description: "Bugün zaten çekilişe katıldınız!",
+        });
+      } else {
+        toast({
+          title: "Hata",
+          description: errorMsg,
+          variant: "destructive",
+        });
+      }
     },
   });
+
+  const joinDailyReward = () => {
+    joinRewardMutation.mutate();
+  };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -78,7 +96,7 @@ export default function FundsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-white dark:bg-black">
       <Header currentPage="funds" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -89,54 +107,112 @@ export default function FundsPage() {
           </Link>
         </Button>
 
-        {/* Hero Section */}
-        <div className="text-center space-y-8 mb-12">
-          <div className="w-32 h-32 gradient-primary rounded-3xl flex items-center justify-center mx-auto neon-border shadow-2xl">
-            <Trophy className="w-16 h-16 text-background drop-shadow-2xl" />
-          </div>
-          
-          <div className="space-y-4">
-            <h1 className="text-4xl md:text-6xl font-bold neon-text uppercase tracking-wider">
-              Günlük Ödüller
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Her gün 3 kez ücretsiz çekiliş! 100 USDT kazanma şansı yakalayın.
+        {/* Daily Rewards Header Section */}
+        <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-3xl p-12 mb-12">
+          <div className="text-center mb-12">
+            <div className="flex items-center justify-center space-x-3 mb-6">
+              <Gift className="w-16 h-16 text-yellow-500" />
+              <h1 className="text-5xl font-bold text-black dark:text-white">
+                Daily Rewards
+              </h1>
+            </div>
+            <p className="text-2xl text-gray-600 dark:text-gray-400 mb-8 max-w-4xl mx-auto">
+              Ücretsiz günlük ödüller için katıl! Her gün 100 USDT kazanma şansın var.
             </p>
           </div>
 
-          {/* Join Daily Reward Button */}
-          {isConnected ? (
-            <div className="space-y-4">
-              <Button 
-                onClick={() => joinDailyReward.mutate()}
-                disabled={joinDailyReward.isPending}
-                className="gradient-primary hover:scale-105 transition-all duration-300 px-8 py-4 text-lg font-bold uppercase tracking-wide neon-border shadow-lg"
-                data-testid="button-join-daily-reward"
-              >
-                {joinDailyReward.isPending ? (
-                  <>
-                    <Clock className="w-6 h-6 mr-2 animate-spin" />
-                    Katılıyor...
-                  </>
-                ) : (
-                  <>
-                    <Gift className="w-6 h-6 mr-2" />
-                    Günlük Çekilişe Katıl
-                  </>
-                )}
-              </Button>
-              <p className="text-sm text-muted-foreground">
-                Ücretsiz! Sadece cüzdan bağlayın ve katılın.
+          {/* Daily Reward Participation Section */}
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border-2 border-yellow-200 dark:border-yellow-800 p-8 max-w-2xl mx-auto">
+            <div className="text-center space-y-6">
+              <div className="w-24 h-24 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto">
+                <Coins className="w-12 h-12 text-black" />
+              </div>
+              
+              <h2 className="text-3xl font-bold text-black dark:text-white">
+                Günlük Çekilişe Katıl
+              </h2>
+              
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                Her gün ücretsiz olarak çekilişe katılabilirsin. Kazanan günde 100 USDT alır!
               </p>
+
+              {/* Today's Stats */}
+              <div className="flex items-center justify-center space-x-8 text-lg bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                <div className="flex items-center space-x-2">
+                  <Users className="w-6 h-6 text-blue-500" />
+                  <span className="text-gray-700 dark:text-gray-300">
+                    Bugünkü Katılım: <span className="font-bold text-blue-600 dark:text-blue-400">{stats?.participants || 0}</span>
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Calendar className="w-6 h-6 text-green-500" />
+                  <span className="text-gray-700 dark:text-gray-300">
+                    Tarih: <span className="font-bold text-green-600 dark:text-green-400">{new Date().toLocaleDateString('tr-TR')}</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Wallet Connection and Join Button */}
+              {!isConnected ? (
+                <div className="space-y-4">
+                  <p className="text-yellow-600 dark:text-yellow-400 font-medium">
+                    Çekilişe katılmak için cüzdanını bağla
+                  </p>
+                  <WalletConnectButton />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-green-600 dark:text-green-400 font-medium">
+                    Cüzdan bağlı: {address?.slice(0, 6)}...{address?.slice(-4)}
+                  </p>
+                  <Button 
+                    onClick={joinDailyReward}
+                    disabled={joinRewardMutation.isPending || hasJoinedToday}
+                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold text-lg py-4 px-8"
+                  >
+                    {joinRewardMutation.isPending ? (
+                      "Katılım işleniyor..."
+                    ) : hasJoinedToday ? (
+                      "Bugün zaten katıldın ✓"
+                    ) : (
+                      "🎁 Ücretsiz Çekilişe Katıl"
+                    )}
+                  </Button>
+                  
+                  {hasJoinedToday && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Sonuçlar gün sonunda açıklanacak. İyi şanslar!
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Reward Rules */}
+              <div className="text-left space-y-2 text-sm text-gray-600 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
+                <h3 className="font-semibold text-black dark:text-white mb-2">📋 Çekiliş Kuralları:</h3>
+                <ul className="space-y-1">
+                  <li>• Her gün sadece 1 kez katılabilirsin</li>
+                  <li>• Katılım tamamen ücretsiz</li>
+                  <li>• Günlük ödül: 100 USDT</li>
+                  <li>• Kazanan her gün rastgele seçilir</li>
+                  <li>• Sonuçlar gün sonunda açıklanır</li>
+                </ul>
+              </div>
             </div>
-          ) : (
-            <div className="space-y-4">
-              <WalletConnectButton />
-              <p className="text-sm text-muted-foreground">
-                Günlük çekilişe katılmak için cüzdanınızı bağlayın
-              </p>
-            </div>
-          )}
+          </div>
+        </div>
+
+        {/* Winners Section Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center space-x-3 mb-4">
+            <Trophy className="w-10 h-10 text-yellow-500" />
+            <h2 className="text-3xl font-bold text-black dark:text-white">
+              Son Kazananlar
+            </h2>
+          </div>
+          <p className="text-lg text-gray-600 dark:text-gray-400">
+            Geçmiş günlerin şanslı kazananları
+          </p>
         </div>
 
         {/* Statistics Cards */}
@@ -155,7 +231,7 @@ export default function FundsPage() {
           
           <Card className="cyber-card p-6 text-center">
             <Users className="w-12 h-12 text-cyber-green mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-foreground mb-2">{todayStats?.participants || 0}</h3>
+            <h3 className="text-2xl font-bold text-foreground mb-2">{stats?.participants || 0}</h3>
             <p className="text-muted-foreground">Bugünkü Katılımcı</p>
           </Card>
         </div>

@@ -404,6 +404,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get today's stats (for daily rewards page)
+  app.get("/api/today-stats", async (req, res) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const todayStats = await storage.getTodayStats(today);
+      res.json(todayStats);
+    } catch (error) {
+      console.error("Error fetching today's stats:", error);
+      res.status(500).json({ error: "Failed to fetch today's stats" });
+    }
+  });
+
+  // Admin: Get daily entries for a specific date
+  app.get("/api/admin/daily-entries/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const entries = await storage.getDailyEntriesByDate(date);
+      res.json(entries);
+    } catch (error) {
+      console.error("Error fetching daily entries:", error);
+      res.status(500).json({ error: "Failed to fetch daily entries" });
+    }
+  });
+
+  // Admin: Get daily winner for a specific date
+  app.get("/api/admin/daily-winner/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const winner = await storage.getDailyWinnerByDate(date);
+      res.json(winner);
+    } catch (error) {
+      console.error("Error fetching daily winner:", error);
+      res.status(500).json({ error: "Failed to fetch daily winner" });
+    }
+  });
+
+  // Admin: Get daily reward statistics
+  app.get("/api/admin/daily-stats", async (req, res) => {
+    try {
+      const stats = await storage.getDailyRewardStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching daily stats:", error);
+      res.status(500).json({ error: "Failed to fetch daily stats" });
+    }
+  });
+
+  // Admin: Select random winner
+  app.post("/api/admin/select-random-winner", async (req, res) => {
+    try {
+      const { date, amount } = req.body;
+      const adminId = 1; // Default admin for demo
+      
+      // Check if winner already exists
+      const existingWinner = await storage.getDailyWinnerByDate(date);
+      if (existingWinner) {
+        return res.status(400).json({ error: "Winner already selected for this date" });
+      }
+
+      // Get all entries for the date
+      const entries = await storage.getDailyEntriesByDate(date);
+      if (entries.length === 0) {
+        return res.status(400).json({ error: "No entries found for this date" });
+      }
+
+      // Select random winner
+      const randomIndex = Math.floor(Math.random() * entries.length);
+      const selectedEntry = entries[randomIndex];
+
+      // Create winner record
+      const winner = await storage.createDailyWinner({
+        wallet: selectedEntry.wallet,
+        date,
+        amount: amount || "100",
+        selectedBy: adminId
+      });
+
+      res.json({ success: true, winner });
+    } catch (error) {
+      console.error("Error selecting random winner:", error);
+      res.status(500).json({ error: "Failed to select random winner" });
+    }
+  });
+
+  // Admin: Select manual winner
+  app.post("/api/admin/select-manual-winner", async (req, res) => {
+    try {
+      const { date, wallet, amount } = req.body;
+      const adminId = 1; // Default admin for demo
+      
+      // Check if winner already exists
+      const existingWinner = await storage.getDailyWinnerByDate(date);
+      if (existingWinner) {
+        return res.status(400).json({ error: "Winner already selected for this date" });
+      }
+
+      // Create winner record
+      const winner = await storage.createDailyWinner({
+        wallet,
+        date,
+        amount: amount || "100",
+        selectedBy: adminId
+      });
+
+      res.json({ success: true, winner });
+    } catch (error) {
+      console.error("Error selecting manual winner:", error);
+      res.status(500).json({ error: "Failed to select manual winner" });
+    }
+  });
+
   // Verify transaction (public - for frontend validation)
   app.post("/api/verify-transaction", async (req, res) => {
     try {

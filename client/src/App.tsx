@@ -16,6 +16,7 @@ import FundsPage from "@/pages/funds";
 import DailyRewardsPage from "@/pages/daily-rewards";
 import PaymentPage from "@/pages/payment";
 import AdminSettingsPage from "@/pages/admin/settings";
+import AdminDailyRewardsPage from "@/pages/admin/daily-rewards";
 
 function Router() {
   return (
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/campaign/:id" component={CampaignDetailPage} />
       <Route path="/create-campaign" component={CreateCampaignPage} />
       <Route path="/admin/settings" component={AdminSettingsPage} />
+      <Route path="/admin/daily-rewards" component={AdminDailyRewardsPage} />
       <Route component={NotFound} />
     </Switch>
   );

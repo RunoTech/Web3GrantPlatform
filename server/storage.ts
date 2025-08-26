@@ -72,7 +72,15 @@ export interface IStorage {
   // Daily Rewards
   createDailyEntry(entry: InsertDailyEntry): Promise<DailyEntry>;
   getDailyEntries(date: string): Promise<DailyEntry[]>;
+  getDailyEntriesByDate(date: string): Promise<DailyEntry[]>;
   checkDailyEntry(wallet: string, date: string): Promise<boolean>;
+  getTodayStats(date: string): Promise<{ participants: number; date: string }>;
+  getDailyRewardStats(): Promise<{ totalEntries: number; totalWinners: number; totalRewards: number; activeDays: number }>;
+  
+  // Daily Winners
+  createDailyWinner(winner: InsertDailyWinner): Promise<DailyWinner>;
+  getDailyWinnerByDate(date: string): Promise<DailyWinner | undefined>;
+  getDailyWinnersByDate(date: string): Promise<DailyWinner[]>;
   createDailyWinner(winner: InsertDailyWinner): Promise<DailyWinner>;
   getDailyWinners(limit?: number): Promise<DailyWinner[]>;
   getDailyWinnersByDate(date: string): Promise<DailyWinner[]>;
@@ -365,6 +373,48 @@ export class DatabaseStorage implements IStorage {
 
   async getDailyWinnersByDate(date: string): Promise<DailyWinner[]> {
     return await db.select().from(dailyWinners).where(eq(dailyWinners.date, date));
+  }
+
+  async getDailyEntriesByDate(date: string): Promise<DailyEntry[]> {
+    return await db.select().from(dailyEntries).where(eq(dailyEntries.date, date));
+  }
+
+  async getDailyWinnerByDate(date: string): Promise<DailyWinner | undefined> {
+    const [winner] = await db.select().from(dailyWinners).where(eq(dailyWinners.date, date));
+    return winner || undefined;
+  }
+
+  async getTodayStats(date: string): Promise<{ participants: number; date: string }> {
+    const [stats] = await db.select({
+      participants: sql`COUNT(*)`
+    }).from(dailyEntries).where(eq(dailyEntries.date, date));
+    
+    return {
+      participants: Number(stats.participants) || 0,
+      date
+    };
+  }
+
+  async getDailyRewardStats(): Promise<{ totalEntries: number; totalWinners: number; totalRewards: number; activeDays: number }> {
+    const [entryStats] = await db.select({
+      totalEntries: sql`COUNT(*)`
+    }).from(dailyEntries);
+
+    const [winnerStats] = await db.select({
+      totalWinners: sql`COUNT(*)`,
+      totalRewards: sql`COALESCE(SUM(${dailyWinners.amount}), 0)`
+    }).from(dailyWinners);
+
+    const [dayStats] = await db.select({
+      activeDays: sql`COUNT(DISTINCT ${dailyEntries.date})`
+    }).from(dailyEntries);
+
+    return {
+      totalEntries: Number(entryStats.totalEntries) || 0,
+      totalWinners: Number(winnerStats.totalWinners) || 0,
+      totalRewards: Number(winnerStats.totalRewards) || 0,
+      activeDays: Number(dayStats.activeDays) || 0
+    };
   }
 
   // Footer Links

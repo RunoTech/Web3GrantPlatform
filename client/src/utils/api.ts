@@ -1,26 +1,59 @@
-import { apiRequest } from "@/lib/queryClient";
+const BASE_URL = '';
 
 export const api = {
-  get: async (url: string) => {
-    const response = await apiRequest("GET", url);
-    return response.json();
-  },
-  
-  post: async (url: string, data?: any, options?: { headers?: Record<string, string> }) => {
-    const response = await apiRequest("POST", url, data);
-    if (options?.headers) {
-      // Headers are handled in apiRequest
+  async get(url: string) {
+    const response = await fetch(`${BASE_URL}${url}`);
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`${response.status}: ${error}`);
     }
     return response.json();
   },
-  
-  put: async (url: string, data?: any) => {
-    const response = await apiRequest("PUT", url, data);
+
+  async post(url: string, data?: any) {
+    const response = await fetch(`${BASE_URL}${url}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data ? JSON.stringify(data) : undefined,
+    });
+    
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`${response.status}: ${error}`);
+    }
+    
     return response.json();
   },
-  
-  delete: async (url: string) => {
-    const response = await apiRequest("DELETE", url);
+
+  async put(url: string, data?: any) {
+    const response = await fetch(`${BASE_URL}${url}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data ? JSON.stringify(data) : undefined,
+    });
+    
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`${response.status}: ${error}`);
+    }
+    
     return response.json();
   },
+
+  async delete(url: string) {
+    const response = await fetch(`${BASE_URL}${url}`, {
+      method: 'DELETE',
+    });
+    
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`${response.status}: ${error}`);
+    }
+    
+    return response.json();
+  }
 };

@@ -32,8 +32,12 @@ import {
   Star,
   Gem,
   Coins,
-  Wallet
+  Wallet,
+  User,
+  BarChart3,
+  Settings
 } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
 export default function HomePage() {
   const { isConnected, address } = useWallet();
@@ -93,16 +97,51 @@ export default function HomePage() {
               <Link href="/daily-rewards" className="text-foreground hover:text-cyber-yellow font-bold transition-colors uppercase tracking-wide hover:text-shadow-yellow">
                 Daily Rewards
               </Link>
-              {isConnected && (
-                <Link href="/profile" className="text-foreground hover:text-cyber-yellow font-bold transition-colors uppercase tracking-wide hover:text-shadow-yellow">
-                  {t('profile')}
-                </Link>
-              )}
             </nav>
 
             <div className="flex items-center space-x-3">
               <ThemeToggle />
               <LanguageSelector />
+              {isConnected && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="transition-colors hover:text-cyber-yellow text-foreground"
+                    >
+                      <User className="w-5 h-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="flex items-center w-full">
+                        <BarChart3 className="w-4 h-4 mr-2" />
+                        Dashboard Overview
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile?tab=campaigns" className="flex items-center w-full">
+                        <Target className="w-4 h-4 mr-2" />
+                        My Campaigns
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile?tab=rewards" className="flex items-center w-full">
+                        <Trophy className="w-4 h-4 mr-2" />
+                        Daily Rewards
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile?tab=settings" className="flex items-center w-full">
+                        <Settings className="w-4 h-4 mr-2" />
+                        Profile Settings
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
               <WalletConnectButton />
             </div>
           </div>

@@ -74,9 +74,23 @@ export default function DonationsPage() {
               <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 uppercase tracking-wider">
                 <span className="neon-text">{t('donations.title')}</span>
               </h1>
-              <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8">
                 {t('donations.subtitle')}
               </p>
+              
+              {/* Create Campaign Button */}
+              <div className="flex justify-center">
+                <Button 
+                  asChild 
+                  size="lg"
+                  className="cyber-cyan-bg px-8 py-4 font-bold uppercase tracking-wide btn-cyber shadow-2xl hover:scale-105 transition-transform duration-300"
+                >
+                  <Link href="/create-campaign?type=donate">
+                    <Target className="w-6 h-6 mr-2 text-black" />
+                    {t('donations.create_campaign')}
+                  </Link>
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">

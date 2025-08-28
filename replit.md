@@ -8,7 +8,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Company Information Privacy Implementation (August 28, 2025)
+### Campaign Creation Flow Separation (August 28, 2025)
+- **CRITICAL UPDATE**: Successfully separated FUND and DONATE campaign creation flows
+- Implemented URL parameter-based campaign type locking system (?type=fund or ?type=donate)
+- Updated all navigation links to direct to appropriate campaign creation type:
+  - FUNDS page → creates only FUND campaigns for companies
+  - CAMPAIGNS/DONATIONS/PROFILE pages → creates only DONATE campaigns for individuals/organizations
+  - Homepage maintains general campaign creation (defaults to DONATE)
+- Enhanced create-campaign page with conditional rendering based on URL parameters
+- Added locked campaign type indicator with visual feedback when coming from specific sections
+
+### Company Information Privacy Implementation (August 28, 2025)  
 - **CRITICAL PRIVACY UPDATE**: Company information collection for FUND campaigns is now private and only accessible through admin panel
 - Implemented data privacy filter system to exclude company details from public APIs
 - Updated public API endpoints (`/api/get-campaigns`, `/api/get-popular-campaigns`, `/api/campaign/:id`) to filter out sensitive company information

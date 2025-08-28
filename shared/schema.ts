@@ -92,6 +92,19 @@ export const campaigns = pgTable("campaigns", {
   targetAmount: decimal("target_amount", { precision: 18, scale: 8 }).default("0"),
   totalDonations: decimal("total_donations", { precision: 18, scale: 8 }).default("0"),
   donationCount: integer("donation_count").default(0),
+  
+  // Company information fields (for FUND campaigns)
+  companyName: varchar("company_name", { length: 200 }),
+  companyRegistrationNumber: varchar("company_registration_number", { length: 100 }),
+  companyAddress: text("company_address"),
+  companyWebsite: varchar("company_website", { length: 300 }),
+  companyEmail: varchar("company_email", { length: 100 }),
+  companyPhone: varchar("company_phone", { length: 50 }),
+  companyCEO: varchar("company_ceo", { length: 100 }),
+  companyFoundedYear: integer("company_founded_year"),
+  companyIndustry: varchar("company_industry", { length: 100 }),
+  companyEmployeeCount: varchar("company_employee_count", { length: 50 }),
+  
   // Time-limited fields (only for DONATE campaigns)
   startDate: timestamp("start_date"), // Required for DONATE, null for FUND
   endDate: timestamp("end_date"), // Required for DONATE, null for FUND

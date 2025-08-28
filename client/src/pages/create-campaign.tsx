@@ -25,6 +25,18 @@ export default function CreateCampaignPage() {
   const [campaignType, setCampaignType] = useState<"FUND" | "DONATE">("DONATE");
   const [creatorType, setCreatorType] = useState<"company" | "citizen" | "association" | "foundation">("citizen");
 
+  // Creator type options based on campaign type
+  const getCreatorTypeOptions = () => {
+    if (campaignType === "FUND") {
+      return [{ value: "company", label: "Company" }];
+    }
+    return [
+      { value: "citizen", label: "Individual" },
+      { value: "association", label: "Association" },
+      { value: "foundation", label: "Foundation" }
+    ];
+  };
+
   const form = useForm({
     defaultValues: {
       title: "",
@@ -33,6 +45,17 @@ export default function CreateCampaignPage() {
       targetAmount: "0",
       startDate: "",
       endDate: "",
+      // Company information fields
+      companyName: "",
+      companyRegistrationNumber: "",
+      companyAddress: "",
+      companyWebsite: "",
+      companyEmail: "",
+      companyPhone: "",
+      companyCEO: "",
+      companyFoundedYear: "",
+      companyIndustry: "",
+      companyEmployeeCount: "",
     },
   });
 
@@ -46,16 +69,16 @@ export default function CreateCampaignPage() {
       }),
     onSuccess: (data) => {
       toast({
-        title: "Başarılı!",
-        description: "Kampanyanız başarıyla oluşturuldu",
+        title: "Success!",
+        description: "Campaign created successfully",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/get-campaigns"] });
       setLocation(`/campaign/${data.id}`);
     },
     onError: (error: any) => {
       toast({
-        title: "Hata",
-        description: error.message || "Kampanya oluşturulamadı",
+        title: "Error",
+        description: error.message || "Failed to create campaign",
         variant: "destructive",
       });
     },
@@ -65,8 +88,8 @@ export default function CreateCampaignPage() {
     // Validate FUND/DONATE rules
     if (campaignType === "FUND" && creatorType !== "company") {
       toast({
-        title: "Hata",
-        description: "FUND kampanyaları yalnızca şirketler tarafından oluşturulabilir",
+        title: "Error",
+        description: "FUND campaigns can only be created by companies",
         variant: "destructive",
       });
       return;
@@ -74,8 +97,8 @@ export default function CreateCampaignPage() {
 
     if (campaignType === "DONATE" && creatorType === "company") {
       toast({
-        title: "Hata", 
-        description: "DONATE kampanyaları şirketler tarafından oluşturulamaz",
+        title: "Error", 
+        description: "DONATE campaigns cannot be created by companies",
         variant: "destructive",
       });
       return;
@@ -83,27 +106,14 @@ export default function CreateCampaignPage() {
 
     if (campaignType === "DONATE" && (!data.startDate || !data.endDate)) {
       toast({
-        title: "Hata",
-        description: "DONATE kampanyaları için başlangıç ve bitiş tarihi zorunludur",
+        title: "Error",
+        description: "Start and end dates are required for DONATE campaigns",
         variant: "destructive",
       });
       return;
     }
 
     createCampaignMutation.mutate(data);
-  };
-
-  // Update creator type options based on campaign type
-  const getCreatorTypeOptions = () => {
-    if (campaignType === "FUND") {
-      return [{ value: "company", label: "Şirket" }];
-    } else {
-      return [
-        { value: "citizen", label: "Birey" },
-        { value: "association", label: "Dernek" },
-        { value: "foundation", label: "Vakıf" }
-      ];
-    }
   };
 
   if (!isConnected) {
@@ -113,9 +123,9 @@ export default function CreateCampaignPage() {
           <div className="w-24 h-24 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-3xl flex items-center justify-center mx-auto">
             <Lock className="w-12 h-12 text-black" />
           </div>
-          <h1 className="text-3xl font-bold text-black dark:text-white">Cüzdan Bağlayın</h1>
+          <h1 className="text-3xl font-bold text-black dark:text-white">Connect Wallet</h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Kampanya oluşturmak için önce cüzdanınızı bağlamanız gerekiyor.
+            You need to connect your wallet first to create a campaign.
           </p>
           <WalletConnectButton />
         </div>
@@ -137,7 +147,7 @@ export default function CreateCampaignPage() {
             </div>
             <Link href="/" className="flex items-center text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">
               <ArrowLeft className="w-5 h-5 mr-2" />
-              Ana Sayfa
+              Home
             </Link>
           </div>
         </div>
@@ -146,8 +156,8 @@ export default function CreateCampaignPage() {
       {/* Campaign Creation Form */}
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-black dark:text-white mb-4">Kampanya Oluştur</h1>
-          <p className="text-gray-600 dark:text-gray-400">Hangi tür kampanya oluşturmak istiyorsunuz?</p>
+          <h1 className="text-3xl font-bold text-black dark:text-white mb-4">Create Campaign</h1>
+          <p className="text-gray-600 dark:text-gray-400">What type of campaign would you like to create?</p>
         </div>
 
         {/* Campaign Type Selection */}
@@ -166,23 +176,23 @@ export default function CreateCampaignPage() {
           >
             <div className="flex items-center space-x-3 mb-4">
               <Building className="w-8 h-8 text-yellow-600" />
-              <h3 className="text-xl font-bold text-black dark:text-white">FUND Kampanyası</h3>
+              <h3 className="text-xl font-bold text-black dark:text-white">FUND Campaign</h3>
             </div>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Şirketler için süresiz fonlama kampanyası
+              Unlimited funding campaign for companies
             </p>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <li className="flex items-center space-x-2">
                 <CheckCircle className="w-4 h-4 text-green-500" />
-                <span>Yalnızca şirketler oluşturabilir</span>
+                <span>Only companies can create</span>
               </li>
               <li className="flex items-center space-x-2">
                 <CheckCircle className="w-4 h-4 text-green-500" />
-                <span>Süresiz (kalıcı) kampanya</span>
+                <span>Unlimited (permanent) campaign</span>
               </li>
               <li className="flex items-center space-x-2">
                 <CheckCircle className="w-4 h-4 text-green-500" />
-                <span>Sürekli fonlama imkanı</span>
+                <span>Continuous funding opportunity</span>
               </li>
             </ul>
           </div>
@@ -201,23 +211,23 @@ export default function CreateCampaignPage() {
           >
             <div className="flex items-center space-x-3 mb-4">
               <Users className="w-8 h-8 text-yellow-600" />
-              <h3 className="text-xl font-bold text-black dark:text-white">DONATE Kampanyası</h3>
+              <h3 className="text-xl font-bold text-black dark:text-white">DONATE Campaign</h3>
             </div>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Bireyler ve dernekler için süreli bağış kampanyası
+              Time-limited donation campaign for individuals and organizations
             </p>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <li className="flex items-center space-x-2">
                 <CheckCircle className="w-4 h-4 text-green-500" />
-                <span>Bireyler, dernekler, vakıflar</span>
+                <span>Individuals, associations, foundations</span>
               </li>
               <li className="flex items-center space-x-2">
                 <Calendar className="w-4 h-4 text-blue-500" />
-                <span>Başlangıç ve bitiş tarihi zorunlu</span>
+                <span>Start and end dates required</span>
               </li>
               <li className="flex items-center space-x-2">
                 <CheckCircle className="w-4 h-4 text-green-500" />
-                <span>Süreli bağış kampanyası</span>
+                <span>Time-limited donation campaign</span>
               </li>
             </ul>
           </div>
@@ -229,34 +239,25 @@ export default function CreateCampaignPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               
               {/* Creator Type Selection */}
-              <FormField
-                control={form.control}
-                name="creatorType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-black dark:text-white">Kuruluş Türü</FormLabel>
-                    <Select 
-                      value={creatorType} 
-                      onValueChange={(value: any) => setCreatorType(value)}
-                      disabled={campaignType === "FUND"}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Kuruluş türünü seçin" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {getCreatorTypeOptions().map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-2">
+                <label className="text-black dark:text-white font-medium">Organization Type</label>
+                <Select 
+                  value={creatorType} 
+                  onValueChange={(value: any) => setCreatorType(value)}
+                  disabled={campaignType === "FUND"}
+                >
+                  <SelectTrigger className="border-gray-300 dark:border-gray-600">
+                    <SelectValue placeholder="Select organization type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getCreatorTypeOptions().map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
               {/* Campaign Title */}
               <FormField
@@ -264,10 +265,10 @@ export default function CreateCampaignPage() {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-black dark:text-white">Kampanya Başlığı</FormLabel>
+                    <FormLabel className="text-black dark:text-white">Campaign Title</FormLabel>
                     <FormControl>
                       <Input 
-                        placeholder="Kampanyanızın başlığını girin" 
+                        placeholder="Enter your campaign title" 
                         {...field} 
                         className="border-gray-300 dark:border-gray-600"
                       />
@@ -283,10 +284,10 @@ export default function CreateCampaignPage() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-black dark:text-white">Kampanya Açıklaması</FormLabel>
+                    <FormLabel className="text-black dark:text-white">Campaign Description</FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="Kampanyanızın detaylı açıklaması" 
+                        placeholder="Detailed description of your campaign" 
                         {...field} 
                         className="border-gray-300 dark:border-gray-600 min-h-[120px]"
                       />
@@ -302,7 +303,7 @@ export default function CreateCampaignPage() {
                 name="imageUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-black dark:text-white">Kampanya Görseli URL</FormLabel>
+                    <FormLabel className="text-black dark:text-white">Campaign Image URL</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="https://example.com/image.jpg" 
@@ -321,7 +322,7 @@ export default function CreateCampaignPage() {
                 name="targetAmount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-black dark:text-white">Hedef Tutar (USDT)</FormLabel>
+                    <FormLabel className="text-black dark:text-white">Target Amount (USDT)</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -335,6 +336,222 @@ export default function CreateCampaignPage() {
                 )}
               />
 
+              {/* Company Information Section - Only for FUND campaigns */}
+              {campaignType === "FUND" && (
+                <div className="space-y-6 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <Building className="w-6 h-6 text-blue-600" />
+                    <h3 className="text-lg font-bold text-black dark:text-white">Company Information</h3>
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="companyName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-black dark:text-white">Company Name *</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="ABC Technologies Inc." 
+                              {...field} 
+                              className="border-gray-300 dark:border-gray-600"
+                              required
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="companyRegistrationNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-black dark:text-white">Registration Number *</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="123456789" 
+                              {...field} 
+                              className="border-gray-300 dark:border-gray-600"
+                              required
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="companyAddress"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-black dark:text-white">Company Address *</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="123 Business Street, City, State, Country" 
+                            {...field} 
+                            className="border-gray-300 dark:border-gray-600"
+                            required
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="companyWebsite"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-black dark:text-white">Company Website</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="https://www.company.com" 
+                              {...field} 
+                              className="border-gray-300 dark:border-gray-600"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="companyEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-black dark:text-white">Company Email *</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="email"
+                              placeholder="info@company.com" 
+                              {...field} 
+                              className="border-gray-300 dark:border-gray-600"
+                              required
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="companyPhone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-black dark:text-white">Company Phone</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="+1 234 567 8900" 
+                              {...field} 
+                              className="border-gray-300 dark:border-gray-600"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="companyCEO"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-black dark:text-white">CEO/Founder Name *</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="John Smith" 
+                              {...field} 
+                              className="border-gray-300 dark:border-gray-600"
+                              required
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="companyFoundedYear"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-black dark:text-white">Founded Year</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number"
+                              placeholder="2020" 
+                              {...field} 
+                              className="border-gray-300 dark:border-gray-600"
+                              min="1800"
+                              max={new Date().getFullYear()}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="companyIndustry"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-black dark:text-white">Industry *</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Technology, Healthcare, etc." 
+                              {...field} 
+                              className="border-gray-300 dark:border-gray-600"
+                              required
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="companyEmployeeCount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-black dark:text-white">Employee Count</FormLabel>
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select range" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="1-10">1-10 employees</SelectItem>
+                              <SelectItem value="11-50">11-50 employees</SelectItem>
+                              <SelectItem value="51-200">51-200 employees</SelectItem>
+                              <SelectItem value="201-500">201-500 employees</SelectItem>
+                              <SelectItem value="501-1000">501-1000 employees</SelectItem>
+                              <SelectItem value="1000+">1000+ employees</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Date Fields - Only for DONATE campaigns */}
               {campaignType === "DONATE" && (
                 <div className="grid md:grid-cols-2 gap-4">
@@ -343,7 +560,7 @@ export default function CreateCampaignPage() {
                     name="startDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-black dark:text-white">Başlangıç Tarihi</FormLabel>
+                        <FormLabel className="text-black dark:text-white">Start Date</FormLabel>
                         <FormControl>
                           <Input 
                             type="date" 
@@ -361,7 +578,7 @@ export default function CreateCampaignPage() {
                     name="endDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-black dark:text-white">Bitiş Tarihi</FormLabel>
+                        <FormLabel className="text-black dark:text-white">End Date</FormLabel>
                         <FormControl>
                           <Input 
                             type="date" 
@@ -382,7 +599,7 @@ export default function CreateCampaignPage() {
                 className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
                 disabled={createCampaignMutation.isPending}
               >
-                {createCampaignMutation.isPending ? "Oluşturuluyor..." : "Kampanya Oluştur"}
+                {createCampaignMutation.isPending ? "Creating..." : "Create Campaign"}
               </Button>
 
             </form>
@@ -392,20 +609,20 @@ export default function CreateCampaignPage() {
         {/* Campaign Type Info */}
         <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <h3 className="font-semibold text-black dark:text-white mb-2">
-            {campaignType === "FUND" ? "FUND Kampanyası" : "DONATE Kampanyası"} Bilgileri:
+            {campaignType === "FUND" ? "FUND Campaign" : "DONATE Campaign"} Information:
           </h3>
           <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
             {campaignType === "FUND" ? (
               <>
-                <li>• Yalnızca şirketler tarafından oluşturulabilir</li>
-                <li>• Süresiz (kalıcı) kampanya - başlangıç/bitiş tarihi yok</li>
-                <li>• Sürekli fonlama imkanı</li>
+                <li>• Can only be created by companies</li>
+                <li>• Unlimited (permanent) campaign - no start/end dates</li>
+                <li>• Continuous funding opportunity</li>
               </>
             ) : (
               <>
-                <li>• Bireyler, dernekler ve vakıflar tarafından oluşturulabilir</li>
-                <li>• Başlangıç ve bitiş tarihi zorunlu</li>
-                <li>• Süreli bağış kampanyası</li>
+                <li>• Can be created by individuals, associations and foundations</li>
+                <li>• Start and end dates are required</li>
+                <li>• Time-limited donation campaign</li>
               </>
             )}
           </ul>

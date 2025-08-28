@@ -104,7 +104,7 @@ export default function FundsPage() {
         <Button variant="ghost" asChild className="mb-8" data-testid="button-back-home">
           <Link href="/">
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Ana Sayfa
+            Home
           </Link>
         </Button>
 
@@ -118,7 +118,7 @@ export default function FundsPage() {
               </h1>
             </div>
             <p className="text-2xl text-gray-600 dark:text-gray-400 mb-8 max-w-4xl mx-auto">
-              FUND kampanyaları - Şirketler için süresiz fon toplama alanı
+              Corporate Fundraising Platform - Unlimited funding campaigns for companies
             </p>
           </div>
 
@@ -131,7 +131,7 @@ export default function FundsPage() {
             >
               <Link href="/create-campaign">
                 <Building className="w-6 h-6 mr-2" />
-                Yeni FUND Kampanyası Oluştur
+                Create Corporate FUND Campaign
               </Link>
             </Button>
             
@@ -143,7 +143,7 @@ export default function FundsPage() {
             >
               <Link href="/campaigns">
                 <Trophy className="w-6 h-6 mr-2" />
-                Tüm Kampanyaları Gör
+                View All Campaigns
               </Link>
             </Button>
           </div>
@@ -152,20 +152,20 @@ export default function FundsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
             <div className="bg-white dark:bg-gray-900 rounded-xl p-6 text-center border border-blue-200 dark:border-blue-800">
               <Building className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-black dark:text-white mb-2">Sadece Şirketler</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">FUND kampanyaları sadece şirketler tarafından oluşturulabilir</p>
+              <h3 className="text-lg font-bold text-black dark:text-white mb-2">Companies Only</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">FUND campaigns can only be created by registered companies</p>
             </div>
             
             <div className="bg-white dark:bg-gray-900 rounded-xl p-6 text-center border border-green-200 dark:border-green-800">
               <Clock className="w-12 h-12 text-green-500 mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-black dark:text-white mb-2">Süresiz</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">FUND kampanyalarının bitiş tarihi yoktur, sürekli aktiftir</p>
+              <h3 className="text-lg font-bold text-black dark:text-white mb-2">Unlimited</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">FUND campaigns have no end date and remain permanently active</p>
             </div>
             
             <div className="bg-white dark:bg-gray-900 rounded-xl p-6 text-center border border-purple-200 dark:border-purple-800">
               <Heart className="w-12 h-12 text-purple-500 mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-black dark:text-white mb-2">Komisyonsuz</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Tüm bağışlar doğrudan kampanya sahibine gider</p>
+              <h3 className="text-lg font-bold text-black dark:text-white mb-2">Zero Commission</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">All funds go directly to the company wallet</p>
             </div>
           </div>
         </div>
@@ -174,20 +174,20 @@ export default function FundsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <Card className="cyber-card p-6 text-center">
             <DollarSign className="w-12 h-12 text-cyber-yellow mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-foreground mb-2">100 USDT</h3>
-            <p className="text-muted-foreground">Günlük Ödül</p>
+            <h3 className="text-2xl font-bold text-foreground mb-2">50 USDT</h3>
+            <p className="text-muted-foreground">Activation Fee</p>
           </Card>
           
           <Card className="cyber-card p-6 text-center">
             <Clock className="w-12 h-12 text-cyber-cyan mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-foreground mb-2">3 Kez</h3>
-            <p className="text-muted-foreground">Günlük Çekiliş</p>
+            <h3 className="text-2xl font-bold text-foreground mb-2">∞</h3>
+            <p className="text-muted-foreground">Campaign Duration</p>
           </Card>
           
           <Card className="cyber-card p-6 text-center">
-            <Users className="w-12 h-12 text-cyber-green mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-foreground mb-2">{stats?.participants || 0}</h3>
-            <p className="text-muted-foreground">Bugünkü Katılımcı</p>
+            <Building className="w-12 h-12 text-cyber-green mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-foreground mb-2">Companies</h3>
+            <p className="text-muted-foreground">Corporate Only</p>
           </Card>
         </div>
 
@@ -195,10 +195,10 @@ export default function FundsPage() {
         <div className="space-y-8">
           <div className="text-center space-y-4">
             <h2 className="text-3xl font-bold text-foreground uppercase tracking-wide">
-              Son Kazananlar
+              Recent Corporate Fundings
             </h2>
             <p className="text-muted-foreground">
-              Günlük ödül çekilişlerinde kazanan wallet adresleri
+              Latest successful corporate fundraising campaigns
             </p>
           </div>
 
@@ -276,10 +276,10 @@ export default function FundsPage() {
             </div>
           ) : (
             <Card className="cyber-card p-12 text-center">
-              <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-foreground mb-2">Henüz Kazanan Yok</h3>
+              <Building className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-foreground mb-2">No Corporate Campaigns Yet</h3>
               <p className="text-muted-foreground">
-                Günlük çekilişlere katılın ve ilk kazanan siz olun!
+                Be the first company to create a FUND campaign on our platform!
               </p>
             </Card>
           )}
@@ -289,28 +289,28 @@ export default function FundsPage() {
         <div className="space-y-8 mt-16">
           <div className="text-center space-y-4">
             <h2 className="text-3xl font-bold text-foreground uppercase tracking-wide">
-              Nasıl Çalışır?
+              How It Works for Companies
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="cyber-card p-6 text-center">
               <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <WalletIcon className="w-8 h-8 text-background" />
+                <Building className="w-8 h-8 text-background" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">1. Cüzdan Bağlayın</h3>
+              <h3 className="text-xl font-bold text-foreground mb-2">1. Company Registration</h3>
               <p className="text-muted-foreground">
-                MetaMask veya başka bir Web3 cüzdanı ile bağlanın
+                Provide company details, wallet address and pay 50 USDT activation fee
               </p>
             </Card>
 
             <Card className="cyber-card p-6 text-center">
               <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <Gift className="w-8 h-8 text-background" />
+                <DollarSign className="w-8 h-8 text-background" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">2. Çekilişe Katılın</h3>
+              <h3 className="text-xl font-bold text-foreground mb-2">2. Create FUND Campaign</h3>
               <p className="text-muted-foreground">
-                Günde 3 kez yapılan ücretsiz çekilişlere katılın
+                Launch unlimited duration fundraising campaigns for your business
               </p>
             </Card>
 
@@ -318,9 +318,9 @@ export default function FundsPage() {
               <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
                 <Trophy className="w-8 h-8 text-background" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">3. Ödül Kazanın</h3>
+              <h3 className="text-xl font-bold text-foreground mb-2">3. Receive Direct Funds</h3>
               <p className="text-muted-foreground">
-                100 USDT ödülü doğrudan cüzdanınıza gönderilir
+                All investments go directly to your company wallet with zero commission
               </p>
             </Card>
           </div>

@@ -67,7 +67,7 @@ export default function DonationsPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-8">
             <div className="w-24 h-24 gradient-primary rounded-lg flex items-center justify-center mx-auto neon-border">
-              <Gift className="w-12 h-12 text-background" />
+              <Gift className="w-12 h-12 icon-on-primary" />
             </div>
             
             <div>
@@ -86,7 +86,7 @@ export default function DonationsPage() {
                   className="cyber-cyan-bg px-8 py-4 font-bold uppercase tracking-wide btn-cyber shadow-2xl hover:scale-105 transition-transform duration-300"
                 >
                   <Link href="/create-campaign?type=donate">
-                    <Target className="w-6 h-6 mr-2 text-black" />
+                    <Target className="w-6 h-6 mr-2 icon-on-primary" />
                     {t('donations.create_campaign')}
                   </Link>
                 </Button>
@@ -96,21 +96,21 @@ export default function DonationsPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               <div className="cyber-card p-6 text-center">
                 <div className="w-16 h-16 cyber-cyan-bg rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Target className="w-8 h-8 text-background" />
+                  <Target className="w-8 h-8 icon-on-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2 uppercase tracking-wide">{t('donations.features.reach_goal')}</h3>
                 <p className="text-sm text-muted-foreground">{t('donations.features.reach_desc')}</p>
               </div>
               <div className="cyber-card p-6 text-center">
                 <div className="w-16 h-16 cyber-purple-bg rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-white" />
+                  <Users className="w-8 h-8 text-white dark:text-white" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2 uppercase tracking-wide">{t('donations.features.support_community')}</h3>
                 <p className="text-sm text-muted-foreground">{t('donations.features.support_desc')}</p>
               </div>
               <div className="cyber-card p-6 text-center">
                 <div className="w-16 h-16 cyber-green-bg rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Heart className="w-8 h-8 text-background" />
+                  <Heart className="w-8 h-8 icon-on-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2 uppercase tracking-wide">{t('donations.features.secure_donation')}</h3>
                 <p className="text-sm text-muted-foreground">{t('donations.features.secure_desc')}</p>
@@ -227,7 +227,7 @@ export default function DonationsPage() {
             ) : (
               <div className="text-center py-20">
                 <div className="w-24 h-24 cyber-cyan-bg rounded-lg flex items-center justify-center mx-auto mb-6 neon-border">
-                  <Search className="w-12 h-12 text-background" />
+                  <Search className="w-12 h-12 icon-on-primary" />
                 </div>
                 <h3 className="text-2xl font-semibold text-foreground mb-2 uppercase tracking-wide">
                   {searchTerm ? t('donations.no_results') : t('donations.no_campaigns')}

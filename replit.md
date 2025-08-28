@@ -8,6 +8,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Light Mode Icon Visibility Fix (August 28, 2025)
+- **CRITICAL UI FIX**: Fixed icon visibility issues in light mode across all pages
+- Replaced hardcoded `text-black` and `text-white` with theme-aware classes
+- Added comprehensive theme-aware icon color system:
+  - `.icon-primary`: Uses foreground color for main icons
+  - `.icon-on-primary`: Uses primary-foreground for icons on primary backgrounds
+  - `.icon-secondary`: Uses muted-foreground for secondary icons
+  - `.icon-accent`: Uses primary color for accent icons
+- Fixed all major pages: index, donations, funds, profile, daily-rewards, create-campaign
+- Ensured proper contrast ratios in both light and dark themes
+- Enhanced cyber theme colors with proper gradients and visibility
+
 ### Campaign Creation Flow Separation (August 28, 2025)
 - **CRITICAL UPDATE**: Successfully separated FUND and DONATE campaign creation flows
 - Implemented URL parameter-based campaign type locking system (?type=fund or ?type=donate)
@@ -15,7 +27,7 @@ Preferred communication style: Simple, everyday language.
   - FUNDS page → creates only FUND campaigns for companies
   - CAMPAIGNS/DONATIONS/PROFILE pages → creates only DONATE campaigns for individuals/organizations
   - Homepage maintains general campaign creation (defaults to DONATE)
-- Enhanced create-campaign page with conditional rendering based on URL parameters
+- Enhanced create-campaign page with conditional rendering based URL parameters
 - Added locked campaign type indicator with visual feedback when coming from specific sections
 
 ### Company Information Privacy Implementation (August 28, 2025)  

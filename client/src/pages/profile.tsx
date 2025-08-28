@@ -47,7 +47,7 @@ export default function ProfilePage() {
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center space-y-8 max-w-lg mx-auto p-8">
             <div className="w-32 h-32 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-              <Wallet className="w-16 h-16 text-white" />
+              <Wallet className="w-16 h-16 text-white dark:text-white" />
             </div>
             <div className="space-y-4">
               <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{t('profile.access_title')}</h1>
@@ -394,7 +394,7 @@ export default function ProfilePage() {
               <CardContent>
                 <div className="text-center py-8">
                   <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Calendar className="w-8 h-8 text-white" />
+                    <Calendar className="w-8 h-8 text-white dark:text-white" />
                   </div>
                   <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
                     {dailyParticipationCount}

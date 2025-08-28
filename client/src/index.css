@@ -120,6 +120,31 @@ h6 { font-size: 0.875rem; } /* 14px */
 .bg-danger { background-color: var(--danger-red); }
 .text-danger { color: var(--danger-red); }
 
+/* Cyber Theme Colors */
+.cyber-cyan-bg { 
+  background: linear-gradient(135deg, #00d4aa, #00bcd4); 
+}
+.cyber-purple-bg { 
+  background: linear-gradient(135deg, #9c27b0, #673ab7); 
+}
+.cyber-green-bg { 
+  background: linear-gradient(135deg, #4caf50, #8bc34a); 
+}
+.cyber-yellow-bg { 
+  background: linear-gradient(135deg, #ffc107, #ff9800); 
+}
+
+.cyber-cyan { color: #00d4aa; }
+.cyber-purple { color: #9c27b0; }
+.cyber-green { color: #4caf50; }
+.cyber-yellow { color: #ffc107; }
+
+/* Theme-aware icon colors */
+.icon-primary { color: hsl(var(--foreground)); }
+.icon-secondary { color: hsl(var(--muted-foreground)); }
+.icon-accent { color: hsl(var(--primary)); }
+.icon-on-primary { color: hsl(var(--primary-foreground)); }
+
 /* Custom animations */
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }

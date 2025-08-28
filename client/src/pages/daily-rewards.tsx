@@ -125,7 +125,7 @@ export default function DailyRewardsPage() {
           <div className="bg-white dark:bg-gray-900 rounded-2xl border-2 border-yellow-200 dark:border-yellow-800 p-8 max-w-2xl mx-auto">
             <div className="text-center space-y-6">
               <div className="w-24 h-24 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto">
-                <Coins className="w-12 h-12 text-black" />
+                <Coins className="w-12 h-12 icon-primary" />
               </div>
               
               <h2 className="text-3xl font-bold text-black dark:text-white">
@@ -242,9 +242,9 @@ export default function DailyRewardsPage() {
                         'bg-gradient-to-r from-blue-400 to-blue-600'
                       }`}>
                         {index < 3 ? (
-                          <Trophy className="w-8 h-8 text-white" />
+                          <Trophy className="w-8 h-8 text-white dark:text-white" />
                         ) : (
-                          <Star className="w-8 h-8 text-white" />
+                          <Star className="w-8 h-8 text-white dark:text-white" />
                         )}
                       </div>
                       <Badge 

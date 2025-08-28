@@ -227,9 +227,9 @@ export default function FundsPage() {
                         'gradient-primary'
                       }`}>
                         {index < 3 ? (
-                          <Trophy className="w-8 h-8 text-white" />
+                          <Trophy className="w-8 h-8 text-white dark:text-white" />
                         ) : (
-                          <Award className="w-8 h-8 text-white" />
+                          <Award className="w-8 h-8 text-white dark:text-white" />
                         )}
                       </div>
                       {index < 3 && (
@@ -296,7 +296,7 @@ export default function FundsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="cyber-card p-6 text-center">
               <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <Building className="w-8 h-8 text-background" />
+                <Building className="w-8 h-8 icon-on-primary" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-2">1. Company Registration</h3>
               <p className="text-muted-foreground">
@@ -306,7 +306,7 @@ export default function FundsPage() {
 
             <Card className="cyber-card p-6 text-center">
               <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <DollarSign className="w-8 h-8 text-background" />
+                <DollarSign className="w-8 h-8 icon-on-primary" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-2">2. Create FUND Campaign</h3>
               <p className="text-muted-foreground">
@@ -316,7 +316,7 @@ export default function FundsPage() {
 
             <Card className="cyber-card p-6 text-center">
               <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <Trophy className="w-8 h-8 text-background" />
+                <Trophy className="w-8 h-8 icon-on-primary" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-2">3. Receive Direct Funds</h3>
               <p className="text-muted-foreground">

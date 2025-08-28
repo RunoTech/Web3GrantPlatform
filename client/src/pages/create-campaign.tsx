@@ -132,7 +132,7 @@ export default function CreateCampaignPage() {
       <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
         <div className="text-center space-y-6 max-w-md mx-auto p-8">
           <div className="w-24 h-24 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-3xl flex items-center justify-center mx-auto">
-            <Lock className="w-12 h-12 text-black" />
+            <Lock className="w-12 h-12 icon-primary" />
           </div>
           <h1 className="text-3xl font-bold text-black dark:text-white">Connect Wallet</h1>
           <p className="text-gray-600 dark:text-gray-400">
@@ -152,7 +152,7 @@ export default function CreateCampaignPage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
-                <Heart className="w-6 h-6 text-black" />
+                <Heart className="w-6 h-6 icon-primary" />
               </div>
               <span className="text-xl font-bold text-black dark:text-white">DUXXAN</span>
             </div>

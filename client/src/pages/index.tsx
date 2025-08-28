@@ -73,7 +73,7 @@ export default function HomePage() {
             <div className="flex items-center space-x-3">
               <div className="w-16 h-16 gradient-primary rounded-3xl flex items-center justify-center neon-border relative group shadow-2xl">
                 <div className="absolute inset-0 bg-gradient-to-r from-cyber-cyan/40 to-cyber-yellow/40 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                <Heart className="w-10 h-10 text-black relative z-10 drop-shadow-2xl" />
+                <Heart className="w-10 h-10 icon-on-primary relative z-10 drop-shadow-2xl" />
               </div>
               <h1 className="text-xl font-bold neon-text uppercase tracking-wide">
                 {siteTitle}
@@ -120,7 +120,7 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-12">
             <div className="w-40 h-40 gradient-primary rounded-3xl flex items-center justify-center mx-auto neon-border shadow-2xl">
-              <Heart className="w-20 h-20 text-black drop-shadow-2xl" />
+              <Heart className="w-20 h-20 icon-on-primary drop-shadow-2xl" />
             </div>
             
             <div className="space-y-6">
@@ -143,7 +143,7 @@ export default function HomePage() {
                 data-testid="button-create-campaign"
               >
                 <Link href="/create-campaign">
-                  <Target className="w-6 h-6 mr-2 text-black" />
+                  <Target className="w-6 h-6 mr-2 icon-on-primary" />
                   {t('hero.create_campaign')}
                 </Link>
               </Button>
@@ -154,7 +154,7 @@ export default function HomePage() {
                 data-testid="button-explore-campaigns"
               >
                 <Link href="/campaigns">
-                  <Search className="w-6 h-6 mr-2 text-black" />
+                  <Search className="w-6 h-6 mr-2 icon-on-primary" />
                   {t('hero.explore_campaigns')}
                 </Link>
               </Button>
@@ -178,7 +178,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="cyber-card p-8 text-center group hover:scale-105 transition-transform duration-300">
               <div className="w-24 h-24 cyber-cyan-bg rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl neon-border">
-                <Shield className="w-12 h-12 text-black drop-shadow-2xl" />
+                <Shield className="w-12 h-12 icon-on-primary drop-shadow-2xl" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.blockchain_security')}</h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -188,7 +188,7 @@ export default function HomePage() {
 
             <div className="cyber-card p-8 text-center group hover:scale-105 transition-transform duration-300">
               <div className="w-24 h-24 cyber-green-bg rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl neon-border">
-                <DollarSign className="w-12 h-12 text-black drop-shadow-2xl" />
+                <DollarSign className="w-12 h-12 icon-on-primary drop-shadow-2xl" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.commission_free')}</h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -198,7 +198,7 @@ export default function HomePage() {
 
             <div className="cyber-card p-8 text-center group hover:scale-105 transition-transform duration-300">
               <div className="w-24 h-24 cyber-purple-bg rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl neon-border">
-                <Zap className="w-12 h-12 text-black drop-shadow-2xl" />
+                <Zap className="w-12 h-12 icon-on-primary drop-shadow-2xl" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.fast_easy')}</h3>
               <p className="text-muted-foreground leading-relaxed">

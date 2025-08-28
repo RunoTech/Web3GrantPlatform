@@ -127,7 +127,7 @@ export default function ProfilePage() {
             
             <div className="mt-4 sm:mt-0">
               <Button asChild className="bg-yellow-400 hover:bg-yellow-500 text-black">
-                <Link href="/create-campaign">
+                <Link href="/create-campaign?type=donate">
                   <Target className="w-4 h-4 mr-2" />
                   {t('profile.new_campaign')}
                 </Link>
@@ -373,7 +373,7 @@ export default function ProfilePage() {
                     {t('profile.create_first_campaign')}
                   </p>
                   <Button asChild className="bg-yellow-400 hover:bg-yellow-500 text-black">
-                    <Link href="/create-campaign">
+                    <Link href="/create-campaign?type=donate">
                       <Target className="w-4 h-4 mr-2" />
                       {t('profile.create_campaign')}
                     </Link>

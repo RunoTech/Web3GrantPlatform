@@ -142,7 +142,7 @@ export default function CampaignsPage() {
               </p>
               {!searchTerm && (
                 <Button asChild className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                  <Link href="/create-campaign">
+                  <Link href="/create-campaign?type=donate">
                     {t('donations.create_campaign')}
                   </Link>
                 </Button>

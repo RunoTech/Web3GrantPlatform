@@ -129,7 +129,7 @@ export default function FundsPage() {
               size="lg"
               className="bg-blue-500 hover:bg-blue-600 text-white font-bold text-lg py-4 px-8"
             >
-              <Link href="/create-campaign">
+              <Link href="/create-campaign?type=fund">
                 <Building className="w-6 h-6 mr-2" />
                 Create Corporate FUND Campaign
               </Link>

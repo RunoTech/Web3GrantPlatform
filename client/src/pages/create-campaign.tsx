@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -22,8 +22,19 @@ export default function CreateCampaignPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  const [campaignType, setCampaignType] = useState<"FUND" | "DONATE">("DONATE");
-  const [creatorType, setCreatorType] = useState<"company" | "citizen" | "association" | "foundation">("citizen");
+  // Get URL parameters to determine campaign type
+  const urlParams = new URLSearchParams(window.location.search);
+  const typeParam = urlParams.get('type');
+  
+  // Set initial campaign type based on URL parameter or default to DONATE
+  const initialCampaignType = typeParam === 'fund' ? 'FUND' : 'DONATE';
+  const [campaignType, setCampaignType] = useState<"FUND" | "DONATE">(initialCampaignType);
+  const [creatorType, setCreatorType] = useState<"company" | "citizen" | "association" | "foundation">(
+    initialCampaignType === 'FUND' ? 'company' : 'citizen'
+  );
+
+  // Lock campaign type if coming from specific page
+  const isLocked = typeParam !== null;
 
   // Creator type options based on campaign type
   const getCreatorTypeOptions = () => {
@@ -160,78 +171,138 @@ export default function CreateCampaignPage() {
           <p className="text-gray-600 dark:text-gray-400">What type of campaign would you like to create?</p>
         </div>
 
-        {/* Campaign Type Selection */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          {/* FUND Campaign */}
-          <div 
-            className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
-              campaignType === "FUND" 
-                ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" 
-                : "border-gray-200 dark:border-gray-700 hover:border-yellow-300 dark:hover:border-yellow-600"
-            }`}
-            onClick={() => {
-              setCampaignType("FUND");
-              setCreatorType("company");
-            }}
-          >
-            <div className="flex items-center space-x-3 mb-4">
-              <Building className="w-8 h-8 text-yellow-600" />
-              <h3 className="text-xl font-bold text-black dark:text-white">FUND Campaign</h3>
+        {/* Campaign Type Selection - Only show if not locked */}
+        {!isLocked && (
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            {/* FUND Campaign */}
+            <div 
+              className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
+                campaignType === "FUND" 
+                  ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" 
+                  : "border-gray-200 dark:border-gray-700 hover:border-yellow-300 dark:hover:border-yellow-600"
+              }`}
+              onClick={() => {
+                setCampaignType("FUND");
+                setCreatorType("company");
+              }}
+            >
+              <div className="flex items-center space-x-3 mb-4">
+                <Building className="w-8 h-8 text-yellow-600" />
+                <h3 className="text-xl font-bold text-black dark:text-white">FUND Campaign</h3>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Unlimited funding campaign for companies
+              </p>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span>Only companies can create</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span>Unlimited (permanent) campaign</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span>Continuous funding opportunity</span>
+                </li>
+              </ul>
             </div>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Unlimited funding campaign for companies
-            </p>
-            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-              <li className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                <span>Only companies can create</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                <span>Unlimited (permanent) campaign</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                <span>Continuous funding opportunity</span>
-              </li>
-            </ul>
-          </div>
 
-          {/* DONATE Campaign */}
-          <div 
-            className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
-              campaignType === "DONATE" 
-                ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" 
-                : "border-gray-200 dark:border-gray-700 hover:border-yellow-300 dark:hover:border-yellow-600"
-            }`}
-            onClick={() => {
-              setCampaignType("DONATE");
-              if (creatorType === "company") setCreatorType("citizen");
-            }}
-          >
+            {/* DONATE Campaign */}
+            <div 
+              className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
+                campaignType === "DONATE" 
+                  ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" 
+                  : "border-gray-200 dark:border-gray-700 hover:border-yellow-300 dark:hover:border-yellow-600"
+              }`}
+              onClick={() => {
+                setCampaignType("DONATE");
+                if (creatorType === "company") setCreatorType("citizen");
+              }}
+            >
+              <div className="flex items-center space-x-3 mb-4">
+                <Users className="w-8 h-8 text-yellow-600" />
+                <h3 className="text-xl font-bold text-black dark:text-white">DONATE Campaign</h3>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Time-limited donation campaign for individuals and organizations
+              </p>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span>Individuals, associations, foundations</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <Calendar className="w-4 h-4 text-blue-500" />
+                  <span>Start and end dates required</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span>Time-limited donation campaign</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {/* Campaign Type Info - Show when locked */}
+        {isLocked && (
+          <div className="mb-8 p-6 border-2 border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
             <div className="flex items-center space-x-3 mb-4">
-              <Users className="w-8 h-8 text-yellow-600" />
-              <h3 className="text-xl font-bold text-black dark:text-white">DONATE Campaign</h3>
+              {campaignType === "FUND" ? (
+                <Building className="w-8 h-8 text-yellow-600" />
+              ) : (
+                <Users className="w-8 h-8 text-yellow-600" />
+              )}
+              <h3 className="text-xl font-bold text-black dark:text-white">
+                Creating {campaignType} Campaign
+              </h3>
+              {isLocked && (
+                <Lock className="w-5 h-5 text-gray-500" />
+              )}
             </div>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Time-limited donation campaign for individuals and organizations
+              {campaignType === "FUND" 
+                ? "Unlimited funding campaign for companies"
+                : "Time-limited donation campaign for individuals and organizations"
+              }
             </p>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-              <li className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                <span>Individuals, associations, foundations</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <Calendar className="w-4 h-4 text-blue-500" />
-                <span>Start and end dates required</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                <span>Time-limited donation campaign</span>
-              </li>
+              {campaignType === "FUND" ? (
+                <>
+                  <li className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span>Only companies can create</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span>Unlimited (permanent) campaign</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span>Continuous funding opportunity</span>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span>Individuals, associations, foundations</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Calendar className="w-4 h-4 text-blue-500" />
+                    <span>Start and end dates required</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span>Time-limited donation campaign</span>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
-        </div>
+        )}
 
         {/* Campaign Form */}
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
@@ -606,27 +677,29 @@ export default function CreateCampaignPage() {
           </Form>
         </div>
 
-        {/* Campaign Type Info */}
-        <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <h3 className="font-semibold text-black dark:text-white mb-2">
-            {campaignType === "FUND" ? "FUND Campaign" : "DONATE Campaign"} Information:
-          </h3>
-          <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
-            {campaignType === "FUND" ? (
-              <>
-                <li>• Can only be created by companies</li>
-                <li>• Unlimited (permanent) campaign - no start/end dates</li>
-                <li>• Continuous funding opportunity</li>
-              </>
-            ) : (
-              <>
-                <li>• Can be created by individuals, associations and foundations</li>
-                <li>• Start and end dates are required</li>
-                <li>• Time-limited donation campaign</li>
-              </>
-            )}
-          </ul>
-        </div>
+        {/* Campaign Type Info - Only show when not locked */}
+        {!isLocked && (
+          <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <h3 className="font-semibold text-black dark:text-white mb-2">
+              {campaignType === "FUND" ? "FUND Campaign" : "DONATE Campaign"} Information:
+            </h3>
+            <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+              {campaignType === "FUND" ? (
+                <>
+                  <li>• Can only be created by companies</li>
+                  <li>• Unlimited (permanent) campaign - no start/end dates</li>
+                  <li>• Continuous funding opportunity</li>
+                </>
+              ) : (
+                <>
+                  <li>• Can be created by individuals, associations and foundations</li>
+                  <li>• Start and end dates are required</li>
+                  <li>• Time-limited donation campaign</li>
+                </>
+              )}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

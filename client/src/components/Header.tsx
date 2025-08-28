@@ -74,6 +74,12 @@ export default function Header({ currentPage }: HeaderProps) {
             >
               Daily Rewards
             </Link>
+          </nav>
+
+          <div className="flex items-center space-x-4">
+            <CryptoOnramp />
+            <ThemeToggle />
+            <LanguageSelector />
             {isConnected && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -117,19 +123,6 @@ export default function Header({ currentPage }: HeaderProps) {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            )}
-          </nav>
-
-          <div className="flex items-center space-x-4">
-            <CryptoOnramp />
-            <ThemeToggle />
-            <LanguageSelector />
-            {isConnected && (
-              <Avatar className="h-8 w-8 border-2 border-primary">
-                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-bold">
-                  {isConnected ? 'U' : '?'}
-                </AvatarFallback>
-              </Avatar>
             )}
             <WalletConnectButton />
           </div>

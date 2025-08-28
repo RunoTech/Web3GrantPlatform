@@ -79,15 +79,14 @@ export default function Header({ currentPage }: HeaderProps) {
                 <DropdownMenuTrigger asChild>
                   <Button 
                     variant="ghost" 
-                    className={`font-medium transition-colors uppercase tracking-wide hover:text-cyber-cyan ${
+                    size="icon"
+                    className={`transition-colors hover:text-cyber-cyan ${
                       currentPage === 'profile' 
-                        ? 'text-cyber-cyan font-semibold' 
+                        ? 'text-cyber-cyan' 
                         : 'text-muted-foreground'
                     }`}
                   >
-                    <User className="w-4 h-4 mr-1" />
-                    Dashboard
-                    <ChevronDown className="w-4 h-4 ml-1" />
+                    <User className="w-5 h-5" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">

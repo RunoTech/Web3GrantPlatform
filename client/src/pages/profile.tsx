@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import CampaignCard from "@/components/CampaignCard";
+import Header from "@/components/Header";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { 
@@ -89,7 +90,7 @@ export default function ProfilePage() {
   const userCampaigns = (campaigns as Campaign[]).filter((c: Campaign) => c.ownerWallet === address);
   const totalDonationsReceived = userCampaigns.reduce((sum: number, c: Campaign) => sum + parseFloat(c.totalDonations || '0'), 0);
   const totalSupporters = userCampaigns.reduce((sum: number, c: Campaign) => sum + (c.donationCount || 0), 0);
-  const activeCampaigns = userCampaigns.filter((c: Campaign) => c.status || c.isActive).length;
+  const activeCampaigns = userCampaigns.filter((c: Campaign) => c.active).length;
   const dailyParticipationCount = Array.isArray(dailyEntries) ? dailyEntries.length : 0;
 
   return (
@@ -265,7 +266,7 @@ export default function ProfilePage() {
                           <p className="font-medium text-foreground">{campaign.title}</p>
                           <p className="text-sm text-muted-foreground">{campaign.totalDonations || '0'} USDT raised</p>
                         </div>
-                        <Badge variant="outline">{campaign.status ? 'Active' : 'Draft'}</Badge>
+                        <Badge variant="outline">{campaign.active ? 'Active' : 'Draft'}</Badge>
                       </div>
                     ))}
                     {userCampaigns.length === 0 && (

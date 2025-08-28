@@ -5,7 +5,10 @@ import ThemeToggle from "@/components/ThemeToggle";
 import CryptoOnramp from "@/components/CryptoOnramp";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useWallet } from "@/hooks/useWallet";
-import { Heart } from "lucide-react";
+import { Heart, User, Settings, BarChart3, Target, Trophy, LogOut, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface HeaderProps {
   currentPage?: string;
@@ -21,7 +24,7 @@ export default function Header({ currentPage }: HeaderProps) {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center neon-border">
-              <Heart className="w-6 h-6 text-background" />
+              <Heart className="w-6 h-6 icon-on-primary" />
             </div>
             <Link href="/">
               <h1 className="text-xl font-bold text-foreground neon-text uppercase tracking-wide cursor-pointer">
@@ -72,16 +75,49 @@ export default function Header({ currentPage }: HeaderProps) {
               Daily Rewards
             </Link>
             {isConnected && (
-              <Link 
-                href="/profile" 
-                className={`font-medium transition-colors uppercase tracking-wide ${
-                  currentPage === 'profile' 
-                    ? 'text-cyber-cyan font-semibold' 
-                    : 'text-muted-foreground hover:text-cyber-cyan'
-                }`}
-              >
-                {t('profile')}
-              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    className={`font-medium transition-colors uppercase tracking-wide hover:text-cyber-cyan ${
+                      currentPage === 'profile' 
+                        ? 'text-cyber-cyan font-semibold' 
+                        : 'text-muted-foreground'
+                    }`}
+                  >
+                    <User className="w-4 h-4 mr-1" />
+                    Dashboard
+                    <ChevronDown className="w-4 h-4 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="flex items-center w-full">
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Dashboard Overview
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile?tab=campaigns" className="flex items-center w-full">
+                      <Target className="w-4 h-4 mr-2" />
+                      My Campaigns
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile?tab=rewards" className="flex items-center w-full">
+                      <Trophy className="w-4 h-4 mr-2" />
+                      Daily Rewards
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile?tab=settings" className="flex items-center w-full">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Profile Settings
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </nav>
 
@@ -89,6 +125,13 @@ export default function Header({ currentPage }: HeaderProps) {
             <CryptoOnramp />
             <ThemeToggle />
             <LanguageSelector />
+            {isConnected && (
+              <Avatar className="h-8 w-8 border-2 border-primary">
+                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-bold">
+                  {isConnected ? 'U' : '?'}
+                </AvatarFallback>
+              </Avatar>
+            )}
             <WalletConnectButton />
           </div>
         </div>

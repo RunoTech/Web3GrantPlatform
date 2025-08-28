@@ -83,11 +83,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function to filter out company private information
+  const filterCampaignForPublic = (campaign: any) => {
+    const {
+      companyName,
+      companyRegistrationNumber, 
+      companyAddress,
+      companyWebsite,
+      companyEmail,
+      companyPhone,
+      companyCEO,
+      companyFoundedYear,
+      companyIndustry,
+      companyEmployeeCount,
+      ...publicCampaign
+    } = campaign;
+    return publicCampaign;
+  };
+
   // Get popular campaigns (public)
   app.get("/api/get-popular-campaigns", async (req, res) => {
     try {
       const campaigns = await storage.getPopularCampaigns(6);
-      res.json(campaigns);
+      // Filter out company private information for public API
+      const publicCampaigns = campaigns.map(filterCampaignForPublic);
+      res.json(publicCampaigns);
     } catch (error) {
       console.error("Error fetching popular campaigns:", error);
       res.status(500).json({ error: "Failed to fetch campaigns" });
@@ -100,10 +120,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
       const campaigns = await storage.getCampaigns(limit, offset);
-      res.json(campaigns);
+      // Filter out company private information for public API
+      const publicCampaigns = campaigns.map(filterCampaignForPublic);
+      res.json(publicCampaigns);
     } catch (error) {
       console.error("Error fetching campaigns:", error);
       res.status(500).json({ error: "Failed to fetch campaigns" });
+    }
+  });
+
+  // Get single campaign by ID (public)
+  app.get("/api/campaign/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const campaign = await storage.getCampaign(id);
+      
+      if (!campaign) {
+        return res.status(404).json({ error: "Campaign not found" });
+      }
+      
+      // Filter out company private information for public API
+      const publicCampaign = filterCampaignForPublic(campaign);
+      res.json(publicCampaign);
+    } catch (error) {
+      console.error("Error fetching campaign:", error);
+      res.status(500).json({ error: "Failed to fetch campaign" });
     }
   });
 
@@ -448,6 +489,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching daily stats:", error);
       res.status(500).json({ error: "Failed to fetch daily stats" });
+    }
+  });
+
+  // Admin: Get campaign with full company details (admin only)
+  app.get("/api/admin/campaign/:id", authenticateAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const campaign = await storage.getCampaign(id);
+      
+      if (!campaign) {
+        return res.status(404).json({ error: "Campaign not found" });
+      }
+      
+      // Return full campaign details including company information for admin
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error fetching campaign for admin:", error);
+      res.status(500).json({ error: "Failed to fetch campaign" });
+    }
+  });
+
+  // Admin: Get all campaigns with company information (admin only)
+  app.get("/api/admin/campaigns", authenticateAdmin, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const campaigns = await storage.getCampaigns(limit, offset);
+      
+      // Return full campaign details including company information for admin
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching campaigns for admin:", error);
+      res.status(500).json({ error: "Failed to fetch campaigns" });
     }
   });
 

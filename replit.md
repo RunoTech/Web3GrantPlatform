@@ -8,6 +8,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Company Information Privacy Implementation (August 28, 2025)
+- **CRITICAL PRIVACY UPDATE**: Company information collection for FUND campaigns is now private and only accessible through admin panel
+- Implemented data privacy filter system to exclude company details from public APIs
+- Updated public API endpoints (`/api/get-campaigns`, `/api/get-popular-campaigns`, `/api/campaign/:id`) to filter out sensitive company information
+- Added dedicated admin-only endpoints (`/api/admin/campaign/:id`, `/api/admin/campaigns`) for full campaign details including company data
+- Enhanced security for FUND campaign company information: name, registration number, address, email, phone, CEO, industry, employee count are now protected
+- Maintained DEX platform privacy standards ensuring donor anonymity and company information confidentiality
+
+### Company Information Collection System (August 28, 2025)
+- Enhanced FUND campaign creation with comprehensive company information fields
+- Added required fields: company name, registration number, address, email, CEO name, industry
+- Added optional fields: website, phone, founded year, employee count selection
+- Implemented professional form layout with validation and proper field grouping
+- Updated database schema with company-specific fields for FUND campaigns
+- Completed English translation for all FUND/DONATE campaign interfaces
+- Fixed FUNDS page translation and improved corporate messaging
+
 ### Navigation Architecture Fix (August 19, 2025)
 - Fixed "Create Campaign" button navigation issue where buttons incorrectly redirected to `/funds` instead of `/create-campaign`
 - Updated all "Create Campaign" buttons across the platform:
@@ -16,16 +33,6 @@ Preferred communication style: Simple, everyday language.
   - Profile page: Campaign creation buttons now redirect to `/create-campaign`
   - Campaigns page: Already correctly linked to `/create-campaign`
 - Ensured proper separation between donation workflow (`/donations`) and funding workflow (`/funds`)
-
-### Profile Page Complete Redesign (August 19, 2025)
-- Completely redesigned profile page with Binance-style corporate design
-- Implemented clean white/yellow light theme and black/yellow dark theme
-- Added modern header with sticky navigation and proper back button
-- Created comprehensive statistics overview with 4 key metrics cards
-- Implemented tab system with Overview, Campaigns, and Daily Rewards sections
-- Added achievement badges system with progress tracking
-- Included campaign performance analytics and activity monitoring
-- Responsive design ensuring professional appearance across all devices
 
 ## System Architecture
 

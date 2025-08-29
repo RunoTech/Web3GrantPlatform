@@ -337,7 +337,88 @@ h6 { font-size: 0.875rem; } /* 14px */
   text-shadow: 0 0 12px hsla(45, 100%, 51%, 0.6) !important;
 }
 
+/* Enhanced Theme-aware Icon System */
+/* Base icon classes for consistent visibility */
+.icon-primary {
+  @apply text-foreground;
+}
+
+.icon-on-primary {
+  @apply text-primary-foreground;
+}
+
+.icon-secondary {
+  @apply text-muted-foreground;
+}
+
+.icon-accent {
+  @apply text-primary;
+}
+
+/* Enhanced visibility icons */
+.icon-visible {
+  @apply text-gray-800 dark:text-gray-100;
+}
+
+.icon-contrast {
+  @apply text-gray-900 dark:text-gray-50;
+}
+
+/* Force visibility for critical icons */
+.icon-force-dark {
+  color: #1a1a1a !important;
+}
+
+.dark .icon-force-dark {
+  color: #f5f5f5 !important;
+}
+
+/* Button icon colors */
+.btn-icon {
+  @apply text-current;
+}
+
+/* Header icon fixes */
+.header-icon {
+  @apply text-foreground;
+}
+
+/* Card icon fixes */
+.card-icon {
+  @apply text-foreground;
+}
+
 /* Enhanced icon visibility for dark theme */
 .dark .text-black {
   color: #ffffff !important;
+}
+
+/* Icon background combinations */
+.icon-on-yellow {
+  color: #000000 !important;
+}
+
+.icon-on-dark {
+  color: #ffffff !important;
+}
+
+/* Specific icon fixes for buttons and cards */
+.btn-primary .icon-on-primary,
+.bg-primary .icon-on-primary {
+  color: #000000 !important;
+}
+
+.dark .btn-primary .icon-on-primary,
+.dark .bg-primary .icon-on-primary {
+  color: #000000 !important;
+}
+
+/* Logo and brand icon visibility */
+.brand-icon {
+  @apply text-foreground;
+}
+
+/* Navigation icon fixes */
+.nav-icon {
+  @apply text-muted-foreground hover:text-foreground;
 }

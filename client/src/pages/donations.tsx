@@ -45,7 +45,7 @@ export default function DonationsPage() {
   }).sort((a: Campaign, b: Campaign) => {
     switch (sortBy) {
       case "donations":
-        return (b.totalDonations || 0) - (a.totalDonations || 0);
+        return parseFloat(b.totalDonations || '0') - parseFloat(a.totalDonations || '0');
       case "supporters":
         return (b.donationCount || 0) - (a.donationCount || 0);
       default:
@@ -67,7 +67,7 @@ export default function DonationsPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-8">
             <div className="w-24 h-24 gradient-primary rounded-lg flex items-center justify-center mx-auto neon-border">
-              <Gift className="w-12 h-12 icon-on-primary" />
+              <Gift className="w-12 h-12 icon-on-primary text-black" />
             </div>
             
             <div>

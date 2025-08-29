@@ -152,7 +152,7 @@ export default function FundsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
             <div className="bg-white dark:bg-gray-900 rounded-xl p-6 text-center border border-blue-200 dark:border-blue-800">
               <Building className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-black dark:text-white mb-2">Companies Only</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">Companies Only</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">FUND campaigns can only be created by registered companies</p>
             </div>
             

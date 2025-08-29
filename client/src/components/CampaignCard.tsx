@@ -21,7 +21,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
   return (
     <Link href={`/campaign/${campaign.id}`}>
       <div 
-        className={`group bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] overflow-hidden border border-slate-100 cursor-pointer`}
+        className={`group bg-white dark:bg-gray-900 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] overflow-hidden border border-gray-200 dark:border-gray-700 cursor-pointer`}
         data-testid={`campaign-card-${campaign.id}`}
       >
         {/* Campaign Image */}
@@ -34,7 +34,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
             />
           ) : (
             <div className={`w-full h-full ${bgClass} flex items-center justify-center`}>
-              <Heart className="w-16 h-16 text-slate-400" />
+              <Heart className="w-16 h-16 text-gray-600 dark:text-gray-300" />
             </div>
           )}
           <div className="absolute top-4 right-4">
@@ -52,27 +52,27 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
         
         {/* Campaign Content */}
         <div className="p-6 space-y-4">
-          <h3 className="text-xl font-semibold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-2">
+          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 transition-colors line-clamp-2">
             {campaign.title}
           </h3>
-          <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">
+          <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed line-clamp-3">
             {campaign.description}
           </p>
           
           {/* Campaign Stats */}
           <div className="flex items-center justify-between pt-4 border-t border-slate-100">
             <div className="flex items-center space-x-1">
-              <Target className="w-4 h-4 text-slate-500" />
+              <Target className="w-4 h-4 text-gray-500 dark:text-gray-400" />
               <div className="space-y-1">
-                <p className="text-xs text-slate-500">Toplanan</p>
-                <p className="font-semibold text-slate-800">{parseFloat(campaign.totalDonations || "0").toFixed(2)} USDT</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Toplanan</p>
+                <p className="font-semibold text-gray-800 dark:text-gray-100">{parseFloat(campaign.totalDonations || "0").toFixed(2)} USDT</p>
               </div>
             </div>
             <div className="flex items-center space-x-1">
-              <Users className="w-4 h-4 text-slate-500" />
+              <Users className="w-4 h-4 text-gray-500 dark:text-gray-400" />
               <div className="space-y-1 text-right">
-                <p className="text-xs text-slate-500">Destekçi</p>
-                <p className="font-semibold text-slate-800">{campaign.donationCount}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Destekçi</p>
+                <p className="font-semibold text-gray-800 dark:text-gray-100">{campaign.donationCount}</p>
               </div>
             </div>
           </div>

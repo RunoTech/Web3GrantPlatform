@@ -159,7 +159,7 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-12">
             <div className="w-40 h-40 gradient-primary rounded-3xl flex items-center justify-center mx-auto neon-border shadow-2xl">
-              <Heart className="w-20 h-20 icon-on-primary drop-shadow-2xl" />
+              <Heart className="w-20 h-20 text-black drop-shadow-2xl" />
             </div>
             
             <div className="space-y-6">
@@ -182,7 +182,7 @@ export default function HomePage() {
                 data-testid="button-create-campaign"
               >
                 <Link href="/create-campaign">
-                  <Target className="w-6 h-6 mr-2 icon-on-primary" />
+                  <Target className="w-6 h-6 mr-2 text-black" />
                   {t('hero.create_campaign')}
                 </Link>
               </Button>
@@ -193,7 +193,7 @@ export default function HomePage() {
                 data-testid="button-explore-campaigns"
               >
                 <Link href="/campaigns">
-                  <Search className="w-6 h-6 mr-2 icon-on-primary" />
+                  <Search className="w-6 h-6 mr-2 text-black" />
                   {t('hero.explore_campaigns')}
                 </Link>
               </Button>
@@ -217,7 +217,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="cyber-card p-8 text-center group hover:scale-105 transition-transform duration-300">
               <div className="w-24 h-24 cyber-cyan-bg rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl neon-border">
-                <Shield className="w-12 h-12 icon-on-primary drop-shadow-2xl" />
+                <Shield className="w-12 h-12 text-black drop-shadow-2xl" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.blockchain_security')}</h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -227,7 +227,7 @@ export default function HomePage() {
 
             <div className="cyber-card p-8 text-center group hover:scale-105 transition-transform duration-300">
               <div className="w-24 h-24 cyber-green-bg rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl neon-border">
-                <DollarSign className="w-12 h-12 icon-on-primary drop-shadow-2xl" />
+                <DollarSign className="w-12 h-12 text-black drop-shadow-2xl" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.commission_free')}</h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -237,7 +237,7 @@ export default function HomePage() {
 
             <div className="cyber-card p-8 text-center group hover:scale-105 transition-transform duration-300">
               <div className="w-24 h-24 cyber-purple-bg rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl neon-border">
-                <Zap className="w-12 h-12 icon-on-primary drop-shadow-2xl" />
+                <Zap className="w-12 h-12 text-black drop-shadow-2xl" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.fast_easy')}</h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -263,9 +263,9 @@ export default function HomePage() {
             <div className="inline-flex items-center justify-center space-x-4 mb-6">
               <div className="w-24 h-24 gradient-primary rounded-3xl flex items-center justify-center neon-border relative shadow-2xl group">
                 <div className="absolute inset-0 bg-gradient-to-r from-cyber-cyan/20 to-cyber-yellow/20 rounded-3xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
-                <Trophy className="w-12 h-12 text-background relative z-10 drop-shadow-2xl" />
+                <Trophy className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
                 <div className="absolute -top-3 -right-3 w-8 h-8 cyber-yellow-bg rounded-full flex items-center justify-center shadow-xl neon-border">
-                  <Sparkles className="w-4 h-4 text-background" />
+                  <Sparkles className="w-4 h-4 text-black" />
                 </div>
               </div>
               <div className="text-center">
@@ -446,7 +446,7 @@ export default function HomePage() {
                 <div className="text-center space-y-4">
                   <div className="w-24 h-24 cyber-yellow-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl neon-border relative group">
                     <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-3xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
-                    <Trophy className="w-12 h-12 text-background relative z-10 drop-shadow-2xl" />
+                    <Trophy className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
                   </div>
                   <h3 className="text-2xl font-bold text-foreground uppercase tracking-wide">
                     DÜN'ÜN KAZANANLARI

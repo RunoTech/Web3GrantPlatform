@@ -123,7 +123,7 @@ export default function ProfilePage() {
                   <p className="text-3xl font-bold text-foreground">{userCampaigns.length}</p>
                 </div>
                 <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
-                  <Target className="w-6 h-6 icon-on-primary" />
+                  <Target className="w-6 h-6 text-black" />
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">
@@ -141,7 +141,7 @@ export default function ProfilePage() {
                   <p className="text-3xl font-bold text-foreground">{totalDonationsReceived.toFixed(2)}</p>
                 </div>
                 <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 icon-on-primary" />
+                  <DollarSign className="w-6 h-6 text-black" />
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">
@@ -158,7 +158,7 @@ export default function ProfilePage() {
                   <p className="text-3xl font-bold text-foreground">{totalSupporters}</p>
                 </div>
                 <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
-                  <Users className="w-6 h-6 icon-on-primary" />
+                  <Users className="w-6 h-6 text-black" />
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">
@@ -176,7 +176,7 @@ export default function ProfilePage() {
                   <p className="text-3xl font-bold text-foreground">{dailyParticipationCount}</p>
                 </div>
                 <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
-                  <Gift className="w-6 h-6 icon-on-primary" />
+                  <Gift className="w-6 h-6 text-black" />
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">

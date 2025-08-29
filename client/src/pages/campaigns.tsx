@@ -42,7 +42,7 @@ export default function CampaignsPage() {
               
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center neon-border">
-                  <Heart className="w-6 h-6 text-background" />
+                  <Heart className="w-6 h-6 text-black" />
                 </div>
                 <h1 className="text-xl font-bold neon-text uppercase tracking-wide">
                   {t('duxxan')}
@@ -80,7 +80,7 @@ export default function CampaignsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-6">
             <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 neon-border">
-              <Search className="w-8 h-8 text-background" />
+              <Search className="w-8 h-8 text-black" />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold neon-text uppercase tracking-wide">
               {t('donations.all_campaigns')}

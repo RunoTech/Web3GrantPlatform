@@ -103,7 +103,7 @@ export default function DonationsPage() {
               </div>
               <div className="cyber-card p-6 text-center">
                 <div className="w-16 h-16 cyber-purple-bg rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-white dark:text-white" />
+                  <Users className="w-8 h-8 text-black" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2 uppercase tracking-wide">{t('donations.features.support_community')}</h3>
                 <p className="text-sm text-muted-foreground">{t('donations.features.support_desc')}</p>
@@ -134,7 +134,7 @@ export default function DonationsPage() {
             {(popularCampaigns as Campaign[]).slice(0, 6).map((campaign: Campaign) => (
               <div key={campaign.id} className="relative">
                 <div className="absolute -top-3 -right-3 z-10">
-                  <Badge className="gradient-accent text-white animate-pulse">
+                  <Badge className="gradient-accent text-black animate-pulse">
                     🌟 {t('donations.filter_popular')}
                   </Badge>
                 </div>

@@ -390,7 +390,7 @@ export default function HomePage() {
                   <div className="flex items-center space-x-4 p-4 cyber-card border border-cyber-purple/30 relative group hover:scale-105 transition-transform duration-300">
                     <div className="w-16 h-16 cyber-purple-bg rounded-2xl flex items-center justify-center flex-shrink-0 neon-border relative group">
                       <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-violet-500 rounded-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                      <Clock className="w-8 h-8 text-white relative z-10 drop-shadow-lg" />
+                      <Clock className="w-8 h-8 text-black relative z-10 drop-shadow-lg" />
                     </div>
                     <div>
                       <h4 className="font-bold text-cyber-purple uppercase tracking-wide">Günlük Katılım</h4>

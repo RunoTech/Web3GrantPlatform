@@ -257,10 +257,10 @@ export default function DonationsPage() {
           <div className="cyber-card p-12 gradient-primary relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 cyber-cyan-bg opacity-10 rounded-full blur-2xl"></div>
             <div className="space-y-6 relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold text-background uppercase tracking-wider">
+              <h2 className="text-3xl md:text-4xl font-bold text-black uppercase tracking-wider">
                 {t('donations.make_difference')}
               </h2>
-              <p className="text-xl text-background/90">
+              <p className="text-xl text-black/90">
                 {t('donations.create_own')}
               </p>
               <Button 

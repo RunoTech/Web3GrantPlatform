@@ -301,7 +301,7 @@ export default function HomePage() {
             <div className="cyber-card p-6 relative overflow-hidden group hover:scale-105 transition-all duration-300">
               <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-cyber-yellow/20 to-cyber-green/20 rounded-full blur-2xl"></div>
               <div className="absolute top-4 right-4 w-10 h-6 cyber-yellow-bg rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-background">SABAH</span>
+                <span className="text-xs font-bold text-black">SABAH</span>
               </div>
               
               <div className="relative z-10 text-center space-y-4">
@@ -368,7 +368,7 @@ export default function HomePage() {
                 <div className="text-center space-y-4">
                   <div className="w-24 h-24 cyber-cyan-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl neon-border relative group">
                     <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-3xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
-                    <Zap className="w-12 h-12 text-background relative z-10 drop-shadow-2xl" />
+                    <Zap className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
                   </div>
                   <h3 className="text-2xl font-bold text-foreground uppercase tracking-wide">
                     KATILIM SÜRECİ
@@ -379,7 +379,7 @@ export default function HomePage() {
                   <div className="flex items-center space-x-4 p-4 cyber-card border border-cyber-cyan/30 relative group hover:scale-105 transition-transform duration-300">
                     <div className="w-16 h-16 cyber-cyan-bg rounded-2xl flex items-center justify-center flex-shrink-0 neon-border relative group">
                       <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                      <Wallet className="w-8 h-8 text-background relative z-10 drop-shadow-lg" />
+                      <Wallet className="w-8 h-8 text-black relative z-10 drop-shadow-lg" />
                     </div>
                     <div>
                       <h4 className="font-bold text-cyber-cyan uppercase tracking-wide">Cüzdan Bağla</h4>
@@ -401,7 +401,7 @@ export default function HomePage() {
                   <div className="flex items-center space-x-4 p-4 cyber-card border border-cyber-green/30 relative group hover:scale-105 transition-transform duration-300">
                     <div className="w-16 h-16 cyber-green-bg rounded-2xl flex items-center justify-center flex-shrink-0 neon-border relative group">
                       <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                      <Gift className="w-8 h-8 text-background relative z-10 drop-shadow-lg" />
+                      <Gift className="w-8 h-8 text-black relative z-10 drop-shadow-lg" />
                     </div>
                     <div>
                       <h4 className="font-bold text-cyber-green uppercase tracking-wide">Ödül Kazan</h4>
@@ -464,9 +464,9 @@ export default function HomePage() {
                       }`}>
                         <div className="flex items-center space-x-3">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
-                            index === 0 ? 'cyber-yellow-bg text-background' :
-                            index === 1 ? 'cyber-cyan-bg text-background' :
-                            index === 2 ? 'cyber-green-bg text-background' :
+                            index === 0 ? 'cyber-yellow-bg text-black' :
+                            index === 1 ? 'cyber-cyan-bg text-black' :
+                            index === 2 ? 'cyber-green-bg text-black' :
                             'bg-surface text-foreground'
                           }`}>
                             #{index + 1}
@@ -580,7 +580,7 @@ export default function HomePage() {
                 <div key={campaign.id} className="relative">
                   <div className="absolute -top-3 -right-3 z-10">
                     <div className="w-8 h-8 gradient-accent rounded-lg flex items-center justify-center neon-border">
-                      <Sparkles className="w-4 h-4 text-background" />
+                      <Sparkles className="w-4 h-4 text-black" />
                     </div>
                   </div>
                   <CampaignCard campaign={campaign} />
@@ -627,7 +627,7 @@ export default function HomePage() {
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center neon-border">
-                  <Heart className="w-6 h-6 text-background" />
+                  <Heart className="w-6 h-6 text-black" />
                 </div>
                 <h3 className="text-xl font-bold text-foreground neon-text uppercase tracking-wide">{t('duxxan')}</h3>
               </div>

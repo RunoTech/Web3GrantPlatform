@@ -277,7 +277,7 @@ export default function HomePage() {
             </div>
             
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Her gün ücretsiz katılın, şansınızı deneyin ve büyük ödüller kazanın! Sadece cüzdan bağlayın ve günde bir kez katılım hakkınızı kullanın.
+              Join daily for free, try your luck and win big rewards! Just connect your wallet and use your participation right once a day.
             </p>
             
             {/* Daily Prize Pool */}
@@ -285,12 +285,12 @@ export default function HomePage() {
               <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-cyber-yellow/10 to-cyber-green/10 px-6 py-3 rounded-full border border-cyber-yellow/20">
                 <DollarSign className="w-5 h-5 text-cyber-yellow" />
                 <span className="text-lg font-bold text-cyber-yellow">1500 USDT</span>
-                <span className="text-sm text-muted-foreground">günlük toplam ödül</span>
+                <span className="text-sm text-muted-foreground">daily total prize</span>
               </div>
               <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-cyber-cyan/10 to-cyber-purple/10 px-4 py-2 rounded-full border border-cyber-cyan/20">
                 <Clock className="w-4 h-4 text-cyber-cyan" />
-                <span className="text-sm font-bold text-cyber-cyan">3 ÇEKILIŞ</span>
-                <span className="text-xs text-muted-foreground">günde</span>
+                <span className="text-sm font-bold text-cyber-cyan">3 DRAWS</span>
+                <span className="text-xs text-muted-foreground">daily</span>
               </div>
             </div>
           </div>
@@ -301,7 +301,7 @@ export default function HomePage() {
             <div className="cyber-card p-6 relative overflow-hidden group hover:scale-105 transition-all duration-300">
               <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-cyber-yellow/20 to-cyber-green/20 rounded-full blur-2xl"></div>
               <div className="absolute top-4 right-4 w-10 h-6 cyber-yellow-bg rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-black">SABAH</span>
+                <span className="text-xs font-bold text-black">MORNING</span>
               </div>
               
               <div className="relative z-10 text-center space-y-4">
@@ -310,9 +310,9 @@ export default function HomePage() {
                   <Sun className="w-14 h-14 text-black relative z-10 drop-shadow-2xl" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-cyber-yellow mb-1">09:00 ÇEKİLİŞİ</h3>
+                  <h3 className="text-xl font-bold text-cyber-yellow mb-1">09:00 DRAW</h3>
                   <p className="text-3xl font-bold text-foreground">500 USDT</p>
-                  <p className="text-sm text-muted-foreground">7 kazanan • Sabah çekilişi</p>
+                  <p className="text-sm text-muted-foreground">7 winners • Morning draw</p>
                 </div>
               </div>
             </div>
@@ -321,7 +321,7 @@ export default function HomePage() {
             <div className="cyber-card p-6 relative overflow-hidden group hover:scale-105 transition-all duration-300">
               <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-cyber-cyan/20 to-cyber-purple/20 rounded-full blur-2xl"></div>
               <div className="absolute top-4 right-4 w-12 h-6 cyber-cyan-bg rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-black">ÖĞLE</span>
+                <span className="text-xs font-bold text-black">NOON</span>
               </div>
               
               <div className="relative z-10 text-center space-y-4">
@@ -330,9 +330,9 @@ export default function HomePage() {
                   <Sunset className="w-14 h-14 text-black relative z-10 drop-shadow-2xl" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-cyber-cyan mb-1">15:00 ÇEKİLİŞİ</h3>
+                  <h3 className="text-xl font-bold text-cyber-cyan mb-1">15:00 DRAW</h3>
                   <p className="text-3xl font-bold text-foreground">500 USDT</p>
-                  <p className="text-sm text-muted-foreground">7 kazanan • Öğle çekilişi</p>
+                  <p className="text-sm text-muted-foreground">7 winners • Afternoon draw</p>
                 </div>
               </div>
             </div>
@@ -341,7 +341,7 @@ export default function HomePage() {
             <div className="cyber-card p-6 relative overflow-hidden group hover:scale-105 transition-all duration-300">
               <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-cyber-green/20 to-cyber-purple/20 rounded-full blur-2xl"></div>
               <div className="absolute top-4 right-4 w-12 h-6 cyber-green-bg rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-black">AKŞAM</span>
+                <span className="text-xs font-bold text-black">EVENING</span>
               </div>
               
               <div className="relative z-10 text-center space-y-4">
@@ -350,9 +350,9 @@ export default function HomePage() {
                   <Moon className="w-14 h-14 text-black relative z-10 drop-shadow-2xl" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-cyber-green mb-1">21:00 ÇEKİLİŞİ</h3>
+                  <h3 className="text-xl font-bold text-cyber-green mb-1">21:00 DRAW</h3>
                   <p className="text-3xl font-bold text-foreground">500 USDT</p>
-                  <p className="text-sm text-muted-foreground">7 kazanan • Akşam çekilişi</p>
+                  <p className="text-sm text-muted-foreground">7 winners • Evening draw</p>
                 </div>
               </div>
             </div>
@@ -371,7 +371,7 @@ export default function HomePage() {
                     <Zap className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
                   </div>
                   <h3 className="text-2xl font-bold text-foreground uppercase tracking-wide">
-                    KATILIM SÜRECİ
+                    PARTICIPATION PROCESS
                   </h3>
                 </div>
                 
@@ -382,8 +382,8 @@ export default function HomePage() {
                       <Wallet className="w-8 h-8 text-black relative z-10 drop-shadow-lg" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-cyber-cyan uppercase tracking-wide">Cüzdan Bağla</h4>
-                      <p className="text-sm text-muted-foreground">MetaMask veya Trust Wallet ile bağlan</p>
+                      <h4 className="font-bold text-cyber-cyan uppercase tracking-wide">Connect Wallet</h4>
+                      <p className="text-sm text-muted-foreground">Connect with MetaMask or Trust Wallet</p>
                     </div>
                   </div>
                   
@@ -393,8 +393,8 @@ export default function HomePage() {
                       <Clock className="w-8 h-8 text-black relative z-10 drop-shadow-lg" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-cyber-purple uppercase tracking-wide">Günlük Katılım</h4>
-                      <p className="text-sm text-muted-foreground">Günde bir kez ücretsiz katıl</p>
+                      <h4 className="font-bold text-cyber-purple uppercase tracking-wide">Daily Participation</h4>
+                      <p className="text-sm text-muted-foreground">Join once a day for free</p>
                     </div>
                   </div>
                   
@@ -404,8 +404,8 @@ export default function HomePage() {
                       <Gift className="w-8 h-8 text-black relative z-10 drop-shadow-lg" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-cyber-green uppercase tracking-wide">Ödül Kazan</h4>
-                      <p className="text-sm text-muted-foreground">Şansını dene ve USDT kazan</p>
+                      <h4 className="font-bold text-cyber-green uppercase tracking-wide">Win Rewards</h4>
+                      <p className="text-sm text-muted-foreground">Try your luck and win USDT</p>
                     </div>
                   </div>
                 </div>
@@ -422,7 +422,7 @@ export default function HomePage() {
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                       <div className="relative z-10 flex items-center space-x-3">
                         <DollarSign className="w-6 h-6" />
-                        <span>BUGÜN KATIL</span>
+                        <span>JOIN TODAY</span>
                         <Sparkles className="w-6 h-6" />
                       </div>
                     </Button>
@@ -430,7 +430,7 @@ export default function HomePage() {
                     <div className="cyber-card px-8 py-4 neon-border relative rounded-2xl">
                       <div className="absolute inset-0 bg-gradient-to-r from-cyber-cyan/10 to-cyber-purple/10 rounded-2xl"></div>
                       <span className="text-cyber-cyan font-bold uppercase tracking-wide relative z-10 text-lg">
-                        ÖNCE CÜZDAN BAĞLAYIN
+                        CONNECT WALLET FIRST
                       </span>
                     </div>
                   )}
@@ -449,7 +449,7 @@ export default function HomePage() {
                     <Trophy className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
                   </div>
                   <h3 className="text-2xl font-bold text-foreground uppercase tracking-wide">
-                    DÜN'ÜN KAZANANLARI
+                    YESTERDAY'S WINNERS
                   </h3>
                 </div>
                 
@@ -496,10 +496,10 @@ export default function HomePage() {
                       </div>
                       <div className="space-y-2">
                         <div className="text-foreground font-bold uppercase tracking-wide text-lg">
-                          HENÜz KAZANAN YOK
+                          NO WINNERS YET
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          İlk katılan sen ol!
+                          Be the first to join!
                         </div>
                       </div>
                     </div>
@@ -519,7 +519,7 @@ export default function HomePage() {
                   <Coins className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
                 </div>
                 <div className="text-2xl font-bold text-cyber-yellow mb-1">1500</div>
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">GÜNLÜK TOPLAM</div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">DAILY TOTAL</div>
               </div>
             </div>
             
@@ -531,7 +531,7 @@ export default function HomePage() {
                   <Star className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
                 </div>
                 <div className="text-2xl font-bold text-cyber-cyan mb-1">21</div>
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">TOPLAM KAZANAN</div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">TOTAL WINNERS</div>
               </div>
             </div>
             
@@ -543,7 +543,7 @@ export default function HomePage() {
                   <Clock className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
                 </div>
                 <div className="text-2xl font-bold text-cyber-green mb-1">3</div>
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">ÇEKİLİŞ SAYISI</div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">DRAW COUNT</div>
               </div>
             </div>
             

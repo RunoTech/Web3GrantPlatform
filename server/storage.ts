@@ -112,6 +112,14 @@ export interface IStorage {
     totalDonationCount: number;
     todayEntries: number;
   }>;
+  
+  // Database Administration
+  getTableData(tableName: string, options: { page: number; limit: number; search: string }): Promise<any[]>;
+  getTableStats(tableName: string): Promise<{ total: number }>;
+  createRecord(tableName: string, data: any): Promise<any>;
+  updateRecord(tableName: string, id: string, data: any): Promise<any>;
+  deleteRecord(tableName: string, id: string): Promise<void>;
+  exportTableData(tableName: string): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -533,6 +541,84 @@ export class DatabaseStorage implements IStorage {
       totalDonationCount: Number(donationStats.count),
       todayEntries: Number(todayStats.entries),
     };
+  }
+
+  // Database Administration
+  async getTableData(tableName: string, options: { page: number; limit: number; search: string }): Promise<any[]> {
+    const offset = (options.page - 1) * options.limit;
+    
+    const tableMap: Record<string, any> = {
+      accounts, campaigns, donations, dailyEntries, dailyWinners,
+      admins, platformSettings, networkFees, footerLinks, announcements, adminLogs
+    };
+    
+    const table = tableMap[tableName];
+    if (!table) throw new Error(`Table ${tableName} not found`);
+
+    return await db.select().from(table).limit(options.limit).offset(offset);
+  }
+
+  async getTableStats(tableName: string): Promise<{ total: number }> {
+    const tableMap: Record<string, any> = {
+      accounts, campaigns, donations, dailyEntries, dailyWinners,
+      admins, platformSettings, networkFees, footerLinks, announcements, adminLogs
+    };
+    
+    const table = tableMap[tableName];
+    if (!table) throw new Error(`Table ${tableName} not found`);
+
+    const [result] = await db.select({ count: sql<number>`count(*)` }).from(table);
+    return { total: result.count };
+  }
+
+  async createRecord(tableName: string, data: any): Promise<any> {
+    const tableMap: Record<string, any> = {
+      accounts, campaigns, donations, dailyEntries, dailyWinners,
+      admins, platformSettings, networkFees, footerLinks, announcements, adminLogs
+    };
+    
+    const table = tableMap[tableName];
+    if (!table) throw new Error(`Table ${tableName} not found`);
+
+    const [result] = await db.insert(table).values(data).returning();
+    return result;
+  }
+
+  async updateRecord(tableName: string, id: string, data: any): Promise<any> {
+    const tableMap: Record<string, any> = {
+      accounts, campaigns, donations, dailyEntries, dailyWinners,
+      admins, platformSettings, networkFees, footerLinks, announcements, adminLogs
+    };
+    
+    const table = tableMap[tableName];
+    if (!table) throw new Error(`Table ${tableName} not found`);
+
+    const [result] = await db.update(table).set(data).where(eq(table.id, parseInt(id))).returning();
+    return result;
+  }
+
+  async deleteRecord(tableName: string, id: string): Promise<void> {
+    const tableMap: Record<string, any> = {
+      accounts, campaigns, donations, dailyEntries, dailyWinners,
+      admins, platformSettings, networkFees, footerLinks, announcements, adminLogs
+    };
+    
+    const table = tableMap[tableName];
+    if (!table) throw new Error(`Table ${tableName} not found`);
+
+    await db.delete(table).where(eq(table.id, parseInt(id)));
+  }
+
+  async exportTableData(tableName: string): Promise<any[]> {
+    const tableMap: Record<string, any> = {
+      accounts, campaigns, donations, dailyEntries, dailyWinners,
+      admins, platformSettings, networkFees, footerLinks, announcements, adminLogs
+    };
+    
+    const table = tableMap[tableName];
+    if (!table) throw new Error(`Table ${tableName} not found`);
+
+    return await db.select().from(table);
   }
 }
 

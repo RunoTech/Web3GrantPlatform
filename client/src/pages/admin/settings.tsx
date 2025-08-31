@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Settings, Save, Plus, Trash2, Edit3 } from "lucide-react";
+import { Settings, Save, Plus, Trash2, Edit3, Database } from "lucide-react";
 
 interface PlatformSetting {
   id: number;
@@ -220,8 +220,24 @@ export default function AdminSettingsPage() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Settings className="w-6 h-6 text-yellow-400" />
-          <h1 className="text-2xl font-bold">Platform Ayarları</h1>
+          <h1 className="text-2xl font-bold">Platform Administration</h1>
         </div>
+        <div className="flex gap-4">
+          <Button variant="outline" asChild>
+            <a href="/admin/database" className="flex items-center gap-2">
+              <Database className="w-4 h-4" />
+              Database Management
+            </a>
+          </Button>
+          <Button variant="outline" asChild>
+            <a href="/admin/daily-rewards" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Daily Rewards
+            </a>
+          </Button>
+        </div>
+      </div>
+      <div>
         <p className="text-sm text-muted-foreground">
           Sitenin tüm dinamik içeriklerini buradan yönetebilirsiniz
         </p>

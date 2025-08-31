@@ -562,6 +562,130 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Database Administration Routes
+  app.get('/api/admin/database/:table', authenticateAdmin, async (req, res) => {
+    try {
+      const { table } = req.params;
+      const { page = 1, limit = 50, search = '' } = req.query;
+      
+      const result = await storage.getTableData(table, {
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+        search: search as string
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching table data:", error);
+      res.status(500).json({ message: "Failed to fetch table data" });
+    }
+  });
+
+  app.get('/api/admin/database/:table/stats', authenticateAdmin, async (req, res) => {
+    try {
+      const { table } = req.params;
+      const stats = await storage.getTableStats(table);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching table stats:", error);
+      res.status(500).json({ message: "Failed to fetch table stats" });
+    }
+  });
+
+  app.post('/api/admin/database/:table', authenticateAdmin, async (req, res) => {
+    try {
+      const { table } = req.params;
+      const data = req.body;
+      const result = await storage.createRecord(table, data);
+      
+      // Log admin action
+      await storage.createAdminLog({
+        adminId: (req as any).admin.id,
+        action: 'CREATE',
+        tableName: table,
+        recordId: result.id,
+        changes: data,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error creating record:", error);
+      res.status(500).json({ message: "Failed to create record" });
+    }
+  });
+
+  app.put('/api/admin/database/:table/:id', authenticateAdmin, async (req, res) => {
+    try {
+      const { table, id } = req.params;
+      const data = req.body;
+      const result = await storage.updateRecord(table, id, data);
+      
+      // Log admin action
+      await storage.createAdminLog({
+        adminId: (req as any).admin.id,
+        action: 'UPDATE',
+        tableName: table,
+        recordId: id,
+        changes: data,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error updating record:", error);
+      res.status(500).json({ message: "Failed to update record" });
+    }
+  });
+
+  app.delete('/api/admin/database/:table/:id', authenticateAdmin, async (req, res) => {
+    try {
+      const { table, id } = req.params;
+      await storage.deleteRecord(table, id);
+      
+      // Log admin action
+      await storage.createAdminLog({
+        adminId: (req as any).admin.id,
+        action: 'DELETE',
+        tableName: table,
+        recordId: id,
+        changes: {},
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting record:", error);
+      res.status(500).json({ message: "Failed to delete record" });
+    }
+  });
+
+  app.get('/api/admin/database/:table/export', authenticateAdmin, async (req, res) => {
+    try {
+      const { table } = req.params;
+      const data = await storage.exportTableData(table);
+      
+      // Log admin action
+      await storage.createAdminLog({
+        adminId: (req as any).admin.id,
+        action: 'EXPORT',
+        tableName: table,
+        recordId: null,
+        changes: { exported: data.length + ' records' },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+      
+      res.json(data);
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      res.status(500).json({ message: "Failed to export data" });
+    }
+  });
+
   // Admin: Select manual winner
   app.post("/api/admin/select-manual-winner", async (req, res) => {
     try {

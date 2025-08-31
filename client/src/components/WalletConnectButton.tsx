@@ -22,7 +22,7 @@ export default function WalletConnectButton() {
           onClick={disconnect}
           data-testid="button-disconnect-wallet"
         >
-          Çıkış
+          Disconnect
         </Button>
       </div>
     );
@@ -36,7 +36,7 @@ export default function WalletConnectButton() {
       data-testid="button-connect-wallet"
     >
       <Wallet className="w-5 h-5 mr-2" />
-      {isConnecting ? "Bağlanıyor..." : "Cüzdan Bağla"}
+      {isConnecting ? "Connecting..." : "Connect Wallet"}
     </Button>
   );
 }

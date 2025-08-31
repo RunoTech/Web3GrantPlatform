@@ -52,23 +52,23 @@ export default function FundsPage() {
     mutationFn: () => api.post("/api/join-daily-reward", { wallet: address }),
     onSuccess: () => {
       toast({
-        title: "Başarılı!",
-        description: "Günlük ödül çekilişine katıldınız!",
+        title: "Success!",
+        description: "You have joined the daily reward draw!",
       });
       setHasJoinedToday(true);
       queryClient.invalidateQueries({ queryKey: ["/api/today-stats"] });
     },
     onError: (error: any) => {
-      const errorMsg = error.message || "Çekilişe katılım başarısız";
+      const errorMsg = error.message || "Failed to join the draw";
       if (errorMsg.includes("Already entered")) {
         setHasJoinedToday(true);
         toast({
-          title: "Bilgi",
-          description: "Bugün zaten çekilişe katıldınız!",
+          title: "Info",
+          description: "You have already joined the draw today!",
         });
       } else {
         toast({
-          title: "Hata",
+          title: "Error",
           description: errorMsg,
           variant: "destructive",
         });

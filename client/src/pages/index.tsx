@@ -555,7 +555,7 @@ export default function HomePage() {
                   <Gem className="w-12 h-12 text-black drop-shadow-2xl relative z-10" />
                 </div>
                 <div className="text-2xl font-bold text-cyber-purple mb-1">100%</div>
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">GÜVENLİ</div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">SECURE</div>
               </div>
             </div>
           </div>

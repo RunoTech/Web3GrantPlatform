@@ -51,23 +51,23 @@ export default function DailyRewardsPage() {
     mutationFn: () => api.post("/api/join-daily-reward", { wallet: address }),
     onSuccess: () => {
       toast({
-        title: "Başarılı!",
-        description: "Günlük ödül çekilişine katıldınız!",
+        title: "Success!",
+        description: "You have joined the daily reward draw!",
       });
       setHasJoinedToday(true);
       queryClient.invalidateQueries({ queryKey: ["/api/today-stats"] });
     },
     onError: (error: any) => {
-      const errorMsg = error.message || "Çekilişe katılım başarısız";
+      const errorMsg = error.message || "Failed to join the draw";
       if (errorMsg.includes("Already entered")) {
         setHasJoinedToday(true);
         toast({
-          title: "Bilgi",
-          description: "Bugün zaten çekilişe katıldınız!",
+          title: "Info",
+          description: "You have already joined the draw today!",
         });
       } else {
         toast({
-          title: "Hata",
+          title: "Error",
           description: errorMsg,
           variant: "destructive",
         });
@@ -82,8 +82,8 @@ export default function DailyRewardsPage() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: "Kopyalandı!",
-      description: "Cüzdan adresi panoya kopyalandı",
+      title: "Copied!",
+      description: "Wallet address copied to clipboard",
     });
   };
 
@@ -156,14 +156,14 @@ export default function DailyRewardsPage() {
               {!isConnected ? (
                 <div className="space-y-4">
                   <p className="text-yellow-600 dark:text-yellow-400 font-medium">
-                    Çekilişe katılmak için cüzdanını bağla
+                    Connect your wallet to join the draw
                   </p>
                   <WalletConnectButton />
                 </div>
               ) : (
                 <div className="space-y-4">
                   <p className="text-green-600 dark:text-green-400 font-medium">
-                    Cüzdan bağlı: {address?.slice(0, 6)}...{address?.slice(-4)}
+                    Wallet connected: {address?.slice(0, 6)}...{address?.slice(-4)}
                   </p>
                   <Button 
                     onClick={joinDailyReward}
@@ -171,17 +171,17 @@ export default function DailyRewardsPage() {
                     className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold text-lg py-4 px-8"
                   >
                     {joinRewardMutation.isPending ? (
-                      "Katılım işleniyor..."
+                      "Processing participation..."
                     ) : hasJoinedToday ? (
-                      "Bugün zaten katıldın ✓"
+                      "Already joined today ✓"
                     ) : (
-                      "🎁 Ücretsiz Çekilişe Katıl"
+                      "🎁 Join Free Draw"
                     )}
                   </Button>
                   
                   {hasJoinedToday && (
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Sonuçlar gün sonunda açıklanacak. İyi şanslar!
+                      Results will be announced at the end of the day. Good luck!
                     </p>
                   )}
                 </div>
@@ -189,13 +189,13 @@ export default function DailyRewardsPage() {
 
               {/* Reward Rules */}
               <div className="text-left space-y-2 text-sm text-gray-600 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
-                <h3 className="font-semibold text-black dark:text-white mb-2">📋 Çekiliş Kuralları:</h3>
+                <h3 className="font-semibold text-black dark:text-white mb-2">📋 Draw Rules:</h3>
                 <ul className="space-y-1">
-                  <li>• Her gün sadece 1 kez katılabilirsin</li>
-                  <li>• Katılım tamamen ücretsiz</li>
-                  <li>• Günlük ödül: 100 USDT</li>
-                  <li>• Kazanan her gün rastgele seçilir</li>
-                  <li>• Sonuçlar gün sonunda açıklanır</li>
+                  <li>• You can only participate once per day</li>
+                  <li>• Participation is completely free</li>
+                  <li>• Daily reward: 100 USDT</li>
+                  <li>• Winner is randomly selected daily</li>
+                  <li>• Results are announced at the end of the day</li>
                 </ul>
               </div>
             </div>

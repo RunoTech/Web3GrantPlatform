@@ -19,7 +19,7 @@ export default function WalletConnectButton() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={disconnect}
+          onClick={() => disconnect()}
           data-testid="button-disconnect-wallet"
         >
           Disconnect

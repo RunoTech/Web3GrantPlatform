@@ -86,14 +86,46 @@ export function useWallet() {
     }
   }, [isConnecting, toast]);
 
-  const disconnect = useCallback(() => {
-    setAddress(null);
-    setIsConnected(false);
-    removeWalletListeners();
-    toast({
-      title: "Bağlantı Kesildi",
-      description: "Cüzdan bağlantısı kesildi",
-    });
+  const disconnect = useCallback(async () => {
+    try {
+      // Clear local state
+      setAddress(null);
+      setIsConnected(false);
+      removeWalletListeners();
+      
+      // Try to disconnect from MetaMask if available
+      if (window.ethereum?.disconnect) {
+        await window.ethereum.disconnect();
+      }
+      
+      // Clear any stored connection data
+      if (window.ethereum?.selectedAddress) {
+        // Some wallets support this method
+        try {
+          await window.ethereum.request({
+            method: 'wallet_requestPermissions',
+            params: [{ eth_accounts: {} }]
+          });
+        } catch (error) {
+          // Ignore permission errors, they're expected
+        }
+      }
+      
+      toast({
+        title: "Disconnected",
+        description: "Wallet connection has been closed",
+      });
+    } catch (error) {
+      // Even if disconnect fails, clear local state
+      setAddress(null);
+      setIsConnected(false);
+      removeWalletListeners();
+      
+      toast({
+        title: "Disconnected",
+        description: "Wallet connection cleared locally",
+      });
+    }
   }, [toast]);
 
   useEffect(() => {

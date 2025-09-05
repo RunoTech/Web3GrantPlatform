@@ -21,7 +21,7 @@ const translations = {
     
     // Hero Section
     'hero.title': 'NEXT-GEN BLOCKCHAIN DONATION PLATFORM',
-    'hero.subtitle': 'Commission-free donations with futuristic technology. Direct wallet-to-wallet transfers on Ethereum and BSC networks.',
+    'hero.subtitle': 'Commission-free donations with futuristic technology. Direct wallet-to-wallet transfers on Ethereum network.',
     'hero.explore_campaigns': 'EXPLORE CAMPAIGNS',
     'hero.create_campaign': 'CREATE CAMPAIGN',
     
@@ -54,7 +54,7 @@ const translations = {
     'features.why_title': 'WHY DUXXAN?',
     'features.subtitle': 'Secure and transparent donation experience with futuristic blockchain technology',
     'features.blockchain_security': 'BLOCKCHAIN SECURITY',
-    'features.blockchain_desc': '100% secure transactions with smart contracts running on Ethereum and BSC networks',
+    'features.blockchain_desc': '100% secure transactions with smart contracts running on Ethereum network',
     'features.commission_free': 'COMMISSION FREE',
     'features.commission_desc': 'Your donations go directly to campaign owners, no commission is deducted',
     'features.fast_easy': 'FAST & EASY',
@@ -148,7 +148,7 @@ const translations = {
     'crypto.buy_crypto': 'BUY CRYPTO',
     'crypto.buy_crypto_with_card': 'Buy Crypto with Card',
     'step1ConnectWallet': 'Connect your wallet to the platform',
-    'step2SelectNetwork': 'Select Ethereum or BSC network based on your preference',
+    'step2SelectNetwork': 'Select Ethereum network for transactions',
     'step3SendTokens': 'Send the exact amount of USDT/BUSD to our platform wallet',
     'step4CopyTxHash': 'Copy the transaction hash from your wallet',
     'step5VerifyHere': 'Paste the hash here and verify your payment',
@@ -246,7 +246,7 @@ const translations = {
     
     // Hero Section
     'hero.title': 'YENİ NESİL BLOCKCHAIN BAĞIŞ PLATFORMU',
-    'hero.subtitle': 'Futuristik teknoloji ile komisyonsuz bağışlar. Ethereum ve BSC ağlarında doğrudan cüzdan-cüzdan transferler.',
+    'hero.subtitle': 'Futuristik teknoloji ile komisyonsuz bağışlar. Ethereum ağında doğrudan cüzdan-cüzdan transferler.',
     'hero.explore_campaigns': 'KAMPANYALARI KEŞFET',
     'hero.create_campaign': 'KAMPANYA OLUŞTUR',
     
@@ -279,7 +279,7 @@ const translations = {
     'features.why_title': 'NEDEN DUXXAN?',
     'features.subtitle': 'Futuristik blockchain teknolojisi ile güvenli ve şeffaf bağış deneyimi',
     'features.blockchain_security': 'BLOCKCHAİN GÜVENLİĞİ',
-    'features.blockchain_desc': 'Ethereum ve BSC ağlarında çalışan akıllı kontratlar ile %100 güvenli işlemler',
+    'features.blockchain_desc': 'Ethereum ağında çalışan akıllı kontratlar ile %100 güvenli işlemler',
     'features.commission_free': 'KOMİSYONSUZ',
     'features.commission_desc': 'Bağışlarınız doğrudan kampanya sahiplerine ulaşır, hiçbir komisyon kesilmez',
     'features.fast_easy': 'HIZLI VE KOLAY',
@@ -405,7 +405,7 @@ const translations = {
     
     // Hero Section
     'hero.title': 'PLATAFORMA DE DONACIONES BLOCKCHAIN DE NUEVA GENERACIÓN',
-    'hero.subtitle': 'Donaciones sin comisiones con tecnología futurista. Transferencias directas billetera a billetera en redes Ethereum y BSC.',
+    'hero.subtitle': 'Donaciones sin comisiones con tecnología futurista. Transferencias directas billetera a billetera en red Ethereum.',
     'hero.explore_campaigns': 'EXPLORAR CAMPAÑAS',
     'hero.create_campaign': 'CREAR CAMPAÑA',
     
@@ -438,7 +438,7 @@ const translations = {
     'features.why_title': '¿POR QUÉ DUXXAN?',
     'features.subtitle': 'Experiencia de donación segura y transparente con tecnología blockchain futurista',
     'features.blockchain_security': 'SEGURIDAD BLOCKCHAIN',
-    'features.blockchain_desc': 'Transacciones 100% seguras con contratos inteligentes en redes Ethereum y BSC',
+    'features.blockchain_desc': 'Transacciones 100% seguras con contratos inteligentes en red Ethereum',
     'features.commission_free': 'SIN COMISIONES',
     'features.commission_desc': 'Tus donaciones van directamente a los creadores de campañas, sin comisiones',
     'features.fast_easy': 'RÁPIDO Y FÁCIL',

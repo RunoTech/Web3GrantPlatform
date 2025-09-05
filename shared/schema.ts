@@ -72,6 +72,15 @@ export const accounts = pgTable("accounts", {
   active: boolean("active").default(false),
   activationTxHash: varchar("activation_tx_hash", { length: 66 }),
   activationDate: timestamp("activation_date"),
+  
+  // Affiliate system fields
+  referralCode: varchar("referral_code", { length: 20 }).unique(), // Unique referral code for this user
+  referredBy: varchar("referred_by", { length: 42 }), // Wallet address of the user who referred this account
+  affiliateActivated: boolean("affiliate_activated").default(false), // Whether affiliate benefits are activated
+  affiliateActivationDate: timestamp("affiliate_activation_date"), // When affiliate system was activated for this user
+  totalReferrals: integer("total_referrals").default(0), // Number of successful referrals
+  totalAffiliateEarnings: decimal("total_affiliate_earnings", { precision: 18, scale: 8 }).default("0"), // Total earnings from affiliates
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -182,6 +191,19 @@ export const adminLogs = pgTable("admin_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Affiliate tracking and rewards
+export const affiliateActivities = pgTable("affiliate_activities", {
+  id: serial("id").primaryKey(),
+  referrerWallet: varchar("referrer_wallet", { length: 42 }).notNull(), // Who gets the reward
+  referredWallet: varchar("referred_wallet", { length: 42 }).notNull(), // Who was referred
+  activityType: varchar("activity_type", { length: 20 }).notNull(), // "donation", "campaign_creation"
+  relatedId: integer("related_id"), // Campaign or donation ID
+  rewardAmount: decimal("reward_amount", { precision: 18, scale: 8 }).default("0"), // Potential reward amount
+  rewardPaid: boolean("reward_paid").default(false), // Whether reward has been paid
+  txHash: varchar("tx_hash", { length: 66 }), // Transaction hash if reward was paid
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const platformSettingsRelations = relations(platformSettings, ({ one }) => ({
   updatedBy: one(admins, {
@@ -230,6 +252,17 @@ export const adminLogsRelations = relations(adminLogs, ({ one }) => ({
   admin: one(admins, {
     fields: [adminLogs.adminId],
     references: [admins.id],
+  }),
+}));
+
+export const affiliateActivitiesRelations = relations(affiliateActivities, ({ one }) => ({
+  referrer: one(accounts, {
+    fields: [affiliateActivities.referrerWallet],
+    references: [accounts.wallet],
+  }),
+  referred: one(accounts, {
+    fields: [affiliateActivities.referredWallet],
+    references: [accounts.wallet],
   }),
 }));
 
@@ -309,6 +342,11 @@ export const insertAdminLogSchema = createInsertSchema(adminLogs).omit({
   createdAt: true 
 });
 
+export const insertAffiliateActivitySchema = createInsertSchema(affiliateActivities).omit({ 
+  id: true, 
+  createdAt: true 
+});
+
 // Types
 export type Admin = typeof admins.$inferSelect;
 export type InsertAdmin = z.infer<typeof insertAdminSchema>;
@@ -332,3 +370,5 @@ export type Announcement = typeof announcements.$inferSelect;
 export type InsertAnnouncement = z.infer<typeof insertAnnouncementSchema>;
 export type AdminLog = typeof adminLogs.$inferSelect;
 export type InsertAdminLog = z.infer<typeof insertAdminLogSchema>;
+export type AffiliateActivity = typeof affiliateActivities.$inferSelect;
+export type InsertAffiliateActivity = z.infer<typeof insertAffiliateActivitySchema>;

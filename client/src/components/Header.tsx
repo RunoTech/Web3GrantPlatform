@@ -5,7 +5,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import CryptoOnramp from "@/components/CryptoOnramp";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useWallet } from "@/hooks/useWallet";
-import { Heart, User, Settings, BarChart3, Target, Trophy, LogOut, ChevronDown } from "lucide-react";
+import { Heart, User, Settings, BarChart3, Target, Trophy, Users, LogOut, ChevronDown } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -112,6 +112,12 @@ export default function Header({ currentPage }: HeaderProps) {
                     <Link href="/profile?tab=rewards" className="flex items-center w-full">
                       <Trophy className="w-4 h-4 mr-2" />
                       Daily Rewards
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/affiliate" className="flex items-center w-full">
+                      <Users className="w-4 h-4 mr-2" />
+                      Affiliate Program
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />

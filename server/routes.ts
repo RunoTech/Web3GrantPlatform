@@ -260,6 +260,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get account with affiliate data (public)
+  app.get("/api/account/:wallet", async (req, res) => {
+    try {
+      const { wallet } = req.params;
+      const account = await storage.getAccountWithAffiliateData(wallet);
+      
+      if (!account) {
+        return res.status(404).json({ error: "Account not found" });
+      }
+      
+      res.json(account);
+    } catch (error) {
+      console.error("Error fetching account:", error);
+      res.status(500).json({ error: "Failed to fetch account" });
+    }
+  });
+
+  // Get affiliate referral stats (public)
+  app.get("/api/affiliate/stats/:wallet", async (req, res) => {
+    try {
+      const { wallet } = req.params;
+      const stats = await storage.getReferralStats(wallet);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching affiliate stats:", error);
+      res.status(500).json({ error: "Failed to fetch affiliate stats" });
+    }
+  });
+
+  // Activate affiliate system (public)
+  app.post("/api/affiliate/activate", async (req, res) => {
+    try {
+      const { wallet, activityType, relatedId } = req.body;
+      
+      if (!wallet || !activityType) {
+        return res.status(400).json({ error: "Wallet and activity type are required" });
+      }
+      
+      await storage.activateAffiliateSystem(wallet, activityType, relatedId);
+      res.json({ success: true, message: "Affiliate system activated" });
+    } catch (error) {
+      console.error("Error activating affiliate system:", error);
+      res.status(500).json({ error: "Failed to activate affiliate system" });
+    }
+  });
+
+  // Register with referral code (public)
+  app.post("/api/register-with-referral", async (req, res) => {
+    try {
+      const { wallet, referralCode } = req.body;
+      
+      if (!wallet) {
+        return res.status(400).json({ error: "Wallet is required" });
+      }
+
+      // Check if account already exists
+      const existingAccount = await storage.getAccount(wallet);
+      if (existingAccount) {
+        return res.status(409).json({ error: "Account already exists" });
+      }
+
+      let referredBy = null;
+      
+      // If referral code provided, validate it
+      if (referralCode) {
+        const allAccounts = await storage.getAllAccounts();
+        const referrer = allAccounts.find(acc => acc.referralCode === referralCode);
+        
+        if (referrer) {
+          referredBy = referrer.wallet;
+        } else {
+          return res.status(400).json({ error: "Invalid referral code" });
+        }
+      }
+
+      // Create account with referral info
+      const account = await storage.createAccount({
+        wallet,
+        active: false,
+        referredBy,
+      });
+
+      res.json(account);
+    } catch (error) {
+      console.error("Error registering with referral:", error);
+      res.status(500).json({ error: "Failed to register with referral" });
+    }
+  });
+
   // Direct payment activation (new system - no transaction hash verification needed)
   app.post("/api/direct-activate", async (req, res) => {
     try {
@@ -336,6 +425,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // }
 
       const campaign = await storage.createCampaign(campaignData);
+      
+      // Activate affiliate system for campaign creator (if first donation/campaign)
+      try {
+        await storage.activateAffiliateSystem(campaignData.ownerWallet, 'campaign_creation', campaign.id);
+      } catch (error) {
+        console.error("Error activating affiliate system for campaign:", error);
+        // Don't fail the campaign creation if affiliate activation fails
+      }
+      
       res.json(campaign);
     } catch (error) {
       console.error("Error creating campaign:", error);
@@ -398,6 +496,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const donationData = insertDonationSchema.parse(req.body);
       const donation = await storage.createDonation(donationData);
+      
+      // Activate affiliate system for donor (if first donation/campaign)
+      try {
+        await storage.activateAffiliateSystem(donationData.donorWallet, 'donation', donation.id);
+      } catch (error) {
+        console.error("Error activating affiliate system for donation:", error);
+        // Don't fail the donation if affiliate activation fails
+      }
+      
       res.json(donation);
     } catch (error) {
       console.error("Error recording donation:", error);

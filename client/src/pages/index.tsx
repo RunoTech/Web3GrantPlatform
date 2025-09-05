@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import CampaignCard from "@/components/CampaignCard";
 import LanguageSelector from "@/components/LanguageSelector";
@@ -10,6 +11,7 @@ import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSettings } from "@/hooks/useSettings";
 import { api } from "@/utils/api";
+import { useState, useEffect } from "react";
 import { 
   Heart, 
   Plus, 
@@ -48,6 +50,20 @@ export default function HomePage() {
     getSetting,
     siteTitle
   } = useSettings();
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [showReferralBanner, setShowReferralBanner] = useState(false);
+
+  // Check for referral code in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      setReferralCode(refCode);
+      setShowReferralBanner(true);
+      // Store in localStorage for account creation
+      localStorage.setItem('referralCode', refCode);
+    }
+  }, []);
 
   const { data: popularCampaigns = [] } = useQuery({
     queryKey: ["/api/get-popular-campaigns"],
@@ -147,6 +163,27 @@ export default function HomePage() {
           </div>
         </div>
       </header>
+
+      {/* Referral Banner */}
+      {showReferralBanner && referralCode && (
+        <div className="bg-gradient-to-r from-cyber-cyan/10 to-cyber-yellow/10 border-b border-cyber-cyan/30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Alert className="border-cyber-cyan/30 bg-transparent py-4">
+              <Users className="h-4 w-4 text-cyber-cyan" />
+              <AlertDescription className="text-foreground">
+                🎉 You were referred by a DUXXAN user! Connect your wallet and get started to activate affiliate benefits.{" "}
+                <Button
+                  variant="link"
+                  className="h-auto p-0 text-cyber-cyan hover:text-cyber-yellow"
+                  onClick={() => setShowReferralBanner(false)}
+                >
+                  Dismiss
+                </Button>
+              </AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden bg-surface">

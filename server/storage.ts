@@ -12,6 +12,7 @@ import {
   type FooterLink, type InsertFooterLink,
   type Announcement, type InsertAnnouncement,
   type AdminLog, type InsertAdminLog,
+  type AffiliateActivity, type InsertAffiliateActivity,
   admins,
   platformSettings,
   networkFees,
@@ -23,6 +24,7 @@ import {
   footerLinks,
   announcements,
   adminLogs,
+  affiliateActivities,
 } from "../shared/schema";
 
 export interface IStorage {
@@ -120,6 +122,15 @@ export interface IStorage {
   updateRecord(tableName: string, id: string, data: any): Promise<any>;
   deleteRecord(tableName: string, id: string): Promise<void>;
   exportTableData(tableName: string): Promise<any[]>;
+
+  // Affiliate System
+  generateReferralCode(wallet: string): Promise<string>;
+  getAccountWithAffiliateData(wallet: string): Promise<Account | undefined>;
+  updateAccountAffiliateData(wallet: string, updates: Partial<Account>): Promise<void>;
+  activateAffiliateSystem(wallet: string, activityType: 'donation' | 'campaign_creation', relatedId?: number): Promise<void>;
+  getReferralStats(wallet: string): Promise<{ totalReferrals: number; totalEarnings: string; activities: AffiliateActivity[] }>;
+  createAffiliateActivity(activity: InsertAffiliateActivity): Promise<AffiliateActivity>;
+  getAffiliateActivities(wallet: string): Promise<AffiliateActivity[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -580,8 +591,8 @@ export class DatabaseStorage implements IStorage {
     const table = tableMap[tableName];
     if (!table) throw new Error(`Table ${tableName} not found`);
 
-    const [result] = await db.insert(table).values(data).returning();
-    return result;
+    const result = await db.insert(table).values(data).returning();
+    return result[0];
   }
 
   async updateRecord(tableName: string, id: string, data: any): Promise<any> {
@@ -619,6 +630,94 @@ export class DatabaseStorage implements IStorage {
     if (!table) throw new Error(`Table ${tableName} not found`);
 
     return await db.select().from(table);
+  }
+
+  // Affiliate System Implementation
+  async generateReferralCode(wallet: string): Promise<string> {
+    // Generate a unique referral code based on wallet address and timestamp
+    const timestamp = Date.now().toString(36);
+    const walletPart = wallet.slice(-6).toUpperCase();
+    const referralCode = `${walletPart}${timestamp}`.slice(0, 20);
+    
+    // Check if code already exists (though unlikely)
+    const existing = await db.select().from(accounts).where(eq(accounts.referralCode, referralCode));
+    if (existing.length > 0) {
+      // If collision, add random suffix
+      const randomSuffix = Math.random().toString(36).substring(2, 5).toUpperCase();
+      return `${referralCode.slice(0, 17)}${randomSuffix}`;
+    }
+    
+    return referralCode;
+  }
+
+  async getAccountWithAffiliateData(wallet: string): Promise<Account | undefined> {
+    const [account] = await db.select().from(accounts).where(eq(accounts.wallet, wallet));
+    return account || undefined;
+  }
+
+  async updateAccountAffiliateData(wallet: string, updates: Partial<Account>): Promise<void> {
+    await db.update(accounts).set(updates).where(eq(accounts.wallet, wallet));
+  }
+
+  async activateAffiliateSystem(wallet: string, activityType: 'donation' | 'campaign_creation', relatedId?: number): Promise<void> {
+    const account = await this.getAccount(wallet);
+    if (!account) throw new Error('Account not found');
+
+    // If affiliate not already activated, activate it
+    if (!account.affiliateActivated) {
+      // Generate referral code if not exists
+      let referralCode = account.referralCode;
+      if (!referralCode) {
+        referralCode = await this.generateReferralCode(wallet);
+      }
+
+      await this.updateAccountAffiliateData(wallet, {
+        referralCode,
+        affiliateActivated: true,
+        affiliateActivationDate: new Date(),
+      });
+
+      // If this user was referred by someone, create affiliate activity
+      if (account.referredBy) {
+        await this.createAffiliateActivity({
+          referrerWallet: account.referredBy,
+          referredWallet: wallet,
+          activityType,
+          relatedId,
+          rewardAmount: "0", // Reward system can be configured later
+        });
+
+        // Update referrer's total referrals
+        await db.update(accounts)
+          .set({
+            totalReferrals: sql`${accounts.totalReferrals} + 1`,
+            updatedAt: new Date(),
+          })
+          .where(eq(accounts.wallet, account.referredBy));
+      }
+    }
+  }
+
+  async getReferralStats(wallet: string): Promise<{ totalReferrals: number; totalEarnings: string; activities: AffiliateActivity[] }> {
+    const account = await this.getAccount(wallet);
+    const activities = await this.getAffiliateActivities(wallet);
+
+    return {
+      totalReferrals: account?.totalReferrals || 0,
+      totalEarnings: account?.totalAffiliateEarnings || "0",
+      activities,
+    };
+  }
+
+  async createAffiliateActivity(activity: InsertAffiliateActivity): Promise<AffiliateActivity> {
+    const [result] = await db.insert(affiliateActivities).values(activity).returning();
+    return result;
+  }
+
+  async getAffiliateActivities(wallet: string): Promise<AffiliateActivity[]> {
+    return await db.select().from(affiliateActivities)
+      .where(eq(affiliateActivities.referrerWallet, wallet))
+      .orderBy(desc(affiliateActivities.createdAt));
   }
 }
 

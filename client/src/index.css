@@ -1,77 +1,63 @@
-/* Font imports - cleaner typography */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Font imports - must be first */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Binance-inspired vibrant theme */
+  /* Binance-style Light Theme - White/Yellow */
   --background: hsl(0 0% 100%);
-  --foreground: hsl(220 9% 10%);
+  --foreground: hsl(0 0% 9%);
   --card: hsl(0 0% 100%);
-  --card-foreground: hsl(220 9% 10%);
+  --card-foreground: hsl(0 0% 9%);
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(220 9% 10%);
-  --primary: hsl(43 89% 56%); /* Binance Yellow */
-  --primary-foreground: hsl(220 26% 14%);
-  --secondary: hsl(210 10% 96%);
-  --secondary-foreground: hsl(220 9% 10%);
-  --muted: hsl(210 10% 96%);
-  --muted-foreground: hsl(215 13% 50%);
-  --accent: hsl(43 89% 56%);
-  --accent-foreground: hsl(220 26% 14%);
+  --popover-foreground: hsl(0 0% 9%);
+  --primary: hsl(45 100% 51%); /* Binance Yellow */
+  --primary-foreground: hsl(0 0% 9%);
+  --secondary: hsl(0 0% 96%);
+  --secondary-foreground: hsl(0 0% 9%);
+  --muted: hsl(0 0% 96%);
+  --muted-foreground: hsl(0 0% 45%);
+  --accent: hsl(45 100% 51%);
+  --accent-foreground: hsl(0 0% 9%);
   --destructive: hsl(0 84% 60%);
   --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(214 32% 91%);
-  --input: hsl(214 32% 91%);
-  --ring: hsl(43 89% 56%);
-  --radius: 0.75rem;
+  --border: hsl(0 0% 91%);
+  --input: hsl(0 0% 96%);
+  --ring: hsl(45 100% 51%);
+  --radius: 0.5rem;
 
-  /* Vibrant Binance color palette */
-  --binance-yellow: hsl(43 89% 56%); /* #F3BA2F */
-  --binance-gold: hsl(38 87% 53%); /* #E6A82F */
-  --binance-dark: hsl(220 26% 14%); /* #181A20 */
-  --binance-darker: hsl(224 27% 7%); /* #0B0E11 */
-  --success: hsl(134 61% 41%);
-  --warning: hsl(43 89% 56%);
-  --info: hsl(199 89% 48%);
-  --danger: hsl(0 84% 60%);
-
-  /* Additional vibrant colors */
-  --electric-blue: hsl(199 89% 48%);
-  --bright-green: hsl(134 61% 41%);
-  --vibrant-orange: hsl(25 95% 53%);
-  --deep-purple: hsl(258 90% 66%);
+  /* Binance Color Palette */
+  --binance-yellow: #FCD535;
+  --binance-dark: #0B0E11;
+  --binance-gray: #474D57;
+  --binance-light-gray: #F5F5F5;
+  --success-green: #00D4AA;
+  --danger-red: #F84960;
 }
 
 .dark {
-  /* Binance dark theme - vibrant and dynamic */
-  --background: hsl(220 26% 14%); /* Binance dark */
-  --foreground: hsl(0 0% 98%);
-  --card: hsl(224 27% 7%); /* Binance darker */
-  --card-foreground: hsl(0 0% 98%);
-  --popover: hsl(224 27% 7%);
-  --popover-foreground: hsl(0 0% 98%);
-  --primary: hsl(43 89% 56%); /* Binance Yellow */
-  --primary-foreground: hsl(220 26% 14%);
-  --secondary: hsl(215 25% 27%);
-  --secondary-foreground: hsl(0 0% 98%);
-  --muted: hsl(215 25% 27%);
-  --muted-foreground: hsl(217 10% 64%);
-  --accent: hsl(43 89% 56%);
-  --accent-foreground: hsl(220 26% 14%);
+  /* Binance-style Dark Theme - Black/Yellow */
+  --background: hsl(210 11% 7%); /* #0B0E11 */
+  --foreground: hsl(0 0% 95%);
+  --card: hsl(210 11% 9%);
+  --card-foreground: hsl(0 0% 95%);
+  --popover: hsl(210 11% 9%);
+  --popover-foreground: hsl(0 0% 95%);
+  --primary: hsl(45 100% 51%); /* Binance Yellow */
+  --primary-foreground: hsl(210 11% 7%);
+  --secondary: hsl(210 11% 12%);
+  --secondary-foreground: hsl(0 0% 95%);
+  --muted: hsl(210 11% 12%);
+  --muted-foreground: hsl(0 0% 55%);
+  --accent: hsl(45 100% 51%);
+  --accent-foreground: hsl(210 11% 7%);
   --destructive: hsl(0 84% 60%);
   --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(215 25% 27%);
-  --input: hsl(215 25% 27%);
-  --ring: hsl(43 89% 56%);
-
-  /* Dark theme vibrant colors */
-  --success: hsl(134 61% 51%);
-  --warning: hsl(43 89% 56%);
-  --info: hsl(199 89% 58%);
-  --danger: hsl(0 84% 60%);
+  --border: hsl(210 11% 15%);
+  --input: hsl(210 11% 12%);
+  --ring: hsl(45 100% 51%);
 }
 
 * {
@@ -81,213 +67,112 @@
 body {
   color: hsl(var(--foreground));
   background: hsl(var(--background));
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 16px; /* More readable base size */
-  line-height: 1.6;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 14px; /* Binance-style small font size */
+  line-height: 1.5;
   letter-spacing: -0.01em;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Natural typography scale */
+/* Binance-style Typography */
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Inter', sans-serif;
   font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: -0.025em;
-  color: hsl(var(--foreground));
+  line-height: 1.3;
+  letter-spacing: -0.02em;
 }
 
-h1 { font-size: 3rem; }     /* 48px */
-h2 { font-size: 2.25rem; }  /* 36px */
-h3 { font-size: 1.875rem; } /* 30px */
-h4 { font-size: 1.5rem; }   /* 24px */
-h5 { font-size: 1.25rem; }  /* 20px */
-h6 { font-size: 1.125rem; } /* 18px */
+h1 { font-size: 1.75rem; } /* 28px */
+h2 { font-size: 1.5rem; }  /* 24px */
+h3 { font-size: 1.25rem; } /* 20px */
+h4 { font-size: 1.125rem; } /* 18px */
+h5 { font-size: 1rem; }    /* 16px */
+h6 { font-size: 0.875rem; } /* 14px */
 
-/* Binance-style vibrant buttons */
-.btn-primary {
-  background: linear-gradient(135deg, hsl(var(--binance-yellow)), hsl(var(--binance-gold)));
-  color: hsl(var(--primary-foreground));
-  border: none;
-  font-weight: 600;
-  box-shadow: 0 4px 15px hsl(var(--binance-yellow) / 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+/* Binance-style Button and Input Sizing */
+.btn-sm {
+  font-size: 0.75rem; /* 12px */
+  padding: 0.375rem 0.75rem;
 }
 
-.btn-primary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.6s;
+.btn-md {
+  font-size: 0.875rem; /* 14px */
+  padding: 0.5rem 1rem;
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px hsl(var(--binance-yellow) / 0.4);
-  background: linear-gradient(135deg, hsl(var(--binance-gold)), hsl(var(--binance-yellow)));
+.btn-lg {
+  font-size: 1rem; /* 16px */
+  padding: 0.75rem 1.5rem;
 }
 
-.btn-primary:hover::before {
-  left: 100%;
+.text-xs { font-size: 0.625rem; } /* 10px */
+.text-sm { font-size: 0.75rem; }  /* 12px */
+.text-base { font-size: 0.875rem; } /* 14px - Binance default */
+.text-lg { font-size: 1rem; }     /* 16px */
+.text-xl { font-size: 1.125rem; } /* 18px */
+
+/* Binance-style Colors */
+.bg-binance-yellow { background-color: var(--binance-yellow); }
+.text-binance-yellow { color: var(--binance-yellow); }
+.bg-binance-dark { background-color: var(--binance-dark); }
+.text-binance-dark { color: var(--binance-dark); }
+.bg-success { background-color: var(--success-green); }
+.text-success { color: var(--success-green); }
+.bg-danger { background-color: var(--danger-red); }
+.text-danger { color: var(--danger-red); }
+
+/* Cyber Theme Colors */
+.cyber-cyan-bg { 
+  background: linear-gradient(135deg, #00d4aa, #00bcd4); 
+}
+.cyber-purple-bg { 
+  background: linear-gradient(135deg, #9c27b0, #673ab7); 
+}
+.cyber-green-bg { 
+  background: linear-gradient(135deg, #4caf50, #8bc34a); 
+}
+.cyber-yellow-bg { 
+  background: linear-gradient(135deg, #ffc107, #ff9800); 
 }
 
-.btn-secondary {
-  background: linear-gradient(135deg, hsl(var(--electric-blue)), hsl(var(--info)));
-  color: white;
-  border: none;
-  font-weight: 600;
-  box-shadow: 0 4px 15px hsl(var(--electric-blue) / 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.cyber-cyan { color: #00d4aa; }
+.cyber-purple { color: #9c27b0; }
+.cyber-green { color: #4caf50; }
+.cyber-yellow { color: #ffc107; }
+
+/* Theme-aware icon colors */
+.icon-primary { color: hsl(var(--foreground)); }
+.icon-secondary { color: hsl(var(--muted-foreground)); }
+.icon-accent { color: hsl(var(--primary)); }
+.icon-on-primary { color: hsl(var(--primary-foreground)); }
+
+/* Custom animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
 }
 
-.btn-secondary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px hsl(var(--electric-blue) / 0.4);
-  background: linear-gradient(135deg, hsl(var(--info)), hsl(var(--electric-blue)));
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
 }
 
-/* Clean button variant */
-.btn-clean {
-  background: linear-gradient(135deg, hsl(var(--binance-yellow)), hsl(var(--binance-gold)));
-  color: hsl(var(--binance-dark));
-  border: none;
-  font-weight: 600;
-  padding: 12px 24px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px hsl(var(--binance-yellow) / 0.25);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.btn-clean:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 30px hsl(var(--binance-yellow) / 0.4);
-  filter: brightness(1.1);
+/* Binance-style Shadows */
+.shadow-binance {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Dynamic Binance-style cards */
-.card {
-  background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  border-radius: 16px;
-  box-shadow: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.06);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+.dark .shadow-binance {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, hsl(var(--binance-yellow)), hsl(var(--electric-blue)), hsl(var(--bright-green)));
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.card:hover::before {
-  opacity: 1;
-}
-
-/* Enhanced hover animations */
-.simple-hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.simple-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px -5px hsl(0 0% 0% / 0.1), 0 20px 25px -5px hsl(0 0% 0% / 0.04);
-}
-
-/* Gradient backgrounds */
-.gradient-primary {
-  background: linear-gradient(135deg, hsl(var(--binance-yellow)), hsl(var(--binance-gold)));
-}
-
-.gradient-secondary {
-  background: linear-gradient(135deg, hsl(var(--electric-blue)), hsl(var(--info)));
-}
-
-.gradient-success {
-  background: linear-gradient(135deg, hsl(var(--bright-green)), hsl(var(--success)));
-}
-
-.gradient-accent {
-  background: linear-gradient(135deg, hsl(var(--deep-purple)), hsl(var(--vibrant-orange)));
-}
-
-/* Surface variants */
-.surface-muted {
-  background: linear-gradient(135deg, hsl(var(--muted)), hsl(var(--secondary)));
-  border: 1px solid hsl(var(--border));
-}
-
-/* Color utility classes */
-.bg-warning-light { background: hsl(var(--warning) / 0.1); }
-.bg-info-light { background: hsl(var(--info) / 0.1); }
-.bg-success-light { background: hsl(var(--success) / 0.1); }
-.bg-primary-light { background: hsl(var(--primary) / 0.1); }
-
-.text-warning { color: hsl(var(--warning)); }
-.text-info { color: hsl(var(--electric-blue)); }
-.text-success { color: hsl(var(--bright-green)); }
-.text-primary { color: hsl(var(--primary)); }
-
-.bg-warning { background: hsl(var(--warning)); }
-.bg-info { background: hsl(var(--electric-blue)); }
-.bg-success { background: hsl(var(--bright-green)); }
-.bg-primary { background: hsl(var(--primary)); }
-
-.card:hover {
-  box-shadow: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
-  transform: translateY(-2px);
-}
-
-/* Modern surfaces */
-.surface {
-  background: hsl(var(--card));
-}
-
-.surface-muted {
-  background: hsl(var(--muted) / 0.5);
-}
-
-/* Clean gradients - subtle and professional */
-.gradient-primary {
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.8));
-}
-
-.gradient-muted {
-  background: linear-gradient(135deg, hsl(var(--muted)), hsl(var(--muted) / 0.8));
-}
-
-/* Success/Warning/Error colors */
-.text-success { color: hsl(var(--success)); }
-.text-warning { color: hsl(var(--warning)); }
-.text-info { color: hsl(var(--info)); }
-
-.bg-success { background-color: hsl(var(--success)); }
-.bg-warning { background-color: hsl(var(--warning)); }
-.bg-info { background-color: hsl(var(--info)); }
-
-.bg-success-light { background-color: hsl(var(--success) / 0.1); }
-.bg-warning-light { background-color: hsl(var(--warning) / 0.1); }
-.bg-info-light { background-color: hsl(var(--info) / 0.1); }
-
-/* Clean scrollbar */
+/* Scrollbar Styling */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -295,98 +180,245 @@ h6 { font-size: 1.125rem; } /* 18px */
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.3);
-  border-radius: 4px;
+  background: hsl(var(--border));
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
+  background: hsl(var(--muted-foreground));
 }
 
-/* Focus states */
-.focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary;
+/* Binance-style colors with enhanced visibility */
+.cyber-cyan-bg { 
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important; 
+  box-shadow: 0 0 20px hsla(45, 100%, 51%, 0.3) !important;
+}
+.cyber-green-bg { 
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important; 
+  box-shadow: 0 0 20px hsla(45, 100%, 51%, 0.3) !important;
+}
+.cyber-purple-bg { 
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important; 
+  box-shadow: 0 0 20px hsla(45, 100%, 51%, 0.3) !important;
+}
+.cyber-yellow-bg { 
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important; 
+  box-shadow: 0 0 20px hsla(45, 100%, 51%, 0.3) !important;
+}
+.cyber-red-bg { 
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important; 
+  box-shadow: 0 0 20px hsla(45, 100%, 51%, 0.3) !important;
 }
 
-/* Spacing utilities for better layout */
-.space-section { @apply py-16 md:py-24; }
-.space-content { @apply py-8 md:py-12; }
-
-/* Clean animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Binance yellow text colors with enhanced visibility */
+.text-cyber-cyan { 
+  color: hsl(45 100% 51%) !important; 
+  text-shadow: 0 0 10px hsla(45, 100%, 51%, 0.4) !important;
+}
+.text-cyber-green { 
+  color: hsl(45 100% 51%) !important; 
+  text-shadow: 0 0 10px hsla(45, 100%, 51%, 0.4) !important;
+}
+.text-cyber-purple { 
+  color: hsl(45 100% 51%) !important; 
+  text-shadow: 0 0 10px hsla(45, 100%, 51%, 0.4) !important;
+}
+.text-cyber-yellow { 
+  color: hsl(45 100% 51%) !important; 
+  text-shadow: 0 0 10px hsla(45, 100%, 51%, 0.4) !important;
+}
+.text-cyber-red { 
+  color: hsl(45 100% 51%) !important; 
+  text-shadow: 0 0 10px hsla(45, 100%, 51%, 0.4) !important;
 }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Enhanced gradients - Binance style */
+.gradient-primary {
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important;
+  box-shadow: 0 0 25px hsla(45, 100%, 51%, 0.3) !important;
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.6s ease-out;
+.gradient-accent {
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important;
+  box-shadow: 0 0 25px hsla(45, 100%, 51%, 0.3) !important;
 }
 
-.animate-slideUp {
-  animation: slideUp 0.5s ease-out;
+/* Enhanced cyber card */
+.cyber-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 0, 0.2) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Remove excessive effects */
-.simple-hover:hover {
-  transform: translateY(-2px);
-  transition: transform 0.2s ease;
+.dark .cyber-card {
+  background: rgba(11, 14, 17, 0.95) !important;
+  border: 1px solid rgba(255, 255, 0, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Clean text styles */
-.text-balance {
-  text-wrap: balance;
-}
-
-.text-readable {
-  max-width: 65ch;
-  line-height: 1.7;
-}
-
-/* Professional button style */
-.btn-clean {
-  @apply px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium transition-all duration-200 focus-ring;
-}
-
-.btn-clean:hover {
-  background: hsl(var(--primary) / 0.9);
-  transform: translateY(-2px);
-}
-
-.btn-clean-secondary {
-  @apply px-6 py-3 bg-secondary text-secondary-foreground border border-border rounded-lg font-medium transition-all duration-200 hover:bg-muted focus-ring;
-}
-
-/* Clean layout helpers */
-.container-clean {
-  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-}
-
-.section-clean {
-  @apply py-16 md:py-20;
-}
-
-/* Remove all neon/cyber effects */
-.cyber-cyan-bg, .cyber-green-bg, .cyber-purple-bg, .cyber-yellow-bg, .cyber-red-bg {
-  @apply bg-primary;
-}
-
+/* Enhanced neon borders - Binance style */
 .neon-border {
-  @apply border border-border;
+  border: 2px solid transparent !important;
+  background: linear-gradient(hsl(0 0% 100%), hsl(0 0% 100%)) padding-box, 
+              linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) border-box !important;
 }
 
+.dark .neon-border {
+  background: linear-gradient(hsl(210 11% 7%), hsl(210 11% 7%)) padding-box, 
+              linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) border-box !important;
+}
+
+/* Enhanced neon text - Binance style */
 .neon-text {
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: 0 0 15px hsla(45, 100%, 51%, 0.4) !important;
+}
+
+/* Better surface colors */
+.bg-surface {
+  background: rgba(255, 255, 255, 0.98) !important;
+}
+
+.dark .bg-surface {
+  background: rgba(11, 14, 17, 0.98) !important;
+}
+
+.bg-surface-2 {
+  background: rgba(245, 245, 245, 0.98) !important;
+}
+
+.dark .bg-surface-2 {
+  background: rgba(15, 18, 21, 0.98) !important;
+}
+
+.bg-surface-3 {
+  background: rgba(240, 240, 240, 0.98) !important;
+}
+
+.dark .bg-surface-3 {
+  background: rgba(20, 23, 26, 0.98) !important;
+}
+
+/* Enhanced button styles - Binance style */
+.btn-cyber {
+  background: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 90% 45%)) !important;
+  color: hsl(210 11% 7%) !important;
+  font-weight: 700 !important;
+  text-shadow: none !important;
+  box-shadow: 0 0 20px hsla(45, 100%, 51%, 0.3) !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-cyber:hover {
+  background: linear-gradient(135deg, hsl(45 95% 48%), hsl(45 85% 42%)) !important;
+  box-shadow: 0 0 30px hsla(45, 100%, 51%, 0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+.dark .btn-cyber {
+  color: hsl(210 11% 7%) !important;
+}
+
+/* Text shadow helpers - Binance yellow */
+.hover\:text-shadow-cyan:hover {
+  text-shadow: 0 0 12px hsla(45, 100%, 51%, 0.6) !important;
+}
+.hover\:text-shadow-green:hover {
+  text-shadow: 0 0 12px hsla(45, 100%, 51%, 0.6) !important;
+}
+.hover\:text-shadow-purple:hover {
+  text-shadow: 0 0 12px hsla(45, 100%, 51%, 0.6) !important;
+}
+.hover\:text-shadow-yellow:hover {
+  text-shadow: 0 0 12px hsla(45, 100%, 51%, 0.6) !important;
+}
+
+/* Enhanced Theme-aware Icon System */
+/* Base icon classes for consistent visibility */
+.icon-primary {
   @apply text-foreground;
 }
 
-.btn-cyber {
-  @apply btn-clean;
+.icon-on-primary {
+  @apply text-primary-foreground;
 }
 
-.cyber-card {
-  @apply card;
+.icon-secondary {
+  @apply text-muted-foreground;
+}
+
+.icon-accent {
+  @apply text-primary;
+}
+
+/* Enhanced visibility icons */
+.icon-visible {
+  @apply text-gray-800 dark:text-gray-100;
+}
+
+.icon-contrast {
+  @apply text-gray-900 dark:text-gray-50;
+}
+
+/* Force visibility for critical icons */
+.icon-force-dark {
+  color: #1a1a1a !important;
+}
+
+.dark .icon-force-dark {
+  color: #f5f5f5 !important;
+}
+
+/* Button icon colors */
+.btn-icon {
+  @apply text-current;
+}
+
+/* Header icon fixes */
+.header-icon {
+  @apply text-foreground;
+}
+
+/* Card icon fixes */
+.card-icon {
+  @apply text-foreground;
+}
+
+/* Enhanced icon visibility for dark theme */
+.dark .text-black {
+  color: #ffffff !important;
+}
+
+/* Icon background combinations */
+.icon-on-yellow {
+  color: #000000 !important;
+}
+
+.icon-on-dark {
+  color: #ffffff !important;
+}
+
+/* Specific icon fixes for buttons and cards */
+.btn-primary .icon-on-primary,
+.bg-primary .icon-on-primary {
+  color: #000000 !important;
+}
+
+.dark .btn-primary .icon-on-primary,
+.dark .bg-primary .icon-on-primary {
+  color: #000000 !important;
+}
+
+/* Logo and brand icon visibility */
+.brand-icon {
+  @apply text-foreground;
+}
+
+/* Navigation icon fixes */
+.nav-icon {
+  @apply text-muted-foreground hover:text-foreground;
 }

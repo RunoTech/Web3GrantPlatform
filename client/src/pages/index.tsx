@@ -186,44 +186,58 @@ export default function HomePage() {
       )}
 
       {/* Hero Section */}
-      <section className="relative py-24 bg-background">
-        <div className="container-clean">
-          <div className="text-center space-y-12">
-            <div className="w-24 h-24 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-              <Heart className="w-12 h-12 text-primary-foreground" />
+      <section className="relative py-32 bg-background overflow-hidden">
+        {/* Dynamic background */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-10 w-64 h-64 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full blur-3xl animate-pulse delay-700"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+        
+        <div className="container-clean relative z-10">
+          <div className="text-center space-y-16">
+            <div className="relative inline-block">
+              <div className="w-32 h-32 gradient-primary rounded-3xl flex items-center justify-center mx-auto shadow-2xl relative">
+                <Heart className="w-16 h-16 text-black" />
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-3xl blur animate-pulse opacity-50"></div>
+              </div>
             </div>
             
-            <div className="space-y-6">
-              <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight">
-                {t('hero.title')}
-              </h1>
+            <div className="space-y-8">
+              <div className="relative">
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-foreground leading-tight">
+                  {t('hero.title')}
+                </h1>
+                <div className="absolute -inset-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-lg blur opacity-20 animate-pulse"></div>
+              </div>
               
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-readable">
-                {t('hero.subtitle')}
+              <p className="text-2xl md:text-3xl text-muted-foreground max-w-4xl mx-auto font-medium">
+                <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                  {t('hero.subtitle')}
+                </span>
               </p>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-12">
               <Button 
                 asChild
                 size="lg"
-                className="btn-clean"
+                className="btn-clean px-12 py-6 text-xl font-bold"
                 data-testid="button-create-campaign"
               >
                 <Link href="/create-campaign">
-                  <Target className="w-5 h-5 mr-2" />
+                  <Target className="w-7 h-7 mr-3" />
                   {t('hero.create_campaign')}
                 </Link>
               </Button>
               <Button 
                 asChild
                 size="lg"
-                variant="outline"
-                className="btn-clean-secondary"
+                className="btn-secondary px-12 py-6 text-xl font-bold"
                 data-testid="button-explore-campaigns"
               >
                 <Link href="/campaigns">
-                  <Search className="w-5 h-5 mr-2" />
+                  <Search className="w-7 h-7 mr-3" />
                   {t('hero.explore_campaigns')}
                 </Link>
               </Button>
@@ -244,33 +258,36 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="card p-8 text-center simple-hover">
-              <div className="w-16 h-16 bg-info rounded-xl flex items-center justify-center mx-auto mb-6">
-                <Shield className="w-8 h-8 text-white" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="card p-10 text-center simple-hover relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 to-cyan-500"></div>
+              <div className="w-20 h-20 gradient-secondary rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl">
+                <Shield className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-4">{t('features.blockchain_security')}</h3>
-              <p className="text-muted-foreground text-readable">
+              <h3 className="text-2xl font-bold text-foreground mb-6">{t('features.blockchain_security')}</h3>
+              <p className="text-muted-foreground text-lg leading-relaxed">
                 {t('features.blockchain_desc')}
               </p>
             </div>
 
-            <div className="card p-8 text-center simple-hover">
-              <div className="w-16 h-16 bg-success rounded-xl flex items-center justify-center mx-auto mb-6">
-                <DollarSign className="w-8 h-8 text-white" />
+            <div className="card p-10 text-center simple-hover relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-400 to-emerald-500"></div>
+              <div className="w-20 h-20 gradient-success rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl">
+                <DollarSign className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-4">{t('features.commission_free')}</h3>
-              <p className="text-muted-foreground text-readable">
+              <h3 className="text-2xl font-bold text-foreground mb-6">{t('features.commission_free')}</h3>
+              <p className="text-muted-foreground text-lg leading-relaxed">
                 {t('features.commission_desc')}
               </p>
             </div>
 
-            <div className="card p-8 text-center simple-hover">
-              <div className="w-16 h-16 bg-warning rounded-xl flex items-center justify-center mx-auto mb-6">
-                <Zap className="w-8 h-8 text-white" />
+            <div className="card p-10 text-center simple-hover relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-400 to-orange-500"></div>
+              <div className="w-20 h-20 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl">
+                <Zap className="w-10 h-10 text-black" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-4">{t('features.fast_easy')}</h3>
-              <p className="text-muted-foreground text-readable">
+              <h3 className="text-2xl font-bold text-foreground mb-6">{t('features.fast_easy')}</h3>
+              <p className="text-muted-foreground text-lg leading-relaxed">
                 {t('features.fast_desc')}
               </p>
             </div>
@@ -282,85 +299,97 @@ export default function HomePage() {
       <section id="odul-sistemi" className="section-clean bg-background">
         <div className="container-clean">
           {/* Section Header */}
-          <div className="text-center mb-16">
-            <div className="w-16 h-16 bg-warning rounded-xl flex items-center justify-center mx-auto mb-6">
-              <Trophy className="w-8 h-8 text-white" />
+          <div className="text-center mb-20">
+            <div className="relative inline-block mb-8">
+              <div className="w-24 h-24 gradient-primary rounded-3xl flex items-center justify-center mx-auto shadow-2xl">
+                <Trophy className="w-12 h-12 text-black" />
+              </div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-3xl blur animate-pulse opacity-40"></div>
             </div>
             
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              {t('daily.title')}
-            </h2>
+            <div className="relative inline-block mb-8">
+              <h2 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                {t('daily.title')}
+              </h2>
+              <div className="absolute -inset-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg blur opacity-20 animate-pulse"></div>
+            </div>
             
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-readable">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto font-medium mb-10">
               Join daily for free, try your luck and win big rewards! Just connect your wallet and use your participation right once a day.
             </p>
             
             {/* Daily Prize Pool */}
-            <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center justify-center">
-              <div className="inline-flex items-center space-x-3 bg-success-light px-6 py-3 rounded-xl border border-border">
-                <DollarSign className="w-5 h-5 text-success" />
-                <span className="text-lg font-semibold text-foreground">1500 USDT</span>
-                <span className="text-sm text-muted-foreground">daily total prize</span>
+            <div className="flex flex-col sm:flex-row gap-6 items-center justify-center">
+              <div className="flex items-center space-x-4 gradient-success px-8 py-4 rounded-2xl shadow-xl">
+                <DollarSign className="w-6 h-6 text-white" />
+                <span className="text-2xl font-bold text-white">1500 USDT</span>
+                <span className="text-sm text-white/80">daily total prize</span>
               </div>
-              <div className="inline-flex items-center space-x-3 bg-info-light px-4 py-2 rounded-xl border border-border">
-                <Clock className="w-4 h-4 text-info" />
-                <span className="text-sm font-semibold text-foreground">3 DRAWS</span>
-                <span className="text-xs text-muted-foreground">daily</span>
+              <div className="flex items-center space-x-4 gradient-secondary px-6 py-3 rounded-2xl shadow-xl">
+                <Clock className="w-5 h-5 text-white" />
+                <span className="text-lg font-bold text-white">3 DRAWS</span>
+                <span className="text-sm text-white/80">daily</span>
               </div>
             </div>
           </div>
           
           {/* Daily Draw Times */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             {/* Morning Draw */}
-            <div className="card p-6 text-center simple-hover">
-              <div className="inline-flex items-center justify-center px-3 py-1 bg-warning-light rounded-full mb-4">
-                <span className="text-xs font-semibold text-warning">MORNING</span>
+            <div className="card p-10 text-center simple-hover relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-yellow-400 to-orange-500"></div>
+              <div className="inline-flex items-center justify-center px-6 py-3 gradient-primary rounded-full mb-8 shadow-lg">
+                <span className="text-sm font-bold text-black">MORNING</span>
               </div>
               
-              <div className="space-y-4">
-                <div className="w-16 h-16 bg-warning rounded-xl flex items-center justify-center mx-auto">
-                  <Sun className="w-8 h-8 text-white" />
+              <div className="space-y-6">
+                <div className="w-24 h-24 gradient-primary rounded-3xl flex items-center justify-center mx-auto shadow-2xl relative">
+                  <Sun className="w-12 h-12 text-black" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-3xl blur animate-pulse opacity-50"></div>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-foreground mb-2">09:00 DRAW</h3>
-                  <p className="text-2xl font-bold text-foreground">500 USDT</p>
+                  <h3 className="text-2xl font-bold text-foreground mb-3">09:00 DRAW</h3>
+                  <p className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-2">500 USDT</p>
                   <p className="text-sm text-muted-foreground">7 winners • Morning draw</p>
                 </div>
               </div>
             </div>
 
             {/* Afternoon Draw */}
-            <div className="card p-6 text-center simple-hover">
-              <div className="inline-flex items-center justify-center px-3 py-1 bg-info-light rounded-full mb-4">
-                <span className="text-xs font-semibold text-info">AFTERNOON</span>
+            <div className="card p-10 text-center simple-hover relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-400 to-cyan-500"></div>
+              <div className="inline-flex items-center justify-center px-6 py-3 gradient-secondary rounded-full mb-8 shadow-lg">
+                <span className="text-sm font-bold text-white">AFTERNOON</span>
               </div>
               
-              <div className="space-y-4">
-                <div className="w-16 h-16 bg-info rounded-xl flex items-center justify-center mx-auto">
-                  <Sunset className="w-8 h-8 text-white" />
+              <div className="space-y-6">
+                <div className="w-24 h-24 gradient-secondary rounded-3xl flex items-center justify-center mx-auto shadow-2xl relative">
+                  <Sunset className="w-12 h-12 text-white" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-3xl blur animate-pulse opacity-50"></div>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-foreground mb-2">15:00 DRAW</h3>
-                  <p className="text-2xl font-bold text-foreground">500 USDT</p>
+                  <h3 className="text-2xl font-bold text-foreground mb-3">15:00 DRAW</h3>
+                  <p className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent mb-2">500 USDT</p>
                   <p className="text-sm text-muted-foreground">7 winners • Afternoon draw</p>
                 </div>
               </div>
             </div>
 
             {/* Evening Draw */}
-            <div className="card p-6 text-center simple-hover">
-              <div className="inline-flex items-center justify-center px-3 py-1 bg-success-light rounded-full mb-4">
-                <span className="text-xs font-semibold text-success">EVENING</span>
+            <div className="card p-10 text-center simple-hover relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-green-400 to-emerald-500"></div>
+              <div className="inline-flex items-center justify-center px-6 py-3 gradient-success rounded-full mb-8 shadow-lg">
+                <span className="text-sm font-bold text-white">EVENING</span>
               </div>
               
-              <div className="space-y-4">
-                <div className="w-16 h-16 bg-success rounded-xl flex items-center justify-center mx-auto">
-                  <Moon className="w-8 h-8 text-white" />
+              <div className="space-y-6">
+                <div className="w-24 h-24 gradient-success rounded-3xl flex items-center justify-center mx-auto shadow-2xl relative">
+                  <Moon className="w-12 h-12 text-white" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-green-400 to-emerald-500 rounded-3xl blur animate-pulse opacity-50"></div>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-foreground mb-2">21:00 DRAW</h3>
-                  <p className="text-2xl font-bold text-foreground">500 USDT</p>
+                  <h3 className="text-2xl font-bold text-foreground mb-3">21:00 DRAW</h3>
+                  <p className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent mb-2">500 USDT</p>
                   <p className="text-sm text-muted-foreground">7 winners • Evening draw</p>
                 </div>
               </div>
@@ -370,65 +399,67 @@ export default function HomePage() {
           {/* How to Participate & Winners */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             {/* How to Participate */}
-            <div className="card p-8">
-              <div className="space-y-8">
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 bg-primary rounded-xl flex items-center justify-center mx-auto">
-                    <Zap className="w-8 h-8 text-primary-foreground" />
+            <div className="card p-10 relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500"></div>
+              <div className="space-y-10">
+                <div className="text-center space-y-6">
+                  <div className="w-20 h-20 gradient-accent rounded-3xl flex items-center justify-center mx-auto shadow-2xl relative">
+                    <Zap className="w-10 h-10 text-white" />
+                    <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-pink-500 rounded-3xl blur animate-pulse opacity-50"></div>
                   </div>
-                  <h3 className="text-2xl font-bold text-foreground">
+                  <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
                     How to Participate
                   </h3>
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-4 p-4 surface-muted rounded-xl">
-                    <div className="w-12 h-12 bg-info rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Wallet className="w-6 h-6 text-white" />
+                <div className="space-y-6">
+                  <div className="flex items-center space-x-6 p-6 gradient-secondary rounded-2xl shadow-lg simple-hover">
+                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+                      <Wallet className="w-8 h-8 text-white" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-foreground">Connect Wallet</h4>
-                      <p className="text-sm text-muted-foreground">Connect with MetaMask or Trust Wallet</p>
+                      <h4 className="font-bold text-white text-lg">Connect Wallet</h4>
+                      <p className="text-white/80">Connect with MetaMask or Trust Wallet</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-4 p-4 surface-muted rounded-xl">
-                    <div className="w-12 h-12 bg-warning rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Clock className="w-6 h-6 text-white" />
+                  <div className="flex items-center space-x-6 p-6 gradient-primary rounded-2xl shadow-lg simple-hover">
+                    <div className="w-16 h-16 bg-black/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+                      <Clock className="w-8 h-8 text-black" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-foreground">Daily Participation</h4>
-                      <p className="text-sm text-muted-foreground">Join once a day for free</p>
+                      <h4 className="font-bold text-black text-lg">Daily Participation</h4>
+                      <p className="text-black/70">Join once a day for free</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-4 p-4 surface-muted rounded-xl">
-                    <div className="w-12 h-12 bg-success rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Gift className="w-6 h-6 text-white" />
+                  <div className="flex items-center space-x-6 p-6 gradient-success rounded-2xl shadow-lg simple-hover">
+                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+                      <Gift className="w-8 h-8 text-white" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-foreground">Win Rewards</h4>
-                      <p className="text-sm text-muted-foreground">Try your luck and win USDT</p>
+                      <h4 className="font-bold text-white text-lg">Win Rewards</h4>
+                      <p className="text-white/80">Try your luck and win USDT</p>
                     </div>
                   </div>
                 </div>
                 
                 {/* Action Button */}
-                <div className="text-center pt-4">
+                <div className="text-center pt-6">
                   {isConnected ? (
                     <Button 
                       onClick={handleDailyReward}
                       size="lg"
-                      className="btn-clean w-full"
+                      className="btn-clean w-full py-6 text-xl font-bold"
                       data-testid="button-daily-reward"
                     >
-                      <DollarSign className="w-5 h-5 mr-2" />
+                      <DollarSign className="w-6 h-6 mr-3" />
                       Join Today
-                      <Sparkles className="w-5 h-5 ml-2" />
+                      <Sparkles className="w-6 h-6 ml-3" />
                     </Button>
                   ) : (
-                    <div className="text-center py-4 bg-muted/50 rounded-lg border border-border">
-                      <span className="text-muted-foreground font-medium">
+                    <div className="text-center py-6 gradient-accent rounded-2xl">
+                      <span className="text-white font-bold text-lg">
                         Connect wallet to participate
                       </span>
                     </div>
@@ -438,62 +469,68 @@ export default function HomePage() {
             </div>
             
             {/* Recent Winners */}
-            <div className="card p-8">
-              <div className="space-y-6">
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 bg-warning rounded-xl flex items-center justify-center mx-auto">
-                    <Trophy className="w-8 h-8 text-white" />
+            <div className="card p-10 relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-yellow-400 to-orange-500"></div>
+              <div className="space-y-8">
+                <div className="text-center space-y-6">
+                  <div className="w-20 h-20 gradient-primary rounded-3xl flex items-center justify-center mx-auto shadow-2xl relative">
+                    <Trophy className="w-10 h-10 text-black" />
+                    <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-3xl blur animate-pulse opacity-50"></div>
                   </div>
-                  <h3 className="text-2xl font-bold text-foreground">
+                  <h3 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
                     Recent Winners
                   </h3>
                 </div>
                 
-                <div className="space-y-3" data-testid="winners-list">
+                <div className="space-y-4" data-testid="winners-list">
                   {(lastWinners as any[]).length > 0 ? (
                     (lastWinners as any[]).slice(0, 7).map((winner: any, index: number) => (
-                      <div key={index} className={`flex items-center justify-between p-4 rounded-lg border simple-hover ${
-                        index === 0 ? 'bg-warning-light border-warning/20' :
-                        index === 1 ? 'bg-info-light border-info/20' :
-                        index === 2 ? 'bg-success-light border-success/20' :
-                        'bg-muted/30 border-border'
+                      <div key={index} className={`flex items-center justify-between p-6 rounded-2xl simple-hover shadow-lg ${
+                        index === 0 ? 'gradient-primary' :
+                        index === 1 ? 'gradient-secondary' :
+                        index === 2 ? 'gradient-success' :
+                        'bg-muted/30 border border-border'
                       }`}>
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                            index === 0 ? 'bg-warning text-white' :
-                            index === 1 ? 'bg-info text-white' :
-                            index === 2 ? 'bg-success text-white' :
+                        <div className="flex items-center space-x-4">
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-bold shadow-lg ${
+                            index === 0 ? 'bg-black/20 text-black' :
+                            index === 1 ? 'bg-white/20 text-white' :
+                            index === 2 ? 'bg-white/20 text-white' :
                             'bg-muted text-foreground'
                           }`}>
                             #{index + 1}
                           </div>
                           <div>
-                            <span className="font-mono text-sm text-foreground font-medium">
+                            <span className={`font-mono text-lg font-medium ${
+                              index <= 2 ? (index === 0 ? 'text-black' : 'text-white') : 'text-foreground'
+                            }`}>
                               {winner.wallet.slice(0, 8)}...{winner.wallet.slice(-6)}
                             </span>
-                            <div className="text-xs text-muted-foreground">
+                            <div className={`text-sm ${
+                              index <= 2 ? (index === 0 ? 'text-black/70' : 'text-white/80') : 'text-muted-foreground'
+                            }`}>
                               {index === 0 ? '200 USDT' : index === 1 ? '100 USDT' : '50 USDT'}
                             </div>
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          {index === 0 ? <Trophy className="w-5 h-5 text-warning" /> :
-                           index === 1 ? <Award className="w-5 h-5 text-info" /> :
-                           index === 2 ? <Gift className="w-5 h-5 text-success" /> :
-                           <Star className="w-4 h-4 text-muted-foreground" />}
+                          {index === 0 ? <Trophy className="w-6 h-6 text-black" /> :
+                           index === 1 ? <Award className="w-6 h-6 text-white" /> :
+                           index === 2 ? <Gift className="w-6 h-6 text-white" /> :
+                           <Star className="w-5 h-5 text-muted-foreground" />}
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-12 space-y-4">
-                      <div className="w-16 h-16 bg-muted rounded-xl flex items-center justify-center mx-auto">
-                        <Trophy className="w-8 h-8 text-muted-foreground" />
+                    <div className="text-center py-16 space-y-6">
+                      <div className="w-20 h-20 bg-muted rounded-2xl flex items-center justify-center mx-auto">
+                        <Trophy className="w-10 h-10 text-muted-foreground" />
                       </div>
-                      <div className="space-y-2">
-                        <div className="text-foreground font-semibold">
+                      <div className="space-y-3">
+                        <div className="text-foreground font-bold text-xl">
                           No Winners Yet
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-muted-foreground text-lg">
                           Be the first to join!
                         </div>
                       </div>
@@ -505,37 +542,41 @@ export default function HomePage() {
           </div>
           
           {/* Statistics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center p-6 card simple-hover">
-              <div className="w-12 h-12 bg-warning rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Coins className="w-6 h-6 text-white" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="text-center p-8 card simple-hover relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-400 to-orange-500"></div>
+              <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
+                <Coins className="w-8 h-8 text-black" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">1500</div>
-              <div className="text-sm text-muted-foreground">Daily Total</div>
+              <div className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-2">1500</div>
+              <div className="text-sm text-muted-foreground font-semibold">Daily Total</div>
             </div>
             
-            <div className="text-center p-6 card simple-hover">
-              <div className="w-12 h-12 bg-info rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Star className="w-6 h-6 text-white" />
+            <div className="text-center p-8 card simple-hover relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 to-cyan-500"></div>
+              <div className="w-16 h-16 gradient-secondary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
+                <Star className="w-8 h-8 text-white" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">21</div>
-              <div className="text-sm text-muted-foreground">Total Winners</div>
+              <div className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent mb-2">21</div>
+              <div className="text-sm text-muted-foreground font-semibold">Total Winners</div>
             </div>
             
-            <div className="text-center p-6 card simple-hover">
-              <div className="w-12 h-12 bg-success rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Clock className="w-6 h-6 text-white" />
+            <div className="text-center p-8 card simple-hover relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-400 to-emerald-500"></div>
+              <div className="w-16 h-16 gradient-success rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
+                <Clock className="w-8 h-8 text-white" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">3</div>
-              <div className="text-sm text-muted-foreground">Daily Draws</div>
+              <div className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent mb-2">3</div>
+              <div className="text-sm text-muted-foreground font-semibold">Daily Draws</div>
             </div>
             
-            <div className="text-center p-6 card simple-hover">
-              <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Gem className="w-6 h-6 text-white" />
+            <div className="text-center p-8 card simple-hover relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-400 to-pink-500"></div>
+              <div className="w-16 h-16 gradient-accent rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
+                <Gem className="w-8 h-8 text-white" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">100%</div>
-              <div className="text-sm text-muted-foreground">Secure</div>
+              <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent mb-2">100%</div>
+              <div className="text-sm text-muted-foreground font-semibold">Secure</div>
             </div>
           </div>
         </div>

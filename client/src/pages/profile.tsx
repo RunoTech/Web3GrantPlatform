@@ -106,12 +106,20 @@ export default function ProfilePage() {
               <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
               <p className="text-muted-foreground">Manage your campaigns, track rewards, and view analytics</p>
             </div>
-            <Button asChild className="bg-primary hover:bg-primary/90">
-              <Link href="/create-campaign">
-                <Target className="w-4 h-4 mr-2" />
-                Create Campaign
-              </Link>
-            </Button>
+            <div className="flex gap-3">
+              <Button asChild className="bg-primary hover:bg-primary/90">
+                <Link href="/create-campaign">
+                  <Target className="w-4 h-4 mr-2" />
+                  Create Campaign
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="border-primary/20 hover:bg-primary/10">
+                <Link href="/affiliate">
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Affiliate Dashboard
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
         {/* Quick Stats Cards */}
@@ -219,7 +227,7 @@ export default function ProfilePage() {
 
         {/* Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-surface-2">
+          <TabsList className="grid w-full grid-cols-4 bg-surface-2">
             <TabsTrigger 
               value="overview" 
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center"
@@ -247,13 +255,6 @@ export default function ProfilePage() {
             >
               <Settings className="w-4 h-4 mr-2" />
               Settings
-            </TabsTrigger>
-            <TabsTrigger 
-              value="affiliate" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center"
-            >
-              <Share2 className="w-4 h-4 mr-2" />
-              Affiliate
             </TabsTrigger>
           </TabsList>
 
@@ -409,70 +410,6 @@ export default function ProfilePage() {
                       Back to Home
                     </Link>
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="affiliate" className="space-y-6 mt-6">
-            <Card className="cyber-card">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Share2 className="w-5 h-5 mr-2 text-primary" />
-                  Affiliate Program
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="bg-gradient-to-r from-primary/10 to-primary/20 border border-primary/20 rounded-lg p-4">
-                  <h4 className="font-medium text-foreground mb-2">Start Earning With Referrals!</h4>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Earn rewards by inviting others to DUXXAN. Get paid for every successful referral who creates a campaign or makes a donation.
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Button asChild className="bg-primary hover:bg-primary/90">
-                      <Link href="/affiliate">
-                        <Share2 className="w-4 h-4 mr-2" />
-                        View Full Dashboard
-                      </Link>
-                    </Button>
-                    <Button variant="outline">
-                      <Eye className="w-4 h-4 mr-2" />
-                      Quick Stats
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center justify-between p-4 bg-surface rounded-lg">
-                    <div>
-                      <h4 className="font-medium text-foreground">Program Status</h4>
-                      <p className="text-sm text-muted-foreground">Ready to start earning</p>
-                    </div>
-                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                      Active
-                    </Badge>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-4 bg-surface rounded-lg">
-                    <div>
-                      <h4 className="font-medium text-foreground">Commission Rate</h4>
-                      <p className="text-sm text-muted-foreground">Per successful referral</p>
-                    </div>
-                    <Badge variant="outline" className="font-mono">
-                      Variable Rewards
-                    </Badge>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-border">
-                  <div className="text-center space-y-2">
-                    <p className="text-sm text-muted-foreground">
-                      🎯 <strong>How it works:</strong> Share your referral code, earn when people create campaigns or donate
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Track all your referrals, earnings, and performance metrics in the full affiliate dashboard
-                    </p>
-                  </div>
                 </div>
               </CardContent>
             </Card>

@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Users, DollarSign, Gift, Share2, TrendingUp, ArrowLeft, Home } from "lucide-react";
+import { Copy, Users, DollarSign, Gift, Share2, TrendingUp, ArrowLeft, Home, Send, CheckCircle, Clock, XCircle } from "lucide-react";
 import { Link } from "wouter";
 import { formatDistanceToNow } from "date-fns";
 
@@ -73,7 +74,9 @@ interface LeaderboardEntry {
 export default function AffiliatePage() {
   const [userWallet, setUserWallet] = useState<string>("");
   const [referralLink, setReferralLink] = useState<string>("");
+  const [applicationText, setApplicationText] = useState("");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Get connected wallet
   useEffect(() => {
@@ -138,6 +141,47 @@ export default function AffiliatePage() {
     queryFn: async () => {
       const res = await apiRequest("GET", `/api/affiliate/leaderboard?limit=10`);
       return res.json();
+    },
+  });
+
+  // Get affiliate application status
+  const { data: applicationStatus } = useQuery({
+    queryKey: ["affiliate-application-status", userWallet],
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/affiliate/application-status/${userWallet}`);
+      return res.json();
+    },
+    enabled: !!userWallet,
+  });
+
+  // Submit affiliate application mutation
+  const submitApplicationMutation = useMutation({
+    mutationFn: async (data: { wallet: string; applicationText: string }) => {
+      const res = await apiRequest("POST", "/api/affiliate/apply", data);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({
+          title: "Application Submitted!",
+          description: "Your affiliate application has been submitted successfully. We'll review it soon.",
+        });
+        setApplicationText("");
+        queryClient.invalidateQueries({ queryKey: ["affiliate-application-status"] });
+      } else {
+        toast({
+          title: "Error",
+          description: data.message || "Failed to submit application",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: "Failed to submit application. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -282,6 +326,125 @@ export default function AffiliatePage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Affiliate Application Status */}
+      {!account?.affiliateActivated && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {applicationStatus?.hasApplication ? (
+                <>
+                  <Clock className="w-5 h-5" />
+                  Affiliate Application Status
+                </>
+              ) : (
+                <>
+                  <Send className="w-5 h-5" />
+                  Become an Affiliate
+                </>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {applicationStatus?.hasApplication ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  {applicationStatus.application.status === "pending" && (
+                    <>
+                      <Clock className="w-4 h-4 text-yellow-500" />
+                      <Badge variant="outline" className="text-yellow-600 border-yellow-300">
+                        Pending Review
+                      </Badge>
+                    </>
+                  )}
+                  {applicationStatus.application.status === "approved" && (
+                    <>
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <Badge variant="outline" className="text-green-600 border-green-300">
+                        Approved
+                      </Badge>
+                    </>
+                  )}
+                  {applicationStatus.application.status === "rejected" && (
+                    <>
+                      <XCircle className="w-4 h-4 text-red-500" />
+                      <Badge variant="outline" className="text-red-600 border-red-300">
+                        Rejected
+                      </Badge>
+                    </>
+                  )}
+                </div>
+                
+                <div className="text-sm text-muted-foreground">
+                  <p>Applied: {new Date(applicationStatus.application.appliedAt).toLocaleDateString()}</p>
+                  {applicationStatus.application.reviewedAt && (
+                    <p>Reviewed: {new Date(applicationStatus.application.reviewedAt).toLocaleDateString()}</p>
+                  )}
+                </div>
+
+                {applicationStatus.application.reviewNotes && (
+                  <div className="mt-4 p-4 bg-muted rounded-lg">
+                    <h4 className="font-medium mb-2">Admin Notes:</h4>
+                    <p className="text-sm">{applicationStatus.application.reviewNotes}</p>
+                  </div>
+                )}
+
+                {applicationStatus.application.status === "pending" && (
+                  <p className="text-sm text-muted-foreground">
+                    Your application is being reviewed by our team. We'll notify you once it's processed.
+                  </p>
+                )}
+                
+                {applicationStatus.application.status === "rejected" && (
+                  <p className="text-sm text-muted-foreground">
+                    Your application was not approved this time. You can apply again after addressing the feedback.
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-muted-foreground">
+                  Apply to become an affiliate and start earning rewards from referrals. 
+                  Tell us why you'd be a great affiliate partner for DUXXAN.
+                </p>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Application Message</label>
+                    <Textarea
+                      placeholder="Tell us about yourself, your marketing experience, and why you want to join our affiliate program..."
+                      value={applicationText}
+                      onChange={(e) => setApplicationText(e.target.value)}
+                      className="mt-1 min-h-[120px]"
+                    />
+                  </div>
+                  
+                  <Button 
+                    onClick={() => submitApplicationMutation.mutate({
+                      wallet: userWallet,
+                      applicationText
+                    })}
+                    disabled={!applicationText.trim() || submitApplicationMutation.isPending}
+                    className="w-full sm:w-auto"
+                  >
+                    {submitApplicationMutation.isPending ? (
+                      <>
+                        <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4 mr-2" />
+                        Submit Application
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Referral Tools */}
       <Card className="mb-8">

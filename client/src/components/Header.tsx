@@ -33,7 +33,7 @@ export default function Header({ currentPage }: HeaderProps) {
             </Link>
           </div>
 
-          <nav className="hidden md:flex items-center space-x-12">
+          <nav className="hidden md:flex items-center space-x-16">
             <Link 
               href="/donations" 
               className={`font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
@@ -76,7 +76,7 @@ export default function Header({ currentPage }: HeaderProps) {
             </Link>
           </nav>
 
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-8">
             <CryptoOnramp />
             <ThemeToggle />
             <LanguageSelector />

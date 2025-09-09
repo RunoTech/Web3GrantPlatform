@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Copy, Users, DollarSign, Gift, Share2, TrendingUp, ArrowLeft, Send, CheckCircle, Clock, XCircle } from "lucide-react";
 import { Link } from "wouter";
 import { formatDistanceToNow } from "date-fns";
+import Header from "@/components/Header";
 
 interface Account {
   id: number;
@@ -197,6 +198,33 @@ export default function AffiliatePage() {
   if (!userWallet) {
     return (
       <div className="min-h-screen bg-background text-foreground">
+        <Header currentPage="affiliate" />
+        
+        {/* Hero Section */}
+        <section className="py-16 relative overflow-hidden bg-surface">
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-1/4 w-96 h-96 cyber-cyan-bg opacity-5 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 right-1/4 w-80 h-80 cyber-purple-bg opacity-5 rounded-full blur-3xl"></div>
+          </div>
+          
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center space-y-8">
+              <div className="w-24 h-24 gradient-primary rounded-lg flex items-center justify-center mx-auto neon-border">
+                <Share2 className="w-12 h-12 text-black" />
+              </div>
+              
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 uppercase tracking-wider">
+                  <span className="neon-text">Affiliate Dashboard</span>
+                </h1>
+                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                  Track your referrals and earnings • Grow your network • Earn rewards from successful partnerships
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <div className="container mx-auto px-4 py-8">
           <Card className="max-w-md mx-auto bg-card text-card-foreground border-border">
             <CardHeader>
@@ -225,6 +253,33 @@ export default function AffiliatePage() {
   if (accountLoading || statsLoading || detailedLoading) {
     return (
       <div className="min-h-screen bg-background text-foreground">
+        <Header currentPage="affiliate" />
+        
+        {/* Hero Section */}
+        <section className="py-16 relative overflow-hidden bg-surface">
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-1/4 w-96 h-96 cyber-cyan-bg opacity-5 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 right-1/4 w-80 h-80 cyber-purple-bg opacity-5 rounded-full blur-3xl"></div>
+          </div>
+          
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center space-y-8">
+              <div className="w-24 h-24 gradient-primary rounded-lg flex items-center justify-center mx-auto neon-border">
+                <Share2 className="w-12 h-12 text-black" />
+              </div>
+              
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 uppercase tracking-wider">
+                  <span className="neon-text">Affiliate Dashboard</span>
+                </h1>
+                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                  Track your referrals and earnings • Grow your network • Earn rewards from successful partnerships
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col items-center justify-center py-12">
             <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mb-4" />
@@ -237,26 +292,34 @@ export default function AffiliatePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="container mx-auto px-4 py-8">
-        {/* Page Header with Home Button */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Button asChild variant="outline" size="sm">
-              <Link href="/">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Link>
-            </Button>
+      <Header currentPage="affiliate" />
+
+      {/* Hero Section */}
+      <section className="py-16 relative overflow-hidden bg-surface">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-96 h-96 cyber-cyan-bg opacity-5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 cyber-purple-bg opacity-5 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-8">
+            <div className="w-24 h-24 gradient-primary rounded-lg flex items-center justify-center mx-auto neon-border">
+              <Share2 className="w-12 h-12 text-black" />
+            </div>
+            
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Affiliate Dashboard</h1>
-              <p className="text-muted-foreground">Track your referrals and earnings</p>
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 uppercase tracking-wider">
+                <span className="neon-text">Affiliate Dashboard</span>
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                Track your referrals and earnings • Grow your network • Earn rewards from successful partnerships
+              </p>
             </div>
           </div>
-          <Badge variant="outline" className="px-3 py-1">
-            <Share2 className="w-4 h-4 mr-2" />
-            Affiliate Program
-          </Badge>
         </div>
+      </section>
+
+      <div className="container mx-auto px-4 py-8">
 
         {/* Enhanced Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

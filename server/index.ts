@@ -7,6 +7,9 @@ import rateLimit from "express-rate-limit";
 
 const app = express();
 
+// Security: Trust proxy for accurate rate limiting
+app.set('trust proxy', 1);
+
 // Security: Add security headers
 app.use(helmet({
   contentSecurityPolicy: {

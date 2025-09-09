@@ -204,6 +204,19 @@ export const affiliateActivities = pgTable("affiliate_activities", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const affiliateApplications = pgTable("affiliate_applications", {
+  id: serial("id").primaryKey(),
+  wallet: varchar("wallet", { length: 42 }).notNull().unique(), // Applicant wallet address
+  applicationText: text("application_text").notNull(), // Application description/reason
+  status: varchar("status", { length: 20 }).default("pending").notNull(), // "pending", "approved", "rejected"
+  appliedAt: timestamp("applied_at").defaultNow(),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewedBy: integer("reviewed_by"), // Admin ID who reviewed
+  reviewNotes: text("review_notes"), // Admin notes about the decision
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const platformSettingsRelations = relations(platformSettings, ({ one }) => ({
   updatedBy: one(admins, {
@@ -263,6 +276,17 @@ export const affiliateActivitiesRelations = relations(affiliateActivities, ({ on
   referred: one(accounts, {
     fields: [affiliateActivities.referredWallet],
     references: [accounts.wallet],
+  }),
+}));
+
+export const affiliateApplicationsRelations = relations(affiliateApplications, ({ one }) => ({
+  applicant: one(accounts, {
+    fields: [affiliateApplications.wallet],
+    references: [accounts.wallet],
+  }),
+  reviewer: one(admins, {
+    fields: [affiliateApplications.reviewedBy],
+    references: [admins.id],
   }),
 }));
 
@@ -372,3 +396,5 @@ export type AdminLog = typeof adminLogs.$inferSelect;
 export type InsertAdminLog = z.infer<typeof insertAdminLogSchema>;
 export type AffiliateActivity = typeof affiliateActivities.$inferSelect;
 export type InsertAffiliateActivity = z.infer<typeof insertAffiliateActivitySchema>;
+export type AffiliateApplication = typeof affiliateApplications.$inferSelect;
+export type InsertAffiliateApplication = z.infer<typeof insertAffiliateApplicationSchema>;

@@ -13,6 +13,7 @@ import {
   type Announcement, type InsertAnnouncement,
   type AdminLog, type InsertAdminLog,
   type AffiliateActivity, type InsertAffiliateActivity,
+  type AffiliateApplication, type InsertAffiliateApplication,
   admins,
   platformSettings,
   networkFees,
@@ -25,6 +26,7 @@ import {
   announcements,
   adminLogs,
   affiliateActivities,
+  affiliateApplications,
 } from "../shared/schema";
 
 export interface IStorage {
@@ -131,6 +133,12 @@ export interface IStorage {
   getReferralStats(wallet: string): Promise<{ totalReferrals: number; totalEarnings: string; activities: AffiliateActivity[] }>;
   createAffiliateActivity(activity: InsertAffiliateActivity): Promise<AffiliateActivity>;
   getAffiliateActivities(wallet: string): Promise<AffiliateActivity[]>;
+
+  // Affiliate Applications
+  createAffiliateApplication(application: InsertAffiliateApplication): Promise<AffiliateApplication>;
+  getAffiliateApplication(wallet: string): Promise<AffiliateApplication | undefined>;
+  getAllAffiliateApplications(status?: string): Promise<AffiliateApplication[]>;
+  updateAffiliateApplicationStatus(id: number, status: string, reviewedBy: number, reviewNotes?: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -843,6 +851,56 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(affiliateActivities)
       .where(eq(affiliateActivities.referrerWallet, wallet))
       .orderBy(desc(affiliateActivities.createdAt));
+  }
+
+  // Affiliate Application Implementation
+  async createAffiliateApplication(application: InsertAffiliateApplication): Promise<AffiliateApplication> {
+    const [created] = await db
+      .insert(affiliateApplications)
+      .values({
+        ...application,
+        appliedAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async getAffiliateApplication(wallet: string): Promise<AffiliateApplication | undefined> {
+    const [application] = await db
+      .select()
+      .from(affiliateApplications)
+      .where(eq(affiliateApplications.wallet, wallet));
+    return application || undefined;
+  }
+
+  async getAllAffiliateApplications(status?: string): Promise<AffiliateApplication[]> {
+    const query = db.select().from(affiliateApplications);
+    
+    if (status) {
+      return await query.where(eq(affiliateApplications.status, status)).orderBy(desc(affiliateApplications.appliedAt));
+    }
+    
+    return await query.orderBy(desc(affiliateApplications.appliedAt));
+  }
+
+  async updateAffiliateApplicationStatus(
+    id: number,
+    status: string,
+    reviewedBy: number,
+    reviewNotes?: string
+  ): Promise<void> {
+    await db
+      .update(affiliateApplications)
+      .set({
+        status,
+        reviewedBy,
+        reviewNotes,
+        reviewedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(affiliateApplications.id, id));
   }
 }
 

@@ -33,53 +33,53 @@ export default function Header({ currentPage }: HeaderProps) {
             </Link>
           </div>
 
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex items-center space-x-8">
             <Link 
               href="/" 
-              className={`font-medium transition-colors uppercase tracking-wide ${
+              className={`font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
                 currentPage === 'home' 
-                  ? 'text-cyber-cyan font-semibold' 
-                  : 'text-muted-foreground hover:text-cyber-cyan'
+                  ? 'text-primary border-b-2 border-primary' 
+                  : 'text-muted-foreground hover:text-primary'
               }`}
             >
               {t('duxxan')}
             </Link>
             <Link 
               href="/donations" 
-              className={`font-medium transition-colors uppercase tracking-wide ${
+              className={`font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
                 currentPage === 'donations' 
-                  ? 'text-cyber-cyan font-semibold' 
-                  : 'text-muted-foreground hover:text-cyber-cyan'
+                  ? 'text-primary border-b-2 border-primary' 
+                  : 'text-muted-foreground hover:text-primary'
               }`}
             >
               {t('donations')}
             </Link>
             <Link 
               href="/funds" 
-              className={`font-medium transition-colors uppercase tracking-wide ${
+              className={`font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
                 currentPage === 'funds' 
-                  ? 'text-cyber-cyan font-semibold' 
-                  : 'text-muted-foreground hover:text-cyber-cyan'
+                  ? 'text-primary border-b-2 border-primary' 
+                  : 'text-muted-foreground hover:text-primary'
               }`}
             >
               {t('funds')}
             </Link>
             <Link 
               href="/daily-rewards" 
-              className={`font-medium transition-colors uppercase tracking-wide ${
+              className={`font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
                 currentPage === 'daily-rewards' 
-                  ? 'text-cyber-cyan font-semibold' 
-                  : 'text-muted-foreground hover:text-cyber-cyan'
+                  ? 'text-primary border-b-2 border-primary' 
+                  : 'text-muted-foreground hover:text-primary'
               }`}
             >
               Daily Rewards
             </Link>
             <Link 
               href="/affiliate" 
-              className={`font-medium transition-colors uppercase tracking-wide ${
+              className={`font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
                 currentPage === 'affiliate' 
-                  ? 'text-cyber-cyan font-semibold' 
-                  : 'text-muted-foreground hover:text-cyber-cyan'
+                  ? 'text-primary border-b-2 border-primary' 
+                  : 'text-muted-foreground hover:text-primary'
               }`}
             >
               Affiliate

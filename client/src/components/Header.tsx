@@ -33,17 +33,7 @@ export default function Header({ currentPage }: HeaderProps) {
             </Link>
           </div>
 
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link 
-              href="/" 
-              className={`font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
-                currentPage === 'home' 
-                  ? 'text-primary border-b-2 border-primary' 
-                  : 'text-muted-foreground hover:text-primary'
-              }`}
-            >
-              {t('duxxan')}
-            </Link>
+          <nav className="hidden md:flex items-center space-x-12">
             <Link 
               href="/donations" 
               className={`font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
@@ -86,7 +76,7 @@ export default function Header({ currentPage }: HeaderProps) {
             </Link>
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-6">
             <CryptoOnramp />
             <ThemeToggle />
             <LanguageSelector />

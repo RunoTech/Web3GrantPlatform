@@ -88,7 +88,7 @@ export default function DailyRewardsPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('tr-TR', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       day: '2-digit',
       month: '2-digit', 
       year: 'numeric'
@@ -103,7 +103,7 @@ export default function DailyRewardsPage() {
         <Button variant="ghost" asChild className="mb-8" data-testid="button-back-home">
           <Link href="/">
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Ana Sayfa
+            Home
           </Link>
         </Button>
 
@@ -117,7 +117,7 @@ export default function DailyRewardsPage() {
               </h1>
             </div>
             <p className="text-2xl text-gray-600 dark:text-gray-400 mb-8 max-w-4xl mx-auto">
-              Ücretsiz günlük ödüller için katıl! Her gün 100 USDT kazanma şansın var.
+              Join free daily rewards! Your chance to win 100 USDT every day.
             </p>
           </div>
 
@@ -129,11 +129,11 @@ export default function DailyRewardsPage() {
               </div>
               
               <h2 className="text-3xl font-bold text-black dark:text-white">
-                Günlük Çekilişe Katıl
+                Join Daily Draw
               </h2>
               
               <p className="text-lg text-gray-600 dark:text-gray-400">
-                Her gün ücretsiz olarak çekilişe katılabilirsin. Kazanan günde 100 USDT alır!
+                You can participate in the draw for free every day. Winner receives 100 USDT daily!
               </p>
 
               {/* Today's Stats */}
@@ -141,13 +141,13 @@ export default function DailyRewardsPage() {
                 <div className="flex items-center space-x-2">
                   <Users className="w-6 h-6 text-blue-500" />
                   <span className="text-gray-700 dark:text-gray-300">
-                    Bugünkü Katılım: <span className="font-bold text-blue-600 dark:text-blue-400">{stats?.participants || 0}</span>
+                    Today's Participants: <span className="font-bold text-blue-600 dark:text-blue-400">{stats?.participants || 0}</span>
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-6 h-6 text-green-500" />
                   <span className="text-gray-700 dark:text-gray-300">
-                    Tarih: <span className="font-bold text-green-600 dark:text-green-400">{new Date().toLocaleDateString('tr-TR')}</span>
+                    Date: <span className="font-bold text-green-600 dark:text-green-400">{new Date().toLocaleDateString('en-US')}</span>
                   </span>
                 </div>
               </div>
@@ -207,11 +207,11 @@ export default function DailyRewardsPage() {
           <div className="flex items-center justify-center space-x-3 mb-4">
             <Trophy className="w-10 h-10 text-yellow-500" />
             <h2 className="text-3xl font-bold text-black dark:text-white">
-              Son Kazananlar
+              Recent Winners
             </h2>
           </div>
           <p className="text-lg text-gray-600 dark:text-gray-400">
-            Geçmiş günlerin şanslı kazananları
+            Lucky winners from past days
           </p>
         </div>
 
@@ -296,10 +296,10 @@ export default function DailyRewardsPage() {
                 <Trophy className="w-16 h-16 text-gray-400" />
               </div>
               <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
-                Henüz kazanan yok
+                No winners yet
               </h3>
               <p className="text-gray-500 dark:text-gray-500 mb-8">
-                İlk katılan sen ol ve şansını dene!
+                Be the first to participate and try your luck!
               </p>
               {!isConnected && <WalletConnectButton />}
             </div>

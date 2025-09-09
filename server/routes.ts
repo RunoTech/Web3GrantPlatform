@@ -319,6 +319,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🎯 NEW: Detailed affiliate analytics (public)
+  app.get("/api/affiliate/detailed-stats/:wallet", async (req, res) => {
+    try {
+      const { wallet } = req.params;
+      const detailedStats = await storage.getDetailedAffiliateStats(wallet);
+      res.json(detailedStats);
+    } catch (error) {
+      console.error("Error fetching detailed affiliate stats:", error);
+      res.status(500).json({ error: "Failed to fetch detailed affiliate stats" });
+    }
+  });
+
+  // 🎯 NEW: Unpaid rewards tracking (public)
+  app.get("/api/affiliate/unpaid-rewards/:wallet", async (req, res) => {
+    try {
+      const { wallet } = req.params;
+      const unpaidRewards = await storage.getUnpaidRewards(wallet);
+      res.json(unpaidRewards);
+    } catch (error) {
+      console.error("Error fetching unpaid rewards:", error);
+      res.status(500).json({ error: "Failed to fetch unpaid rewards" });
+    }
+  });
+
+  // 🎯 NEW: Affiliate leaderboard (public)
+  app.get("/api/affiliate/leaderboard", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const leaderboard = await storage.getAffiliateLeaderboard(limit);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching affiliate leaderboard:", error);
+      res.status(500).json({ error: "Failed to fetch affiliate leaderboard" });
+    }
+  });
+
   // Register with referral code (public)
   app.post("/api/register-with-referral", async (req, res) => {
     try {

@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, gt } from "drizzle-orm";
 import {
   type Admin, type InsertAdmin,
   type PlatformSetting, type InsertPlatformSetting,
@@ -707,6 +707,131 @@ export class DatabaseStorage implements IStorage {
       totalEarnings: account?.totalAffiliateEarnings || "0",
       activities,
     };
+  }
+
+  // Detailed affiliate analytics
+  async getDetailedAffiliateStats(wallet: string): Promise<{
+    overview: {
+      totalReferrals: number;
+      totalEarnings: string;
+      unpaidRewards: string;
+      paidRewards: string;
+      conversionRate: number;
+    };
+    breakdown: {
+      donations: { count: number; totalReward: string };
+      campaigns: { count: number; totalReward: string };
+    };
+    monthlyStats: Array<{
+      month: string;
+      referrals: number;
+      earnings: string;
+    }>;
+    recentActivity: AffiliateActivity[];
+  }> {
+    const account = await this.getAccount(wallet);
+    const activities = await this.getAffiliateActivities(wallet);
+
+    // Calculate unpaid vs paid rewards
+    const unpaidRewards = activities
+      .filter(a => !a.rewardPaid)
+      .reduce((sum, a) => sum + parseFloat(a.rewardAmount || "0"), 0);
+    
+    const paidRewards = activities
+      .filter(a => a.rewardPaid)
+      .reduce((sum, a) => sum + parseFloat(a.rewardAmount || "0"), 0);
+
+    // Breakdown by activity type
+    const donationActivities = activities.filter(a => a.activityType === 'donation');
+    const campaignActivities = activities.filter(a => a.activityType === 'campaign_creation');
+
+    // Monthly stats (last 6 months)
+    const monthlyStats = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+      
+      const monthActivities = activities.filter(a => {
+        if (!a.createdAt) return false;
+        const dateStr = typeof a.createdAt === 'string' ? a.createdAt : a.createdAt.toISOString();
+        return dateStr.startsWith(monthKey);
+      });
+      const monthEarnings = monthActivities.reduce((sum, a) => sum + parseFloat(a.rewardAmount || "0"), 0);
+      
+      monthlyStats.push({
+        month: monthKey,
+        referrals: monthActivities.length,
+        earnings: monthEarnings.toString()
+      });
+    }
+
+    return {
+      overview: {
+        totalReferrals: account?.totalReferrals || 0,
+        totalEarnings: account?.totalAffiliateEarnings || "0",
+        unpaidRewards: unpaidRewards.toString(),
+        paidRewards: paidRewards.toString(),
+        conversionRate: activities.length > 0 ? (account?.totalReferrals || 0) / activities.length * 100 : 0
+      },
+      breakdown: {
+        donations: {
+          count: donationActivities.length,
+          totalReward: donationActivities.reduce((sum, a) => sum + parseFloat(a.rewardAmount || "0"), 0).toString()
+        },
+        campaigns: {
+          count: campaignActivities.length,
+          totalReward: campaignActivities.reduce((sum, a) => sum + parseFloat(a.rewardAmount || "0"), 0).toString()
+        }
+      },
+      monthlyStats,
+      recentActivity: activities.slice(0, 10) // Last 10 activities
+    };
+  }
+
+  // Get unpaid rewards
+  async getUnpaidRewards(wallet: string): Promise<AffiliateActivity[]> {
+    return await db
+      .select()
+      .from(affiliateActivities)
+      .where(
+        and(
+          eq(affiliateActivities.referrerWallet, wallet),
+          eq(affiliateActivities.rewardPaid, false)
+        )
+      )
+      .orderBy(desc(affiliateActivities.createdAt));
+  }
+
+  // Get affiliate leaderboard (top performers)
+  async getAffiliateLeaderboard(limit: number = 10): Promise<Array<{
+    wallet: string;
+    totalReferrals: number;
+    totalEarnings: string;
+    rank: number;
+  }>> {
+    const topAffiliates = await db
+      .select({
+        wallet: accounts.wallet,
+        totalReferrals: accounts.totalReferrals,
+        totalEarnings: accounts.totalAffiliateEarnings
+      })
+      .from(accounts)
+      .where(
+        and(
+          eq(accounts.affiliateActivated, true),
+          gt(accounts.totalReferrals, 0)
+        )
+      )
+      .orderBy(desc(accounts.totalReferrals), desc(accounts.totalAffiliateEarnings))
+      .limit(limit);
+
+    return topAffiliates.map((affiliate, index) => ({
+      wallet: affiliate.wallet,
+      totalReferrals: affiliate.totalReferrals || 0,
+      totalEarnings: affiliate.totalEarnings || "0",
+      rank: index + 1
+    }));
   }
 
   async createAffiliateActivity(activity: InsertAffiliateActivity): Promise<AffiliateActivity> {

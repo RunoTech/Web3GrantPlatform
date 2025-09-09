@@ -343,19 +343,173 @@ export default function AffiliatePage() {
         </CardContent>
       </Card>
 
+      {/* 🎯 NEW: Performance Analytics Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Monthly Performance */}
+        {detailedStats?.monthlyStats && detailedStats.monthlyStats.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Monthly Performance (Last 6 Months)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {detailedStats.monthlyStats.map((month) => (
+                  <div key={month.month} className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{month.month}</p>
+                      <p className="text-sm text-muted-foreground">{month.referrals} referrals</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">{parseFloat(month.earnings).toFixed(2)} USDT</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Activity Breakdown */}
+        {detailedStats?.breakdown && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Activity Breakdown
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <div>
+                      <p className="font-medium">Donations</p>
+                      <p className="text-sm text-muted-foreground">{detailedStats.breakdown.donations.count} activities</p>
+                    </div>
+                  </div>
+                  <p className="font-medium">{parseFloat(detailedStats.breakdown.donations.totalReward).toFixed(2)} USDT</p>
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <div>
+                      <p className="font-medium">Campaigns</p>
+                      <p className="text-sm text-muted-foreground">{detailedStats.breakdown.campaigns.count} activities</p>
+                    </div>
+                  </div>
+                  <p className="font-medium">{parseFloat(detailedStats.breakdown.campaigns.totalReward).toFixed(2)} USDT</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* 🎯 NEW: Unpaid Rewards Tracking */}
+      {unpaidRewards && unpaidRewards.length > 0 && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Gift className="w-5 h-5 text-yellow-500" />
+              Pending Rewards ({unpaidRewards.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {unpaidRewards.map((reward, index) => (
+                <div key={reward.id}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                      <div>
+                        <p className="font-medium">
+                          {reward.referredWallet.slice(0, 6)}...{reward.referredWallet.slice(-4)}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {getActivityTypeLabel(reward.activityType)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                        Pending
+                      </Badge>
+                      <p className="text-sm font-medium mt-1">{parseFloat(reward.rewardAmount).toFixed(2)} USDT</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(reward.createdAt), { addSuffix: true })}
+                      </p>
+                    </div>
+                  </div>
+                  {index < unpaidRewards.length - 1 && <Separator className="mt-4" />}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 🎯 NEW: Affiliate Leaderboard */}
+      {leaderboard && leaderboard.length > 0 && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5" />
+              Top Affiliates Leaderboard
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {leaderboard.map((entry) => (
+                <div key={entry.wallet} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                      entry.rank === 1 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                      entry.rank === 2 ? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' :
+                      entry.rank === 3 ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' :
+                      'bg-muted text-muted-foreground'
+                    }`}>
+                      #{entry.rank}
+                    </div>
+                    <div>
+                      <p className="font-medium font-mono">
+                        {entry.wallet.slice(0, 6)}...{entry.wallet.slice(-4)}
+                        {entry.wallet.toLowerCase() === userWallet.toLowerCase() && (
+                          <Badge variant="outline" className="ml-2 text-xs">You</Badge>
+                        )}
+                      </p>
+                      <p className="text-sm text-muted-foreground">{entry.totalReferrals} referrals</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">{parseFloat(entry.totalEarnings).toFixed(2)} USDT</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Activity History */}
       {stats?.activities && stats.activities.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Referral Activity</CardTitle>
+            <CardTitle>Recent Referral Activity</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {stats?.activities.map((activity, index) => (
+              {stats?.activities.slice(0, 10).map((activity, index) => (
                 <div key={activity.id}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-primary rounded-full" />
+                      <div className={`w-2 h-2 rounded-full ${
+                        activity.rewardPaid ? 'bg-green-500' : 'bg-yellow-500'
+                      }`} />
                       <div>
                         <p className="font-medium">
                           {activity.referredWallet.slice(0, 6)}...{activity.referredWallet.slice(-4)}
@@ -366,15 +520,15 @@ export default function AffiliatePage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <Badge variant={getActivityBadgeVariant(activity.activityType)}>
-                        {activity.activityType}
+                      <Badge variant={activity.rewardPaid ? 'default' : 'secondary'}>
+                        {activity.rewardPaid ? 'Paid' : 'Pending'}
                       </Badge>
                       <p className="text-xs text-muted-foreground mt-1">
                         {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
                       </p>
                     </div>
                   </div>
-                  {index < (stats?.activities.length || 0) - 1 && <Separator className="mt-4" />}
+                  {index < Math.min(stats?.activities.length || 0, 10) - 1 && <Separator className="mt-4" />}
                 </div>
               ))}
             </div>

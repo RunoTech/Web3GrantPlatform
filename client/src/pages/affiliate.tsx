@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Users, DollarSign, Gift, Share2, TrendingUp } from "lucide-react";
+import { Copy, Users, DollarSign, Gift, Share2, TrendingUp, ArrowLeft, Home } from "lucide-react";
+import { Link } from "wouter";
 import { formatDistanceToNow } from "date-fns";
 
 interface Account {
@@ -207,12 +208,24 @@ export default function AffiliatePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Affiliate Program</h1>
-        <p className="text-muted-foreground">
-          Earn rewards by referring new users to DUXXAN platform
-        </p>
+      {/* Page Header with Home Button */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <Button asChild variant="outline" size="sm">
+            <Link href="/">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">Affiliate Dashboard</h1>
+            <p className="text-muted-foreground">Track your referrals and earnings</p>
+          </div>
+        </div>
+        <Badge variant="outline" className="px-3 py-1">
+          <Share2 className="w-4 h-4 mr-2" />
+          Affiliate Program
+        </Badge>
       </div>
 
       {/* Enhanced Stats Cards */}

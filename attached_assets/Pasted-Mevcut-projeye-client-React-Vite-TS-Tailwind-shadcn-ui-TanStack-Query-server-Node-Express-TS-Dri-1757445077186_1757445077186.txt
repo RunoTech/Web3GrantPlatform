@@ -1,0 +1,135 @@
+Mevcut projeye (client: React+Vite+TS+Tailwind+shadcn/ui+TanStack Query, server: Node+Express+TS+Drizzle+PostgreSQL+JWT, ethers.js) tam kapsamlı Admin Panel ekle ve çalışır hale getir. Tüm değişiklikleri uygula, test et, çalıştır.
+
+1) Kimlik Doğrulama
+
+Admin email+password girişi (bcrypt), JWT (HttpOnly cookie), role: superadmin|admin.
+
+Rate limit, CORS sadece admin origin, input validation (zod).
+
+Activity log middleware: her admin işlemini logla.
+
+2) Admin Panel (client /admin)
+
+Layout: sidebar + header; responsive; dark/light.
+
+Sayfalar ve aksiyonlar:
+
+Transactions: listele/filtrele (status, token, tarih), tekil detay.
+
+Wallets: adres, ownerType(ownerId), createdAt.
+
+Balances/Flows: kampanya ve cüzdana göre toplam giriş/çıkış özetleri.
+
+Fees & Settings:
+
+activation_fee_usdt, daily_reward_amount_usdt, platform_name, platform_description.
+
+Kaydet butonu → server /admin/settings PATCH.
+
+Footer Links: listele, sıra/değiştir, görünürlük toggle, yeni link ekle/sil.
+
+Daily Reward:
+
+Gün listesi (tarih, ödül tutarı, winner, isClosed).
+
+“Ödül Tutarı Ayarla”, “Katılımcıları Gör”, “Kazanan Ata (manuel)”, “Günü Kapat/Aç”.
+
+Campaigns:
+
+Pending/Approved/Rejected filtreleri.
+
+“Onayla”, “Reddet”, “FUND şirket bilgisi gizle/göster” toggle.
+
+Affiliates:
+
+Başvurular: Pending/Approved/Rejected.
+
+“Onayla”, “Reddet”, performans metrikleri (clicks, signups, conversions).
+
+Activity Logs: admin işlemleri kronolojik liste.
+
+UI: shadcn/ui tabloları (server-side pagination + filtre), Dialog/Drawer ile düzenleme formları, Toast bildirimleri.
+
+3) Server API (hepsi admin guard’lı, JWT zorunlu)
+
+Auth: POST /admin/auth/login, POST /admin/auth/logout, GET /admin/auth/me.
+
+Settings: GET/PUT /admin/settings (key-value).
+
+Footer Links: GET /admin/footer-links, POST, PUT/:id, DELETE/:id.
+
+Transactions: GET /admin/transactions (query: status, token, address, dateRange), GET /admin/transactions/:id.
+
+Wallets: GET /admin/wallets (query: ownerType/ownerId/address).
+
+Balances: GET /admin/balances/summary?scope=campaign|wallet&id=....
+
+Daily Reward:
+
+GET /admin/daily-reward (liste),
+
+POST /admin/daily-reward/:id/amount (prize set),
+
+GET /admin/daily-reward/:id/participants,
+
+POST /admin/daily-reward/:id/winner (wallet),
+
+POST /admin/daily-reward/:id/close | /open.
+
+Campaigns: GET /admin/campaigns, POST /admin/campaigns/:id/approve, POST /admin/campaigns/:id/reject, POST /admin/campaigns/:id/toggle-company-hide.
+
+Affiliates: GET /admin/affiliates, POST /admin/affiliates/:id/approve, POST /admin/affiliates/:id/reject.
+
+Activity Logs: GET /admin/logs.
+
+4) DB (Drizzle)
+
+Aşağıdaki minimal tabloları ekle/varsa genişlet:
+
+admins(id, email, passwordHash, role, isActive, createdAt)
+
+settings(id, key, value, updatedAt)
+
+footer_links(id, label, url, visible, order, updatedAt)
+
+wallets(id, address, ownerType, ownerId, createdAt)
+
+transactions(id, txHash, fromAddress, toAddress, token, amount, status, campaignId, createdAt)
+
+campaigns(id, type(DONATE|FUND), title, ownerWallet, companyInfoHidden, status, createdAt)
+
+daily_rewards(id, rewardDate, prizeAmountUsdt, winnerWallet, isClosed, createdAt)
+
+daily_participants(id, dailyRewardId, wallet, joinedAt)
+
+affiliates(id, wallet, referralCode, status, clicks, signups, conversions, createdAt)
+
+activity_logs(id, adminId, action, meta(json), createdAt)
+
+5) Güvenlik & Doğrulama
+
+All inputs: zod validate + sanitize.
+
+Ethereum adresleri: checksum doğrulaması.
+
+JWT süresi/yenilenmesi, HttpOnly, Secure, SameSite strict.
+
+API response’larında hassas verileri filtrele (FUND şirket bilgisi gizli).
+
+6) Seed & Secrets
+
+Replit Secrets’a ekle:
+
+DATABASE_URL (Postgres)
+
+JWT_SECRET
+
+ADMIN_EMAIL, ADMIN_PASSWORD (ilk admin seed)
+
+ADMIN_ALLOWED_ORIGIN (örn. http://localhost:5173 veya Replit client URL)
+
+Seed script:
+
+admins tablosunda yoksa ADMIN_EMAIL ile superadmin oluştur (bcrypt hash).
+
+settings varsayılanları: activation_fee_usdt=50, daily_reward_amount_usdt=100, platform_name, platform_description.

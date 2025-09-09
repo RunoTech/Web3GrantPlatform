@@ -16,6 +16,8 @@ import FundsPage from "@/pages/funds";
 import DailyRewardsPage from "@/pages/daily-rewards";
 import PaymentPage from "@/pages/payment";
 import AffiliatePage from "@/pages/affiliate";
+import AdminLoginPage from "@/pages/admin/login";
+import AdminDashboardPage from "@/pages/admin/index";
 import AdminSettingsPage from "@/pages/admin/settings";
 import AdminDailyRewardsPage from "@/pages/admin/daily-rewards";
 import AdminDatabasePage from "@/pages/admin/database";
@@ -33,9 +35,14 @@ function Router() {
       <Route path="/profile" component={ProfilePage} />
       <Route path="/campaign/:id" component={CampaignDetailPage} />
       <Route path="/create-campaign" component={CreateCampaignPage} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin/login" component={AdminLoginPage} />
+      <Route path="/admin" component={AdminDashboardPage} />
       <Route path="/admin/settings" component={AdminSettingsPage} />
       <Route path="/admin/daily-rewards" component={AdminDailyRewardsPage} />
       <Route path="/admin/database" component={AdminDatabasePage} />
+      
       <Route component={NotFound} />
     </Switch>
   );

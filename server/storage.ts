@@ -92,8 +92,6 @@ export interface IStorage {
   // Daily Winners
   createDailyWinner(winner: InsertDailyWinner): Promise<DailyWinner>;
   getDailyWinnerByDate(date: string): Promise<DailyWinner | undefined>;
-  getDailyWinnersByDate(date: string): Promise<DailyWinner[]>;
-  createDailyWinner(winner: InsertDailyWinner): Promise<DailyWinner>;
   getDailyWinners(limit?: number): Promise<DailyWinner[]>;
   getDailyWinnersByDate(date: string): Promise<DailyWinner[]>;
 
@@ -112,7 +110,6 @@ export interface IStorage {
 
   // Admin Logs
   createAdminLog(log: InsertAdminLog): Promise<AdminLog>;
-  getAdminLogs(adminId?: number, limit?: number): Promise<AdminLog[]>;
 
   // Statistics for Admin Dashboard
   getStatistics(): Promise<{
@@ -1011,7 +1008,7 @@ export class DatabaseStorage implements IStorage {
   async updateDailyRewardAmount(id: number, amount: string): Promise<void> {
     await db
       .update(dailyRewards)
-      .set({ rewardAmount: amount })
+      .set({ prizeAmountUsdt: amount })
       .where(eq(dailyRewards.id, id));
   }
 
@@ -1029,7 +1026,8 @@ export class DatabaseStorage implements IStorage {
       .set({ 
         winnerWallet: wallet,
         selectedBy,
-        status: 'closed'
+        isClosed: true,
+        selectedAt: new Date()
       })
       .where(eq(dailyRewards.id, dailyRewardId));
   }
@@ -1037,14 +1035,14 @@ export class DatabaseStorage implements IStorage {
   async closeDailyReward(id: number): Promise<void> {
     await db
       .update(dailyRewards)
-      .set({ status: 'closed' })
+      .set({ isClosed: true })
       .where(eq(dailyRewards.id, id));
   }
 
   async openDailyReward(id: number): Promise<void> {
     await db
       .update(dailyRewards)
-      .set({ status: 'active' })
+      .set({ isClosed: false })
       .where(eq(dailyRewards.id, id));
   }
   
@@ -1053,12 +1051,14 @@ export class DatabaseStorage implements IStorage {
     const offset = (page - 1) * limit;
     let query = db.select().from(campaigns);
     
-    // Apply filters if provided
-    if (filters.status) {
-      query = query.where(eq(campaigns.status, filters.status));
+    // Apply filters if provided - use approved field instead of status
+    if (filters.status === 'approved') {
+      query = query.where(eq(campaigns.approved, true));
+    } else if (filters.status === 'pending') {
+      query = query.where(eq(campaigns.approved, false));
     }
     if (filters.type) {
-      query = query.where(eq(campaigns.type, filters.type));
+      query = query.where(eq(campaigns.campaignType, filters.type));
     }
     
     return await query
@@ -1071,9 +1071,9 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(campaigns)
       .set({ 
-        status: 'rejected',
-        reviewedBy: adminId.toString(),
-        reviewedAt: new Date()
+        approved: false,
+        approvedBy: adminId,
+        approvedAt: new Date()
       })
       .where(eq(campaigns.id, id));
   }

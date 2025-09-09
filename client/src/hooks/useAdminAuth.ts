@@ -28,7 +28,7 @@ export function useAdminAuth() {
 
   // Check if admin is authenticated
   const { data: admin, isLoading, error } = useQuery({
-    queryKey: ["/api/admin/auth/me"],
+    queryKey: ["/api/admin/me"],
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -36,7 +36,7 @@ export function useAdminAuth() {
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginCredentials): Promise<LoginResponse> => {
-      const response = await apiRequest("POST", "/api/admin/auth/login", credentials);
+      const response = await apiRequest("POST", "/api/admin/login", credentials);
       return response.json();
     },
     onSuccess: (data) => {
@@ -64,7 +64,7 @@ export function useAdminAuth() {
   // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/admin/auth/logout");
+      const response = await apiRequest("POST", "/api/admin/logout");
       return response.json();
     },
     onSuccess: () => {

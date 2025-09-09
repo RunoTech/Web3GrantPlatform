@@ -1096,6 +1096,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       res.json({
+        success: true,
         token,
         admin: {
           id: admin.id,
@@ -1107,6 +1108,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error during admin login:", error);
       res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  // Admin me - Get current admin info
+  app.get("/api/admin/me", authenticateAdmin, async (req, res) => {
+    try {
+      const admin = req.admin;
+      res.json({
+        id: admin.id,
+        username: admin.username,
+        email: admin.email,
+        role: admin.role,
+        active: admin.active,
+        lastLogin: admin.lastLogin,
+        createdAt: admin.createdAt,
+      });
+    } catch (error) {
+      console.error("Error fetching admin profile:", error);
+      res.status(500).json({ error: "Failed to fetch profile" });
+    }
+  });
+
+  // Admin logout
+  app.post("/api/admin/logout", authenticateAdmin, async (req, res) => {
+    try {
+      const admin = req.admin;
+      
+      // Log admin logout
+      await storage.createAdminLog({
+        adminId: admin.id,
+        action: "logout",
+        details: { ip: req.ip, userAgent: req.get('User-Agent') },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json({
+        success: true,
+        message: "Logged out successfully"
+      });
+    } catch (error) {
+      console.error("Error during admin logout:", error);
+      res.status(500).json({ error: "Logout failed" });
     }
   });
 

@@ -1646,6 +1646,378 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== ADMIN COMPREHENSIVE ENDPOINTS =====
+
+  // Footer Links Management
+  app.get("/api/admin/footer-links", authenticateAdmin, async (req, res) => {
+    try {
+      const links = await storage.getFooterLinks();
+      res.json(links);
+    } catch (error) {
+      console.error("Error fetching footer links:", error);
+      res.status(500).json({ error: "Failed to fetch footer links" });
+    }
+  });
+
+  app.post("/api/admin/footer-links", authenticateAdmin, async (req: any, res) => {
+    try {
+      const linkData = insertFooterLinkSchema.parse(req.body);
+      const link = await storage.createFooterLink(linkData);
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "create_footer_link",
+        details: `Created footer link: ${linkData.title}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json(link);
+    } catch (error) {
+      console.error("Error creating footer link:", error);
+      res.status(500).json({ error: "Failed to create footer link" });
+    }
+  });
+
+  app.put("/api/admin/footer-links/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const linkData = insertFooterLinkSchema.parse(req.body);
+      const link = await storage.updateFooterLink(parseInt(id), linkData);
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "update_footer_link",
+        details: `Updated footer link ID ${id}: ${linkData.title}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json(link);
+    } catch (error) {
+      console.error("Error updating footer link:", error);
+      res.status(500).json({ error: "Failed to update footer link" });
+    }
+  });
+
+  app.delete("/api/admin/footer-links/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteFooterLink(parseInt(id));
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "delete_footer_link",
+        details: `Deleted footer link ID ${id}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting footer link:", error);
+      res.status(500).json({ error: "Failed to delete footer link" });
+    }
+  });
+
+  // Transactions Management
+  app.get("/api/admin/transactions", authenticateAdmin, async (req, res) => {
+    try {
+      const { status, token, address, dateRange, page = 1, limit = 20 } = req.query;
+      const filters = { status, token, address, dateRange };
+      const transactions = await storage.getTransactions(filters, parseInt(page as string), parseInt(limit as string));
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      res.status(500).json({ error: "Failed to fetch transactions" });
+    }
+  });
+
+  app.get("/api/admin/transactions/:id", authenticateAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const transaction = await storage.getTransaction(parseInt(id));
+      if (!transaction) {
+        return res.status(404).json({ error: "Transaction not found" });
+      }
+      res.json(transaction);
+    } catch (error) {
+      console.error("Error fetching transaction:", error);
+      res.status(500).json({ error: "Failed to fetch transaction" });
+    }
+  });
+
+  // Wallets Management
+  app.get("/api/admin/wallets", authenticateAdmin, async (req, res) => {
+    try {
+      const { ownerType, ownerId, address, page = 1, limit = 50 } = req.query;
+      const filters = { ownerType, ownerId, address };
+      const wallets = await storage.getWallets(filters, parseInt(page as string), parseInt(limit as string));
+      res.json(wallets);
+    } catch (error) {
+      console.error("Error fetching wallets:", error);
+      res.status(500).json({ error: "Failed to fetch wallets" });
+    }
+  });
+
+  // Balances Summary
+  app.get("/api/admin/balances/summary", authenticateAdmin, async (req, res) => {
+    try {
+      const { scope, id } = req.query;
+      const summary = await storage.getBalancesSummary(scope as string, id as string);
+      res.json(summary);
+    } catch (error) {
+      console.error("Error fetching balances summary:", error);
+      res.status(500).json({ error: "Failed to fetch balances summary" });
+    }
+  });
+
+  // Daily Rewards Management
+  app.get("/api/admin/daily-reward", authenticateAdmin, async (req, res) => {
+    try {
+      const { page = 1, limit = 30 } = req.query;
+      const dailyRewards = await storage.getDailyRewards(parseInt(page as string), parseInt(limit as string));
+      res.json(dailyRewards);
+    } catch (error) {
+      console.error("Error fetching daily rewards:", error);
+      res.status(500).json({ error: "Failed to fetch daily rewards" });
+    }
+  });
+
+  app.post("/api/admin/daily-reward/:id/amount", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { amount } = req.body;
+      await storage.updateDailyRewardAmount(parseInt(id), amount);
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "update_daily_reward_amount",
+        details: `Updated daily reward ${id} amount to ${amount} USDT`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating daily reward amount:", error);
+      res.status(500).json({ error: "Failed to update daily reward amount" });
+    }
+  });
+
+  app.get("/api/admin/daily-reward/:id/participants", authenticateAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const participants = await storage.getDailyRewardParticipants(parseInt(id));
+      res.json(participants);
+    } catch (error) {
+      console.error("Error fetching daily reward participants:", error);
+      res.status(500).json({ error: "Failed to fetch participants" });
+    }
+  });
+
+  app.post("/api/admin/daily-reward/:id/winner", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { wallet } = req.body;
+      await storage.setDailyRewardWinner(parseInt(id), wallet, req.admin.id);
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "select_daily_winner",
+        details: `Selected winner ${wallet} for daily reward ${id}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error setting daily reward winner:", error);
+      res.status(500).json({ error: "Failed to set winner" });
+    }
+  });
+
+  app.post("/api/admin/daily-reward/:id/close", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      await storage.closeDailyReward(parseInt(id));
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "close_daily_reward",
+        details: `Closed daily reward ${id}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error closing daily reward:", error);
+      res.status(500).json({ error: "Failed to close daily reward" });
+    }
+  });
+
+  app.post("/api/admin/daily-reward/:id/open", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      await storage.openDailyReward(parseInt(id));
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "open_daily_reward",
+        details: `Opened daily reward ${id}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error opening daily reward:", error);
+      res.status(500).json({ error: "Failed to open daily reward" });
+    }
+  });
+
+  // Campaigns Management
+  app.get("/api/admin/campaigns", authenticateAdmin, async (req, res) => {
+    try {
+      const { status, type, page = 1, limit = 20 } = req.query;
+      const filters = { status, type };
+      const campaigns = await storage.getAdminCampaigns(filters, parseInt(page as string), parseInt(limit as string));
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching admin campaigns:", error);
+      res.status(500).json({ error: "Failed to fetch campaigns" });
+    }
+  });
+
+  app.post("/api/admin/campaigns/:id/approve", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      await storage.approveCampaign(parseInt(id), req.admin.id);
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "approve_campaign",
+        details: `Approved campaign ID ${id}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error approving campaign:", error);
+      res.status(500).json({ error: "Failed to approve campaign" });
+    }
+  });
+
+  app.post("/api/admin/campaigns/:id/reject", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      await storage.rejectCampaign(parseInt(id), req.admin.id);
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "reject_campaign",
+        details: `Rejected campaign ID ${id}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error rejecting campaign:", error);
+      res.status(500).json({ error: "Failed to reject campaign" });
+    }
+  });
+
+  app.post("/api/admin/campaigns/:id/toggle-company-hide", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      await storage.toggleCampaignCompanyVisibility(parseInt(id));
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "toggle_campaign_company_visibility",
+        details: `Toggled company visibility for campaign ID ${id}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error toggling campaign company visibility:", error);
+      res.status(500).json({ error: "Failed to toggle company visibility" });
+    }
+  });
+
+  // Affiliates Management
+  app.get("/api/admin/affiliates", authenticateAdmin, async (req, res) => {
+    try {
+      const { status, page = 1, limit = 20 } = req.query;
+      const filters = { status };
+      const affiliates = await storage.getAffiliateApplications(filters, parseInt(page as string), parseInt(limit as string));
+      res.json(affiliates);
+    } catch (error) {
+      console.error("Error fetching affiliate applications:", error);
+      res.status(500).json({ error: "Failed to fetch affiliate applications" });
+    }
+  });
+
+  app.post("/api/admin/affiliates/:id/approve", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { reviewNotes } = req.body;
+      await storage.approveAffiliateApplication(parseInt(id), req.admin.id, reviewNotes);
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "approve_affiliate",
+        details: `Approved affiliate application ID ${id}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error approving affiliate application:", error);
+      res.status(500).json({ error: "Failed to approve affiliate application" });
+    }
+  });
+
+  app.post("/api/admin/affiliates/:id/reject", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { reviewNotes } = req.body;
+      await storage.rejectAffiliateApplication(parseInt(id), req.admin.id, reviewNotes);
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "reject_affiliate",
+        details: `Rejected affiliate application ID ${id}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error rejecting affiliate application:", error);
+      res.status(500).json({ error: "Failed to reject affiliate application" });
+    }
+  });
+
+  // Activity Logs
+  app.get("/api/admin/logs", authenticateAdmin, async (req, res) => {
+    try {
+      const { adminId, action, page = 1, limit = 50 } = req.query;
+      const filters = { adminId, action };
+      const logs = await storage.getAdminLogs(filters, parseInt(page as string), parseInt(limit as string));
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching admin logs:", error);
+      res.status(500).json({ error: "Failed to fetch admin logs" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

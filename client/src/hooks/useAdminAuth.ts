@@ -44,17 +44,9 @@ export function useAdminAuth() {
         // Store token in localStorage
         localStorage.setItem("admin_token", data.token);
         
-        // Update auth header for future requests
-        queryClient.setDefaultOptions({
-          queries: {
-            meta: {
-              headers: {
-                Authorization: `Bearer ${data.token}`
-              }
-            }
-          }
-        });
-
+        // Set admin data directly in cache to immediately update isAuthenticated
+        queryClient.setQueryData(["/api/admin/me"], data.admin);
+        
         // Invalidate admin queries to refetch with new token
         queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
       }

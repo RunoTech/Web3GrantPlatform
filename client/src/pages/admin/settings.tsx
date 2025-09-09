@@ -201,10 +201,10 @@ export default function AdminSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="min-h-screen bg-background text-foreground p-6 space-y-6">
         <div className="flex items-center gap-2 mb-6">
-          <Settings className="w-6 h-6 text-yellow-400" />
-          <h1 className="text-2xl font-bold">Platform Ayarları</h1>
+          <Settings className="w-6 h-6 text-primary" />
+          <h1 className="text-2xl font-bold text-foreground">Platform Ayarları</h1>
         </div>
         <div className="animate-pulse space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -216,20 +216,20 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-background text-foreground p-6 space-y-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <Settings className="w-6 h-6 text-yellow-400" />
-          <h1 className="text-2xl font-bold">Platform Administration</h1>
+          <Settings className="w-6 h-6 text-primary" />
+          <h1 className="text-2xl font-bold text-foreground">Platform Administration</h1>
         </div>
         <div className="flex gap-4">
-          <Button variant="outline" asChild>
+          <Button variant="secondary" size="lg" className="text-foreground" asChild>
             <a href="/admin/database" className="flex items-center gap-2">
               <Database className="w-4 h-4" />
               Database Management
             </a>
           </Button>
-          <Button variant="outline" asChild>
+          <Button variant="secondary" size="lg" className="text-foreground" asChild>
             <a href="/admin/daily-rewards" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
               Daily Rewards
@@ -243,25 +243,25 @@ export default function AdminSettingsPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="general" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-7">
-          <TabsTrigger value="general">Genel</TabsTrigger>
-          <TabsTrigger value="homepage">Ana Sayfa</TabsTrigger>
-          <TabsTrigger value="features">Özellikler</TabsTrigger>
-          <TabsTrigger value="pricing">Fiyatlar</TabsTrigger>
-          <TabsTrigger value="payment">Ödeme</TabsTrigger>
-          <TabsTrigger value="contact">İletişim</TabsTrigger>
-          <TabsTrigger value="social">Sosyal</TabsTrigger>
+      <Tabs defaultValue="general" className="bg-muted/40 rounded-lg space-y-4">
+        <TabsList className="bg-transparent grid w-full grid-cols-7">
+          <TabsTrigger value="general" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Genel</TabsTrigger>
+          <TabsTrigger value="homepage" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Ana Sayfa</TabsTrigger>
+          <TabsTrigger value="features" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Özellikler</TabsTrigger>
+          <TabsTrigger value="pricing" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Fiyatlar</TabsTrigger>
+          <TabsTrigger value="payment" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Ödeme</TabsTrigger>
+          <TabsTrigger value="contact" className="data-[state=active]:bg-background data-[state=active]:text-foreground">İletişim</TabsTrigger>
+          <TabsTrigger value="social" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Sosyal</TabsTrigger>
         </TabsList>
 
         {Object.entries(categorizedSettings || {}).map(([category, settings]) => (
-          <TabsContent key={category} value={category} className="space-y-4">
-            <div className="grid gap-4">
+          <TabsContent key={category} value={category} className="bg-card text-card-foreground border border-border rounded-xl space-y-4">
+            <div className="grid gap-4 p-4">
               {settings.map((setting: PlatformSetting) => (
-                <Card key={setting.id}>
+                <Card key={setting.id} className="rounded-xl border border-border bg-card text-card-foreground">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-medium">
+                      <CardTitle className="text-base font-medium text-foreground">
                         {setting.key}
                       </CardTitle>
                       <Button

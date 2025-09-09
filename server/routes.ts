@@ -290,6 +290,155 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Affiliate Application endpoints
+  
+  // Submit affiliate application
+  app.post("/api/affiliate/apply", async (req, res) => {
+    try {
+      const { wallet, applicationText } = req.body;
+
+      if (!wallet || !applicationText) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Wallet address and application text are required" 
+        });
+      }
+
+      // Check if user already has an application
+      const existingApplication = await storage.getAffiliateApplication(wallet);
+      if (existingApplication) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "You have already submitted an affiliate application" 
+        });
+      }
+
+      // Create affiliate application
+      const application = await storage.createAffiliateApplication({
+        wallet,
+        applicationText,
+        status: "pending"
+      });
+
+      res.json({ 
+        success: true, 
+        message: "Affiliate application submitted successfully",
+        application: {
+          id: application.id,
+          status: application.status,
+          appliedAt: application.appliedAt
+        }
+      });
+
+    } catch (error) {
+      console.error("Error creating affiliate application:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to submit application" 
+      });
+    }
+  });
+
+  // Get user's affiliate application status
+  app.get("/api/affiliate/application-status/:wallet", async (req, res) => {
+    try {
+      const { wallet } = req.params;
+      const application = await storage.getAffiliateApplication(wallet);
+      
+      if (!application) {
+        return res.json({ 
+          success: true, 
+          hasApplication: false 
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        hasApplication: true,
+        application: {
+          id: application.id,
+          status: application.status,
+          appliedAt: application.appliedAt,
+          reviewedAt: application.reviewedAt,
+          reviewNotes: application.reviewNotes
+        }
+      });
+
+    } catch (error) {
+      console.error("Error fetching affiliate application:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch application status" 
+      });
+    }
+  });
+
+  // Admin: Get all affiliate applications
+  app.get("/api/admin/affiliate/applications", authenticateAdmin, async (req, res) => {
+    try {
+      const { status } = req.query;
+      const applications = await storage.getAllAffiliateApplications(status as string);
+      
+      res.json({ 
+        success: true, 
+        applications 
+      });
+
+    } catch (error) {
+      console.error("Error fetching affiliate applications:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch applications" 
+      });
+    }
+  });
+
+  // Admin: Update affiliate application status
+  app.put("/api/admin/affiliate/applications/:id", authenticateAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status, reviewNotes } = req.body;
+      const adminId = req.admin?.id;
+
+      if (!["approved", "rejected"].includes(status)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Status must be 'approved' or 'rejected'" 
+        });
+      }
+
+      await storage.updateAffiliateApplicationStatus(
+        parseInt(id), 
+        status, 
+        adminId, 
+        reviewNotes
+      );
+
+      // If approved, activate affiliate system for the user
+      if (status === "approved") {
+        // Get application to get wallet address
+        const applications = await storage.getAllAffiliateApplications();
+        const application = applications.find(app => app.id === parseInt(id));
+        
+        if (application) {
+          await storage.activateAffiliateSystem(application.wallet, 'campaign_creation');
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: `Application ${status} successfully` 
+      });
+
+    } catch (error) {
+      console.error("Error updating affiliate application:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to update application" 
+      });
+    }
+  });
+
   // Get affiliate referral stats (public)
   app.get("/api/affiliate/stats/:wallet", async (req, res) => {
     try {

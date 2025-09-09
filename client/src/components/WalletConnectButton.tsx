@@ -5,7 +5,16 @@ import { useWallet } from "@/hooks/useWallet";
 import { Wallet, ChevronDown } from "lucide-react";
 
 export default function WalletConnectButton() {
-  const { isConnected, address, isConnecting, connect, disconnect } = useWallet();
+  const { isConnected, address, isConnecting, isLoading, connect, disconnect } = useWallet();
+
+  // Show loading state while checking wallet connection
+  if (isLoading) {
+    return (
+      <div className="flex items-center space-x-3">
+        <div className="w-32 h-10 bg-muted animate-pulse rounded-2xl"></div>
+      </div>
+    );
+  }
 
   if (isConnected && address) {
     return (

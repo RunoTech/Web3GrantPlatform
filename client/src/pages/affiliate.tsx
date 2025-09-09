@@ -42,6 +42,33 @@ interface ReferralStats {
   activities: AffiliateActivity[];
 }
 
+interface DetailedAffiliateStats {
+  overview: {
+    totalReferrals: number;
+    totalEarnings: string;
+    unpaidRewards: string;
+    paidRewards: string;
+    conversionRate: number;
+  };
+  breakdown: {
+    donations: { count: number; totalReward: string };
+    campaigns: { count: number; totalReward: string };
+  };
+  monthlyStats: Array<{
+    month: string;
+    referrals: number;
+    earnings: string;
+  }>;
+  recentActivity: AffiliateActivity[];
+}
+
+interface LeaderboardEntry {
+  wallet: string;
+  totalReferrals: number;
+  totalEarnings: string;
+  rank: number;
+}
+
 export default function AffiliatePage() {
   const [userWallet, setUserWallet] = useState<string>("");
   const [referralLink, setReferralLink] = useState<string>("");
@@ -78,10 +105,39 @@ export default function AffiliatePage() {
     enabled: !!userWallet,
   });
 
-  // Get affiliate stats
+  // Get affiliate stats (basic)
   const { data: stats, isLoading: statsLoading } = useQuery<ReferralStats>({
     queryKey: ["affiliate-stats", userWallet],
     enabled: !!userWallet,
+  });
+
+  // 🎯 NEW: Get detailed affiliate analytics
+  const { data: detailedStats, isLoading: detailedLoading } = useQuery<DetailedAffiliateStats>({
+    queryKey: ["affiliate", "detailed-stats", userWallet],
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/affiliate/detailed-stats/${userWallet}`);
+      return res.json();
+    },
+    enabled: !!userWallet,
+  });
+
+  // 🎯 NEW: Get unpaid rewards
+  const { data: unpaidRewards, isLoading: unpaidLoading } = useQuery<AffiliateActivity[]>({
+    queryKey: ["affiliate", "unpaid-rewards", userWallet],
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/affiliate/unpaid-rewards/${userWallet}`);
+      return res.json();
+    },
+    enabled: !!userWallet,
+  });
+
+  // 🎯 NEW: Get affiliate leaderboard
+  const { data: leaderboard, isLoading: leaderboardLoading } = useQuery<LeaderboardEntry[]>({
+    queryKey: ["affiliate", "leaderboard"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/affiliate/leaderboard?limit=10`);
+      return res.json();
+    },
   });
 
   const copyReferralLink = () => {
@@ -138,10 +194,13 @@ export default function AffiliatePage() {
     );
   }
 
-  if (accountLoading || statsLoading) {
+  if (accountLoading || statsLoading || detailedLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mb-4" />
+          <p className="text-muted-foreground">Loading affiliate dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -156,15 +215,15 @@ export default function AffiliatePage() {
         </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      {/* Enhanced Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Referrals</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{account?.totalReferrals || 0}</div>
+            <div className="text-2xl font-bold">{detailedStats?.overview.totalReferrals || 0}</div>
             <p className="text-xs text-muted-foreground">
               People you've referred
             </p>
@@ -177,31 +236,35 @@ export default function AffiliatePage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${account?.totalAffiliateEarnings || "0.00"}</div>
+            <div className="text-2xl font-bold">{parseFloat(detailedStats?.overview.totalEarnings || "0").toFixed(2)} USDT</div>
             <p className="text-xs text-muted-foreground">
-              Affiliate rewards earned
+              All-time affiliate rewards
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Affiliate Status</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Unpaid Rewards</CardTitle>
+            <Gift className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {account?.affiliateActivated ? (
-                <Badge variant="default">Active</Badge>
-              ) : (
-                <Badge variant="secondary">Inactive</Badge>
-              )}
-            </div>
+            <div className="text-2xl font-bold text-yellow-600">{parseFloat(detailedStats?.overview.unpaidRewards || "0").toFixed(2)} USDT</div>
             <p className="text-xs text-muted-foreground">
-              {account?.affiliateActivated 
-                ? "Earning affiliate rewards"
-                : "Make your first donation/campaign to activate"
-              }
+              Pending payment
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
+            <TrendingUp className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{(detailedStats?.overview.conversionRate || 0).toFixed(1)}%</div>
+            <p className="text-xs text-muted-foreground">
+              Referral success rate
             </p>
           </CardContent>
         </Card>
@@ -222,7 +285,7 @@ export default function AffiliatePage() {
                 <label className="text-sm font-medium mb-2 block">Your Referral Code</label>
                 <div className="flex gap-2">
                   <Input 
-                    value={account.referralCode} 
+                    value={account?.referralCode || ""} 
                     readOnly 
                     className="font-mono"
                   />
@@ -281,14 +344,14 @@ export default function AffiliatePage() {
       </Card>
 
       {/* Activity History */}
-      {stats && stats.activities && stats.activities.length > 0 && (
+      {stats?.activities && stats.activities.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Referral Activity</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {stats.activities.map((activity, index) => (
+              {stats?.activities.map((activity, index) => (
                 <div key={activity.id}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -311,7 +374,7 @@ export default function AffiliatePage() {
                       </p>
                     </div>
                   </div>
-                  {index < stats.activities.length - 1 && <Separator className="mt-4" />}
+                  {index < (stats?.activities.length || 0) - 1 && <Separator className="mt-4" />}
                 </div>
               ))}
             </div>

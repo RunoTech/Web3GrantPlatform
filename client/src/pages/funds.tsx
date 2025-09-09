@@ -109,15 +109,15 @@ export default function FundsPage() {
         </Button>
 
         {/* Funds Header Section */}
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-3xl p-12 mb-12">
+        <div className="bg-gradient-to-br from-background to-surface rounded-3xl p-12 mb-12 border border-border">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center space-x-3 mb-6">
-              <DollarSign className="w-16 h-16 text-blue-500" />
-              <h1 className="text-5xl font-bold text-black dark:text-white">
+              <DollarSign className="w-16 h-16 text-primary" />
+              <h1 className="text-5xl font-bold text-foreground">
                 Funds
               </h1>
             </div>
-            <p className="text-2xl text-gray-600 dark:text-gray-400 mb-8 max-w-4xl mx-auto">
+            <p className="text-2xl text-muted-foreground mb-8 max-w-4xl mx-auto">
               Corporate Fundraising Platform - Unlimited funding campaigns for companies
             </p>
           </div>
@@ -127,7 +127,7 @@ export default function FundsPage() {
             <Button 
               asChild
               size="lg"
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold text-lg py-4 px-8"
+              className="gradient-primary hover:opacity-90 text-primary-foreground font-bold text-lg py-4 px-8"
             >
               <Link href="/create-campaign?type=fund">
                 <Building className="w-6 h-6 mr-2" />
@@ -139,7 +139,7 @@ export default function FundsPage() {
               asChild
               size="lg"
               variant="outline"
-              className="border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 font-bold text-lg py-4 px-8"
+              className="border-primary text-primary hover:bg-primary/10 font-bold text-lg py-4 px-8"
             >
               <Link href="/campaigns">
                 <Trophy className="w-6 h-6 mr-2" />
@@ -150,22 +150,22 @@ export default function FundsPage() {
 
           {/* Info Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 text-center border border-blue-200 dark:border-blue-800">
-              <Building className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">Companies Only</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">FUND campaigns can only be created by registered companies</p>
+            <div className="cyber-card p-6 text-center">
+              <Building className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-foreground mb-2">Companies Only</h3>
+              <p className="text-sm text-muted-foreground">FUND campaigns can only be created by registered companies</p>
             </div>
             
-            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 text-center border border-green-200 dark:border-green-800">
-              <Clock className="w-12 h-12 text-green-500 mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-black dark:text-white mb-2">Unlimited</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">FUND campaigns have no end date and remain permanently active</p>
+            <div className="cyber-card p-6 text-center">
+              <Clock className="w-12 h-12 text-cyber-green mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-foreground mb-2">Unlimited</h3>
+              <p className="text-sm text-muted-foreground">FUND campaigns have no end date and remain permanently active</p>
             </div>
             
-            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 text-center border border-purple-200 dark:border-purple-800">
-              <Heart className="w-12 h-12 text-purple-500 mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-black dark:text-white mb-2">Zero Commission</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">All funds go directly to the company wallet</p>
+            <div className="cyber-card p-6 text-center">
+              <Heart className="w-12 h-12 text-cyber-cyan mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-foreground mb-2">Zero Commission</h3>
+              <p className="text-sm text-muted-foreground">All funds go directly to the company wallet</p>
             </div>
           </div>
         </div>

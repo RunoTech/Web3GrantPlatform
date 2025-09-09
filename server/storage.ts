@@ -14,6 +14,10 @@ import {
   type AdminLog, type InsertAdminLog,
   type AffiliateActivity, type InsertAffiliateActivity,
   type AffiliateApplication, type InsertAffiliateApplication,
+  type Wallet, type InsertWallet,
+  type Transaction, type InsertTransaction,
+  type DailyReward, type InsertDailyReward,
+  type DailyParticipant, type InsertDailyParticipant,
   admins,
   platformSettings,
   networkFees,
@@ -27,6 +31,10 @@ import {
   adminLogs,
   affiliateActivities,
   affiliateApplications,
+  wallets,
+  transactions,
+  dailyRewards,
+  dailyParticipants,
 } from "../shared/schema";
 
 export interface IStorage {
@@ -139,6 +147,37 @@ export interface IStorage {
   getAffiliateApplication(wallet: string): Promise<AffiliateApplication | undefined>;
   getAllAffiliateApplications(status?: string): Promise<AffiliateApplication[]>;
   updateAffiliateApplicationStatus(id: number, status: string, reviewedBy: number, reviewNotes?: string): Promise<void>;
+
+  // ===== NEW ADMIN ENDPOINTS METHODS =====
+  
+  // Transactions Management
+  getTransactions(filters: any, page: number, limit: number): Promise<Transaction[]>;
+  getTransaction(id: number): Promise<Transaction | undefined>;
+  
+  // Wallets Management
+  getWallets(filters: any, page: number, limit: number): Promise<Wallet[]>;
+  getBalancesSummary(scope: string, id: string): Promise<any>;
+  
+  // Enhanced Daily Rewards Management
+  getDailyRewards(page: number, limit: number): Promise<DailyReward[]>;
+  updateDailyRewardAmount(id: number, amount: string): Promise<void>;
+  getDailyRewardParticipants(dailyRewardId: number): Promise<DailyParticipant[]>;
+  setDailyRewardWinner(dailyRewardId: number, wallet: string, selectedBy: number): Promise<void>;
+  closeDailyReward(id: number): Promise<void>;
+  openDailyReward(id: number): Promise<void>;
+  
+  // Enhanced Campaigns Management
+  getAdminCampaigns(filters: any, page: number, limit: number): Promise<Campaign[]>;
+  rejectCampaign(id: number, adminId: number): Promise<void>;
+  toggleCampaignCompanyVisibility(id: number): Promise<void>;
+  
+  // Enhanced Affiliates Management
+  getAffiliateApplications(filters: any, page: number, limit: number): Promise<AffiliateApplication[]>;
+  approveAffiliateApplication(id: number, reviewedBy: number, reviewNotes?: string): Promise<void>;
+  rejectAffiliateApplication(id: number, reviewedBy: number, reviewNotes?: string): Promise<void>;
+  
+  // Enhanced Admin Logs
+  getAdminLogs(filters: any, page: number, limit: number): Promise<AdminLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -901,6 +940,200 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(affiliateApplications.id, id));
+  }
+
+  // ===== NEW ADMIN ENDPOINTS IMPLEMENTATIONS =====
+  
+  // Transactions Management
+  async getTransactions(filters: any, page: number, limit: number): Promise<Transaction[]> {
+    const offset = (page - 1) * limit;
+    let query = db.select().from(transactions);
+    
+    // Apply filters if provided
+    if (filters.status) {
+      query = query.where(eq(transactions.status, filters.status));
+    }
+    
+    return await query
+      .orderBy(desc(transactions.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getTransaction(id: number): Promise<Transaction | undefined> {
+    const [transaction] = await db
+      .select()
+      .from(transactions)
+      .where(eq(transactions.id, id));
+    return transaction || undefined;
+  }
+  
+  // Wallets Management
+  async getWallets(filters: any, page: number, limit: number): Promise<Wallet[]> {
+    const offset = (page - 1) * limit;
+    let query = db.select().from(wallets);
+    
+    // Apply filters if provided
+    if (filters.ownerType) {
+      query = query.where(eq(wallets.ownerType, filters.ownerType));
+    }
+    if (filters.address) {
+      query = query.where(eq(wallets.address, filters.address));
+    }
+    
+    return await query
+      .orderBy(desc(wallets.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getBalancesSummary(scope: string, id: string): Promise<any> {
+    // Placeholder implementation - customize based on your balance tracking needs
+    return {
+      totalBalance: "0",
+      tokenBalances: {},
+      scope,
+      id
+    };
+  }
+  
+  // Enhanced Daily Rewards Management
+  async getDailyRewards(page: number, limit: number): Promise<DailyReward[]> {
+    const offset = (page - 1) * limit;
+    return await db
+      .select()
+      .from(dailyRewards)
+      .orderBy(desc(dailyRewards.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async updateDailyRewardAmount(id: number, amount: string): Promise<void> {
+    await db
+      .update(dailyRewards)
+      .set({ rewardAmount: amount })
+      .where(eq(dailyRewards.id, id));
+  }
+
+  async getDailyRewardParticipants(dailyRewardId: number): Promise<DailyParticipant[]> {
+    return await db
+      .select()
+      .from(dailyParticipants)
+      .where(eq(dailyParticipants.dailyRewardId, dailyRewardId))
+      .orderBy(desc(dailyParticipants.joinedAt));
+  }
+
+  async setDailyRewardWinner(dailyRewardId: number, wallet: string, selectedBy: number): Promise<void> {
+    await db
+      .update(dailyRewards)
+      .set({ 
+        winnerWallet: wallet,
+        selectedBy,
+        status: 'closed'
+      })
+      .where(eq(dailyRewards.id, dailyRewardId));
+  }
+
+  async closeDailyReward(id: number): Promise<void> {
+    await db
+      .update(dailyRewards)
+      .set({ status: 'closed' })
+      .where(eq(dailyRewards.id, id));
+  }
+
+  async openDailyReward(id: number): Promise<void> {
+    await db
+      .update(dailyRewards)
+      .set({ status: 'active' })
+      .where(eq(dailyRewards.id, id));
+  }
+  
+  // Enhanced Campaigns Management
+  async getAdminCampaigns(filters: any, page: number, limit: number): Promise<Campaign[]> {
+    const offset = (page - 1) * limit;
+    let query = db.select().from(campaigns);
+    
+    // Apply filters if provided
+    if (filters.status) {
+      query = query.where(eq(campaigns.status, filters.status));
+    }
+    if (filters.type) {
+      query = query.where(eq(campaigns.type, filters.type));
+    }
+    
+    return await query
+      .orderBy(desc(campaigns.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async rejectCampaign(id: number, adminId: number): Promise<void> {
+    await db
+      .update(campaigns)
+      .set({ 
+        status: 'rejected',
+        reviewedBy: adminId.toString(),
+        reviewedAt: new Date()
+      })
+      .where(eq(campaigns.id, id));
+  }
+
+  async toggleCampaignCompanyVisibility(id: number): Promise<void> {
+    // This would toggle a visibility flag for company information
+    // Implementation depends on your specific company visibility field
+    const campaign = await this.getCampaign(id);
+    if (campaign) {
+      await db
+        .update(campaigns)
+        .set({ 
+          // Toggle visibility field when it's added to schema
+          updatedAt: new Date()
+        })
+        .where(eq(campaigns.id, id));
+    }
+  }
+  
+  // Enhanced Affiliates Management
+  async getAffiliateApplications(filters: any, page: number, limit: number): Promise<AffiliateApplication[]> {
+    const offset = (page - 1) * limit;
+    let query = db.select().from(affiliateApplications);
+    
+    // Apply filters if provided
+    if (filters.status) {
+      query = query.where(eq(affiliateApplications.status, filters.status));
+    }
+    
+    return await query
+      .orderBy(desc(affiliateApplications.appliedAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async approveAffiliateApplication(id: number, reviewedBy: number, reviewNotes?: string): Promise<void> {
+    await this.updateAffiliateApplicationStatus(id, 'approved', reviewedBy, reviewNotes);
+  }
+
+  async rejectAffiliateApplication(id: number, reviewedBy: number, reviewNotes?: string): Promise<void> {
+    await this.updateAffiliateApplicationStatus(id, 'rejected', reviewedBy, reviewNotes);
+  }
+  
+  // Enhanced Admin Logs
+  async getAdminLogs(filters: any, page: number, limit: number): Promise<AdminLog[]> {
+    const offset = (page - 1) * limit;
+    let query = db.select().from(adminLogs);
+    
+    // Apply filters if provided
+    if (filters.adminId) {
+      query = query.where(eq(adminLogs.adminId, parseInt(filters.adminId)));
+    }
+    if (filters.action) {
+      query = query.where(eq(adminLogs.action, filters.action));
+    }
+    
+    return await query
+      .orderBy(desc(adminLogs.createdAt))
+      .limit(limit)
+      .offset(offset);
   }
 }
 

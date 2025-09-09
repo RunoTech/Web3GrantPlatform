@@ -112,7 +112,7 @@ export default function AdminSettingsPage() {
             <select
               value={currentValue}
               onChange={(e) => handleSettingChange(setting.key, e.target.value)}
-              className="px-3 py-2 border rounded-lg"
+              className="px-3 py-2 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
             >
               <option value="true">Aktif</option>
               <option value="false">Pasif</option>
@@ -208,7 +208,7 @@ export default function AdminSettingsPage() {
         </div>
         <div className="animate-pulse space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-20 bg-gray-200 rounded-lg" />
+            <div key={i} className="h-20 bg-muted rounded-lg" />
           ))}
         </div>
       </div>

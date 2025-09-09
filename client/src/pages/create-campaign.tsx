@@ -59,6 +59,8 @@ export default function CreateCampaignPage() {
       targetAmount: "0",
       startDate: "",
       endDate: "",
+      // Affiliate referral code
+      referralCode: "",
       // Company information fields
       companyName: "",
       companyRegistrationNumber: "",
@@ -405,6 +407,28 @@ export default function CreateCampaignPage() {
                         className="border-gray-300 dark:border-gray-600"
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Referral Code Input */}
+              <FormField
+                control={form.control}
+                name="referralCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-black dark:text-white">Referral Code (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Enter referral code from an affiliate" 
+                        {...field} 
+                        className="border-gray-300 dark:border-gray-600"
+                      />
+                    </FormControl>
+                    <p className="text-sm text-muted-foreground">
+                      If you have a referral code from an affiliate, enter it here to support them
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -16,7 +16,7 @@ interface HeaderProps {
 
 export default function Header({ currentPage }: HeaderProps) {
   const { t } = useLanguage();
-  const { isConnected } = useWallet();
+  const { isConnected, disconnect } = useWallet();
 
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -126,6 +126,14 @@ export default function Header({ currentPage }: HeaderProps) {
                       <Settings className="w-4 h-4 mr-2" />
                       Profile Settings
                     </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={disconnect}
+                    className="flex items-center w-full text-red-600 hover:text-red-700 focus:text-red-700"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Disconnect Wallet
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

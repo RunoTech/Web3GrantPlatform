@@ -7,6 +7,7 @@ export function useWallet() {
   const [isConnected, setIsConnected] = useState(false);
   const [address, setAddress] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const { toast } = useToast();
 
   const checkConnection = useCallback(async () => {
@@ -23,6 +24,8 @@ export function useWallet() {
       console.error('Error checking wallet connection:', error);
       setAddress(null);
       setIsConnected(false);
+    } finally {
+      setIsInitialized(true);
     }
   }, []);
 
@@ -156,6 +159,7 @@ export function useWallet() {
     isConnected,
     address,
     isConnecting,
+    isInitialized,
     connect,
     disconnect,
   };

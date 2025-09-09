@@ -16,7 +16,7 @@ interface HeaderProps {
 
 export default function Header({ currentPage }: HeaderProps) {
   const { t } = useLanguage();
-  const { isConnected, isLoading } = useWallet();
+  const { isConnected } = useWallet();
 
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -80,8 +80,7 @@ export default function Header({ currentPage }: HeaderProps) {
             <CryptoOnramp />
             <ThemeToggle />
             <LanguageSelector />
-            <WalletConnectButton />
-            {!isLoading && isConnected && (
+            {isConnected && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button 

@@ -7,7 +7,6 @@ export function useWallet() {
   const [isConnected, setIsConnected] = useState(false);
   const [address, setAddress] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   const checkConnection = useCallback(async () => {
@@ -24,8 +23,6 @@ export function useWallet() {
       console.error('Error checking wallet connection:', error);
       setAddress(null);
       setIsConnected(false);
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 
@@ -132,18 +129,9 @@ export function useWallet() {
   }, [toast]);
 
   useEffect(() => {
-    let mounted = true;
-    
-    const initWallet = async () => {
-      if (mounted) {
-        await checkConnection();
-      }
-    };
-    
-    initWallet();
+    checkConnection();
 
     const handleAccountsChanged = (accounts: string[]) => {
-      if (!mounted) return;
       if (accounts.length === 0) {
         disconnect();
       } else if (accounts[0] !== address) {
@@ -160,16 +148,14 @@ export function useWallet() {
     onChainChanged(handleChainChanged);
 
     return () => {
-      mounted = false;
       removeWalletListeners();
     };
-  }, []);  // Remove dependencies to prevent re-runs
+  }, [address, disconnect, checkConnection]);
 
   return {
     isConnected,
     address,
     isConnecting,
-    isLoading,
     connect,
     disconnect,
   };

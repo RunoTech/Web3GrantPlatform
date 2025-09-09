@@ -74,6 +74,16 @@ export default function Header({ currentPage }: HeaderProps) {
             >
               Daily Rewards
             </Link>
+            <Link 
+              href="/affiliate" 
+              className={`font-medium transition-colors uppercase tracking-wide ${
+                currentPage === 'affiliate' 
+                  ? 'text-cyber-cyan font-semibold' 
+                  : 'text-muted-foreground hover:text-cyber-cyan'
+              }`}
+            >
+              Affiliate
+            </Link>
           </nav>
 
           <div className="flex items-center space-x-4">

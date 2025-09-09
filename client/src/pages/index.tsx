@@ -285,6 +285,68 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 🎯 NEW: Affiliate Promotion Section */}
+      <section className="py-16 bg-gradient-to-r from-primary/5 to-primary/10 border-y border-primary/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground uppercase tracking-wider">
+                💰 EARN WITH AFFILIATE PROGRAM
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                Refer friends to DUXXAN and earn rewards for every successful campaign creation and donation. Join our affiliate network today!
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-background/50 backdrop-blur-sm border border-border/50 rounded-lg p-6">
+                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Share2 className="w-8 h-8 text-primary-foreground" />
+                </div>
+                <h3 className="font-bold text-foreground mb-2">Share Your Link</h3>
+                <p className="text-sm text-muted-foreground">Get your unique referral code and share with friends</p>
+              </div>
+              
+              <div className="bg-background/50 backdrop-blur-sm border border-border/50 rounded-lg p-6">
+                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Target className="w-8 h-8 text-primary-foreground" />
+                </div>
+                <h3 className="font-bold text-foreground mb-2">Track Performance</h3>
+                <p className="text-sm text-muted-foreground">Monitor referrals and earnings in real-time dashboard</p>
+              </div>
+              
+              <div className="bg-background/50 backdrop-blur-sm border border-border/50 rounded-lg p-6">
+                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                  <DollarSign className="w-8 h-8 text-primary-foreground" />
+                </div>
+                <h3 className="font-bold text-foreground mb-2">Earn Rewards</h3>
+                <p className="text-sm text-muted-foreground">Get paid for every successful referral activity</p>
+              </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button 
+                asChild
+                size="lg"
+                className="bg-primary hover:bg-primary/90 px-8 py-4 font-bold uppercase tracking-wide shadow-lg hover:scale-105 transition-transform duration-300"
+              >
+                <Link href="/affiliate">
+                  <Share2 className="w-5 h-5 mr-2" />
+                  Start Earning Now
+                </Link>
+              </Button>
+              <Button 
+                variant="outline"
+                size="lg"
+                className="px-8 py-4 font-medium"
+              >
+                Learn More
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Daily Tether Reward Section */}
       <section id="odul-sistemi" className="py-16 bg-gradient-to-b from-surface-2 to-surface relative overflow-hidden">
         {/* Animated Background Elements */}

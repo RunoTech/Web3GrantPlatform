@@ -16,8 +16,21 @@ import {
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-// JWT Secret - in production this should be in environment variables
-const JWT_SECRET = process.env.JWT_SECRET || "duxxan-secret-key-2024";
+// Security: JWT Secret - MUST be set in production
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  if (process.env.NODE_ENV === 'production') {
+    console.error("🚨 CRITICAL: JWT_SECRET environment variable is not set!");
+    console.error("🔑 Please set JWT_SECRET for secure authentication");
+    process.exit(1);
+  } else {
+    console.warn("⚠️  WARNING: JWT_SECRET not set, using development secret");
+    console.warn("🔑 MUST set JWT_SECRET in production!");
+  }
+}
+
+// Use secure secret for production, development fallback for demo
+const JWT_SECRET_VALIDATED = JWT_SECRET || "duxxan-development-secret-key-2024-very-long-and-secure-for-demo-only";
 
 // Admin authentication middleware
 async function authenticateAdmin(req: any, res: any, next: any) {
@@ -27,7 +40,7 @@ async function authenticateAdmin(req: any, res: any, next: any) {
       return res.status(401).json({ error: "Token required" });
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = jwt.verify(token, JWT_SECRET_VALIDATED) as any;
     const admin = await storage.getAdmin(decoded.adminId);
     
     if (!admin || !admin.active) {
@@ -886,7 +899,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Invalid credentials" });
       }
 
-      const token = jwt.sign({ adminId: admin.id }, JWT_SECRET, { expiresIn: "24h" });
+      const token = jwt.sign({ adminId: admin.id }, JWT_SECRET_VALIDATED, { expiresIn: "24h" });
       
       // Log admin login
       await storage.createAdminLog({

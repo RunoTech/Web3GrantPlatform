@@ -37,7 +37,8 @@ import {
   Wallet,
   User,
   BarChart3,
-  Settings
+  Settings,
+  Share2
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 

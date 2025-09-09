@@ -151,23 +151,7 @@ export default function CreateCampaignPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">
-      {/* Navigation Header - Binance Style */}
-      <header className="sticky top-0 z-50 bg-white/95 dark:bg-black/95 backdrop-blur-lg border-b border-yellow-200 dark:border-yellow-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
-                <Heart className="w-6 h-6 text-black" />
-              </div>
-              <span className="text-xl font-bold text-black dark:text-white">DUXXAN</span>
-            </div>
-            <Link href="/" className="flex items-center text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Home
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Header currentPage="create-campaign" />
 
       {/* Campaign Creation Form */}
       <div className="max-w-4xl mx-auto px-4 py-8">

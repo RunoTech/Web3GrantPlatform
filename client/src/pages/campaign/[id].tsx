@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import WalletConnectButton from "@/components/WalletConnectButton";
+import Header from "@/components/Header";
 import { Heart, ArrowLeft, Copy, ExternalLink, Users, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Campaign } from "@shared/schema";
@@ -50,33 +51,8 @@ export default function CampaignDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Navigation Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
-                <Heart className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Web3Bağış
-              </h1>
-            </div>
-
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/" className="text-slate-600 hover:text-slate-800 font-medium transition-colors">
-                Ana Sayfa
-              </Link>
-              <Link href="/campaigns" className="text-slate-600 hover:text-slate-800 font-medium transition-colors">
-                Kampanyalar
-              </Link>
-            </nav>
-
-            <WalletConnectButton />
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background text-foreground">
+      <Header currentPage="campaigns" />
 
       {/* Back Button */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">

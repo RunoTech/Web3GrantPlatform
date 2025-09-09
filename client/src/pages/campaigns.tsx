@@ -7,6 +7,7 @@ import WalletConnectButton from "@/components/WalletConnectButton";
 import CampaignCard from "@/components/CampaignCard";
 import CryptoOnramp from "@/components/CryptoOnramp";
 import LanguageSelector from "@/components/LanguageSelector";
+import Header from "@/components/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Heart, Search, ArrowLeft, CreditCard } from "lucide-react";
@@ -28,52 +29,7 @@ export default function CampaignsPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Navigation Header */}
-      <header className="sticky top-0 z-50 cyber-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link href="/">
-                <Button variant="ghost" size="sm" className="hover:text-cyber-cyan">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  {t('back')}
-                </Button>
-              </Link>
-              
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center neon-border">
-                  <Heart className="w-6 h-6 text-black" />
-                </div>
-                <h1 className="text-xl font-bold neon-text uppercase tracking-wide">
-                  {t('duxxan')}
-                </h1>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <LanguageSelector />
-              <CryptoOnramp 
-                targetAmount={100}
-                targetCurrency="USDT"
-                onSuccess={(txHash) => {
-                  toast({
-                    title: "Kripto Satın Alındı!",
-                    description: "Artık bağış yapabilirsiniz.",
-                  });
-                }}
-                onError={(error) => {
-                  toast({
-                    title: "Hata",
-                    description: error,
-                    variant: "destructive",
-                  });
-                }}
-              />
-              <WalletConnectButton />
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header currentPage="campaigns" />
 
       {/* Header Section */}
       <section className="py-12 cyber-bg">

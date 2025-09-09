@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import AutoPayment from "@/components/AutoPayment";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import LanguageSelector from "@/components/LanguageSelector";
+import Header from "@/components/Header";
 import CryptoOnramp from "@/components/CryptoOnramp";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -86,35 +87,7 @@ export default function PaymentPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Navigation Header */}
-      <header className="sticky top-0 z-50 cyber-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link href="/">
-                <Button variant="ghost" size="sm" className="hover:text-cyber-cyan">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  {t('back')}
-                </Button>
-              </Link>
-              
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center neon-border">
-                  <Heart className="w-6 h-6 text-background" />
-                </div>
-                <h1 className="text-xl font-bold neon-text uppercase tracking-wide">
-                  {t('duxxan')}
-                </h1>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <LanguageSelector />
-              <WalletConnectButton />
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header currentPage="payment" />
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Page Header */}

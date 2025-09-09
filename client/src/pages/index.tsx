@@ -7,6 +7,7 @@ import WalletConnectButton from "@/components/WalletConnectButton";
 import CampaignCard from "@/components/CampaignCard";
 import LanguageSelector from "@/components/LanguageSelector";
 import ThemeToggle from "@/components/ThemeToggle";
+import Header from "@/components/Header";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSettings } from "@/hooks/useSettings";
@@ -87,83 +88,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Navigation Header */}
-      <header className="sticky top-0 z-50 cyber-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-16 h-16 gradient-primary rounded-3xl flex items-center justify-center neon-border relative group shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyber-cyan/40 to-cyber-yellow/40 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                <Heart className="w-10 h-10 icon-on-primary relative z-10 drop-shadow-2xl" />
-              </div>
-              <h1 className="text-xl font-bold neon-text uppercase tracking-wide">
-                {siteTitle}
-              </h1>
-            </div>
-
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/campaigns" className="text-foreground hover:text-cyber-cyan font-bold transition-colors uppercase tracking-wide hover:text-shadow-cyan">
-                {t('campaigns')}
-              </Link>
-              <Link href="/donations" className="text-foreground hover:text-cyber-green font-bold transition-colors uppercase tracking-wide hover:text-shadow-green">
-                {t('donations')}
-              </Link>
-              <Link href="/funds" className="text-foreground hover:text-cyber-purple font-bold transition-colors uppercase tracking-wide hover:text-shadow-purple">
-                {t('funds')}
-              </Link>
-              <Link href="/daily-rewards" className="text-foreground hover:text-cyber-yellow font-bold transition-colors uppercase tracking-wide hover:text-shadow-yellow">
-                Daily Rewards
-              </Link>
-            </nav>
-
-            <div className="flex items-center space-x-3">
-              <ThemeToggle />
-              <LanguageSelector />
-              {isConnected && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="transition-colors hover:text-cyber-yellow text-foreground"
-                    >
-                      <User className="w-5 h-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile" className="flex items-center w-full">
-                        <BarChart3 className="w-4 h-4 mr-2" />
-                        Dashboard Overview
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile?tab=campaigns" className="flex items-center w-full">
-                        <Target className="w-4 h-4 mr-2" />
-                        My Campaigns
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile?tab=rewards" className="flex items-center w-full">
-                        <Trophy className="w-4 h-4 mr-2" />
-                        Daily Rewards
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile?tab=settings" className="flex items-center w-full">
-                        <Settings className="w-4 h-4 mr-2" />
-                        Profile Settings
-                      </Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-              <WalletConnectButton />
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header currentPage="home" />
 
       {/* Referral Banner */}
       {showReferralBanner && referralCode && (

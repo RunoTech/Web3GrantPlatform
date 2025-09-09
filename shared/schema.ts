@@ -217,6 +217,51 @@ export const affiliateApplications = pgTable("affiliate_applications", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Wallets table for tracking wallet information
+export const wallets = pgTable("wallets", {
+  id: serial("id").primaryKey(),
+  address: varchar("address", { length: 42 }).notNull().unique(),
+  ownerType: varchar("owner_type", { length: 20 }), // "account", "campaign", "admin", etc.
+  ownerId: integer("owner_id"), // Reference to the owner entity
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Transactions table for comprehensive transaction tracking
+export const transactions = pgTable("transactions", {
+  id: serial("id").primaryKey(),
+  txHash: varchar("tx_hash", { length: 66 }).notNull().unique(),
+  fromAddress: varchar("from_address", { length: 42 }).notNull(),
+  toAddress: varchar("to_address", { length: 42 }).notNull(),
+  token: varchar("token", { length: 10 }).notNull(), // USDT, ETH, etc.
+  amount: decimal("amount", { precision: 18, scale: 8 }).notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, confirmed, failed
+  campaignId: integer("campaign_id").references(() => campaigns.id),
+  blockNumber: integer("block_number"),
+  gasUsed: varchar("gas_used"),
+  gasPrice: varchar("gas_price"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Daily rewards comprehensive table (replacing dailyEntries/dailyWinners)
+export const dailyRewards = pgTable("daily_rewards", {
+  id: serial("id").primaryKey(),
+  rewardDate: varchar("reward_date", { length: 10 }).notNull().unique(), // YYYY-MM-DD
+  prizeAmountUsdt: decimal("prize_amount_usdt", { precision: 18, scale: 8 }).notNull().default("100"),
+  winnerWallet: varchar("winner_wallet", { length: 42 }),
+  isClosed: boolean("is_closed").default(false),
+  selectedBy: integer("selected_by").references(() => admins.id),
+  selectedAt: timestamp("selected_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Daily participants table
+export const dailyParticipants = pgTable("daily_participants", {
+  id: serial("id").primaryKey(),
+  dailyRewardId: integer("daily_reward_id").notNull().references(() => dailyRewards.id),
+  wallet: varchar("wallet", { length: 42 }).notNull(),
+  joinedAt: timestamp("joined_at").defaultNow(),
+});
+
 // Relations
 export const platformSettingsRelations = relations(platformSettings, ({ one }) => ({
   updatedBy: one(admins, {
@@ -287,6 +332,32 @@ export const affiliateApplicationsRelations = relations(affiliateApplications, (
   reviewer: one(admins, {
     fields: [affiliateApplications.reviewedBy],
     references: [admins.id],
+  }),
+}));
+
+export const walletsRelations = relations(wallets, ({ one }) => ({
+  // Add relations as needed based on ownerType
+}));
+
+export const transactionsRelations = relations(transactions, ({ one }) => ({
+  campaign: one(campaigns, {
+    fields: [transactions.campaignId],
+    references: [campaigns.id],
+  }),
+}));
+
+export const dailyRewardsRelations = relations(dailyRewards, ({ one, many }) => ({
+  selectedBy: one(admins, {
+    fields: [dailyRewards.selectedBy],
+    references: [admins.id],
+  }),
+  participants: many(dailyParticipants),
+}));
+
+export const dailyParticipantsRelations = relations(dailyParticipants, ({ one }) => ({
+  dailyReward: one(dailyRewards, {
+    fields: [dailyParticipants.dailyRewardId],
+    references: [dailyRewards.id],
   }),
 }));
 
@@ -371,6 +442,32 @@ export const insertAffiliateActivitySchema = createInsertSchema(affiliateActivit
   createdAt: true 
 });
 
+export const insertWalletSchema = createInsertSchema(wallets).omit({ 
+  id: true, 
+  createdAt: true 
+});
+
+export const insertTransactionSchema = createInsertSchema(transactions).omit({ 
+  id: true, 
+  createdAt: true 
+});
+
+export const insertDailyRewardSchema = createInsertSchema(dailyRewards).omit({ 
+  id: true, 
+  createdAt: true 
+});
+
+export const insertDailyParticipantSchema = createInsertSchema(dailyParticipants).omit({ 
+  id: true, 
+  joinedAt: true 
+});
+
+export const insertAffiliateApplicationSchema = createInsertSchema(affiliateApplications).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true 
+});
+
 // Types
 export type Admin = typeof admins.$inferSelect;
 export type InsertAdmin = z.infer<typeof insertAdminSchema>;
@@ -398,3 +495,11 @@ export type AffiliateActivity = typeof affiliateActivities.$inferSelect;
 export type InsertAffiliateActivity = z.infer<typeof insertAffiliateActivitySchema>;
 export type AffiliateApplication = typeof affiliateApplications.$inferSelect;
 export type InsertAffiliateApplication = z.infer<typeof insertAffiliateApplicationSchema>;
+export type Wallet = typeof wallets.$inferSelect;
+export type InsertWallet = z.infer<typeof insertWalletSchema>;
+export type Transaction = typeof transactions.$inferSelect;
+export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
+export type DailyReward = typeof dailyRewards.$inferSelect;
+export type InsertDailyReward = z.infer<typeof insertDailyRewardSchema>;
+export type DailyParticipant = typeof dailyParticipants.$inferSelect;
+export type InsertDailyParticipant = z.infer<typeof insertDailyParticipantSchema>;

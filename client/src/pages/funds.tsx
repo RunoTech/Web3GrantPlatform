@@ -1,15 +1,9 @@
-import { useState } from "react";
 import { Link } from "wouter";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
-import WalletConnectButton from "@/components/WalletConnectButton";
-import { useWallet } from "@/hooks/useWallet";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { api } from "@/utils/api";
-import { useToast } from "@/hooks/use-toast";
 import { 
   Heart, 
   ArrowLeft, 
@@ -31,12 +25,6 @@ import type { DailyWinner, Campaign } from "@shared/schema";
 import CampaignCard from "@/components/CampaignCard";
 
 export default function FundsPage() {
-  const { t } = useLanguage();
-  const { isConnected, address } = useWallet();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  
-  const [isJoining, setIsJoining] = useState(false);
 
   // Fetch FUND campaigns
   const { data: fundCampaigns = [], isLoading: fundsLoading } = useQuery<Campaign[]>({
@@ -44,60 +32,6 @@ export default function FundsPage() {
     select: (data) => data.filter(campaign => campaign.campaignType === 'FUND')
   });
 
-  const { data: stats } = useQuery<{ participants: number; date: string }>({
-    queryKey: ["/api/today-stats"],
-  });
-
-  // Check if user has joined today
-  const [hasJoinedToday, setHasJoinedToday] = useState(false);
-
-  const joinRewardMutation = useMutation({
-    mutationFn: () => api.post("/api/join-daily-reward", { wallet: address }),
-    onSuccess: () => {
-      toast({
-        title: "Success!",
-        description: "You have joined the daily reward draw!",
-      });
-      setHasJoinedToday(true);
-      queryClient.invalidateQueries({ queryKey: ["/api/today-stats"] });
-    },
-    onError: (error: any) => {
-      const errorMsg = error.message || "Failed to join the draw";
-      if (errorMsg.includes("Already entered")) {
-        setHasJoinedToday(true);
-        toast({
-          title: "Info",
-          description: "You have already joined the draw today!",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: errorMsg,
-          variant: "destructive",
-        });
-      }
-    },
-  });
-
-  const joinDailyReward = () => {
-    joinRewardMutation.mutate();
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Kopyalandı!",
-      description: "Cüzdan adresi panoya kopyalandı",
-    });
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('tr-TR', {
-      day: '2-digit',
-      month: '2-digit', 
-      year: 'numeric'
-    });
-  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">
@@ -112,85 +46,83 @@ export default function FundsPage() {
         </Button>
 
         {/* Funds Header Section */}
-        <div className="bg-gradient-to-br from-background to-surface rounded-3xl p-12 mb-12 border border-border">
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center space-x-3 mb-6">
-              <DollarSign className="w-16 h-16 text-primary" />
-              <h1 className="text-5xl font-bold text-foreground">
-                Funds
+        <div className="bg-gradient-to-br from-background to-surface rounded-2xl p-6 mb-8 border border-border">
+          <div className="text-center mb-6">
+            <div className="flex items-center justify-center space-x-2 mb-3">
+              <DollarSign className="w-10 h-10 text-primary" />
+              <h1 className="text-3xl font-bold text-foreground">
+                FUNDS
               </h1>
             </div>
-            <p className="text-2xl text-muted-foreground mb-8 max-w-4xl mx-auto">
+            <p className="text-lg text-muted-foreground mb-4 max-w-2xl mx-auto">
               Corporate Fundraising Platform - Unlimited funding campaigns for companies
             </p>
           </div>
 
           {/* Quick Actions */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button 
               asChild
-              size="lg"
-              className="gradient-primary hover:opacity-90 text-primary-foreground font-bold text-lg py-4 px-8"
+              className="gradient-primary hover:opacity-90 text-primary-foreground font-semibold px-6"
             >
               <Link href="/create-campaign?type=fund">
-                <Building className="w-6 h-6 mr-2" />
-                Create Corporate FUND Campaign
+                <Building className="w-4 h-4 mr-2" />
+                Create FUND Campaign
               </Link>
             </Button>
             
             <Button 
               asChild
-              size="lg"
               variant="outline"
-              className="border-primary text-primary hover:bg-primary/10 font-bold text-lg py-4 px-8"
+              className="border-primary text-primary hover:bg-primary/10 font-semibold px-6"
             >
               <Link href="/campaigns">
-                <Trophy className="w-6 h-6 mr-2" />
+                <Trophy className="w-4 h-4 mr-2" />
                 View All Campaigns
               </Link>
             </Button>
           </div>
 
           {/* Info Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            <div className="cyber-card p-6 text-center">
-              <Building className="w-12 h-12 text-primary mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-foreground mb-2">Companies Only</h3>
-              <p className="text-sm text-muted-foreground">FUND campaigns can only be created by registered companies</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <div className="cyber-card p-4 text-center">
+              <Building className="w-8 h-8 text-primary mx-auto mb-2" />
+              <h3 className="text-sm font-bold text-foreground mb-1">Companies Only</h3>
+              <p className="text-xs text-muted-foreground">Only registered companies</p>
             </div>
             
-            <div className="cyber-card p-6 text-center">
-              <Clock className="w-12 h-12 text-cyber-green mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-foreground mb-2">Unlimited</h3>
-              <p className="text-sm text-muted-foreground">FUND campaigns have no end date and remain permanently active</p>
+            <div className="cyber-card p-4 text-center">
+              <Clock className="w-8 h-8 text-cyber-green mx-auto mb-2" />
+              <h3 className="text-sm font-bold text-foreground mb-1">Unlimited</h3>
+              <p className="text-xs text-muted-foreground">No end date</p>
             </div>
             
-            <div className="cyber-card p-6 text-center">
-              <Heart className="w-12 h-12 text-cyber-cyan mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-foreground mb-2">Zero Commission</h3>
-              <p className="text-sm text-muted-foreground">All funds go directly to the company wallet</p>
+            <div className="cyber-card p-4 text-center">
+              <Heart className="w-8 h-8 text-cyber-cyan mx-auto mb-2" />
+              <h3 className="text-sm font-bold text-foreground mb-1">Zero Commission</h3>
+              <p className="text-xs text-muted-foreground">Direct to wallet</p>
             </div>
           </div>
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <Card className="cyber-card p-6 text-center">
-            <DollarSign className="w-12 h-12 text-cyber-yellow mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-foreground mb-2">50 USDT</h3>
-            <p className="text-muted-foreground">Activation Fee</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <Card className="cyber-card p-3 text-center">
+            <DollarSign className="w-6 h-6 text-cyber-yellow mx-auto mb-1" />
+            <h3 className="text-lg font-bold text-foreground">50 USDT</h3>
+            <p className="text-xs text-muted-foreground">Activation Fee</p>
           </Card>
           
-          <Card className="cyber-card p-6 text-center">
-            <Clock className="w-12 h-12 text-cyber-cyan mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-foreground mb-2">∞</h3>
-            <p className="text-muted-foreground">Campaign Duration</p>
+          <Card className="cyber-card p-3 text-center">
+            <Clock className="w-6 h-6 text-cyber-cyan mx-auto mb-1" />
+            <h3 className="text-lg font-bold text-foreground">∞</h3>
+            <p className="text-xs text-muted-foreground">Duration</p>
           </Card>
           
-          <Card className="cyber-card p-6 text-center">
-            <Building className="w-12 h-12 text-cyber-green mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-foreground mb-2">Companies</h3>
-            <p className="text-muted-foreground">Corporate Only</p>
+          <Card className="cyber-card p-3 text-center">
+            <Building className="w-6 h-6 text-cyber-green mx-auto mb-1" />
+            <h3 className="text-lg font-bold text-foreground">Companies</h3>
+            <p className="text-xs text-muted-foreground">Corporate Only</p>
           </Card>
         </div>
 
@@ -257,41 +189,41 @@ export default function FundsPage() {
         </div>
 
         {/* How It Works Section */}
-        <div className="space-y-8 mt-16">
-          <div className="text-center space-y-4">
-            <h2 className="text-3xl font-bold text-foreground uppercase tracking-wide">
-              How It Works for Companies
+        <div className="space-y-6 mt-8">
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-foreground uppercase tracking-wide">
+              How It Works
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="cyber-card p-6 text-center">
-              <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <Building className="w-8 h-8 icon-on-primary" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="cyber-card p-4 text-center">
+              <div className="w-10 h-10 gradient-primary rounded-full flex items-center justify-center mx-auto mb-2">
+                <Building className="w-5 h-5 icon-on-primary" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">1. Company Registration</h3>
-              <p className="text-muted-foreground">
-                Provide company details, wallet address and pay 50 USDT activation fee
+              <h3 className="text-sm font-bold text-foreground mb-1">1. Register</h3>
+              <p className="text-xs text-muted-foreground">
+                Provide company details and pay 50 USDT activation fee
               </p>
             </Card>
 
-            <Card className="cyber-card p-6 text-center">
-              <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <DollarSign className="w-8 h-8 icon-on-primary" />
+            <Card className="cyber-card p-4 text-center">
+              <div className="w-10 h-10 gradient-primary rounded-full flex items-center justify-center mx-auto mb-2">
+                <DollarSign className="w-5 h-5 icon-on-primary" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">2. Create FUND Campaign</h3>
-              <p className="text-muted-foreground">
-                Launch unlimited duration fundraising campaigns for your business
+              <h3 className="text-sm font-bold text-foreground mb-1">2. Create FUND</h3>
+              <p className="text-xs text-muted-foreground">
+                Launch unlimited duration fundraising campaign
               </p>
             </Card>
 
-            <Card className="cyber-card p-6 text-center">
-              <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <Trophy className="w-8 h-8 icon-on-primary" />
+            <Card className="cyber-card p-4 text-center">
+              <div className="w-10 h-10 gradient-primary rounded-full flex items-center justify-center mx-auto mb-2">
+                <Trophy className="w-5 h-5 icon-on-primary" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">3. Receive Direct Funds</h3>
-              <p className="text-muted-foreground">
-                All investments go directly to your company wallet with zero commission
+              <h3 className="text-sm font-bold text-foreground mb-1">3. Receive Funds</h3>
+              <p className="text-xs text-muted-foreground">
+                All investments go directly to your wallet
               </p>
             </Card>
           </div>

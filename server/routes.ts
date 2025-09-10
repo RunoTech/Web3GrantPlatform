@@ -616,18 +616,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "DONATE campaigns must have start and end dates" });
       }
       
-      // Validate credit card payment fields
+      // Validate credit card payment fields with dynamic fees
       if (campaignData.creditCardEnabled) {
-        if (!campaignData.collateralPaid) {
-          return res.status(400).json({ error: "Collateral must be paid before enabling credit card payments" });
-        }
+        // Get dynamic collateral amount from platform settings
+        const collateralSettings = await storage.getPlatformSettings(['credit_card_collateral_amount', 'credit_card_enabled']);
+        const requiredCollateral = parseFloat(collateralSettings.credit_card_collateral_amount || '100');
+        const creditCardFeatureEnabled = collateralSettings.credit_card_enabled === 'true';
         
-        if (!campaignData.collateralAmount || parseFloat(campaignData.collateralAmount) < 50) {
-          return res.status(400).json({ error: "Minimum collateral amount is 50 USDT" });
+        if (!creditCardFeatureEnabled) {
+          return res.status(400).json({ error: "Credit card payment feature is currently disabled" });
         }
         
         if (!campaignData.collateralTxHash) {
           return res.status(400).json({ error: "Collateral transaction hash is required" });
+        }
+        
+        // Verify collateral payment on blockchain (instead of trusting client)
+        try {
+          const verification = await blockchain.verifyPayment(
+            'ethereum',
+            campaignData.collateralTxHash,
+            requiredCollateral.toString(),
+            '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT contract
+            platformWallet
+          );
+          
+          if (!verification.verified) {
+            return res.status(400).json({ 
+              error: `Collateral payment verification failed. Required: ${requiredCollateral} USDT` 
+            });
+          }
+          
+          // Set collateral as paid after successful verification
+          campaignData.collateralPaid = true;
+          campaignData.collateralAmount = requiredCollateral.toString();
+          
+        } catch (error) {
+          console.error('Collateral verification error:', error);
+          return res.status(400).json({ 
+            error: `Failed to verify collateral payment. Please ensure you sent ${requiredCollateral} USDT to the platform wallet.` 
+          });
         }
       }
       
@@ -2074,6 +2102,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching admin logs:", error);
       res.status(500).json({ error: "Failed to fetch admin logs" });
+    }
+  });
+
+  // Get credit card collateral info (public)
+  app.get("/api/credit-card-info", async (req, res) => {
+    try {
+      const settings = await storage.getPlatformSettings([
+        'credit_card_collateral_amount',
+        'credit_card_collateral_token', 
+        'credit_card_enabled'
+      ]);
+      
+      res.json({
+        collateralAmount: parseFloat(settings.credit_card_collateral_amount || '100'),
+        collateralToken: settings.credit_card_collateral_token || 'USDT',
+        enabled: settings.credit_card_enabled === 'true',
+        platformWallet: platformWallet
+      });
+    } catch (error) {
+      console.error('Error fetching credit card info:', error);
+      res.status(500).json({ error: 'Failed to fetch credit card info' });
     }
   });
 

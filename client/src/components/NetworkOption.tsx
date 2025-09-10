@@ -47,7 +47,7 @@ export default function NetworkOption({
           colorClass.gradient
         )}>
           <span className="text-white font-bold">
-            {network === 'ethereum' ? 'ETH' : 'BSC'}
+            {network === 'ethereum' ? 'USDT' : 'BSC'}
           </span>
         </div>
         <div className="text-left">

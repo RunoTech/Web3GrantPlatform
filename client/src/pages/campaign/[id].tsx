@@ -108,7 +108,7 @@ export default function CampaignDetailPage() {
                       <p className="text-sm text-slate-500">Toplanan</p>
                     </div>
                     <p className="text-2xl font-bold text-slate-800" data-testid="total-donations">
-                      {campaign.totalDonations} ETH
+                      {campaign.totalDonations} USDT
                     </p>
                   </div>
                   <div className="text-center p-4 bg-white rounded-2xl">

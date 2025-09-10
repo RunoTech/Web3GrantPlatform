@@ -616,6 +616,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "DONATE campaigns must have start and end dates" });
       }
       
+      // Validate credit card payment fields
+      if (campaignData.creditCardEnabled) {
+        if (!campaignData.collateralPaid) {
+          return res.status(400).json({ error: "Collateral must be paid before enabling credit card payments" });
+        }
+        
+        if (!campaignData.collateralAmount || parseFloat(campaignData.collateralAmount) < 50) {
+          return res.status(400).json({ error: "Minimum collateral amount is 50 USDT" });
+        }
+        
+        if (!campaignData.collateralTxHash) {
+          return res.status(400).json({ error: "Collateral transaction hash is required" });
+        }
+      }
+      
       // Check if owner account is active (for now skip this requirement)
       // const account = await storage.getAccount(campaignData.ownerWallet);
       // if (!account || !account.active) {

@@ -51,36 +51,36 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
         </div>
         
         {/* Campaign Content */}
-        <div className="p-6 space-y-4">
-          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 transition-colors line-clamp-2">
+        <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 transition-colors line-clamp-2">
             {campaign.title}
           </h3>
-          <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed line-clamp-3">
+          <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm leading-relaxed line-clamp-3">
             {campaign.description}
           </p>
           
           {/* Campaign Stats */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+          <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-slate-100">
             <div className="flex items-center space-x-1">
-              <Target className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-              <div className="space-y-1">
+              <Target className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 dark:text-gray-400" />
+              <div className="space-y-0.5 sm:space-y-1">
                 <p className="text-xs text-gray-500 dark:text-gray-400">Toplanan</p>
-                <p className="font-semibold text-gray-800 dark:text-gray-100">{parseFloat(campaign.totalDonations || "0").toFixed(2)} USDT</p>
+                <p className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-100">{parseFloat(campaign.totalDonations || "0").toFixed(2)} USDT</p>
               </div>
             </div>
             <div className="flex items-center space-x-1">
-              <Users className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-              <div className="space-y-1 text-right">
+              <Users className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 dark:text-gray-400" />
+              <div className="space-y-0.5 sm:space-y-1 text-right">
                 <p className="text-xs text-gray-500 dark:text-gray-400">Destekçi</p>
-                <p className="font-semibold text-gray-800 dark:text-gray-100">{campaign.donationCount}</p>
+                <p className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-100">{campaign.donationCount}</p>
               </div>
             </div>
           </div>
           
           {/* Owner Info */}
-          <div className="flex items-center space-x-2 pt-2">
-            <div className="w-6 h-6 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full"></div>
-            <span className="text-xs text-slate-500 font-mono">
+          <div className="flex items-center space-x-2 pt-1 sm:pt-2">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex-shrink-0"></div>
+            <span className="text-xs text-slate-500 font-mono truncate">
               {campaign.ownerWallet.slice(0, 6)}...{campaign.ownerWallet.slice(-4)}
             </span>
           </div>

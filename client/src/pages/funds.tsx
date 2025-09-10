@@ -46,24 +46,24 @@ export default function FundsPage() {
         </Button>
 
         {/* Funds Header Section */}
-        <div className="bg-gradient-to-br from-background to-surface rounded-2xl p-6 mb-8 border border-border">
-          <div className="text-center mb-6">
-            <div className="flex items-center justify-center space-x-2 mb-3">
-              <DollarSign className="w-10 h-10 text-primary" />
-              <h1 className="text-3xl font-bold text-foreground">
+        <div className="bg-gradient-to-br from-background to-surface rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 border border-border">
+          <div className="text-center mb-4 sm:mb-6">
+            <div className="flex items-center justify-center space-x-2 mb-2 sm:mb-3">
+              <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
                 FUNDS
               </h1>
             </div>
-            <p className="text-lg text-muted-foreground mb-4 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-muted-foreground mb-3 sm:mb-4 max-w-2xl mx-auto px-4">
               Corporate Fundraising Platform - Unlimited funding campaigns for companies
             </p>
           </div>
 
           {/* Quick Actions */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4">
             <Button 
               asChild
-              className="gradient-primary hover:opacity-90 text-primary-foreground font-semibold px-6"
+              className="gradient-primary hover:opacity-90 text-primary-foreground font-semibold px-4 sm:px-6 py-2 sm:py-3 w-full sm:w-auto text-sm sm:text-base"
             >
               <Link href="/create-campaign?type=fund">
                 <Building className="w-4 h-4 mr-2" />
@@ -74,7 +74,7 @@ export default function FundsPage() {
             <Button 
               asChild
               variant="outline"
-              className="border-primary text-primary hover:bg-primary/10 font-semibold px-6"
+              className="border-primary text-primary hover:bg-primary/10 font-semibold px-4 sm:px-6 py-2 sm:py-3 w-full sm:w-auto text-sm sm:text-base"
             >
               <Link href="/campaigns">
                 <Trophy className="w-4 h-4 mr-2" />
@@ -84,10 +84,10 @@ export default function FundsPage() {
           </div>
 
           {/* Info Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-            <div className="cyber-card p-4 text-center">
-              <Building className="w-8 h-8 text-primary mx-auto mb-2" />
-              <h3 className="text-sm font-bold text-foreground mb-1">Companies Only</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-4 sm:mt-6">
+            <div className="cyber-card p-3 sm:p-4 text-center">
+              <Building className="w-6 h-6 sm:w-8 sm:h-8 text-primary mx-auto mb-1 sm:mb-2" />
+              <h3 className="text-xs sm:text-sm font-bold text-foreground mb-1">Companies Only</h3>
               <p className="text-xs text-muted-foreground">Only registered companies</p>
             </div>
             

@@ -5,7 +5,8 @@ import ThemeToggle from "@/components/ThemeToggle";
 import CryptoOnramp from "@/components/CryptoOnramp";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useWallet } from "@/hooks/useWallet";
-import { Heart, User, Settings, BarChart3, Target, Trophy, Users, LogOut, ChevronDown } from "lucide-react";
+import { Heart, User, Settings, BarChart3, Target, Trophy, Users, LogOut, ChevronDown, Menu, X } from "lucide-react";
+import { useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -17,23 +18,35 @@ interface HeaderProps {
 export default function Header({ currentPage }: HeaderProps) {
   const { t } = useLanguage();
   const { isConnected, disconnect } = useWallet();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center h-16">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center neon-border">
-              <Heart className="w-6 h-6 text-black" />
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-16">
+          <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 gradient-primary rounded-lg flex items-center justify-center neon-border">
+              <Heart className="w-4 h-4 sm:w-6 sm:h-6 text-black" />
             </div>
             <Link href="/">
-              <h1 className="text-xl font-bold text-foreground neon-text uppercase tracking-wide cursor-pointer">
+              <h1 className="text-lg sm:text-xl font-bold text-foreground neon-text uppercase tracking-wide cursor-pointer">
                 {t('duxxan')}
               </h1>
             </Link>
           </div>
 
-          <nav className="hidden md:flex items-center space-x-16 mx-20">
+          {/* Mobile menu button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="md:hidden p-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle mobile menu"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </Button>
+
+          <nav className="hidden md:flex items-center space-x-4 lg:space-x-8 flex-1 justify-center max-w-2xl">
             <Link 
               href="/donations" 
               className={`font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
@@ -76,7 +89,7 @@ export default function Header({ currentPage }: HeaderProps) {
             </Link>
           </nav>
 
-          <div className="flex items-center space-x-8 ml-auto">
+          <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-8 flex-shrink-0">
             <CryptoOnramp />
             <ThemeToggle />
             <LanguageSelector />
@@ -141,6 +154,90 @@ export default function Header({ currentPage }: HeaderProps) {
             <WalletConnectButton />
           </div>
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-background/95 backdrop-blur-lg border-t border-border">
+            <nav className="px-4 py-4 space-y-3">
+              <Link 
+                href="/donations" 
+                className={`block py-2 px-3 rounded-lg font-semibold transition-colors duration-200 uppercase tracking-wide ${
+                  currentPage === 'donations' 
+                    ? 'text-primary bg-primary/10' 
+                    : 'text-muted-foreground hover:text-primary hover:bg-surface'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('donations')}
+              </Link>
+              <Link 
+                href="/funds" 
+                className={`block py-2 px-3 rounded-lg font-semibold transition-colors duration-200 uppercase tracking-wide ${
+                  currentPage === 'funds' 
+                    ? 'text-primary bg-primary/10' 
+                    : 'text-muted-foreground hover:text-primary hover:bg-surface'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('funds')}
+              </Link>
+              <Link 
+                href="/daily-rewards" 
+                className={`block py-2 px-3 rounded-lg font-semibold transition-colors duration-200 uppercase tracking-wide ${
+                  currentPage === 'daily-rewards' 
+                    ? 'text-primary bg-primary/10' 
+                    : 'text-muted-foreground hover:text-primary hover:bg-surface'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Daily Rewards
+              </Link>
+              <Link 
+                href="/affiliate" 
+                className={`block py-2 px-3 rounded-lg font-semibold transition-colors duration-200 uppercase tracking-wide ${
+                  currentPage === 'affiliate' 
+                    ? 'text-primary bg-primary/10' 
+                    : 'text-muted-foreground hover:text-primary hover:bg-surface'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Affiliate
+              </Link>
+              
+              {isConnected && (
+                <div className="pt-3 border-t border-border space-y-2">
+                  <Link 
+                    href="/profile" 
+                    className="block py-2 px-3 rounded-lg text-muted-foreground hover:text-primary hover:bg-surface font-semibold"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <BarChart3 className="w-4 h-4 mr-2 inline" />
+                    Dashboard Overview
+                  </Link>
+                  <Link 
+                    href="/profile?tab=campaigns" 
+                    className="block py-2 px-3 rounded-lg text-muted-foreground hover:text-primary hover:bg-surface font-semibold"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Target className="w-4 h-4 mr-2 inline" />
+                    My Campaigns
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start py-2 px-3 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 font-semibold"
+                    onClick={() => {
+                      disconnect();
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Disconnect Wallet
+                  </Button>
+                </div>
+              )}
+            </nav>
+          </div>
+        )}
       </div>
     </header>
   );

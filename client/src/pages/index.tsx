@@ -112,51 +112,51 @@ export default function HomePage() {
       )}
 
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden bg-surface">
+      <section className="relative py-8 sm:py-16 lg:py-20 overflow-hidden bg-surface">
         <div className="absolute inset-0">
-          <div className="absolute top-20 left-20 w-32 h-32 cyber-cyan-bg rounded-full blur-3xl opacity-20"></div>
-          <div className="absolute bottom-20 right-20 w-40 h-40 cyber-purple-bg rounded-full blur-3xl opacity-20"></div>
-          <div className="absolute top-1/2 left-1/3 w-24 h-24 cyber-green-bg rounded-full blur-3xl opacity-20"></div>
+          <div className="absolute top-10 sm:top-20 left-4 sm:left-20 w-16 sm:w-32 h-16 sm:h-32 cyber-cyan-bg rounded-full blur-3xl opacity-20"></div>
+          <div className="absolute bottom-10 sm:bottom-20 right-4 sm:right-20 w-20 sm:w-40 h-20 sm:h-40 cyber-purple-bg rounded-full blur-3xl opacity-20"></div>
+          <div className="absolute top-1/2 left-1/4 sm:left-1/3 w-12 sm:w-24 h-12 sm:h-24 cyber-green-bg rounded-full blur-3xl opacity-20"></div>
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-12">
-            <div className="w-40 h-40 gradient-primary rounded-3xl flex items-center justify-center mx-auto neon-border shadow-2xl">
-              <Heart className="w-20 h-20 text-black drop-shadow-2xl" />
+          <div className="text-center space-y-6 sm:space-y-8 lg:space-y-12">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 gradient-primary rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto neon-border shadow-2xl">
+              <Heart className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 text-black drop-shadow-2xl" />
             </div>
             
-            <div className="space-y-6">
-              <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight tracking-wider uppercase">
+            <div className="space-y-4 sm:space-y-6">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground leading-tight tracking-wider uppercase">
                 <span className="neon-text">
                   {t('hero.title')}
                 </span>
               </h1>
               
-              <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed px-4">
                 {t('hero.subtitle')}
               </p>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-8 justify-center items-center pt-8">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 lg:gap-8 justify-center items-center pt-6 sm:pt-8 px-4">
               <Button 
                 asChild
                 size="lg"
-                className="cyber-cyan-bg px-8 py-4 font-bold uppercase tracking-wide btn-cyber shadow-2xl hover:scale-105 transition-transform duration-300"
+                className="cyber-cyan-bg px-4 sm:px-6 lg:px-8 py-3 sm:py-4 font-bold text-sm sm:text-base uppercase tracking-wide btn-cyber shadow-2xl hover:scale-105 transition-transform duration-300 w-full sm:w-auto"
                 data-testid="button-create-campaign"
               >
                 <Link href="/create-campaign">
-                  <Target className="w-6 h-6 mr-2 text-black" />
+                  <Target className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2 text-black" />
                   {t('hero.create_campaign')}
                 </Link>
               </Button>
               <Button 
                 asChild
                 size="lg"
-                className="btn-cyber px-8 py-4 shadow-2xl hover:scale-105 transition-transform duration-300"
+                className="btn-cyber px-4 sm:px-6 lg:px-8 py-3 sm:py-4 font-bold text-sm sm:text-base shadow-2xl hover:scale-105 transition-transform duration-300 w-full sm:w-auto"
                 data-testid="button-explore-campaigns"
               >
                 <Link href="/campaigns">
-                  <Search className="w-6 h-6 mr-2 text-black" />
+                  <Search className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2 text-black" />
                   {t('hero.explore_campaigns')}
                 </Link>
               </Button>
@@ -166,34 +166,34 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-surface-2">
+      <section className="py-12 sm:py-16 lg:py-20 bg-surface-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-8 mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold text-foreground uppercase tracking-wider">
+          <div className="text-center space-y-4 sm:space-y-6 lg:space-y-8 mb-12 sm:mb-16 lg:mb-20">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground uppercase tracking-wider">
               {t('features.why_title')}
             </h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto px-4">
               {t('features.subtitle')}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="cyber-card p-8 text-center group hover:scale-105 transition-transform duration-300">
-              <div className="w-24 h-24 cyber-cyan-bg rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl neon-border">
-                <Shield className="w-12 h-12 text-black drop-shadow-2xl" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="cyber-card p-4 sm:p-6 lg:p-8 text-center group hover:scale-105 transition-transform duration-300">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 cyber-cyan-bg rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-2xl neon-border">
+                <Shield className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-black drop-shadow-2xl" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.blockchain_security')}</h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 sm:mb-4 uppercase tracking-wide">{t('features.blockchain_security')}</h3>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                 {t('features.blockchain_desc')}
               </p>
             </div>
 
-            <div className="cyber-card p-8 text-center group hover:scale-105 transition-transform duration-300">
-              <div className="w-24 h-24 cyber-green-bg rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl neon-border">
-                <DollarSign className="w-12 h-12 text-black drop-shadow-2xl" />
+            <div className="cyber-card p-4 sm:p-6 lg:p-8 text-center group hover:scale-105 transition-transform duration-300">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 cyber-green-bg rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-2xl neon-border">
+                <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-black drop-shadow-2xl" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.commission_free')}</h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 sm:mb-4 uppercase tracking-wide">{t('features.commission_free')}</h3>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                 {t('features.commission_desc')}
               </p>
             </div>

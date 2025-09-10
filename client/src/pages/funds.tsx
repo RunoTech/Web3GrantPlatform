@@ -27,7 +27,8 @@ import {
   Coins,
   Building
 } from "lucide-react";
-import type { DailyWinner } from "@shared/schema";
+import type { DailyWinner, Campaign } from "@shared/schema";
+import CampaignCard from "@/components/CampaignCard";
 
 export default function FundsPage() {
   const { t } = useLanguage();
@@ -37,8 +38,10 @@ export default function FundsPage() {
   
   const [isJoining, setIsJoining] = useState(false);
 
-  const { data: lastWinners = [], isLoading: winnersLoading } = useQuery<DailyWinner[]>({
-    queryKey: ["/api/get-last-winners"],
+  // Fetch FUND campaigns
+  const { data: fundCampaigns = [], isLoading: fundsLoading } = useQuery<Campaign[]>({
+    queryKey: ["/api/get-campaigns"],
+    select: (data) => data.filter(campaign => campaign.campaignType === 'FUND')
   });
 
   const { data: stats } = useQuery<{ participants: number; date: string }>({
@@ -195,92 +198,60 @@ export default function FundsPage() {
         <div className="space-y-8">
           <div className="text-center space-y-4">
             <h2 className="text-3xl font-bold text-foreground uppercase tracking-wide">
-              Recent Corporate Fundings
+              Active Corporate FUND Campaigns
             </h2>
             <p className="text-muted-foreground">
-              Latest successful corporate fundraising campaigns
+              Unlimited duration corporate fundraising campaigns
             </p>
           </div>
 
-          {winnersLoading ? (
+          {fundsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
                 <Card key={i} className="cyber-card p-6 animate-pulse">
                   <div className="space-y-4">
-                    <div className="w-12 h-12 bg-muted rounded-full mx-auto"></div>
-                    <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
-                    <div className="h-3 bg-muted rounded w-1/2 mx-auto"></div>
+                    <div className="w-full h-48 bg-muted rounded-xl"></div>
+                    <div className="h-6 bg-muted rounded w-3/4"></div>
+                    <div className="h-4 bg-muted rounded w-full"></div>
+                    <div className="h-4 bg-muted rounded w-2/3"></div>
                   </div>
                 </Card>
               ))}
             </div>
-          ) : lastWinners.length > 0 ? (
+          ) : fundCampaigns.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {lastWinners.map((winner, index) => (
-                <Card key={winner.id} className="cyber-card p-6 hover:scale-105 transition-all duration-300">
-                  <div className="text-center space-y-4">
-                    <div className="relative">
-                      <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${
-                        index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
-                        index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-500' :
-                        index === 2 ? 'bg-gradient-to-r from-orange-400 to-orange-600' :
-                        'gradient-primary'
-                      }`}>
-                        {index < 3 ? (
-                          <Trophy className="w-8 h-8 text-white dark:text-white" />
-                        ) : (
-                          <Award className="w-8 h-8 text-white dark:text-white" />
-                        )}
-                      </div>
-                      {index < 3 && (
-                        <Badge className={`absolute -top-2 -right-2 ${
-                          index === 0 ? 'bg-yellow-500' :
-                          index === 1 ? 'bg-gray-400' :
-                          'bg-orange-500'
-                        }`}>
-                          #{index + 1}
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-center space-x-2">
-                        <DollarSign className="w-5 h-5 text-cyber-yellow" />
-                        <span className="text-2xl font-bold text-foreground">
-                          {parseFloat(winner.amount).toFixed(0)} USDT
-                        </span>
-                      </div>
-                      
-                      <div 
-                        className="bg-surface-2 rounded-lg p-3 cursor-pointer hover:bg-surface transition-colors group"
-                        onClick={() => copyToClipboard(winner.wallet)}
-                        data-testid={`winner-wallet-${winner.id}`}
-                      >
-                        <div className="flex items-center justify-center space-x-2">
-                          <WalletIcon className="w-4 h-4 text-muted-foreground" />
-                          <span className="font-mono text-sm text-muted-foreground group-hover:text-foreground">
-                            {winner.wallet.slice(0, 6)}...{winner.wallet.slice(-4)}
-                          </span>
-                          <Copy className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-center space-x-1 text-sm text-muted-foreground">
-                        <Calendar className="w-4 h-4" />
-                        <span>{formatDate(winner.date)}</span>
-                      </div>
-                    </div>
+              {fundCampaigns.map((campaign) => (
+                <div key={campaign.id} className="relative">
+                  <CampaignCard campaign={campaign} />
+                  {/* Company Badge */}
+                  <div className="absolute top-4 left-4 z-10">
+                    <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 shadow-lg">
+                      <Building className="w-3 h-3 mr-1" />
+                      COMPANY FUND
+                    </Badge>
                   </div>
-                </Card>
+                  {/* Target Amount Badge */}
+                  <div className="absolute top-4 right-4 z-10">
+                    <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white border-0 shadow-lg">
+                      Target: {parseFloat(campaign.targetAmount || '0').toLocaleString()} USDT
+                    </Badge>
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
             <Card className="cyber-card p-12 text-center">
               <Building className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-foreground mb-2">No Corporate Campaigns Yet</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl font-semibold text-foreground mb-2">No Corporate FUND Campaigns Yet</h3>
+              <p className="text-muted-foreground mb-6">
                 Be the first company to create a FUND campaign on our platform!
               </p>
+              <Button asChild className="gradient-primary">
+                <Link href="/create-campaign?type=fund">
+                  <Building className="w-4 h-4 mr-2" />
+                  Create Company FUND
+                </Link>
+              </Button>
             </Card>
           )}
         </div>

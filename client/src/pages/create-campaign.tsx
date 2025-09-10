@@ -13,7 +13,7 @@ import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { api } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, ArrowLeft, Building, Users, Calendar, CheckCircle, Lock } from "lucide-react";
+import { Heart, ArrowLeft, Building, Users, Calendar, CheckCircle, Lock, CreditCard, Shield, DollarSign } from "lucide-react";
 
 // Add Header component import
 import Header from "@/components/Header";
@@ -38,6 +38,10 @@ export default function CreateCampaignPage() {
 
   // Lock campaign type if coming from specific page
   const isLocked = typeParam !== null;
+  
+  // Credit card payment state
+  const [creditCardEnabled, setCreditCardEnabled] = useState(false);
+  const [collateralPaid, setCollateralPaid] = useState(false);
 
   // Creator type options based on campaign type
   const getCreatorTypeOptions = () => {
@@ -72,6 +76,11 @@ export default function CreateCampaignPage() {
       companyFoundedYear: "",
       companyIndustry: "",
       companyEmployeeCount: "",
+      // Credit card payment fields
+      creditCardEnabled: false,
+      collateralAmount: "100", // Default 100 USDT collateral
+      collateralTxHash: "",
+      collateralPaid: false,
     },
   });
 
@@ -99,6 +108,37 @@ export default function CreateCampaignPage() {
       });
     },
   });
+
+  // Mock collateral payment function
+  const handleCollateralPayment = () => {
+    const collateralAmount = form.getValues("collateralAmount");
+    if (!collateralAmount || parseFloat(collateralAmount) < 50) {
+      toast({
+        title: "Error",
+        description: "Minimum collateral amount is 50 USDT",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Simulate payment processing
+    const mockTxHash = `0x${Math.random().toString(16).substr(2, 64)}`;
+    
+    setTimeout(() => {
+      setCollateralPaid(true);
+      form.setValue("collateralTxHash", mockTxHash);
+      form.setValue("collateralPaid", true);
+      toast({
+        title: "Success!",
+        description: `Collateral payment of ${collateralAmount} USDT confirmed`,
+      });
+    }, 2000);
+
+    toast({
+      title: "Processing...",
+      description: "Confirming your collateral payment",
+    });
+  };
 
   const onSubmit = (data: any) => {
     // Validate FUND/DONATE rules
@@ -129,7 +169,21 @@ export default function CreateCampaignPage() {
       return;
     }
 
-    createCampaignMutation.mutate(data);
+    // Validate credit card payment setup
+    if (data.creditCardEnabled && !data.collateralPaid) {
+      toast({
+        title: "Error",
+        description: "You must pay collateral before enabling credit card payments",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createCampaignMutation.mutate({
+      ...data,
+      creditCardEnabled,
+      collateralPaid,
+    });
   };
 
   if (!isConnected) {
@@ -675,11 +729,108 @@ export default function CreateCampaignPage() {
                 </div>
               )}
 
+              {/* Credit Card Payment Section */}
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <CreditCard className="w-6 h-6 text-yellow-600" />
+                  <h3 className="text-lg font-semibold text-black dark:text-white">Credit Card Payment Option</h3>
+                </div>
+                
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
+                  <div className="flex items-start space-x-3">
+                    <Shield className="w-5 h-5 text-yellow-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-yellow-800 dark:text-yellow-200 mb-1">Enable Credit Card Donations</h4>
+                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                        Allow donors to contribute using credit cards. Requires a collateral payment to activate this feature.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Enable Credit Card Toggle */}
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id="creditCardEnabled"
+                      checked={creditCardEnabled}
+                      onChange={(e) => {
+                        setCreditCardEnabled(e.target.checked);
+                        form.setValue("creditCardEnabled", e.target.checked);
+                      }}
+                      className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+                      data-testid="checkbox-credit-card-enabled"
+                    />
+                    <label htmlFor="creditCardEnabled" className="text-black dark:text-white font-medium cursor-pointer">
+                      Enable credit card payments for this campaign
+                    </label>
+                  </div>
+
+                  {/* Collateral Section */}
+                  {creditCardEnabled && (
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <DollarSign className="w-5 h-5 text-green-600" />
+                        <h4 className="font-medium text-black dark:text-white">Collateral Payment Required</h4>
+                      </div>
+                      
+                      <FormField
+                        control={form.control}
+                        name="collateralAmount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-black dark:text-white">Collateral Amount (USDT)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number"
+                                min="50"
+                                step="1"
+                                placeholder="100" 
+                                {...field} 
+                                className="border-gray-300 dark:border-gray-600"
+                                data-testid="input-collateral-amount"
+                              />
+                            </FormControl>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Minimum 50 USDT collateral required</p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {!collateralPaid && (
+                        <Button
+                          type="button"
+                          onClick={handleCollateralPayment}
+                          className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold"
+                          data-testid="button-pay-collateral"
+                        >
+                          Pay Collateral ({form.watch("collateralAmount") || "100"} USDT)
+                        </Button>
+                      )}
+
+                      {collateralPaid && (
+                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                          <div className="flex items-center space-x-2">
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                            <span className="text-green-800 dark:text-green-200 font-medium">Collateral Paid Successfully</span>
+                          </div>
+                          <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+                            TX: {form.watch("collateralTxHash")?.slice(0, 20)}...
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Submit Button */}
               <Button 
                 type="submit" 
                 className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
                 disabled={createCampaignMutation.isPending}
+                data-testid="button-create-campaign"
               >
                 {createCampaignMutation.isPending ? "Creating..." : "Create Campaign"}
               </Button>

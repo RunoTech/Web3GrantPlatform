@@ -623,10 +623,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate credit card payment fields with dynamic fees
       if (campaignData.creditCardEnabled) {
         // Get dynamic collateral amount from platform settings
-        const collateralSettings = await storage.getPlatformSettings('payment');
+        const collateralSettings = await storage.getPlatformSettings('payments');
         const collateralAmountSetting = collateralSettings.find(s => s.key === 'credit_card_collateral_amount');
         const creditCardEnabledSetting = collateralSettings.find(s => s.key === 'credit_card_enabled');
-        const requiredCollateral = parseFloat(collateralAmountSetting?.value || '100');
+        const requiredCollateral = parseFloat(collateralAmountSetting?.value || '2');
         const creditCardFeatureEnabled = creditCardEnabledSetting?.value === 'true';
         
         if (!creditCardFeatureEnabled) {

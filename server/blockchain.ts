@@ -194,6 +194,9 @@ export async function testRpcConnection() {
 /**
  * Real-time wallet listener using WebSocket
  */
+// Active campaign listeners tracker
+const activeCampaignListeners = new Map<number, any>();
+
 export async function startWalletListener(platformWallet: string, onPaymentReceived: (payment: any) => void) {
   try {
     const checksummedWallet = ethers.getAddress(platformWallet);
@@ -253,8 +256,8 @@ export async function startWalletListener(platformWallet: string, onPaymentRecei
       console.error("Provider error:", error);
     });
     
-    if (provider instanceof ethers.WebSocketProvider) {
-      provider.websocket.on("close", () => {
+    if (provider instanceof ethers.WebSocketProvider && (provider as any).websocket) {
+      (provider as any).websocket.on("close", () => {
         console.warn("WebSocket connection closed, attempting to reconnect...");
         // Auto-reconnect logic could be added here
       });
@@ -266,4 +269,164 @@ export async function startWalletListener(platformWallet: string, onPaymentRecei
     console.error("Failed to start wallet listener:", error);
     return { success: false, error: String(error) };
   }
+}
+
+/**
+ * Start listening to a specific campaign's wallet for donations
+ */
+export async function startCampaignListener(
+  campaignId: number, 
+  ownerWallet: string, 
+  onDonationReceived: (donation: any) => void
+) {
+  try {
+    const checksummedWallet = ethers.getAddress(ownerWallet);
+    console.log(`🔍 Starting campaign listener for Campaign #${campaignId}: ${checksummedWallet}`);
+    
+    // Skip if already listening to this campaign
+    if (activeCampaignListeners.has(campaignId)) {
+      console.log(`⚠️  Already listening to Campaign #${campaignId}`);
+      return { success: true, status: "already_active" };
+    }
+    
+    // Try WebSocket first for real-time monitoring
+    let provider;
+    try {
+      provider = new ethers.WebSocketProvider(networks.ethereum.wsUrl);
+      console.log(`🌐 Connected via WebSocket for Campaign #${campaignId}`);
+    } catch (wsError) {
+      console.warn(`WebSocket failed for Campaign #${campaignId}, falling back to HTTP RPC`);
+      provider = new ethers.JsonRpcProvider(networks.ethereum.rpcUrl);
+    }
+    
+    const usdtContract = new ethers.Contract(TOKENS.ethereum.USDT, ERC20_ABI, provider);
+    
+    // Listen for USDT transfers TO this campaign wallet
+    const transferFilter = usdtContract.filters.Transfer(null, checksummedWallet);
+    
+    console.log(`📡 Listening for USDT donations to Campaign #${campaignId}: ${checksummedWallet}`);
+    
+    const listenerCallback = async (from: string, to: string, value: any, event: any) => {
+      try {
+        const amount = ethers.formatUnits(value, 6); // USDT has 6 decimals
+        console.log(`💰 DONATION DETECTED! Campaign #${campaignId}: ${amount} USDT from ${from}`);
+        console.log(`🔗 Transaction: ${event.transactionHash}`);
+        
+        const donation = {
+          campaignId,
+          txHash: event.transactionHash,
+          donorWallet: from,
+          ownerWallet: to,
+          amount,
+          token: 'USDT',
+          network: 'ethereum',
+          blockNumber: event.blockNumber,
+          timestamp: new Date()
+        };
+        
+        // Call the callback function to process donation
+        await onDonationReceived(donation);
+        
+      } catch (error) {
+        console.error(`Error processing donation for Campaign #${campaignId}:`, error);
+      }
+    };
+    
+    // Start listening
+    usdtContract.on(transferFilter, listenerCallback);
+    
+    // Store the listener info for cleanup later
+    activeCampaignListeners.set(campaignId, {
+      provider,
+      contract: usdtContract,
+      filter: transferFilter,
+      callback: listenerCallback,
+      wallet: checksummedWallet
+    });
+    
+    return { 
+      success: true, 
+      status: "active",
+      provider: provider instanceof ethers.WebSocketProvider ? "websocket" : "http" 
+    };
+    
+  } catch (error) {
+    console.error(`Failed to start campaign listener for #${campaignId}:`, error);
+    return { success: false, error: String(error) };
+  }
+}
+
+/**
+ * Stop listening to a specific campaign's wallet
+ */
+export async function stopCampaignListener(campaignId: number) {
+  try {
+    const listenerInfo = activeCampaignListeners.get(campaignId);
+    if (!listenerInfo) {
+      console.log(`⚠️  No active listener for Campaign #${campaignId}`);
+      return { success: true, status: "not_active" };
+    }
+    
+    // Remove the event listener
+    listenerInfo.contract.off(listenerInfo.filter, listenerInfo.callback);
+    
+    // Remove from active listeners
+    activeCampaignListeners.delete(campaignId);
+    
+    console.log(`🛑 Stopped listening to Campaign #${campaignId}: ${listenerInfo.wallet}`);
+    
+    return { success: true, status: "stopped" };
+    
+  } catch (error) {
+    console.error(`Failed to stop campaign listener for #${campaignId}:`, error);
+    return { success: false, error: String(error) };
+  }
+}
+
+/**
+ * Start listeners for all active campaigns
+ */
+export async function startAllCampaignListeners(
+  campaigns: Array<{id: number, ownerWallet: string, status: string}>,
+  onDonationReceived: (donation: any) => void
+) {
+  console.log(`🚀 Starting listeners for ${campaigns.length} active campaigns`);
+  
+  const results = [];
+  
+  for (const campaign of campaigns) {
+    if (campaign.status === 'active') {
+      const result = await startCampaignListener(
+        campaign.id, 
+        campaign.ownerWallet, 
+        onDonationReceived
+      );
+      results.push({ campaignId: campaign.id, ...result });
+    }
+  }
+  
+  console.log(`✅ Campaign listeners started: ${results.filter(r => r.success).length}/${results.length}`);
+  
+  return {
+    success: true,
+    started: results.filter(r => r.success).length,
+    failed: results.filter(r => !r.success).length,
+    results
+  };
+}
+
+/**
+ * Get status of all active campaign listeners
+ */
+export function getCampaignListenersStatus() {
+  const activeListeners = Array.from(activeCampaignListeners.entries()).map(([campaignId, info]) => ({
+    campaignId,
+    wallet: info.wallet,
+    active: true
+  }));
+  
+  return {
+    totalActive: activeListeners.length,
+    listeners: activeListeners
+  };
 }

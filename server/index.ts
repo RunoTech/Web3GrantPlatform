@@ -3,7 +3,8 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-// import { testRpcConnection, startWalletListener } from "./blockchain";
+import { testRpcConnection, startAllCampaignListeners, getCampaignListenersStatus } from "./blockchain";
+import { storage } from "./storage";
 
 const app = express();
 
@@ -148,7 +149,59 @@ app.use((req, res, next) => {
   }, async () => {
     log(`🚀 serving on port ${port}`);
     
-    // Real-time wallet listener temporarily disabled for demo
-    console.log("📊 Server ready - blockchain monitoring disabled for demo");
+    // Initialize automatic donation detection system
+    try {
+      console.log("🔗 Starting blockchain monitoring for campaign donations...");
+      
+      // Get all active campaigns
+      const activeCampaigns = await storage.getCampaigns();
+      const campaignsToMonitor = activeCampaigns
+        .filter(c => c.approved && c.active)
+        .map(c => ({
+          id: c.id,
+          ownerWallet: c.ownerWallet,
+          status: 'active'
+        }));
+      
+      if (campaignsToMonitor.length > 0) {
+        // Donation received callback - automatically record donations
+        const onDonationReceived = async (donationData: any) => {
+          try {
+            console.log(`💾 Recording donation: ${donationData.amount} USDT to Campaign #${donationData.campaignId}`);
+            
+            const donation = await storage.createDonation({
+              campaignId: donationData.campaignId,
+              donorWallet: donationData.donorWallet,
+              amount: donationData.amount,
+              txHash: donationData.txHash,
+              network: donationData.network
+            });
+            
+            console.log(`✅ Donation recorded: ID #${donation.id}`);
+            
+          } catch (error) {
+            console.error("Failed to record donation:", error);
+          }
+        };
+        
+        // Start listeners for all campaigns
+        const result = await startAllCampaignListeners(campaignsToMonitor, onDonationReceived);
+        
+        if (result.success) {
+          console.log(`✅ Automatic donation detection active for ${result.started} campaigns`);
+          console.log("📊 Server ready - blockchain monitoring ENABLED");
+        } else {
+          console.error("❌ Failed to start campaign listeners");
+          console.log("📊 Server ready - blockchain monitoring FAILED");
+        }
+      } else {
+        console.log("⚠️  No active campaigns found - blockchain monitoring skipped");
+        console.log("📊 Server ready - blockchain monitoring DISABLED");
+      }
+      
+    } catch (error) {
+      console.error("Failed to initialize blockchain monitoring:", error);
+      console.log("📊 Server ready - blockchain monitoring FAILED");
+    }
   });
 })();

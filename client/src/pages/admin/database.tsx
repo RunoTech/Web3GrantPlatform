@@ -145,7 +145,7 @@ export default function DatabaseAdminPage() {
   });
 
   // Fetch table stats
-  const { data: tableStats = { total: 0 } } = useQuery({
+  const { data: tableStats = { total: 0 } } = useQuery<{ total: number }>({
     queryKey: ["admin-table-stats", selectedTable],
     queryFn: async () => {
       const response = await apiRequest("GET", `/api/youhonor/database/${selectedTable}/stats`);

@@ -27,7 +27,7 @@ export function useAdminAuth() {
   const queryClient = useQueryClient();
 
   // Check if admin is authenticated
-  const { data: admin, isLoading, error } = useQuery({
+  const { data: admin, isLoading, error } = useQuery<AdminUser>({
     queryKey: ["/api/youhonor/me"],
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes

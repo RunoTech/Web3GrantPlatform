@@ -33,7 +33,11 @@ if (!JWT_SECRET) {
 const JWT_SECRET_VALIDATED = JWT_SECRET || "duxxan-development-secret-key-2024-very-long-and-secure-for-demo-only";
 
 // Admin authentication middleware
-async function authenticateAdmin(req: any, res: any, next: any) {
+interface AuthenticatedRequest extends Express.Request {
+  admin: Admin;
+}
+
+async function authenticateAdmin(req: AuthenticatedRequest, res: any, next: any) {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) {
@@ -619,9 +623,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate credit card payment fields with dynamic fees
       if (campaignData.creditCardEnabled) {
         // Get dynamic collateral amount from platform settings
-        const collateralSettings = await storage.getPlatformSettings(['credit_card_collateral_amount', 'credit_card_enabled']);
-        const requiredCollateral = parseFloat(collateralSettings.credit_card_collateral_amount || '100');
-        const creditCardFeatureEnabled = collateralSettings.credit_card_enabled === 'true';
+        const collateralSettings = await storage.getPlatformSettings('payment');
+        const collateralAmountSetting = collateralSettings.find(s => s.key === 'credit_card_collateral_amount');
+        const creditCardEnabledSetting = collateralSettings.find(s => s.key === 'credit_card_enabled');
+        const requiredCollateral = parseFloat(collateralAmountSetting?.value || '100');
+        const creditCardFeatureEnabled = creditCardEnabledSetting?.value === 'true';
         
         if (!creditCardFeatureEnabled) {
           return res.status(400).json({ error: "Credit card payment feature is currently disabled" });
@@ -635,7 +641,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const paymentSettings = await storage.getPlatformSettings("payment");
         const platformWalletSetting = paymentSettings.find(s => s.key === "ethereum_wallet_address");
         
-        if (!platformWalletSetting) {
+        if (!platformWalletSetting?.value) {
           return res.status(500).json({ error: "Platform wallet address not configured" });
         }
         
@@ -959,9 +965,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createAdminLog({
         adminId: (req as any).admin.id,
         action: 'CREATE',
-        tableName: table,
-        recordId: result.id,
-        changes: data,
+        details: { table, recordId: result.id, changes: data },
         ipAddress: req.ip,
         userAgent: req.get('User-Agent')
       });
@@ -983,9 +987,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createAdminLog({
         adminId: (req as any).admin.id,
         action: 'UPDATE',
-        tableName: table,
-        recordId: id,
-        changes: data,
+        details: { table, recordId: id, changes: data },
         ipAddress: req.ip,
         userAgent: req.get('User-Agent')
       });
@@ -1006,9 +1008,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createAdminLog({
         adminId: (req as any).admin.id,
         action: 'DELETE',
-        tableName: table,
-        recordId: id,
-        changes: {},
+        details: { table, recordId: id },
         ipAddress: req.ip,
         userAgent: req.get('User-Agent')
       });
@@ -1029,9 +1029,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createAdminLog({
         adminId: (req as any).admin.id,
         action: 'EXPORT',
-        tableName: table,
-        recordId: null,
-        changes: { exported: data.length + ' records' },
+        details: { table, exported: data.length + ' records' },
         ipAddress: req.ip,
         userAgent: req.get('User-Agent')
       });
@@ -2136,80 +2134,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Missing admin endpoints that were not migrated
-  app.get("/api/youhonor/me", authenticateAdmin, async (req: any, res) => {
-    try {
-      res.json(req.admin);
-    } catch (error) {
-      console.error("Error fetching admin me:", error);
-      res.status(500).json({ error: "Failed to fetch admin profile" });
-    }
-  });
-
-  app.post("/api/youhonor/login", async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      
-      if (!username || !password) {
-        return res.status(400).json({ error: "Username and password are required" });
-      }
-      
-      const admin = await storage.authenticateAdmin(username, password);
-      if (!admin) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-      
-      const token = jwt.sign(
-        { adminId: admin.id, username: admin.username },
-        JWT_SECRET,
-        { expiresIn: "24h" }
-      );
-      
-      res.json({
-        success: true,
-        token,
-        admin: {
-          id: admin.id,
-          username: admin.username,
-          email: admin.email,
-          role: admin.role,
-          active: admin.active,
-          lastLogin: admin.lastLogin,
-          createdAt: admin.createdAt
-        }
-      });
-    } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ error: "Login failed" });
-    }
-  });
-
-  app.post("/api/youhonor/logout", authenticateAdmin, async (req: any, res) => {
-    try {
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Logout error:", error);
-      res.status(500).json({ error: "Logout failed" });
-    }
-  });
-
-  app.get("/api/youhonor/dashboard/stats", authenticateAdmin, async (req, res) => {
-    try {
-      const stats = {
-        totalUsers: 0,
-        activeUsers: 0,
-        totalCampaigns: 0,
-        pendingCampaigns: 0,
-        totalDonations: "0",
-        totalDonationCount: 0,
-        todayEntries: 0
-      };
-      res.json(stats);
-    } catch (error) {
-      console.error("Error fetching dashboard stats:", error);
-      res.status(500).json({ error: "Failed to fetch dashboard stats" });
-    }
-  });
 
   const httpServer = createServer(app);
   return httpServer;

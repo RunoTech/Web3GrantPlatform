@@ -116,7 +116,12 @@ export default function CreateCampaignPage() {
   });
 
   // Fetch dynamic collateral info
-  const { data: creditCardInfoData, isLoading: creditCardInfoLoading } = useQuery({
+  const { data: creditCardInfoData, isLoading: creditCardInfoLoading } = useQuery<{
+    collateralAmount: number;
+    collateralToken: string;
+    enabled: boolean;
+    platformWallet: string;
+  }>({
     queryKey: ["/api/credit-card-info"],
     enabled: true,
   });

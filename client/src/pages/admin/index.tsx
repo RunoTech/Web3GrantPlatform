@@ -38,13 +38,13 @@ export default function AdminDashboardPage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      setLocation("/admin/login");
+      setLocation("/youhonor/login");
     }
   }, [isAuthenticated, isLoading, setLocation]);
 
   // Fetch dashboard statistics
   const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
-    queryKey: ["/api/admin/dashboard/stats"],
+    queryKey: ["/api/youhonor/dashboard/stats"],
     enabled: isAuthenticated,
   });
 

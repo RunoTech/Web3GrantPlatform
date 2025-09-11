@@ -19,7 +19,7 @@ export async function apiRequest(
   }
   
   // Add Authorization header for admin routes
-  if (url.includes("/api/admin/")) {
+  if (url.includes("/api/youhonor/")) {
     const token = localStorage.getItem("admin_token");
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
@@ -47,7 +47,7 @@ export const getQueryFn: <T>(options: {
     const headers: Record<string, string> = {};
     
     // Add Authorization header for admin routes
-    if (url.includes("/api/admin/")) {
+    if (url.includes("/api/youhonor/")) {
       const token = localStorage.getItem("admin_token");
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;

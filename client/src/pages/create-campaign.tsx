@@ -43,8 +43,8 @@ export default function CreateCampaignPage() {
   const [creditCardEnabled, setCreditCardEnabled] = useState(false);
   const [collateralPaid, setCollateralPaid] = useState(false);
   const [collateralInfo, setCollateralInfo] = useState({ 
-    amount: 100, 
-    token: 'USDT', 
+    collateralAmount: 100, 
+    collateralToken: 'USDT', 
     enabled: true,
     platformWallet: '0x742d35cC6734C0532925A3b8d4037D4D40DA5F1E'
   });
@@ -116,7 +116,7 @@ export default function CreateCampaignPage() {
   });
 
   // Fetch dynamic collateral info
-  const { data: creditCardInfoData } = useQuery({
+  const { data: creditCardInfoData, isLoading: creditCardInfoLoading } = useQuery({
     queryKey: ["/api/credit-card-info"],
     enabled: true,
   });
@@ -132,11 +132,11 @@ export default function CreateCampaignPage() {
   // Mock collateral payment function
   const handleCollateralPayment = () => {
     const collateralAmount = form.getValues("collateralAmount");
-    const minAmount = collateralInfo.amount;
+    const minAmount = collateralInfo.collateralAmount;
     if (!collateralAmount || parseFloat(collateralAmount) < minAmount) {
       toast({
         title: "Error",
-        description: `Minimum collateral amount is ${minAmount} ${collateralInfo.token}`,
+        description: `Minimum collateral amount is ${minAmount} ${collateralInfo.collateralToken}`,
         variant: "destructive",
       });
       return;
@@ -763,7 +763,7 @@ export default function CreateCampaignPage() {
                     <div>
                       <h4 className="font-medium text-yellow-800 dark:text-yellow-200 mb-1">Enable Credit Card Donations</h4>
                       <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                        Allow donors to contribute using credit cards. Requires a {collateralInfo.amount} {collateralInfo.token} collateral payment to activate this feature.
+                        Allow donors to contribute using credit cards. Requires a {collateralInfo.collateralAmount} {collateralInfo.collateralToken} collateral payment to activate this feature.
                       </p>
                     </div>
                   </div>
@@ -813,7 +813,7 @@ export default function CreateCampaignPage() {
                                 data-testid="input-collateral-amount"
                               />
                             </FormControl>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Required: {collateralInfo.amount} {collateralInfo.token} to platform wallet</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Required: {collateralInfo.collateralAmount} {collateralInfo.collateralToken} to platform wallet</p>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -826,7 +826,7 @@ export default function CreateCampaignPage() {
                           className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold"
                           data-testid="button-pay-collateral"
                         >
-                          Pay Collateral ({form.watch("collateralAmount") || collateralInfo.amount} {collateralInfo.token})
+                          Pay Collateral ({form.watch("collateralAmount") || collateralInfo.collateralAmount} {collateralInfo.collateralToken})
                         </Button>
                       )}
 
@@ -834,7 +834,7 @@ export default function CreateCampaignPage() {
                         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
                           <div className="flex items-center space-x-2">
                             <CheckCircle className="w-5 h-5 text-green-600" />
-                            <span className="text-green-800 dark:text-green-200 font-medium">Collateral Paid Successfully ({collateralInfo.amount} {collateralInfo.token})</span>
+                            <span className="text-green-800 dark:text-green-200 font-medium">Collateral Paid Successfully ({collateralInfo.collateralAmount} {collateralInfo.collateralToken})</span>
                           </div>
                           <p className="text-xs text-green-700 dark:text-green-300 mt-1">
                             TX: {form.watch("collateralTxHash")?.slice(0, 20)}...

@@ -139,7 +139,7 @@ export default function DatabaseAdminPage() {
   const { data: tableData = [], isLoading, refetch } = useQuery({
     queryKey: ["admin-table", selectedTable, currentPage, pageSize, searchTerm],
     queryFn: async () => {
-      const response = await apiRequest("GET", `/api/admin/database/${selectedTable}?page=${currentPage}&limit=${pageSize}&search=${searchTerm}`);
+      const response = await apiRequest("GET", `/api/youhonor/database/${selectedTable}?page=${currentPage}&limit=${pageSize}&search=${searchTerm}`);
       return Array.isArray(response) ? response : [];
     },
   });
@@ -148,7 +148,7 @@ export default function DatabaseAdminPage() {
   const { data: tableStats = { total: 0 } } = useQuery({
     queryKey: ["admin-table-stats", selectedTable],
     queryFn: async () => {
-      const response = await apiRequest("GET", `/api/admin/database/${selectedTable}/stats`);
+      const response = await apiRequest("GET", `/api/youhonor/database/${selectedTable}/stats`);
       return response || { total: 0 };
     },
   });
@@ -157,8 +157,8 @@ export default function DatabaseAdminPage() {
   const createUpdateMutation = useMutation({
     mutationFn: async (data: any) => {
       const endpoint = editingRecord 
-        ? `/api/admin/database/${selectedTable}/${editingRecord.id}`
-        : `/api/admin/database/${selectedTable}`;
+        ? `/api/youhonor/database/${selectedTable}/${editingRecord.id}`
+        : `/api/youhonor/database/${selectedTable}`;
       const method = editingRecord ? "PUT" : "POST";
       return apiRequest(method, endpoint, data);
     },
@@ -183,7 +183,7 @@ export default function DatabaseAdminPage() {
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => apiRequest("DELETE", `/api/admin/database/${selectedTable}/${id}`),
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/youhonor/database/${selectedTable}/${id}`),
     onSuccess: () => {
       toast({
         title: "Success",
@@ -202,7 +202,7 @@ export default function DatabaseAdminPage() {
 
   // Export data mutation
   const exportMutation = useMutation({
-    mutationFn: () => apiRequest("GET", `/api/admin/database/${selectedTable}/export`),
+    mutationFn: () => apiRequest("GET", `/api/youhonor/database/${selectedTable}/export`),
     onSuccess: (data) => {
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = window.URL.createObjectURL(blob);

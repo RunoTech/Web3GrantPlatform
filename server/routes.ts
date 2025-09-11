@@ -374,7 +374,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Get all affiliate applications
-  app.get("/api/admin/affiliate/applications", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/affiliate/applications", authenticateAdmin, async (req, res) => {
     try {
       const { status } = req.query;
       const applications = await storage.getAllAffiliateApplications(status as string);
@@ -394,7 +394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Update affiliate application status
-  app.put("/api/admin/affiliate/applications/:id", authenticateAdmin, async (req, res) => {
+  app.put("/api/youhonor/affiliate/applications/:id", authenticateAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const { status, reviewNotes } = req.body;
@@ -631,17 +631,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ error: "Collateral transaction hash is required" });
         }
         
+        // Get platform wallet address for Ethereum
+        const paymentSettings = await storage.getPlatformSettings("payment");
+        const platformWalletSetting = paymentSettings.find(s => s.key === "ethereum_wallet_address");
+        
+        if (!platformWalletSetting) {
+          return res.status(500).json({ error: "Platform wallet address not configured" });
+        }
+        
         // Verify collateral payment on blockchain (instead of trusting client)
         try {
-          const verification = await blockchain.verifyPayment(
+          const { verifyPayment } = await import("./blockchain");
+          const verification = await verifyPayment(
             'ethereum',
             campaignData.collateralTxHash,
             requiredCollateral.toString(),
             '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT contract
-            platformWallet
+            platformWalletSetting.value
           );
           
-          if (!verification.verified) {
+          if (!verification.success) {
             return res.status(400).json({ 
               error: `Collateral payment verification failed. Required: ${requiredCollateral} USDT` 
             });
@@ -806,7 +815,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Get daily entries for a specific date
-  app.get("/api/admin/daily-entries/:date", async (req, res) => {
+  app.get("/api/youhonor/daily-entries/:date", async (req, res) => {
     try {
       const { date } = req.params;
       const entries = await storage.getDailyEntriesByDate(date);
@@ -818,7 +827,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Get daily winner for a specific date
-  app.get("/api/admin/daily-winner/:date", async (req, res) => {
+  app.get("/api/youhonor/daily-winner/:date", async (req, res) => {
     try {
       const { date } = req.params;
       const winner = await storage.getDailyWinnerByDate(date);
@@ -830,7 +839,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Get daily reward statistics
-  app.get("/api/admin/daily-stats", async (req, res) => {
+  app.get("/api/youhonor/daily-stats", async (req, res) => {
     try {
       const stats = await storage.getDailyRewardStats();
       res.json(stats);
@@ -841,7 +850,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Get campaign with full company details (admin only)
-  app.get("/api/admin/campaign/:id", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/campaign/:id", authenticateAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const campaign = await storage.getCampaign(id);
@@ -859,7 +868,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Get all campaigns with company information (admin only)
-  app.get("/api/admin/campaigns", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/campaigns", authenticateAdmin, async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
@@ -874,7 +883,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Select random winner
-  app.post("/api/admin/select-random-winner", async (req, res) => {
+  app.post("/api/youhonor/select-random-winner", async (req, res) => {
     try {
       const { date, amount } = req.body;
       const adminId = 1; // Default admin for demo
@@ -911,7 +920,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Database Administration Routes
-  app.get('/api/admin/database/:table', authenticateAdmin, async (req, res) => {
+  app.get('/api/youhonor/database/:table', authenticateAdmin, async (req, res) => {
     try {
       const { table } = req.params;
       const { page = 1, limit = 50, search = '' } = req.query;
@@ -929,7 +938,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/database/:table/stats', authenticateAdmin, async (req, res) => {
+  app.get('/api/youhonor/database/:table/stats', authenticateAdmin, async (req, res) => {
     try {
       const { table } = req.params;
       const stats = await storage.getTableStats(table);
@@ -940,7 +949,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/database/:table', authenticateAdmin, async (req, res) => {
+  app.post('/api/youhonor/database/:table', authenticateAdmin, async (req, res) => {
     try {
       const { table } = req.params;
       const data = req.body;
@@ -964,7 +973,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/database/:table/:id', authenticateAdmin, async (req, res) => {
+  app.put('/api/youhonor/database/:table/:id', authenticateAdmin, async (req, res) => {
     try {
       const { table, id } = req.params;
       const data = req.body;
@@ -988,7 +997,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/admin/database/:table/:id', authenticateAdmin, async (req, res) => {
+  app.delete('/api/youhonor/database/:table/:id', authenticateAdmin, async (req, res) => {
     try {
       const { table, id } = req.params;
       await storage.deleteRecord(table, id);
@@ -1011,7 +1020,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/database/:table/export', authenticateAdmin, async (req, res) => {
+  app.get('/api/youhonor/database/:table/export', authenticateAdmin, async (req, res) => {
     try {
       const { table } = req.params;
       const data = await storage.exportTableData(table);
@@ -1035,7 +1044,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Select manual winner
-  app.post("/api/admin/select-manual-winner", async (req, res) => {
+  app.post("/api/youhonor/select-manual-winner", async (req, res) => {
     try {
       const { date, wallet, amount } = req.body;
       const adminId = 1; // Default admin for demo
@@ -1109,7 +1118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ADMIN API ROUTES
   
   // Admin login
-  app.post("/api/admin/login", async (req, res) => {
+  app.post("/api/youhonor/login", async (req, res) => {
     try {
       const { username, password } = req.body;
       
@@ -1155,7 +1164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin me - Get current admin info
-  app.get("/api/admin/me", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/me", authenticateAdmin, async (req, res) => {
     try {
       const admin = req.admin;
       res.json({
@@ -1174,7 +1183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin logout
-  app.post("/api/admin/logout", authenticateAdmin, async (req, res) => {
+  app.post("/api/youhonor/logout", authenticateAdmin, async (req, res) => {
     try {
       const admin = req.admin;
       
@@ -1198,7 +1207,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin dashboard statistics
-  app.get("/api/admin/dashboard", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/dashboard", authenticateAdmin, async (req, res) => {
     try {
       const stats = await storage.getStatistics();
       res.json(stats);
@@ -1209,7 +1218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Get all campaigns
-  app.get("/api/admin/campaigns", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/campaigns", authenticateAdmin, async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
@@ -1222,7 +1231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Get pending campaigns
-  app.get("/api/admin/campaigns/pending", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/campaigns/pending", authenticateAdmin, async (req, res) => {
     try {
       const campaigns = await storage.getPendingCampaigns();
       res.json(campaigns);
@@ -1233,7 +1242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Approve campaign
-  app.post("/api/admin/campaigns/:id/approve", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/campaigns/:id/approve", authenticateAdmin, async (req: any, res) => {
     try {
       const campaignId = parseInt(req.params.id);
       await storage.approveCampaign(campaignId, req.admin.id);
@@ -1255,7 +1264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Update campaign
-  app.put("/api/admin/campaigns/:id", authenticateAdmin, async (req: any, res) => {
+  app.put("/api/youhonor/campaigns/:id", authenticateAdmin, async (req: any, res) => {
     try {
       const campaignId = parseInt(req.params.id);
       const updates = req.body;
@@ -1279,7 +1288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Get all accounts
-  app.get("/api/admin/accounts", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/accounts", authenticateAdmin, async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 100;
       const offset = parseInt(req.query.offset as string) || 0;
@@ -1292,7 +1301,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Network fees management
-  app.get("/api/admin/network-fees", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/network-fees", authenticateAdmin, async (req, res) => {
     try {
       const fees = await storage.getNetworkFees();
       res.json(fees);
@@ -1302,7 +1311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/network-fees", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/network-fees", authenticateAdmin, async (req: any, res) => {
     try {
       const feeData = insertNetworkFeeSchema.parse({
         ...req.body,
@@ -1327,7 +1336,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/network-fees/:id", authenticateAdmin, async (req: any, res) => {
+  app.put("/api/youhonor/network-fees/:id", authenticateAdmin, async (req: any, res) => {
     try {
       const feeId = parseInt(req.params.id);
       const updates = { ...req.body, updatedBy: req.admin.id };
@@ -1351,7 +1360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Platform settings
-  app.get("/api/admin/settings", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/settings", authenticateAdmin, async (req, res) => {
     try {
       const category = req.query.category as string;
       const settings = await storage.getPlatformSettings(category);
@@ -1362,7 +1371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/settings", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/settings", authenticateAdmin, async (req: any, res) => {
     try {
       const settingData = insertPlatformSettingSchema.parse({
         ...req.body,
@@ -1388,7 +1397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Footer links management
-  app.get("/api/admin/footer-links", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/footer-links", authenticateAdmin, async (req, res) => {
     try {
       const section = req.query.section as string;
       const links = await storage.getFooterLinks(section);
@@ -1399,7 +1408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/footer-links", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/footer-links", authenticateAdmin, async (req: any, res) => {
     try {
       const linkData = insertFooterLinkSchema.parse(req.body);
       const link = await storage.createFooterLink(linkData);
@@ -1420,7 +1429,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/footer-links/:id", authenticateAdmin, async (req: any, res) => {
+  app.put("/api/youhonor/footer-links/:id", authenticateAdmin, async (req: any, res) => {
     try {
       const linkId = parseInt(req.params.id);
       const updates = req.body;
@@ -1443,7 +1452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/footer-links/:id", authenticateAdmin, async (req: any, res) => {
+  app.delete("/api/youhonor/footer-links/:id", authenticateAdmin, async (req: any, res) => {
     try {
       const linkId = parseInt(req.params.id);
       
@@ -1466,7 +1475,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Announcements management
-  app.get("/api/admin/announcements", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/announcements", authenticateAdmin, async (req, res) => {
     try {
       const announcements = await storage.getAllAnnouncements();
       res.json(announcements);
@@ -1476,7 +1485,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/announcements", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/announcements", authenticateAdmin, async (req: any, res) => {
     try {
       const announcementData = insertAnnouncementSchema.parse({
         ...req.body,
@@ -1501,7 +1510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/announcements/:id", authenticateAdmin, async (req: any, res) => {
+  app.put("/api/youhonor/announcements/:id", authenticateAdmin, async (req: any, res) => {
     try {
       const announcementId = parseInt(req.params.id);
       const updates = req.body;
@@ -1524,7 +1533,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/announcements/:id", authenticateAdmin, async (req: any, res) => {
+  app.delete("/api/youhonor/announcements/:id", authenticateAdmin, async (req: any, res) => {
     try {
       const announcementId = parseInt(req.params.id);
       
@@ -1547,7 +1556,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Daily winners management
-  app.get("/api/admin/daily-winners", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/daily-winners", authenticateAdmin, async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const winners = await storage.getDailyWinners(limit);
@@ -1558,7 +1567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/daily-winners", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/daily-winners", authenticateAdmin, async (req: any, res) => {
     try {
       const winnerData = insertDailyWinnerSchema.parse({
         ...req.body,
@@ -1584,7 +1593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Activity logs
-  app.get("/api/admin/logs", authenticateAdmin, async (req: any, res) => {
+  app.get("/api/youhonor/logs", authenticateAdmin, async (req: any, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 100;
       const adminId = req.query.adminId ? parseInt(req.query.adminId as string) : undefined;
@@ -1657,7 +1666,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update platform setting (admin only)
-  app.put("/api/admin/settings/:key", authenticateAdmin, async (req: any, res) => {
+  app.put("/api/youhonor/settings/:key", authenticateAdmin, async (req: any, res) => {
     try {
       const { key } = req.params;
       const { value } = req.body;
@@ -1686,7 +1695,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new platform setting (admin only)
-  app.post("/api/admin/settings-new", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/settings-new", authenticateAdmin, async (req: any, res) => {
     try {
       const settingData = insertPlatformSettingSchema.parse({
         ...req.body,
@@ -1712,7 +1721,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all settings with categories for admin panel (admin only) 
-  app.get("/api/admin/settings-categorized", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/settings-categorized", authenticateAdmin, async (req, res) => {
     try {
       const settings = await storage.getPlatformSettings();
       
@@ -1736,7 +1745,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===== ADMIN COMPREHENSIVE ENDPOINTS =====
 
   // Footer Links Management
-  app.get("/api/admin/footer-links", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/footer-links", authenticateAdmin, async (req, res) => {
     try {
       const links = await storage.getFooterLinks();
       res.json(links);
@@ -1746,7 +1755,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/footer-links", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/footer-links", authenticateAdmin, async (req: any, res) => {
     try {
       const linkData = insertFooterLinkSchema.parse(req.body);
       const link = await storage.createFooterLink(linkData);
@@ -1766,7 +1775,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/footer-links/:id", authenticateAdmin, async (req: any, res) => {
+  app.put("/api/youhonor/footer-links/:id", authenticateAdmin, async (req: any, res) => {
     try {
       const { id } = req.params;
       const linkData = insertFooterLinkSchema.parse(req.body);
@@ -1787,7 +1796,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/footer-links/:id", authenticateAdmin, async (req: any, res) => {
+  app.delete("/api/youhonor/footer-links/:id", authenticateAdmin, async (req: any, res) => {
     try {
       const { id } = req.params;
       await storage.deleteFooterLink(parseInt(id));
@@ -1808,7 +1817,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Transactions Management
-  app.get("/api/admin/transactions", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/transactions", authenticateAdmin, async (req, res) => {
     try {
       const { status, token, address, dateRange, page = 1, limit = 20 } = req.query;
       const filters = { status, token, address, dateRange };
@@ -1820,7 +1829,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/transactions/:id", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/transactions/:id", authenticateAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const transaction = await storage.getTransaction(parseInt(id));
@@ -1835,7 +1844,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Wallets Management
-  app.get("/api/admin/wallets", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/wallets", authenticateAdmin, async (req, res) => {
     try {
       const { ownerType, ownerId, address, page = 1, limit = 50 } = req.query;
       const filters = { ownerType, ownerId, address };
@@ -1848,7 +1857,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Balances Summary
-  app.get("/api/admin/balances/summary", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/balances/summary", authenticateAdmin, async (req, res) => {
     try {
       const { scope, id } = req.query;
       const summary = await storage.getBalancesSummary(scope as string, id as string);
@@ -1860,7 +1869,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Daily Rewards Management
-  app.get("/api/admin/daily-reward", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/daily-reward", authenticateAdmin, async (req, res) => {
     try {
       const { page = 1, limit = 30 } = req.query;
       const dailyRewards = await storage.getDailyRewards(parseInt(page as string), parseInt(limit as string));
@@ -1871,7 +1880,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/daily-reward/:id/amount", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/daily-reward/:id/amount", authenticateAdmin, async (req: any, res) => {
     try {
       const { id } = req.params;
       const { amount } = req.body;
@@ -1892,7 +1901,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/daily-reward/:id/participants", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/daily-reward/:id/participants", authenticateAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const participants = await storage.getDailyRewardParticipants(parseInt(id));
@@ -1903,7 +1912,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/daily-reward/:id/winner", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/daily-reward/:id/winner", authenticateAdmin, async (req: any, res) => {
     try {
       const { id } = req.params;
       const { wallet } = req.body;
@@ -1924,7 +1933,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/daily-reward/:id/close", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/daily-reward/:id/close", authenticateAdmin, async (req: any, res) => {
     try {
       const { id } = req.params;
       await storage.closeDailyReward(parseInt(id));
@@ -1944,7 +1953,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/daily-reward/:id/open", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/daily-reward/:id/open", authenticateAdmin, async (req: any, res) => {
     try {
       const { id } = req.params;
       await storage.openDailyReward(parseInt(id));
@@ -1965,7 +1974,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Campaigns Management
-  app.get("/api/admin/campaigns", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/campaigns", authenticateAdmin, async (req, res) => {
     try {
       const { status, type, page = 1, limit = 20 } = req.query;
       const filters = { status, type };
@@ -1977,7 +1986,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/campaigns/:id/approve", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/campaigns/:id/approve", authenticateAdmin, async (req: any, res) => {
     try {
       const { id } = req.params;
       await storage.approveCampaign(parseInt(id), req.admin.id);
@@ -1997,7 +2006,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/campaigns/:id/reject", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/campaigns/:id/reject", authenticateAdmin, async (req: any, res) => {
     try {
       const { id } = req.params;
       await storage.rejectCampaign(parseInt(id), req.admin.id);
@@ -2017,7 +2026,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/campaigns/:id/toggle-company-hide", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/campaigns/:id/toggle-company-hide", authenticateAdmin, async (req: any, res) => {
     try {
       const { id } = req.params;
       await storage.toggleCampaignCompanyVisibility(parseInt(id));
@@ -2038,7 +2047,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Affiliates Management
-  app.get("/api/admin/affiliates", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/affiliates", authenticateAdmin, async (req, res) => {
     try {
       const { status, page = 1, limit = 20 } = req.query;
       const filters = { status };
@@ -2050,7 +2059,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/affiliates/:id/approve", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/affiliates/:id/approve", authenticateAdmin, async (req: any, res) => {
     try {
       const { id } = req.params;
       const { reviewNotes } = req.body;
@@ -2071,7 +2080,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/affiliates/:id/reject", authenticateAdmin, async (req: any, res) => {
+  app.post("/api/youhonor/affiliates/:id/reject", authenticateAdmin, async (req: any, res) => {
     try {
       const { id } = req.params;
       const { reviewNotes } = req.body;
@@ -2093,7 +2102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Activity Logs
-  app.get("/api/admin/logs", authenticateAdmin, async (req, res) => {
+  app.get("/api/youhonor/logs", authenticateAdmin, async (req, res) => {
     try {
       const { adminId, action, page = 1, limit = 50 } = req.query;
       const filters = { adminId, action };
@@ -2108,21 +2117,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get credit card collateral info (public)
   app.get("/api/credit-card-info", async (req, res) => {
     try {
-      const settings = await storage.getPlatformSettings([
-        'credit_card_collateral_amount',
-        'credit_card_collateral_token', 
-        'credit_card_enabled'
-      ]);
+      // Get credit card settings from platform settings
+      const settings = await storage.getPlatformSettings("payment");
+      const collateralAmountSetting = settings.find(s => s.key === 'credit_card_collateral_amount');
+      const collateralTokenSetting = settings.find(s => s.key === 'credit_card_collateral_token');
+      const enabledSetting = settings.find(s => s.key === 'credit_card_enabled');
+      const platformWalletSetting = settings.find(s => s.key === 'ethereum_wallet_address');
       
       res.json({
-        collateralAmount: parseFloat(settings.credit_card_collateral_amount || '100'),
-        collateralToken: settings.credit_card_collateral_token || 'USDT',
-        enabled: settings.credit_card_enabled === 'true',
-        platformWallet: platformWallet
+        collateralAmount: parseFloat(collateralAmountSetting?.value || '100'),
+        collateralToken: collateralTokenSetting?.value || 'USDT',
+        enabled: enabledSetting?.value === 'true',
+        platformWallet: platformWalletSetting?.value || '0x742d35cC6734C0532925A3b8d4037D4D40DA5F1E'
       });
     } catch (error) {
       console.error('Error fetching credit card info:', error);
       res.status(500).json({ error: 'Failed to fetch credit card info' });
+    }
+  });
+
+  // Missing admin endpoints that were not migrated
+  app.get("/api/youhonor/me", authenticateAdmin, async (req: any, res) => {
+    try {
+      res.json(req.admin);
+    } catch (error) {
+      console.error("Error fetching admin me:", error);
+      res.status(500).json({ error: "Failed to fetch admin profile" });
+    }
+  });
+
+  app.post("/api/youhonor/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ error: "Username and password are required" });
+      }
+      
+      const admin = await storage.authenticateAdmin(username, password);
+      if (!admin) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+      
+      const token = jwt.sign(
+        { adminId: admin.id, username: admin.username },
+        JWT_SECRET,
+        { expiresIn: "24h" }
+      );
+      
+      res.json({
+        success: true,
+        token,
+        admin: {
+          id: admin.id,
+          username: admin.username,
+          email: admin.email,
+          role: admin.role,
+          active: admin.active,
+          lastLogin: admin.lastLogin,
+          createdAt: admin.createdAt
+        }
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  app.post("/api/youhonor/logout", authenticateAdmin, async (req: any, res) => {
+    try {
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Logout error:", error);
+      res.status(500).json({ error: "Logout failed" });
+    }
+  });
+
+  app.get("/api/youhonor/dashboard/stats", authenticateAdmin, async (req, res) => {
+    try {
+      const stats = {
+        totalUsers: 0,
+        activeUsers: 0,
+        totalCampaigns: 0,
+        pendingCampaigns: 0,
+        totalDonations: "0",
+        totalDonationCount: 0,
+        todayEntries: 0
+      };
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+      res.status(500).json({ error: "Failed to fetch dashboard stats" });
     }
   });
 

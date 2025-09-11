@@ -35,28 +35,28 @@ export default function AdminDailyRewardsPage() {
 
   // Get today's entries
   const { data: todayEntries = [], isLoading: entriesLoading } = useQuery<any[]>({
-    queryKey: ["/api/admin/daily-entries", selectedDate],
+    queryKey: ["/api/youhonor/daily-entries", selectedDate],
   });
 
   // Get today's winner (if any)
   const { data: todayWinner } = useQuery<any>({
-    queryKey: ["/api/admin/daily-winner", selectedDate],
+    queryKey: ["/api/youhonor/daily-winner", selectedDate],
   });
 
   // Get overall stats
   const { data: dailyStats } = useQuery<any>({
-    queryKey: ["/api/admin/daily-stats"],
+    queryKey: ["/api/youhonor/daily-stats"],
   });
 
   // Random winner selection mutation
   const selectRandomWinnerMutation = useMutation({
-    mutationFn: (date: string) => api.post(`/api/admin/select-random-winner`, { date, amount: rewardAmount }),
+    mutationFn: (date: string) => api.post(`/api/youhonor/select-random-winner`, { date, amount: rewardAmount }),
     onSuccess: (data) => {
       toast({
         title: "Winner Selected!",
         description: `Random winner selected for ${selectedDate}`,
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/daily-winner"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/youhonor/daily-winner"] });
       queryClient.invalidateQueries({ queryKey: ["/api/get-last-winners"] });
     },
     onError: (error: any) => {
@@ -71,14 +71,14 @@ export default function AdminDailyRewardsPage() {
   // Manual winner selection mutation
   const selectManualWinnerMutation = useMutation({
     mutationFn: (data: { date: string; wallet: string; amount: string }) => 
-      api.post(`/api/admin/select-manual-winner`, data),
+      api.post(`/api/youhonor/select-manual-winner`, data),
     onSuccess: () => {
       toast({
         title: "Winner Selected!",
         description: `Manual winner selected for ${selectedDate}`,
       });
       setWinnerWallet('');
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/daily-winner"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/youhonor/daily-winner"] });
       queryClient.invalidateQueries({ queryKey: ["/api/get-last-winners"] });
     },
     onError: (error: any) => {

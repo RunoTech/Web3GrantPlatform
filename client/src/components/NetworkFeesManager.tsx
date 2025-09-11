@@ -41,18 +41,15 @@ export default function NetworkFeesManager() {
   }>({ amount: '', tokenAddress: '', active: true });
 
   const { data: fees = [], isLoading } = useQuery<NetworkFee[]>({
-    queryKey: ["/api/admin/network-fees"],
+    queryKey: ["/api/youhonor/network-fees"],
   });
 
   const updateFeeMutation = useMutation({
     mutationFn: async (data: { id: number; amount: string; tokenAddress: string; active: boolean }) => {
-      return await apiRequest(`/api/admin/network-fees/${data.id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          amount: data.amount,
-          tokenAddress: data.tokenAddress,
-          active: data.active
-        }),
+      return await apiRequest("PUT", `/api/youhonor/network-fees/${data.id}`, {
+        amount: data.amount,
+        tokenAddress: data.tokenAddress,
+        active: data.active
       });
     },
     onSuccess: () => {
@@ -60,7 +57,7 @@ export default function NetworkFeesManager() {
         title: "Network fee updated successfully",
         description: "Changes saved to database",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/network-fees"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/youhonor/network-fees"] });
       queryClient.invalidateQueries({ queryKey: ["/api/get-fees"] });
       setEditingId(null);
     },

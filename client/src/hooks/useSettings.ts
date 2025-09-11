@@ -58,7 +58,7 @@ export function useSettings() {
 // Hook specifically for admin settings management
 export function useAdminSettings() {
   return useQuery({
-    queryKey: ["/api/admin/settings-categorized"],
+    queryKey: ["/api/youhonor/settings-categorized"],
     staleTime: 1000 * 60, // Cache for 1 minute in admin
   });
 }

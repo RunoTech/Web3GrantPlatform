@@ -30,10 +30,10 @@ export default function AdminSettingsPage() {
 
   const updateSettingMutation = useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
-      return apiRequest("PUT", `/api/admin/settings/${key}`, { value });
+      return apiRequest("PUT", `/api/youhonor/settings/${key}`, { value });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/settings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/youhonor/settings"] });
       queryClient.invalidateQueries({ queryKey: ["/api/settings-map"] });
       toast({
         title: "Başarılı",
@@ -224,13 +224,13 @@ export default function AdminSettingsPage() {
         </div>
         <div className="flex gap-4">
           <Button variant="secondary" size="lg" className="text-foreground" asChild>
-            <a href="/admin/database" className="flex items-center gap-2">
+            <a href="/youhonor/database" className="flex items-center gap-2">
               <Database className="w-4 h-4" />
               Database Management
             </a>
           </Button>
           <Button variant="secondary" size="lg" className="text-foreground" asChild>
-            <a href="/admin/daily-rewards" className="flex items-center gap-2">
+            <a href="/youhonor/daily-rewards" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
               Daily Rewards
             </a>

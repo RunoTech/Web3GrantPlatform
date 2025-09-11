@@ -28,7 +28,7 @@ export function useAdminAuth() {
 
   // Check if admin is authenticated
   const { data: admin, isLoading, error } = useQuery({
-    queryKey: ["/api/admin/me"],
+    queryKey: ["/api/youhonor/me"],
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -36,7 +36,7 @@ export function useAdminAuth() {
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginCredentials): Promise<LoginResponse> => {
-      const response = await apiRequest("POST", "/api/admin/login", credentials);
+      const response = await apiRequest("POST", "/api/youhonor/login", credentials);
       return response.json();
     },
     onSuccess: (data) => {
@@ -45,10 +45,10 @@ export function useAdminAuth() {
         localStorage.setItem("admin_token", data.token);
         
         // Set admin data directly in cache to immediately update isAuthenticated
-        queryClient.setQueryData(["/api/admin/me"], data.admin);
+        queryClient.setQueryData(["/api/youhonor/me"], data.admin);
         
         // Invalidate admin queries to refetch with new token
-        queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/youhonor"] });
       }
     },
   });
@@ -56,7 +56,7 @@ export function useAdminAuth() {
   // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/admin/logout");
+      const response = await apiRequest("POST", "/api/youhonor/logout");
       return response.json();
     },
     onSuccess: () => {
@@ -64,10 +64,10 @@ export function useAdminAuth() {
       localStorage.removeItem("admin_token");
       
       // Clear all admin queries
-      queryClient.removeQueries({ queryKey: ["/api/admin"] });
+      queryClient.removeQueries({ queryKey: ["/api/youhonor"] });
       
       // Redirect to admin login
-      window.location.href = "/admin/login";
+      window.location.href = "/youhonor/login";
     },
   });
 

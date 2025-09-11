@@ -2127,7 +2127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       
       res.json({
-        collateralAmount: parseFloat(collateralAmountSetting?.value || '100'),
+        collateralAmount: parseFloat(collateralAmountSetting?.value || '2'),
         collateralToken: collateralTokenSetting?.value || 'USDT',
         enabled: enabledSetting?.value === 'true',
         platformWallet: platformWalletSetting?.value || '0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8'

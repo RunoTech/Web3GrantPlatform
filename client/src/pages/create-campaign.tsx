@@ -134,8 +134,17 @@ export default function CreateCampaignPage() {
     }
   }, [creditCardInfoData, form]);
 
-  // Mock collateral payment function
-  const handleCollateralPayment = () => {
+  // Real collateral payment function using blockchain
+  const handleCollateralPayment = async () => {
+    if (!isConnected || !address) {
+      toast({
+        title: "Error",
+        description: "Please connect your wallet first",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const collateralAmount = form.getValues("collateralAmount");
     const minAmount = collateralInfo.collateralAmount;
     if (!collateralAmount || parseFloat(collateralAmount) < minAmount) {
@@ -147,23 +156,96 @@ export default function CreateCampaignPage() {
       return;
     }
 
-    // Simulate payment processing
-    const mockTxHash = `0x${Math.random().toString(16).substr(2, 64)}`;
-    
-    setTimeout(() => {
-      setCollateralPaid(true);
-      form.setValue("collateralTxHash", mockTxHash);
-      form.setValue("collateralPaid", true);
-      toast({
-        title: "Success!",
-        description: `Collateral payment of ${collateralAmount} USDT confirmed`,
-      });
-    }, 2000);
+    try {
+      // Check if MetaMask is available
+      if (typeof window.ethereum === 'undefined') {
+        toast({
+          title: "Error",
+          description: "MetaMask not detected. Please install MetaMask.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    toast({
-      title: "Processing...",
-      description: "Confirming your collateral payment",
-    });
+      const { ethers } = await import("ethers");
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      // Switch to Ethereum Mainnet
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x1' }], // Ethereum Mainnet
+        });
+      } catch (switchError: any) {
+        toast({
+          title: "Error",
+          description: "Please switch to Ethereum Mainnet",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // USDT contract details
+      const USDT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+      const ERC20_ABI = [
+        "function transfer(address to, uint256 amount) returns (bool)",
+        "function balanceOf(address owner) view returns (uint256)",
+        "function decimals() view returns (uint8)"
+      ];
+
+      // Create contract instance
+      const tokenContract = new ethers.Contract(USDT_ADDRESS, ERC20_ABI, signer);
+
+      // Check balance
+      const balance = await tokenContract.balanceOf(address);
+      const requiredAmount = ethers.parseUnits(collateralAmount, 6); // USDT has 6 decimals
+      
+      if (balance < requiredAmount) {
+        toast({
+          title: "Insufficient Balance",
+          description: `You need at least ${collateralAmount} USDT to pay collateral`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Processing...",
+        description: "Please confirm the transaction in MetaMask",
+      });
+
+      // Execute real USDT transfer
+      const tx = await tokenContract.transfer(collateralInfo.platformWallet, requiredAmount);
+      
+      toast({
+        title: "Transaction Sent",
+        description: "Waiting for blockchain confirmation...",
+      });
+
+      // Wait for confirmation
+      const receipt = await tx.wait();
+
+      if (receipt.status === 1) {
+        setCollateralPaid(true);
+        form.setValue("collateralTxHash", tx.hash);
+        form.setValue("collateralPaid", true);
+        toast({
+          title: "Payment Successful!",
+          description: `${collateralAmount} USDT collateral paid successfully`,
+        });
+      } else {
+        throw new Error("Transaction failed");
+      }
+
+    } catch (error: any) {
+      console.error("Collateral payment error:", error);
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to process collateral payment",
+        variant: "destructive",
+      });
+    }
   };
 
   const onSubmit = (data: any) => {

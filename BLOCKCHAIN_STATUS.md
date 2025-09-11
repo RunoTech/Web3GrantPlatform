@@ -15,7 +15,7 @@
 ```bash
 ETH_RPC_URL="https://eth.llamarpc.com"              # RPC endpoint
 ADMIN_WALLET_ADDRESS="0x..."                         # Admin wallet for system management
-PLATFORM_WALLET_ADDRESS="0x742d35Cc6734C0532925a3b8D4037D4d40DA5f1E"  # Fee collection wallet
+PLATFORM_WALLET_ADDRESS="0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8"  # Fee collection wallet
 ```
 
 #### 2. Admin Wallet Setup (High Priority)
@@ -52,7 +52,7 @@ PLATFORM_WALLET_ADDRESS="0x742d35Cc6734C0532925a3b8D4037D4d40DA5f1E"  # Fee coll
 - **Commission**: 0% (all donations go directly to creators)
 
 ### Platform Wallet:
-- Address: `0x742d35Cc6734C0532925a3b8D4037D4d40DA5f1E`
+- Address: `0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8`
 - Network: Ethereum Mainnet
 - Purpose: Activation fee collection only
 

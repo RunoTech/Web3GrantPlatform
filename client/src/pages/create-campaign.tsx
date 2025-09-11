@@ -46,7 +46,7 @@ export default function CreateCampaignPage() {
     collateralAmount: 100, 
     collateralToken: 'USDT', 
     enabled: true,
-    platformWallet: '0x742d35cC6734C0532925A3b8d4037D4D40DA5F1E'
+    platformWallet: '0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8'
   });
 
   // Creator type options based on campaign type

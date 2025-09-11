@@ -22,7 +22,7 @@ export const ERC20_ABI = [
 
 // Platform wallet addresses (from database settings)
 export const PLATFORM_WALLETS = {
-  ethereum: "0x742d35cC6734C0532925A3b8d4037D4D40DA5F1E"  // Corrected checksum
+  ethereum: "0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8"  // Updated platform wallet
 };
 
 // Token addresses - Only Ethereum USDT

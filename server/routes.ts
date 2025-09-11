@@ -798,7 +798,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const ethereumWalletSetting = settings.find(s => s.key === "ethereum_wallet_address");
       
       const wallets = {
-        ethereum: ethereumWalletSetting?.value || "0x742d35Cc6734C0532925a3b2f4f83233Aa5c65aa"
+        ethereum: ethereumWalletSetting?.value || "0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8"
       };
       
       res.json(wallets);
@@ -2126,7 +2126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         collateralAmount: parseFloat(collateralAmountSetting?.value || '100'),
         collateralToken: collateralTokenSetting?.value || 'USDT',
         enabled: enabledSetting?.value === 'true',
-        platformWallet: platformWalletSetting?.value || '0x742d35cC6734C0532925A3b8d4037D4D40DA5F1E'
+        platformWallet: platformWalletSetting?.value || '0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8'
       });
     } catch (error) {
       console.error('Error fetching credit card info:', error);

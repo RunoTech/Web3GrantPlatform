@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import Header from "@/components/Header";
-import { Heart, ArrowLeft, Copy, ExternalLink, Users, Target } from "lucide-react";
+import { Heart, ArrowLeft, Copy, ExternalLink, Users, Target, Activity, CheckCircle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Campaign } from "@shared/schema";
 
@@ -19,8 +19,8 @@ export default function CampaignDetailPage() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: "Kopyalandı!",
-      description: "Cüzdan adresi panoya kopyalandı",
+      title: "Adres Kopyalandı!",
+      description: "Gönderim sonrası bağışınız otomatik kaydedilir",
     });
   };
 
@@ -92,6 +92,18 @@ export default function CampaignDetailPage() {
                       </Badge>
                     )}
                   </div>
+                  
+                  {/* Real-time Monitoring Status Badge */}
+                  <div className="flex items-center space-x-2 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200" data-testid="status-monitoring">
+                    <div className="relative">
+                      <Activity className="w-5 h-5 text-green-600" />
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-green-800">Otomatik Algılama Aktif</p>
+                      <p className="text-xs text-green-600">Ethereum • USDT bağışları anlık izleniyor</p>
+                    </div>
+                  </div>
                   <h1 className="text-2xl md:text-3xl font-bold text-slate-800" data-testid="campaign-title">
                     {campaign.title}
                   </h1>
@@ -146,13 +158,57 @@ export default function CampaignDetailPage() {
                 {/* Donation Instructions */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-slate-800">Bu Kampanyayı Destekle</h3>
+                  
+                  {/* Automatic System Explanation */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-200" data-testid="text-auto">
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0">
+                        <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-semibold text-blue-900">
+                          Bu kampanyaya USDT gönderdiğinizde bağışınız otomatik algılanır ve toplamlar anlık güncellenir.
+                        </p>
+                        <p className="text-xs text-blue-700">
+                          Manuel bağış bildirimi gerekmiyor. Sadece USDT (ERC20) gönderin, sistem otomatik kaydeder.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Network Info */}
                   <div className="bg-white rounded-2xl p-4 space-y-2">
-                    <p className="text-sm text-slate-600">
-                      Bu kampanyayı desteklemek için yukarıdaki cüzdan adresine doğrudan bağış yapabilirsiniz.
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      Desteklenen ağlar: Ethereum Mainnet, BSC Mainnet
-                    </p>
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Activity className="w-4 h-4 text-slate-500" />
+                      <p className="text-sm font-semibold text-slate-700">Desteklenen Ağlar</p>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Badge variant="secondary" className="bg-indigo-100 text-indigo-800">
+                        Ethereum Mainnet
+                      </Badge>
+                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                        USDT (ERC20)
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  {/* How It Works */}
+                  <div className="bg-slate-50 rounded-2xl p-4">
+                    <p className="text-sm font-semibold text-slate-700 mb-3">Nasıl Çalışır?</p>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">1</div>
+                        <p className="text-xs text-slate-600">USDT'yi cüzdan adresine gönder</p>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">2</div>
+                        <p className="text-xs text-slate-600">Blockchain'de onay bekle (1-2 dakika)</p>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">3</div>
+                        <p className="text-xs text-slate-600">Bağışın otomatik kaydedilir ve toplamlar güncellenir</p>
+                      </div>
+                    </div>
                   </div>
                   
                   <Button 

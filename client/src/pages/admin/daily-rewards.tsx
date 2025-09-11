@@ -124,7 +124,7 @@ export default function AdminDailyRewardsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Button variant="ghost" asChild className="mb-8">
-          <Link href="/admin/settings">
+          <Link href="/youhonor/settings">
             <ArrowLeft className="w-5 h-5 mr-2" />
             Back to Admin Panel
           </Link>

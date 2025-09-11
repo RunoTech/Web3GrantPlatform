@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      setLocation("/admin");
+      setLocation("/youhonor");
     }
   }, [isAuthenticated, setLocation]);
 
@@ -49,7 +49,7 @@ export default function AdminLoginPage() {
           title: "Login Successful",
           description: `Welcome back, ${response.admin.username}!`,
         });
-        setLocation("/admin");
+        setLocation("/youhonor");
       } else {
         toast({
           title: "Login Failed",

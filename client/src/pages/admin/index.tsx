@@ -191,7 +191,7 @@ export default function AdminDashboardPage() {
               <Button
                 variant="outline"
                 className="h-20 flex-col space-y-2"
-                onClick={() => setLocation("/admin/settings")}
+                onClick={() => setLocation("/youhonor/settings")}
                 data-testid="button-admin-settings"
               >
                 <Settings className="h-6 w-6" />
@@ -201,7 +201,7 @@ export default function AdminDashboardPage() {
               <Button
                 variant="outline"
                 className="h-20 flex-col space-y-2"
-                onClick={() => setLocation("/admin/daily-rewards")}
+                onClick={() => setLocation("/youhonor/daily-rewards")}
                 data-testid="button-admin-daily-rewards"
               >
                 <Gift className="h-6 w-6" />
@@ -211,7 +211,7 @@ export default function AdminDashboardPage() {
               <Button
                 variant="outline"
                 className="h-20 flex-col space-y-2"
-                onClick={() => setLocation("/admin/database")}
+                onClick={() => setLocation("/youhonor/database")}
                 data-testid="button-admin-database"
               >
                 <Database className="h-6 w-6" />
@@ -221,7 +221,7 @@ export default function AdminDashboardPage() {
               <Button
                 variant="outline"
                 className="h-20 flex-col space-y-2"
-                onClick={() => setLocation("/admin/campaigns")}
+                onClick={() => setLocation("/youhonor/campaigns")}
                 data-testid="button-admin-campaigns"
               >
                 <Briefcase className="h-6 w-6" />
@@ -231,7 +231,7 @@ export default function AdminDashboardPage() {
               <Button
                 variant="outline"
                 className="h-20 flex-col space-y-2"
-                onClick={() => setLocation("/admin/transactions")}
+                onClick={() => setLocation("/youhonor/transactions")}
                 data-testid="button-admin-transactions"
               >
                 <CreditCard className="h-6 w-6" />
@@ -241,7 +241,7 @@ export default function AdminDashboardPage() {
               <Button
                 variant="outline"
                 className="h-20 flex-col space-y-2"
-                onClick={() => setLocation("/admin/affiliates")}
+                onClick={() => setLocation("/youhonor/affiliates")}
                 data-testid="button-admin-affiliates"
               >
                 <TrendingUp className="h-6 w-6" />

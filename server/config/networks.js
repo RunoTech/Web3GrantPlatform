@@ -4,12 +4,6 @@ export const networks = {
     chainId: 1,
     rpcUrl: process.env.ETH_RPC_URL || 'https://eth.llamarpc.com',
     platformWallet: process.env.PLATFORM_WALLET_ETH || '',
-  },
-  bsc: {
-    name: 'BSC Mainnet',
-    chainId: 56,
-    rpcUrl: process.env.BSC_RPC_URL || 'https://bsc.llamarpc.com',
-    platformWallet: process.env.PLATFORM_WALLET_BSC || '',
   }
 };
 

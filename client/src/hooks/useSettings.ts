@@ -40,7 +40,6 @@ export function useSettings() {
     
     // Pricing settings
     activationFeeEthereum: getNumberSetting('activation_fee_ethereum', 50),
-    activationFeeBsc: getNumberSetting('activation_fee_bsc', 50),
     minDonationAmount: getNumberSetting('min_donation_amount', 1),
     maxCampaignGoal: getNumberSetting('max_campaign_goal', 1000000),
     

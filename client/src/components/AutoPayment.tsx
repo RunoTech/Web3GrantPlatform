@@ -94,31 +94,19 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
 
-      // Switch to correct network
-      const networkChainId = selectedNetwork === 'ethereum' ? '0x1' : '0x38'; // 1 for ETH, 56 for BSC
+      // Switch to Ethereum Mainnet
       try {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: networkChainId }],
+          params: [{ chainId: '0x1' }], // Ethereum Mainnet
         });
       } catch (switchError: any) {
-        // Network doesn't exist, add it (for BSC)
-        if (switchError.code === 4902 && selectedNetwork === 'bsc') {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: '0x38',
-              chainName: 'BSC Mainnet',
-              nativeCurrency: {
-                name: 'BNB',
-                symbol: 'BNB',
-                decimals: 18,
-              },
-              rpcUrls: ['https://bsc-dataseed1.binance.org'],
-              blockExplorerUrls: ['https://bscscan.com'],
-            }],
-          });
-        }
+        toast({
+          title: t('error'),
+          description: "Please switch to Ethereum Mainnet",
+          variant: "destructive",
+        });
+        return;
       }
 
       // Create contract instance
@@ -244,7 +232,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
             >
               <div className="text-left">
                 <div className="font-semibold uppercase tracking-wide">
-                  {fee.network === 'ethereum' ? 'ETHEREUM' : 'BSC'}
+                  ETHEREUM
                 </div>
                 <div className="text-cyber-cyan font-mono">
                   {fee.amount} {fee.tokenSymbol}
@@ -369,7 +357,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
           <div className="space-y-4">
             <div>
               <Badge variant="outline" className="text-cyber-yellow border-cyber-yellow mb-2">
-                {selectedNetwork === 'ethereum' ? 'ETHEREUM MAINNET' : 'BSC MAINNET'}
+                ETHEREUM MAINNET
               </Badge>
               <div className="text-sm text-muted-foreground">
                 Send exactly <span className="text-cyber-green font-mono">{selectedFee.amount} {selectedFee.tokenSymbol}</span> to:

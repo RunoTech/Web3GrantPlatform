@@ -59,7 +59,7 @@ export default function PaymentPage() {
         setIsActivated(true);
         toast({
           title: t('accountActivated'),
-          description: `${result.amount} ${network === 'ethereum' ? 'USDT' : 'BUSD'} ${t('paymentConfirmed')}`,
+          description: `${result.amount} USDT ${t('paymentConfirmed')}`,
         });
         
         // Redirect to profile after 3 seconds

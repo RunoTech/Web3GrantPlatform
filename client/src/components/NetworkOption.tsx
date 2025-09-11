@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 
 interface NetworkOptionProps {
-  network: 'ethereum' | 'bsc';
+  network: 'ethereum';
   name: string;
   fee: string;
-  color: 'blue' | 'yellow';
+  color: 'blue';
   selected: boolean;
   onSelect: () => void;
 }
@@ -47,7 +47,7 @@ export default function NetworkOption({
           colorClass.gradient
         )}>
           <span className="text-white font-bold">
-            {network === 'ethereum' ? 'USDT' : 'BSC'}
+            USDT
           </span>
         </div>
         <div className="text-left">

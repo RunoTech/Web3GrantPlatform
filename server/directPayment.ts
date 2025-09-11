@@ -17,13 +17,6 @@ const networks = {
     rpcUrl: process.env.ETH_RPC_URL || "https://eth.llamarpc.com",
     nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
     blockExplorer: "https://etherscan.io"
-  },
-  bsc: {
-    chainId: 56,
-    name: "BSC Mainnet", 
-    rpcUrl: process.env.BSC_RPC_URL || "https://bsc.llamarpc.com",
-    nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
-    blockExplorer: "https://bscscan.com"
   }
 };
 
@@ -31,9 +24,6 @@ const networks = {
 export const PAYMENT_TOKENS = {
   ethereum: {
     USDT: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-  },
-  bsc: {
-    BUSD: "0xe9e7cea3dedca5984780bafc599bd69add087d56"
   }
 };
 

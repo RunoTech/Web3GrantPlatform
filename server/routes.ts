@@ -2115,12 +2115,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get credit card collateral info (public)
   app.get("/api/credit-card-info", async (req, res) => {
     try {
-      // Get credit card settings from platform settings
-      const settings = await storage.getPlatformSettings("payment");
-      const collateralAmountSetting = settings.find(s => s.key === 'credit_card_collateral_amount');
-      const collateralTokenSetting = settings.find(s => s.key === 'credit_card_collateral_token');
-      const enabledSetting = settings.find(s => s.key === 'credit_card_enabled');
-      const platformWalletSetting = settings.find(s => s.key === 'ethereum_wallet_address');
+      // Get credit card settings from payments category
+      const paymentsSettings = await storage.getPlatformSettings("payments");
+      const collateralAmountSetting = paymentsSettings.find(s => s.key === 'credit_card_collateral_amount');
+      const collateralTokenSetting = paymentsSettings.find(s => s.key === 'credit_card_collateral_token');
+      const enabledSetting = paymentsSettings.find(s => s.key === 'credit_card_enabled');
+      
+      // Get platform wallet from payment category (different category)
+      const paymentSettings = await storage.getPlatformSettings("payment");
+      const platformWalletSetting = paymentSettings.find(s => s.key === 'ethereum_wallet_address');
+      
       
       res.json({
         collateralAmount: parseFloat(collateralAmountSetting?.value || '100'),

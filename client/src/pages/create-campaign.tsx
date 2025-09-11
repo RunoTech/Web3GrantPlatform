@@ -230,10 +230,18 @@ export default function CreateCampaignPage() {
         setCollateralPaid(true);
         form.setValue("collateralTxHash", tx.hash);
         form.setValue("collateralPaid", true);
+        
         toast({
           title: "Payment Successful!",
-          description: `${collateralAmount} USDT collateral paid successfully`,
+          description: "Collateral paid successfully. Creating campaign...",
         });
+
+        // Automatically create campaign after successful collateral payment
+        setTimeout(() => {
+          const formData = form.getValues();
+          onSubmit(formData);
+        }, 1000); // Small delay to show success message first
+
       } else {
         throw new Error("Transaction failed");
       }

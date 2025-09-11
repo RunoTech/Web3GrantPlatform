@@ -5,6 +5,9 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { testRpcConnection, startAllCampaignListeners, getCampaignListenersStatus } from "./blockchain";
 import { storage } from "./storage";
+import 'dotenv/config';
+console.log("📦 Using database:", process.env.DATABASE_URL);
+
 
 const app = express();
 

@@ -1,11 +1,13 @@
 import { Link, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import Header from "@/components/Header";
-import { Heart, ArrowLeft, Copy, ExternalLink, Users, Target, Activity, CheckCircle, Clock } from "lucide-react";
+import { Heart, ArrowLeft, ExternalLink, Users, Target, Activity, CheckCircle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import DonationForm from "@/components/DonationForm";
 import type { Campaign } from "@shared/schema";
 
 export default function CampaignDetailPage() {
@@ -16,13 +18,6 @@ export default function CampaignDetailPage() {
     queryKey: ["/api/campaign", id],
   });
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Adres Kopyalandı!",
-      description: "Gönderim sonrası bağışınız otomatik kaydedilir",
-    });
-  };
 
   if (isLoading) {
     return (
@@ -137,88 +132,42 @@ export default function CampaignDetailPage() {
                 {/* Owner Info */}
                 <div className="bg-white rounded-2xl p-4 space-y-3">
                   <p className="text-sm font-semibold text-slate-700">Kampanya Sahibi</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-full"></div>
-                      <span className="font-mono text-sm text-slate-600" data-testid="owner-wallet">
-                        {campaign.ownerWallet.slice(0, 6)}...{campaign.ownerWallet.slice(-4)}
-                      </span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(campaign.ownerWallet)}
-                      data-testid="button-copy-wallet"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </Button>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-full"></div>
+                    <span className="font-mono text-sm text-slate-600" data-testid="owner-wallet">
+                      {campaign.ownerWallet.slice(0, 6)}...{campaign.ownerWallet.slice(-4)}
+                    </span>
                   </div>
                 </div>
                 
-                {/* Donation Instructions */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-800">Bu Kampanyayı Destekle</h3>
-                  
-                  {/* Automatic System Explanation */}
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-200" data-testid="text-auto">
-                    <div className="flex items-start space-x-3">
-                      <div className="flex-shrink-0">
-                        <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5" />
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-semibold text-blue-900">
-                          Bu kampanyaya USDT gönderdiğinizde bağışınız otomatik algılanır ve toplamlar anlık güncellenir.
-                        </p>
-                        <p className="text-xs text-blue-700">
-                          Manuel bağış bildirimi gerekmiyor. Sadece USDT (ERC20) gönderin, sistem otomatik kaydeder.
-                        </p>
-                      </div>
+                {/* Direct Donation Form */}
+                <DonationForm
+                  campaignId={campaign.id}
+                  ownerWallet={campaign.ownerWallet}
+                  campaignTitle={campaign.title}
+                  onSuccess={() => {
+                    // Invalidate campaign query cache to refresh data
+                    queryClient.invalidateQueries({ queryKey: ["/api/campaign", id] });
+                  }}
+                />
+                
+                {/* How It Works Info */}
+                <div className="bg-slate-50 rounded-2xl p-4">
+                  <p className="text-sm font-semibold text-slate-700 mb-3">Nasıl Çalışır?</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">1</div>
+                      <p className="text-xs text-slate-600">Cüzdanınızı bağlayın ve miktarı girin</p>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">2</div>
+                      <p className="text-xs text-slate-600">USDT transferini onaylayın</p>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">3</div>
+                      <p className="text-xs text-slate-600">Bağışınız otomatik kaydedilir ve toplamlar güncellenir</p>
                     </div>
                   </div>
-                  
-                  {/* Network Info */}
-                  <div className="bg-white rounded-2xl p-4 space-y-2">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Activity className="w-4 h-4 text-slate-500" />
-                      <p className="text-sm font-semibold text-slate-700">Desteklenen Ağlar</p>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Badge variant="secondary" className="bg-indigo-100 text-indigo-800">
-                        Ethereum Mainnet
-                      </Badge>
-                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                        USDT (ERC20)
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  {/* How It Works */}
-                  <div className="bg-slate-50 rounded-2xl p-4">
-                    <p className="text-sm font-semibold text-slate-700 mb-3">Nasıl Çalışır?</p>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">1</div>
-                        <p className="text-xs text-slate-600">USDT'yi cüzdan adresine gönder</p>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">2</div>
-                        <p className="text-xs text-slate-600">Blockchain'de onay bekle (1-2 dakika)</p>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">3</div>
-                        <p className="text-xs text-slate-600">Bağışın otomatik kaydedilir ve toplamlar güncellenir</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <Button 
-                    className="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-                    onClick={() => copyToClipboard(campaign.ownerWallet)}
-                    data-testid="button-support-campaign"
-                  >
-                    <Heart className="w-5 h-5 mr-2" />
-                    Bağış Adresini Kopyala
-                  </Button>
                 </div>
               </div>
             </div>

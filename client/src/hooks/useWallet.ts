@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { connectWallet, getAccounts, onAccountsChanged, onChainChanged, removeWalletListeners } from '@/utils/wallet';
+import { connectWallet, getAccounts, onAccountsChanged, onChainChanged, removeWalletListeners, verifyNetwork, switchToEthereumMainnet } from '@/utils/wallet';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -155,6 +155,44 @@ export function useWallet() {
     };
   }, [address, disconnect, checkConnection]);
 
+  // Get provider - supports both MetaMask and WalletConnect
+  const getProvider = useCallback(() => {
+    if (typeof window.ethereum !== 'undefined') {
+      return window.ethereum;
+    }
+    return null;
+  }, []);
+
+  // Network verification functions
+  const checkNetwork = useCallback(async (): Promise<boolean> => {
+    try {
+      return await verifyNetwork();
+    } catch (error) {
+      console.error('Network check error:', error);
+      return false;
+    }
+  }, []);
+
+  const switchToMainnet = useCallback(async (): Promise<boolean> => {
+    try {
+      const switched = await switchToEthereumMainnet();
+      if (switched) {
+        toast({
+          title: "Network Switched",
+          description: "Successfully switched to Ethereum Mainnet",
+        });
+      }
+      return switched;
+    } catch (error: any) {
+      toast({
+        title: "Network Switch Failed",
+        description: error.message || "Failed to switch to Ethereum Mainnet",
+        variant: "destructive",
+      });
+      return false;
+    }
+  }, [toast]);
+
   return {
     isConnected,
     address,
@@ -162,5 +200,8 @@ export function useWallet() {
     isInitialized,
     connect,
     disconnect,
+    getProvider,
+    checkNetwork,
+    switchToMainnet,
   };
 }

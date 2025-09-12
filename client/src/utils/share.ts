@@ -1,6 +1,8 @@
 // Dynamic social media sharing utilities for duxxan.com
 
-const BASE_URL = 'https://duxxan.com';
+// Get base URL from environment or use current origin as fallback
+const BASE_URL = import.meta.env.VITE_BASE_URL || 
+                 (typeof window !== 'undefined' ? window.location.origin : 'https://duxxan.com');
 
 export interface ShareData {
   title: string;

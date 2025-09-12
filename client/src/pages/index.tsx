@@ -124,7 +124,7 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-6 sm:space-y-8 lg:space-y-12">
             <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 gradient-primary rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto neon-border shadow-2xl">
-              <Heart className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 text-black drop-shadow-2xl" />
+              <Heart className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 icon-on-primary drop-shadow-2xl" />
             </div>
             
             <div className="space-y-4 sm:space-y-6">
@@ -147,7 +147,7 @@ export default function HomePage() {
                 data-testid="button-create-campaign"
               >
                 <Link href="/create-campaign">
-                  <Target className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2 text-black" />
+                  <Target className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2 icon-on-primary" />
                   {t('hero.create_campaign')}
                 </Link>
               </Button>
@@ -158,7 +158,7 @@ export default function HomePage() {
                 data-testid="button-explore-campaigns"
               >
                 <Link href="/campaigns">
-                  <Search className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2 text-black" />
+                  <Search className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2 icon-on-primary" />
                   {t('hero.explore_campaigns')}
                 </Link>
               </Button>
@@ -182,7 +182,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             <div className="cyber-card p-4 sm:p-6 lg:p-8 text-center group hover:scale-105 transition-transform duration-300">
               <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 cyber-cyan-bg rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-2xl neon-border">
-                <Shield className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-black drop-shadow-2xl" />
+                <Shield className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 icon-on-primary drop-shadow-2xl" />
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 sm:mb-4 uppercase tracking-wide">{t('features.blockchain_security')}</h3>
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
@@ -192,7 +192,7 @@ export default function HomePage() {
 
             <div className="cyber-card p-4 sm:p-6 lg:p-8 text-center group hover:scale-105 transition-transform duration-300">
               <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 cyber-green-bg rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-2xl neon-border">
-                <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-black drop-shadow-2xl" />
+                <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 icon-on-primary drop-shadow-2xl" />
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 sm:mb-4 uppercase tracking-wide">{t('features.commission_free')}</h3>
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
@@ -202,7 +202,7 @@ export default function HomePage() {
 
             <div className="cyber-card p-8 text-center group hover:scale-105 transition-transform duration-300">
               <div className="w-24 h-24 cyber-purple-bg rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl neon-border">
-                <Zap className="w-12 h-12 text-black drop-shadow-2xl" />
+                <Zap className="w-12 h-12 icon-on-primary drop-shadow-2xl" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.fast_easy')}</h3>
               <p className="text-muted-foreground leading-relaxed">

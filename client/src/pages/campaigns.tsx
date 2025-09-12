@@ -36,7 +36,7 @@ export default function CampaignsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-6">
             <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 neon-border">
-              <Search className="w-8 h-8 text-black" />
+              <Search className="w-8 h-8 icon-on-primary" />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold neon-text uppercase tracking-wide">
               {t('donations.all_campaigns')}

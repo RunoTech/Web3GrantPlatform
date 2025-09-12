@@ -26,7 +26,7 @@ export default function Header({ currentPage }: HeaderProps) {
         <div className="flex items-center justify-between h-14 sm:h-16">
           <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
             <div className="w-8 h-8 sm:w-10 sm:h-10 gradient-primary rounded-lg flex items-center justify-center neon-border">
-              <Heart className="w-4 h-4 sm:w-6 sm:h-6 text-black" />
+              <Heart className="w-4 h-4 sm:w-6 sm:h-6 icon-on-primary" />
             </div>
             <Link href="/">
               <h1 className="text-lg sm:text-xl font-bold text-foreground neon-text uppercase tracking-wide cursor-pointer">

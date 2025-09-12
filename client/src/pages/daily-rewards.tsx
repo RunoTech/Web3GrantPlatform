@@ -112,7 +112,7 @@ export default function DailyRewardsPage() {
           <div className="text-center mb-12">
             <div className="flex items-center justify-center space-x-3 mb-6">
               <Gift className="w-16 h-16 text-yellow-500" />
-              <h1 className="text-5xl font-bold text-black dark:text-white">
+              <h1 className="text-5xl font-bold text-foreground">
                 Daily Rewards
               </h1>
             </div>
@@ -125,10 +125,10 @@ export default function DailyRewardsPage() {
           <div className="bg-white dark:bg-gray-900 rounded-2xl border-2 border-yellow-200 dark:border-yellow-800 p-8 max-w-2xl mx-auto">
             <div className="text-center space-y-6">
               <div className="w-24 h-24 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto">
-                <Coins className="w-12 h-12 text-black" />
+                <Coins className="w-12 h-12 icon-on-primary" />
               </div>
               
-              <h2 className="text-3xl font-bold text-black dark:text-white">
+              <h2 className="text-3xl font-bold text-foreground">
                 Join Daily Draw
               </h2>
               
@@ -168,7 +168,7 @@ export default function DailyRewardsPage() {
                   <Button 
                     onClick={joinDailyReward}
                     disabled={joinRewardMutation.isPending || hasJoinedToday}
-                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold text-lg py-4 px-8"
+                    className="w-full btn-cyber font-bold text-lg py-4 px-8"
                   >
                     {joinRewardMutation.isPending ? (
                       "Processing participation..."
@@ -189,7 +189,7 @@ export default function DailyRewardsPage() {
 
               {/* Reward Rules */}
               <div className="text-left space-y-2 text-sm text-gray-600 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
-                <h3 className="font-semibold text-black dark:text-white mb-2">📋 Draw Rules:</h3>
+                <h3 className="font-semibold text-foreground mb-2">📋 Draw Rules:</h3>
                 <ul className="space-y-1">
                   <li>• You can only participate once per day</li>
                   <li>• Participation is completely free</li>
@@ -206,7 +206,7 @@ export default function DailyRewardsPage() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <Trophy className="w-10 h-10 text-yellow-500" />
-            <h2 className="text-3xl font-bold text-black dark:text-white">
+            <h2 className="text-3xl font-bold text-foreground">
               Recent Winners
             </h2>
           </div>

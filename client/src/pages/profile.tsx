@@ -67,7 +67,7 @@ export default function ProfilePage() {
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center space-y-8 max-w-lg mx-auto p-8">
             <div className="w-32 h-32 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-              <Wallet className="w-16 h-16 text-black" />
+              <Wallet className="w-16 h-16 icon-on-primary" />
             </div>
             <div className="space-y-4">
               <h1 className="text-3xl font-bold text-foreground">{t('profile.access_title')}</h1>
@@ -132,7 +132,7 @@ export default function ProfilePage() {
                   <p className="text-3xl font-bold text-foreground">{userCampaigns.length}</p>
                 </div>
                 <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
-                  <Target className="w-6 h-6 text-black" />
+                  <Target className="w-6 h-6 icon-on-primary" />
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">
@@ -150,7 +150,7 @@ export default function ProfilePage() {
                   <p className="text-3xl font-bold text-foreground">{totalDonationsReceived.toFixed(2)}</p>
                 </div>
                 <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-black" />
+                  <DollarSign className="w-6 h-6 icon-on-primary" />
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">
@@ -167,7 +167,7 @@ export default function ProfilePage() {
                   <p className="text-3xl font-bold text-foreground">{totalSupporters}</p>
                 </div>
                 <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
-                  <Users className="w-6 h-6 text-black" />
+                  <Users className="w-6 h-6 icon-on-primary" />
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">
@@ -185,7 +185,7 @@ export default function ProfilePage() {
                   <p className="text-3xl font-bold text-foreground">{dailyParticipationCount}</p>
                 </div>
                 <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
-                  <Gift className="w-6 h-6 text-black" />
+                  <Gift className="w-6 h-6 icon-on-primary" />
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">

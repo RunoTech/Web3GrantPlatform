@@ -1,6 +1,7 @@
 declare global {
   interface Window {
     ethereum?: any;
+    trustwallet?: any;
   }
 }
 
@@ -12,6 +13,54 @@ export interface WalletProvider {
 
 // Security: Ethereum Mainnet Chain ID
 const ETHEREUM_MAINNET_CHAIN_ID = '0x1'; // Chain ID 1
+
+// Detect and return the appropriate wallet provider
+export function getWalletProvider(): any {
+  // Priority order: Trust Wallet, then MetaMask, then generic ethereum
+  if (typeof window !== 'undefined') {
+    // Check for Trust Wallet first
+    if (window.trustwallet?.ethereum) {
+      console.log('🛡️ Trust Wallet detected');
+      return window.trustwallet.ethereum;
+    }
+    
+    // Check if it's Trust Wallet injected as ethereum
+    if (window.ethereum?.isTrustWallet) {
+      console.log('🛡️ Trust Wallet detected');
+      return window.ethereum;
+    }
+    
+    // Check for MetaMask
+    if (window.ethereum?.isMetaMask) {
+      console.log('🦊 MetaMask detected');
+      return window.ethereum;
+    }
+    
+    // Fall back to generic ethereum provider
+    if (window.ethereum) {
+      console.log('💳 Generic Ethereum provider detected');
+      return window.ethereum;
+    }
+  }
+  
+  return null;
+}
+
+// Get the current wallet name for display purposes
+export function getWalletName(): string {
+  if (typeof window !== 'undefined') {
+    if (window.trustwallet?.ethereum || window.ethereum?.isTrustWallet) {
+      return 'Trust Wallet';
+    }
+    if (window.ethereum?.isMetaMask) {
+      return 'MetaMask';
+    }
+    if (window.ethereum) {
+      return 'Ethereum Wallet';
+    }
+  }
+  return 'Unknown';
+}
 
 export function isValidEthereumAddress(address: string): boolean {
   // Basic format check
@@ -29,12 +78,13 @@ export function isValidEthereumAddress(address: string): boolean {
 }
 
 export async function verifyNetwork(): Promise<boolean> {
-  if (typeof window.ethereum === 'undefined') {
+  const provider = getWalletProvider();
+  if (!provider) {
     return false;
   }
 
   try {
-    const chainId = await window.ethereum.request({
+    const chainId = await provider.request({
       method: 'eth_chainId',
     });
     
@@ -46,12 +96,13 @@ export async function verifyNetwork(): Promise<boolean> {
 }
 
 export async function switchToEthereumMainnet(): Promise<boolean> {
-  if (typeof window.ethereum === 'undefined') {
+  const provider = getWalletProvider();
+  if (!provider) {
     return false;
   }
 
   try {
-    await window.ethereum.request({
+    await provider.request({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: ETHEREUM_MAINNET_CHAIN_ID }],
     });
@@ -63,8 +114,10 @@ export async function switchToEthereumMainnet(): Promise<boolean> {
 }
 
 export async function connectWallet(): Promise<string | null> {
-  if (typeof window.ethereum === 'undefined') {
-    throw new Error('MetaMask or compatible wallet not found. Please install MetaMask.');
+  // Check for various wallet providers
+  const provider = getWalletProvider();
+  if (!provider) {
+    throw new Error('No wallet found. Please install MetaMask, Trust Wallet, or another compatible wallet.');
   }
 
   try {
@@ -78,7 +131,7 @@ export async function connectWallet(): Promise<string | null> {
     }
 
     // Request account access
-    const accounts = await window.ethereum.request({
+    const accounts = await provider.request({
       method: 'eth_requestAccounts',
     });
 
@@ -107,12 +160,13 @@ export async function connectWallet(): Promise<string | null> {
 }
 
 export async function getAccounts(): Promise<string[]> {
-  if (typeof window.ethereum === 'undefined') {
+  const provider = getWalletProvider();
+  if (!provider) {
     return [];
   }
 
   try {
-    const accounts = await window.ethereum.request({
+    const accounts = await provider.request({
       method: 'eth_accounts',
     });
     return accounts;
@@ -123,20 +177,23 @@ export async function getAccounts(): Promise<string[]> {
 }
 
 export function onAccountsChanged(callback: (accounts: string[]) => void) {
-  if (typeof window.ethereum !== 'undefined') {
-    window.ethereum.on('accountsChanged', callback);
+  const provider = getWalletProvider();
+  if (provider) {
+    provider.on('accountsChanged', callback);
   }
 }
 
 export function onChainChanged(callback: (chainId: string) => void) {
-  if (typeof window.ethereum !== 'undefined') {
-    window.ethereum.on('chainChanged', callback);
+  const provider = getWalletProvider();
+  if (provider) {
+    provider.on('chainChanged', callback);
   }
 }
 
 export function removeWalletListeners() {
-  if (typeof window.ethereum !== 'undefined') {
-    window.ethereum.removeAllListeners('accountsChanged');
-    window.ethereum.removeAllListeners('chainChanged');
+  const provider = getWalletProvider();
+  if (provider && typeof provider.removeAllListeners === 'function') {
+    provider.removeAllListeners('accountsChanged');
+    provider.removeAllListeners('chainChanged');
   }
 }

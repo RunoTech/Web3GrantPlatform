@@ -5,12 +5,14 @@ import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import CampaignCard from "@/components/CampaignCard";
+import ShareButton from "@/components/ShareButton";
 import LanguageSelector from "@/components/LanguageSelector";
 import ThemeToggle from "@/components/ThemeToggle";
 import Header from "@/components/Header";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSettings } from "@/hooks/useSettings";
+import { generateAffiliateShareLink } from "@/utils/share";
 import { api } from "@/utils/api";
 import { useState, useEffect } from "react";
 import { 
@@ -243,30 +245,25 @@ export default function HomePage() {
               
               <div className="bg-background/50 backdrop-blur-sm border border-border/50 rounded-lg p-6">
                 <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                  <DollarSign className="w-8 h-8 text-primary-foreground" />
+                  <Coins className="w-8 h-8 text-primary-foreground" />
                 </div>
                 <h3 className="font-bold text-foreground mb-2">Earn Rewards</h3>
-                <p className="text-sm text-muted-foreground">Get paid for every successful referral activity</p>
+                <p className="text-sm text-muted-foreground">Get passive income from successful referrals and campaigns</p>
               </div>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button 
-                asChild
+              <ShareButton 
+                shareData={generateAffiliateShareLink()}
+                variant="default"
                 size="lg"
-                className="bg-primary hover:bg-primary/90 px-8 py-4 font-bold uppercase tracking-wide shadow-lg hover:scale-105 transition-transform duration-300"
-              >
+                className="bg-primary hover:bg-primary/90 px-8 py-4 font-bold text-primary-foreground shadow-lg hover:scale-105 transition-transform duration-300"
+              />
+              <Button asChild variant="outline" size="lg" className="px-8 py-4">
                 <Link href="/affiliate">
-                  <Share2 className="w-5 h-5 mr-2" />
-                  Start Earning Now
+                  <BarChart3 className="w-5 h-5 mr-2" />
+                  View Affiliate Dashboard
                 </Link>
-              </Button>
-              <Button 
-                variant="outline"
-                size="lg"
-                className="px-8 py-4 font-medium"
-              >
-                Learn More
               </Button>
             </div>
           </div>

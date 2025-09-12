@@ -1,6 +1,8 @@
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Users, Target } from "lucide-react";
+import ShareButton from "@/components/ShareButton";
+import { generateCampaignShareLink } from "@/utils/share";
 import type { Campaign } from "@shared/schema";
 
 interface CampaignCardProps {
@@ -77,12 +79,24 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
             </div>
           </div>
           
-          {/* Owner Info */}
-          <div className="flex items-center space-x-2 pt-1 sm:pt-2">
-            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex-shrink-0"></div>
-            <span className="text-xs text-slate-500 font-mono truncate">
-              {campaign.ownerWallet.slice(0, 6)}...{campaign.ownerWallet.slice(-4)}
-            </span>
+          {/* Owner Info and Share Button */}
+          <div className="flex items-center justify-between pt-1 sm:pt-2">
+            <div className="flex items-center space-x-2">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex-shrink-0"></div>
+              <span className="text-xs text-slate-500 font-mono truncate">
+                {campaign.ownerWallet.slice(0, 6)}...{campaign.ownerWallet.slice(-4)}
+              </span>
+            </div>
+            {/* Share Button - Prevent event bubbling to card link */}
+            <div onClick={(e) => e.preventDefault()}>
+              <ShareButton 
+                shareData={generateCampaignShareLink(campaign.id, campaign.title)}
+                variant="ghost"
+                size="sm"
+                showText={false}
+                className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800"
+              />
+            </div>
           </div>
         </div>
       </div>

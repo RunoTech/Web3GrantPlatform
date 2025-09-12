@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import Header from "@/components/Header";
+import ShareButton from "@/components/ShareButton";
 import { Heart, ArrowLeft, ExternalLink, Users, Target, Activity, CheckCircle, Clock, Building, TrendingUp, Shield, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DonationForm from "@/components/DonationForm";
+import { generateCampaignShareLink } from "@/utils/share";
 import type { Campaign } from "@shared/schema";
 
 export default function CampaignDetailPage() {
@@ -72,24 +74,32 @@ export default function CampaignDetailPage() {
               {/* Header Content */}
               <div className="relative z-10 px-8 py-12 text-white">
                 <div className="max-w-4xl">
-                  {/* Status Badges */}
-                  <div className="flex items-center gap-3 mb-6">
-                    <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 transition-all" data-testid="campaign-status">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Aktif
-                    </Badge>
-                    {campaign.featured && (
-                      <Badge className="bg-yellow-500/90 text-white border-yellow-400/30">
-                        <TrendingUp className="w-3 h-3 mr-1" />
-                        Öne Çıkan
+                  {/* Status Badges and Share Button */}
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 transition-all" data-testid="campaign-status">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Aktif
                       </Badge>
-                    )}
-                    {campaign.campaignType === 'FUND' && (
-                      <Badge className="bg-purple-500/90 text-white border-purple-400/30">
-                        <Building className="w-3 h-3 mr-1" />
-                        Kurumsal Fon
-                      </Badge>
-                    )}
+                      {campaign.featured && (
+                        <Badge className="bg-yellow-500/90 text-white border-yellow-400/30">
+                          <TrendingUp className="w-3 h-3 mr-1" />
+                          Öne Çıkan
+                        </Badge>
+                      )}
+                      {campaign.campaignType === 'FUND' && (
+                        <Badge className="bg-purple-500/90 text-white border-purple-400/30">
+                          <Building className="w-3 h-3 mr-1" />
+                          Kurumsal Fon
+                        </Badge>
+                      )}
+                    </div>
+                    {/* Share Button */}
+                    <ShareButton 
+                      shareData={generateCampaignShareLink(campaign.id, campaign.title)}
+                      variant="ghost"
+                      className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30"
+                    />
                   </div>
                   
                   {/* Real-time Monitoring Status */}

@@ -26,7 +26,7 @@ import {
   CheckCircle,
   Coins
 } from "lucide-react";
-import type { DailyWinner } from "@shared/schema";
+import type { DailyWinner, Announcement } from "@shared/schema";
 
 export default function DailyRewardsPage() {
   const { t } = useLanguage();
@@ -42,6 +42,10 @@ export default function DailyRewardsPage() {
 
   const { data: stats } = useQuery<{ participants: number; date: string }>({
     queryKey: ["/api/today-stats"],
+  });
+
+  const { data: announcements = [] } = useQuery<Announcement[]>({
+    queryKey: ["/api/announcements"],
   });
 
   // Check if user has joined today
@@ -201,6 +205,58 @@ export default function DailyRewardsPage() {
             </div>
           </div>
         </div>
+
+        {/* Announcements Section */}
+        {announcements.length > 0 && (
+          <div className="mb-12">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-foreground mb-2">📢 Daily Reward Announcements</h2>
+              <p className="text-gray-600 dark:text-gray-400">Important updates and information</p>
+            </div>
+            
+            <div className="space-y-4">
+              {announcements.map((announcement) => (
+                <Card key={announcement.id} className={`p-4 border-l-4 ${
+                  announcement.type === 'success' ? 'border-l-green-500 bg-green-50 dark:bg-green-900/20' :
+                  announcement.type === 'warning' ? 'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' :
+                  announcement.type === 'error' ? 'border-l-red-500 bg-red-50 dark:bg-red-900/20' :
+                  'border-l-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                }`} data-testid={`announcement-${announcement.id}`}>
+                  <div className="flex items-start space-x-3">
+                    <div className={`p-1 rounded-full ${
+                      announcement.type === 'success' ? 'bg-green-500' :
+                      announcement.type === 'warning' ? 'bg-yellow-500' :
+                      announcement.type === 'error' ? 'bg-red-500' :
+                      'bg-blue-500'
+                    }`}>
+                      {announcement.type === 'success' ? 
+                        <CheckCircle className="w-4 h-4 text-white" /> :
+                      announcement.type === 'warning' ? 
+                        <Clock className="w-4 h-4 text-white" /> :
+                      announcement.type === 'error' ? 
+                        <ArrowLeft className="w-4 h-4 text-white" /> :
+                        <Gift className="w-4 h-4 text-white" />
+                      }
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-foreground mb-1">{announcement.title}</h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm whitespace-pre-wrap">{announcement.content}</p>
+                      <div className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                        {announcement.createdAt ? new Date(announcement.createdAt).toLocaleDateString('en-US', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        }) : 'Recent'}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Winners Section Header */}
         <div className="text-center mb-8">

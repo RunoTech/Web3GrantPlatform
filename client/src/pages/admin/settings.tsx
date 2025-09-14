@@ -244,7 +244,7 @@ export default function AdminSettingsPage() {
       </div>
 
       <Tabs defaultValue="general" className="bg-muted/40 rounded-lg space-y-4">
-        <TabsList className="bg-transparent grid w-full grid-cols-7">
+        <TabsList className="bg-transparent grid w-full grid-cols-8">
           <TabsTrigger value="general" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Genel</TabsTrigger>
           <TabsTrigger value="homepage" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Ana Sayfa</TabsTrigger>
           <TabsTrigger value="features" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Özellikler</TabsTrigger>
@@ -252,6 +252,7 @@ export default function AdminSettingsPage() {
           <TabsTrigger value="payment" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Ödeme</TabsTrigger>
           <TabsTrigger value="contact" className="data-[state=active]:bg-background data-[state=active]:text-foreground">İletişim</TabsTrigger>
           <TabsTrigger value="social" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Sosyal</TabsTrigger>
+          <TabsTrigger value="blockchain" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Blockchain</TabsTrigger>
         </TabsList>
 
         {Object.entries(categorizedSettings || {}).map(([category, settings]) => (

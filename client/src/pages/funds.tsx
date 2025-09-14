@@ -46,10 +46,10 @@ export default function FundsPage() {
         </Button>
 
         {/* Funds Header Section */}
-        <div className="bg-gradient-to-br from-background to-surface rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 border border-border">
+        <div className="card-standard section-spacing-lg mb-6 sm:mb-8">
           <div className="text-center mb-4 sm:mb-6">
             <div className="flex items-center justify-center space-x-2 mb-2 sm:mb-3">
-              <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+              <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 icon-accent" />
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
                 FUNDS
               </h1>
@@ -63,10 +63,10 @@ export default function FundsPage() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4">
             <Button 
               asChild
-              className="gradient-primary hover:opacity-90 text-primary-foreground font-semibold px-4 sm:px-6 py-2 sm:py-3 w-full sm:w-auto text-sm sm:text-base"
+              className="btn-binance hover:transform hover:-translate-y-0.5 font-semibold px-4 sm:px-6 py-2 sm:py-3 w-full sm:w-auto text-sm sm:text-base"
             >
               <Link href="/create-campaign?type=fund">
-                <Building className="w-4 h-4 mr-2" />
+                <Building className="w-4 h-4 mr-2 icon-on-primary" />
                 Create FUND Campaign
               </Link>
             </Button>
@@ -74,10 +74,10 @@ export default function FundsPage() {
             <Button 
               asChild
               variant="outline"
-              className="border-primary text-primary hover:bg-primary/10 font-semibold px-4 sm:px-6 py-2 sm:py-3 w-full sm:w-auto text-sm sm:text-base"
+              className="btn-secondary hover:transform hover:-translate-y-0.5 font-semibold px-4 sm:px-6 py-2 sm:py-3 w-full sm:w-auto text-sm sm:text-base"
             >
               <Link href="/campaigns">
-                <Trophy className="w-4 h-4 mr-2" />
+                <Trophy className="w-4 h-4 mr-2 icon-primary" />
                 View All Campaigns
               </Link>
             </Button>
@@ -85,20 +85,20 @@ export default function FundsPage() {
 
           {/* Info Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-4 sm:mt-6">
-            <div className="cyber-card p-3 sm:p-4 text-center">
-              <Building className="w-6 h-6 sm:w-8 sm:h-8 text-primary mx-auto mb-1 sm:mb-2" />
+            <div className="card-standard p-3 sm:p-4 text-center">
+              <Building className="w-6 h-6 sm:w-8 sm:h-8 icon-accent mx-auto mb-1 sm:mb-2" />
               <h3 className="text-xs sm:text-sm font-bold text-foreground mb-1">Companies Only</h3>
               <p className="text-xs text-muted-foreground">Only registered companies</p>
             </div>
             
-            <div className="cyber-card p-4 text-center">
-              <Clock className="w-8 h-8 text-cyber-green mx-auto mb-2" />
+            <div className="card-standard p-4 text-center">
+              <Clock className="w-8 h-8 text-success mx-auto mb-2" />
               <h3 className="text-sm font-bold text-foreground mb-1">Unlimited</h3>
               <p className="text-xs text-muted-foreground">No end date</p>
             </div>
             
-            <div className="cyber-card p-4 text-center">
-              <Heart className="w-8 h-8 text-cyber-cyan mx-auto mb-2" />
+            <div className="card-standard p-4 text-center">
+              <Heart className="w-8 h-8 icon-accent mx-auto mb-2" />
               <h3 className="text-sm font-bold text-foreground mb-1">Zero Commission</h3>
               <p className="text-xs text-muted-foreground">Direct to wallet</p>
             </div>
@@ -107,20 +107,20 @@ export default function FundsPage() {
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <Card className="cyber-card p-3 text-center">
-            <DollarSign className="w-6 h-6 text-cyber-yellow mx-auto mb-1" />
+          <Card className="card-standard p-3 text-center">
+            <DollarSign className="w-6 h-6 text-success mx-auto mb-1" />
             <h3 className="text-lg font-bold text-foreground">50 USDT</h3>
             <p className="text-xs text-muted-foreground">Activation Fee</p>
           </Card>
           
-          <Card className="cyber-card p-3 text-center">
-            <Clock className="w-6 h-6 text-cyber-cyan mx-auto mb-1" />
+          <Card className="card-standard p-3 text-center">
+            <Clock className="w-6 h-6 icon-accent mx-auto mb-1" />
             <h3 className="text-lg font-bold text-foreground">∞</h3>
             <p className="text-xs text-muted-foreground">Duration</p>
           </Card>
           
-          <Card className="cyber-card p-3 text-center">
-            <Building className="w-6 h-6 text-cyber-green mx-auto mb-1" />
+          <Card className="card-standard p-3 text-center">
+            <Building className="w-6 h-6 text-success mx-auto mb-1" />
             <h3 className="text-lg font-bold text-foreground">Companies</h3>
             <p className="text-xs text-muted-foreground">Corporate Only</p>
           </Card>
@@ -140,7 +140,7 @@ export default function FundsPage() {
           {fundsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
-                <Card key={i} className="cyber-card p-6 animate-pulse">
+                <Card key={i} className="card-standard p-6 animate-pulse">
                   <div className="space-y-4">
                     <div className="w-full h-48 bg-muted rounded-xl"></div>
                     <div className="h-6 bg-muted rounded w-3/4"></div>
@@ -157,14 +157,14 @@ export default function FundsPage() {
                   <CampaignCard campaign={campaign} />
                   {/* Company Badge */}
                   <div className="absolute top-4 left-4 z-10">
-                    <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 shadow-lg">
-                      <Building className="w-3 h-3 mr-1" />
+                    <Badge className="bg-primary text-primary-foreground border-0 shadow-binance font-semibold">
+                      <Building className="w-3 h-3 mr-1 icon-on-primary" />
                       COMPANY FUND
                     </Badge>
                   </div>
                   {/* Target Amount Badge */}
                   <div className="absolute top-4 right-4 z-10">
-                    <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white border-0 shadow-lg">
+                    <Badge className="bg-success text-white border-0 shadow-binance font-semibold">
                       Target: {parseFloat(campaign.targetAmount || '0').toLocaleString()} USDT
                     </Badge>
                   </div>
@@ -172,15 +172,15 @@ export default function FundsPage() {
               ))}
             </div>
           ) : (
-            <Card className="cyber-card p-12 text-center">
+            <Card className="card-standard p-12 text-center">
               <Building className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-foreground mb-2">No Corporate FUND Campaigns Yet</h3>
               <p className="text-muted-foreground mb-6">
                 Be the first company to create a FUND campaign on our platform!
               </p>
-              <Button asChild className="gradient-primary">
+              <Button asChild className="btn-binance">
                 <Link href="/create-campaign?type=fund">
-                  <Building className="w-4 h-4 mr-2" />
+                  <Building className="w-4 h-4 mr-2 icon-on-primary" />
                   Create Company FUND
                 </Link>
               </Button>
@@ -197,8 +197,8 @@ export default function FundsPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="cyber-card p-4 text-center">
-              <div className="w-10 h-10 gradient-primary rounded-full flex items-center justify-center mx-auto mb-2">
+            <Card className="card-standard p-4 text-center">
+              <div className="w-10 h-10 btn-binance rounded-full flex items-center justify-center mx-auto mb-2">
                 <Building className="w-5 h-5 icon-on-primary" />
               </div>
               <h3 className="text-sm font-bold text-foreground mb-1">1. Register</h3>
@@ -207,8 +207,8 @@ export default function FundsPage() {
               </p>
             </Card>
 
-            <Card className="cyber-card p-4 text-center">
-              <div className="w-10 h-10 gradient-primary rounded-full flex items-center justify-center mx-auto mb-2">
+            <Card className="card-standard p-4 text-center">
+              <div className="w-10 h-10 btn-binance rounded-full flex items-center justify-center mx-auto mb-2">
                 <DollarSign className="w-5 h-5 icon-on-primary" />
               </div>
               <h3 className="text-sm font-bold text-foreground mb-1">2. Create FUND</h3>
@@ -217,8 +217,8 @@ export default function FundsPage() {
               </p>
             </Card>
 
-            <Card className="cyber-card p-4 text-center">
-              <div className="w-10 h-10 gradient-primary rounded-full flex items-center justify-center mx-auto mb-2">
+            <Card className="card-standard p-4 text-center">
+              <div className="w-10 h-10 btn-binance rounded-full flex items-center justify-center mx-auto mb-2">
                 <Trophy className="w-5 h-5 icon-on-primary" />
               </div>
               <h3 className="text-sm font-bold text-foreground mb-1">3. Receive Funds</h3>

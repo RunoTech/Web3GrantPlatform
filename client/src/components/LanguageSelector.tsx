@@ -27,10 +27,10 @@ export default function LanguageSelector() {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="cyber-card border border-border/50 hover:border-cyber-cyan/50 transition-colors"
+          className="card-standard border border-border/50 hover:border-primary/50 transition-colors"
           data-testid="language-selector"
         >
-          <Globe className="w-4 h-4 mr-2 text-cyber-cyan" />
+          <Globe className="w-4 h-4 mr-2 text-primary" />
           <span className="text-foreground font-medium uppercase tracking-wide">
             {currentLanguage?.flag} {currentLanguage?.code.toUpperCase()}
           </span>
@@ -38,14 +38,14 @@ export default function LanguageSelector() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="cyber-card border border-border bg-surface-2 min-w-[150px]"
+        className="card-standard border border-border bg-surface-2 min-w-[150px]"
       >
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
             onClick={() => setLanguage(lang.code)}
-            className={`cursor-pointer hover:bg-cyber-cyan/10 transition-colors ${
-              language === lang.code ? 'bg-cyber-cyan/20 text-cyber-cyan' : 'text-foreground'
+            className={`cursor-pointer hover:bg-primary/10 transition-colors ${
+              language === lang.code ? 'bg-primary/20 text-primary' : 'text-foreground'
             }`}
             data-testid={`language-option-${lang.code}`}
           >

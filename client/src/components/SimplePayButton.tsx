@@ -190,14 +190,14 @@ export default function SimplePayButton({ onPaymentSuccess }: SimplePayButtonPro
   // Step 1: Network Selection
   if (step === 1) {
     return (
-      <Card className="cyber-card p-8 max-w-2xl mx-auto">
+      <Card className="card-standard p-8 max-w-2xl mx-auto">
         <div className="text-center space-y-6">
-          <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto neon-border">
+          <div className="w-16 h-16 btn-binance rounded-full flex items-center justify-center mx-auto">
             <CreditCard className="w-8 h-8 text-background" />
           </div>
           
           <div>
-            <h2 className="text-2xl font-bold neon-text mb-2 uppercase tracking-wide">
+            <h2 className="text-2xl font-bold text-foreground mb-2">
               HESAP AKTİVASYONU
             </h2>
             <p className="text-muted-foreground">
@@ -211,7 +211,7 @@ export default function SimplePayButton({ onPaymentSuccess }: SimplePayButtonPro
                 key={fee.network}
                 onClick={() => handlePayment(fee.network)}
                 disabled={!isConnected}
-                className="cyber-card p-6 hover:border-cyber-cyan transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
+                className="card-standard p-6 hover:border-primary transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
                 data-testid={`pay-${fee.network}`}
               >
                 <div className="space-y-4">
@@ -223,7 +223,7 @@ export default function SimplePayButton({ onPaymentSuccess }: SimplePayButtonPro
                   </Badge>
                   
                   <div className="space-y-2">
-                    <div className="text-2xl font-bold text-cyber-cyan">
+                    <div className="text-2xl font-bold text-primary">
                       {fee.amount} {fee.tokenSymbol}
                     </div>
                     <div className="text-sm text-muted-foreground">
@@ -231,7 +231,7 @@ export default function SimplePayButton({ onPaymentSuccess }: SimplePayButtonPro
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-center gap-2 text-cyber-green">
+                  <div className="flex items-center justify-center gap-2 text-green-500">
                     <Zap className="w-4 h-4" />
                     <span className="text-sm font-semibold">OTOMATIK ÖDEME</span>
                   </div>
@@ -256,14 +256,14 @@ export default function SimplePayButton({ onPaymentSuccess }: SimplePayButtonPro
   // Step 2: Processing
   if (step === 2) {
     return (
-      <Card className="cyber-card p-8 max-w-md mx-auto text-center">
+      <Card className="card-standard p-8 max-w-md mx-auto text-center">
         <div className="space-y-6">
-          <div className="w-16 h-16 bg-cyber-cyan/20 border border-cyber-cyan rounded-full flex items-center justify-center mx-auto">
-            <Loader2 className="w-8 h-8 text-cyber-cyan animate-spin" />
+          <div className="w-16 h-16 bg-primary/20 border border-primary rounded-full flex items-center justify-center mx-auto">
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
           
           <div>
-            <h3 className="text-xl font-bold mb-2 uppercase tracking-wide">
+            <h3 className="text-xl font-bold mb-2">
               İŞLEM YAPILIYOR
             </h3>
             <p className="text-muted-foreground mb-4">
@@ -273,7 +273,7 @@ export default function SimplePayButton({ onPaymentSuccess }: SimplePayButtonPro
             {selectedFee && (
               <div className="bg-muted rounded-lg p-4">
                 <div className="text-sm text-muted-foreground mb-1">Ödeme Miktarı:</div>
-                <div className="text-lg font-bold text-cyber-cyan">
+                <div className="text-lg font-bold text-primary">
                   {selectedFee.amount} {selectedFee.tokenSymbol}
                 </div>
               </div>
@@ -287,14 +287,14 @@ export default function SimplePayButton({ onPaymentSuccess }: SimplePayButtonPro
   // Step 3: Success
   if (step === 3) {
     return (
-      <Card className="cyber-card p-8 max-w-md mx-auto text-center border-cyber-green">
+      <Card className="card-standard p-8 max-w-md mx-auto text-center border-green-500">
         <div className="space-y-6">
-          <div className="w-16 h-16 bg-cyber-green/20 border border-cyber-green rounded-full flex items-center justify-center mx-auto">
-            <CheckCircle className="w-8 h-8 text-cyber-green" />
+          <div className="w-16 h-16 bg-green-500/20 border border-green-500 rounded-full flex items-center justify-center mx-auto">
+            <CheckCircle className="w-8 h-8 text-green-500" />
           </div>
           
           <div>
-            <h3 className="text-xl font-bold mb-2 text-cyber-green uppercase tracking-wide">
+            <h3 className="text-xl font-bold mb-2 text-green-500">
               ÖDEME BAŞARILI!
             </h3>
             <p className="text-muted-foreground">

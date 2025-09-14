@@ -214,8 +214,8 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
   return (
     <div className="space-y-6">
       {/* Network Selection */}
-      <Card className="cyber-card p-6">
-        <h3 className="text-lg font-semibold neon-text mb-4 uppercase tracking-wide">
+      <Card className="card-standard p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-4">
           {t('selectNetwork')}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -225,8 +225,8 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
               onClick={() => setSelectedNetwork(fee.network)}
               className={`p-4 rounded-lg border-2 transition-all duration-200 ${
                 selectedNetwork === fee.network
-                  ? 'border-cyber-cyan neon-border bg-cyber-cyan/10'
-                  : 'border-border hover:border-cyber-purple'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:border-primary/50'
               }`}
               data-testid={`select-network-${fee.network}`}
             >
@@ -234,7 +234,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
                 <div className="font-semibold uppercase tracking-wide">
                   ETHEREUM
                 </div>
-                <div className="text-cyber-cyan font-mono">
+                <div className="text-primary font-mono">
                   {fee.amount} {fee.tokenSymbol}
                 </div>
               </div>
@@ -245,20 +245,20 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
 
       {/* Auto Payment Methods */}
       {selectedFee && platformWallet && (
-        <Card className="cyber-card p-6">
-          <h3 className="text-lg font-semibold neon-text mb-6 uppercase tracking-wide">
+        <Card className="card-standard p-6">
+          <h3 className="text-lg font-semibold text-foreground mb-6">
             AUTOMATIC PAYMENT OPTIONS
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* MetaMask Auto Pay */}
-            <div className="cyber-card p-4 border-cyber-green">
+            <div className="card-standard p-4 border-green-500">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-cyber-green/20 border border-cyber-green rounded-lg flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-cyber-green" />
+                <div className="w-10 h-10 bg-green-500/20 border border-green-500 rounded-lg flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-green-500" />
                 </div>
                 <div>
-                  <h4 className="font-semibold uppercase tracking-wide">INSTANT PAY</h4>
+                  <h4 className="font-semibold">INSTANT PAY</h4>
                   <p className="text-sm text-muted-foreground">One-click payment</p>
                 </div>
               </div>
@@ -266,7 +266,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
               <Button
                 onClick={handleAutoPayment}
                 disabled={!isConnected || isProcessing}
-                className="w-full gradient-primary hover:opacity-90 mb-3"
+                className="w-full btn-binance hover:opacity-90 mb-3"
                 data-testid="button-auto-payment"
               >
                 {isProcessing ? (
@@ -290,13 +290,13 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
             </div>
 
             {/* Mobile/QR Payment */}
-            <div className="cyber-card p-4 border-cyber-purple">
+            <div className="card-standard p-4 border-primary">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-cyber-purple/20 border border-cyber-purple rounded-lg flex items-center justify-center">
-                  <Smartphone className="w-5 h-5 text-cyber-purple" />
+                <div className="w-10 h-10 bg-primary/20 border border-primary rounded-lg flex items-center justify-center">
+                  <Smartphone className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h4 className="font-semibold uppercase tracking-wide">MOBILE PAY</h4>
+                  <h4 className="font-semibold">MOBILE PAY</h4>
                   <p className="text-sm text-muted-foreground">Trust Wallet, Rainbow</p>
                 </div>
               </div>
@@ -305,7 +305,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
                 <Button
                   onClick={() => window.open(generatePaymentLink(), '_blank')}
                   variant="outline"
-                  className="w-full border-cyber-purple text-cyber-purple hover:bg-cyber-purple hover:text-white"
+                  className="w-full border-primary text-primary hover:bg-primary hover:text-white"
                   data-testid="button-mobile-payment"
                 >
                   <Wallet className="w-4 h-4 mr-2" />
@@ -315,7 +315,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
                 <Button
                   onClick={() => setShowQR(!showQR)}
                   variant="ghost"
-                  className="w-full text-cyber-purple hover:text-white hover:bg-cyber-purple"
+                  className="w-full text-primary hover:text-white hover:bg-primary"
                   data-testid="button-show-qr"
                 >
                   <QrCode className="w-4 h-4 mr-2" />
@@ -336,7 +336,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
             </div>
           </div>
 
-          <Alert className="mt-6 border-cyber-cyan">
+          <Alert className="mt-6 border-blue-500">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               <strong>Desktop:</strong> Use "Instant Pay" for automatic MetaMask payment.
@@ -348,19 +348,19 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
       )}
 
       {/* Manual Payment Info (Fallback) */}
-      <Card className="cyber-card p-6">
-        <h3 className="text-lg font-semibold neon-text mb-4 uppercase tracking-wide">
+      <Card className="card-standard p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-4">
           MANUAL PAYMENT (FALLBACK)
         </h3>
         
         {selectedFee && platformWallet && (
           <div className="space-y-4">
             <div>
-              <Badge variant="outline" className="text-cyber-yellow border-cyber-yellow mb-2">
+              <Badge variant="outline" className="text-yellow-500 border-yellow-500 mb-2">
                 ETHEREUM MAINNET
               </Badge>
               <div className="text-sm text-muted-foreground">
-                Send exactly <span className="text-cyber-green font-mono">{selectedFee.amount} {selectedFee.tokenSymbol}</span> to:
+                Send exactly <span className="text-green-500 font-mono">{selectedFee.amount} {selectedFee.tokenSymbol}</span> to:
               </div>
             </div>
             
@@ -372,7 +372,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
                 size="sm"
                 variant="ghost"
                 onClick={() => copyToClipboard(platformWallet)}
-                className="hover:text-cyber-cyan"
+                className="hover:text-primary"
                 data-testid="button-copy-address"
               >
                 <Copy className="h-4 w-4" />

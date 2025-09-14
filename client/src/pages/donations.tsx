@@ -58,21 +58,17 @@ export default function DonationsPage() {
       <Header currentPage="donations" />
 
       {/* Hero Section */}
-      <section className="py-16 relative overflow-hidden bg-surface">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 cyber-cyan-bg opacity-5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 right-1/4 w-80 h-80 cyber-purple-bg opacity-5 rounded-full blur-3xl"></div>
-        </div>
+      <section className="section-spacing-lg bg-surface-primary">
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-8">
-            <div className="w-24 h-24 gradient-primary rounded-lg flex items-center justify-center mx-auto neon-border">
-              <Gift className="w-12 h-12 icon-on-primary text-black" />
+            <div className="w-24 h-24 bg-primary rounded-lg flex items-center justify-center mx-auto shadow-binance">
+              <Gift className="w-12 h-12 icon-on-primary" />
             </div>
             
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 uppercase tracking-wider">
-                <span className="neon-text">{t('donations.title')}</span>
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+                {t('donations.title')}
               </h1>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8">
                 {t('donations.subtitle')}
@@ -83,10 +79,10 @@ export default function DonationsPage() {
                 <Button 
                   asChild 
                   size="lg"
-                  className="cyber-cyan-bg px-8 py-4 font-bold uppercase tracking-wide btn-cyber shadow-2xl hover:scale-105 transition-transform duration-300"
+                  className="btn-binance px-8 py-4 shadow-binance hover:shadow-lg transition-all duration-200"
                 >
                   <Link href="/create-campaign?type=donate">
-                    <Target className="w-6 h-6 mr-2 icon-on-primary" />
+                    <Target className="w-6 h-6 mr-2 icon-on-yellow" />
                     {t('donations.create_campaign')}
                   </Link>
                 </Button>
@@ -94,25 +90,25 @@ export default function DonationsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <div className="cyber-card p-6 text-center">
-                <div className="w-16 h-16 cyber-cyan-bg rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Target className="w-8 h-8 icon-on-primary" />
+              <div className="card-standard text-center">
+                <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Target className="w-8 h-8 icon-on-yellow" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2 uppercase tracking-wide">{t('donations.features.reach_goal')}</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{t('donations.features.reach_goal')}</h3>
                 <p className="text-sm text-muted-foreground">{t('donations.features.reach_desc')}</p>
               </div>
-              <div className="cyber-card p-6 text-center">
-                <div className="w-16 h-16 cyber-purple-bg rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-black" />
+              <div className="card-standard text-center">
+                <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 icon-on-yellow" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2 uppercase tracking-wide">{t('donations.features.support_community')}</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{t('donations.features.support_community')}</h3>
                 <p className="text-sm text-muted-foreground">{t('donations.features.support_desc')}</p>
               </div>
-              <div className="cyber-card p-6 text-center">
-                <div className="w-16 h-16 cyber-green-bg rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Heart className="w-8 h-8 icon-on-primary" />
+              <div className="card-standard text-center">
+                <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Heart className="w-8 h-8 icon-on-yellow" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2 uppercase tracking-wide">{t('donations.features.secure_donation')}</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{t('donations.features.secure_donation')}</h3>
                 <p className="text-sm text-muted-foreground">{t('donations.features.secure_desc')}</p>
               </div>
             </div>
@@ -121,11 +117,11 @@ export default function DonationsPage() {
       </section>
 
       {/* Popular Campaigns Section */}
-      <section className="py-16 bg-surface-2">
+      <section className="section-spacing-lg bg-surface-secondary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 uppercase tracking-wider">
-              <span className="neon-text">{t('donations.popular_campaigns')}</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              {t('donations.popular_campaigns')}
             </h2>
             <p className="text-lg text-muted-foreground">{t('donations.popular_subtitle')}</p>
           </div>
@@ -134,7 +130,7 @@ export default function DonationsPage() {
             {(popularCampaigns as Campaign[]).slice(0, 6).map((campaign: Campaign) => (
               <div key={campaign.id} className="relative">
                 <div className="absolute -top-3 -right-3 z-10">
-                  <Badge className="gradient-accent text-black animate-pulse">
+                  <Badge className="bg-primary text-primary-foreground animate-pulse">
                     🌟 {t('donations.filter_popular')}
                   </Badge>
                 </div>
@@ -146,11 +142,11 @@ export default function DonationsPage() {
       </section>
 
       {/* All Campaigns Section */}
-      <section className="py-16 bg-surface">
+      <section className="section-spacing-lg bg-surface-primary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-8">
             {/* Search and Filter Header */}
-            <div className="cyber-card p-6">
+            <div className="card-standard">
               <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                 <div className="flex-1 max-w-md">
                   <div className="relative">
@@ -197,7 +193,7 @@ export default function DonationsPage() {
 
             {/* Results Count */}
             <div className="flex items-center justify-between">
-              <h3 className="text-2xl font-bold text-foreground uppercase tracking-wide">
+              <h3 className="text-2xl font-bold text-foreground">
                 {t('donations.all_campaigns')}
               </h3>
               <Badge variant="outline" className="text-muted-foreground">
@@ -226,10 +222,10 @@ export default function DonationsPage() {
               </div>
             ) : (
               <div className="text-center py-20">
-                <div className="w-24 h-24 cyber-cyan-bg rounded-lg flex items-center justify-center mx-auto mb-6 neon-border">
-                  <Search className="w-12 h-12 icon-on-primary" />
+                <div className="w-24 h-24 bg-primary rounded-lg flex items-center justify-center mx-auto mb-6 shadow-binance">
+                  <Search className="w-12 h-12 icon-on-yellow" />
                 </div>
-                <h3 className="text-2xl font-semibold text-foreground mb-2 uppercase tracking-wide">
+                <h3 className="text-2xl font-semibold text-foreground mb-2">
                   {searchTerm ? t('donations.no_results') : t('donations.no_campaigns')}
                 </h3>
                 <p className="text-muted-foreground mb-8 max-w-md mx-auto">
@@ -239,7 +235,7 @@ export default function DonationsPage() {
                   }
                 </p>
                 {!searchTerm && (
-                  <Button asChild className="btn-cyber">
+                  <Button asChild className="btn-binance">
                     <Link href="/create-campaign?type=donate">
                       {t('donations.create_campaign')}
                     </Link>
@@ -252,21 +248,20 @@ export default function DonationsPage() {
       </section>
 
       {/* Call to Action */}
-      <section className="py-16 bg-surface-2">
+      <section className="section-spacing-lg bg-surface-secondary">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="cyber-card p-12 gradient-primary relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 cyber-cyan-bg opacity-10 rounded-full blur-2xl"></div>
-            <div className="space-y-6 relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold text-black uppercase tracking-wider">
+          <div className="card-standard p-12 bg-primary relative overflow-hidden">
+            <div className="space-y-6">
+              <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground">
                 {t('donations.make_difference')}
               </h2>
-              <p className="text-xl text-black/90">
+              <p className="text-xl text-primary-foreground/90">
                 {t('donations.create_own')}
               </p>
               <Button 
                 asChild 
                 size="lg"
-                className="bg-background text-cyber-cyan hover:bg-background/90 text-lg px-8 py-4 font-bold uppercase tracking-wide"
+                className="bg-background text-primary hover:bg-background/90 text-lg px-8 py-4 font-semibold"
               >
                 <Link href="/create-campaign?type=donate">
                   <Target className="w-5 h-5 mr-2" />

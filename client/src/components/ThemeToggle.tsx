@@ -10,13 +10,13 @@ export default function ThemeToggle() {
       onClick={toggleTheme}
       variant="ghost" 
       size="sm" 
-      className="cyber-card border border-border/50 hover:border-cyber-cyan/50 transition-colors w-10 h-10 p-0"
+      className="card-standard border border-border/50 hover:border-primary/50 transition-colors w-10 h-10 p-0"
       data-testid="theme-toggle"
     >
       {theme === 'light' ? (
-        <Moon className="w-4 h-4 text-cyber-cyan" />
+        <Moon className="w-4 h-4 text-primary" />
       ) : (
-        <Sun className="w-4 h-4 text-cyber-yellow" />
+        <Sun className="w-4 h-4 text-yellow-500" />
       )}
     </Button>
   );

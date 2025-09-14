@@ -201,21 +201,21 @@ export default function AffiliatePage() {
         <Header currentPage="affiliate" />
         
         {/* Hero Section */}
-        <section className="py-16 relative overflow-hidden bg-surface">
+        <section className="py-16 relative overflow-hidden bg-gray-50 dark:bg-gray-900">
           <div className="absolute inset-0">
-            <div className="absolute top-0 left-1/4 w-96 h-96 cyber-cyan-bg opacity-5 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 right-1/4 w-80 h-80 cyber-purple-bg opacity-5 rounded-full blur-3xl"></div>
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/10 to-primary/5 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-gradient-to-r from-primary/5 to-primary/10 rounded-full blur-3xl"></div>
           </div>
           
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center space-y-8">
-              <div className="w-24 h-24 gradient-primary rounded-lg flex items-center justify-center mx-auto neon-border">
+              <div className="w-24 h-24 bg-primary rounded-lg flex items-center justify-center mx-auto shadow-binance border border-yellow-300">
                 <Share2 className="w-12 h-12 text-black" />
               </div>
               
               <div>
                 <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 uppercase tracking-wider">
-                  <span className="neon-text">Affiliate Dashboard</span>
+                  Affiliate Dashboard
                 </h1>
                 <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
                   Track your referrals and earnings • Grow your network • Earn rewards from successful partnerships
@@ -239,7 +239,8 @@ export default function AffiliatePage() {
               </p>
               <Button 
                 onClick={() => window.location.reload()}
-                className="w-full"
+                className="w-full btn-binance hover:transform hover:-translate-y-0.5 transition-all duration-200"
+                data-testid="button-connect-wallet"
               >
                 Connect Wallet
               </Button>
@@ -256,21 +257,21 @@ export default function AffiliatePage() {
         <Header currentPage="affiliate" />
         
         {/* Hero Section */}
-        <section className="py-16 relative overflow-hidden bg-surface">
+        <section className="py-16 relative overflow-hidden bg-gray-50 dark:bg-gray-900">
           <div className="absolute inset-0">
-            <div className="absolute top-0 left-1/4 w-96 h-96 cyber-cyan-bg opacity-5 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 right-1/4 w-80 h-80 cyber-purple-bg opacity-5 rounded-full blur-3xl"></div>
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/10 to-primary/5 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-gradient-to-r from-primary/5 to-primary/10 rounded-full blur-3xl"></div>
           </div>
           
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center space-y-8">
-              <div className="w-24 h-24 gradient-primary rounded-lg flex items-center justify-center mx-auto neon-border">
+              <div className="w-24 h-24 bg-primary rounded-lg flex items-center justify-center mx-auto shadow-binance border border-yellow-300">
                 <Share2 className="w-12 h-12 text-black" />
               </div>
               
               <div>
                 <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 uppercase tracking-wider">
-                  <span className="neon-text">Affiliate Dashboard</span>
+                  Affiliate Dashboard
                 </h1>
                 <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
                   Track your referrals and earnings • Grow your network • Earn rewards from successful partnerships
@@ -297,19 +298,19 @@ export default function AffiliatePage() {
       {/* Hero Section */}
       <section className="py-16 relative overflow-hidden bg-surface">
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 cyber-cyan-bg opacity-5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 right-1/4 w-80 h-80 cyber-purple-bg opacity-5 rounded-full blur-3xl"></div>
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 opacity-30 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-primary/5 opacity-30 rounded-full blur-3xl"></div>
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-8">
-            <div className="w-24 h-24 gradient-primary rounded-lg flex items-center justify-center mx-auto neon-border">
+            <div className="w-24 h-24 bg-primary rounded-lg flex items-center justify-center mx-auto border border-primary/20">
               <Share2 className="w-12 h-12 text-black" />
             </div>
             
             <div>
               <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 uppercase tracking-wider">
-                <span className="neon-text">Affiliate Dashboard</span>
+                <span className="text-foreground">Affiliate Dashboard</span>
               </h1>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
                 Track your referrals and earnings • Grow your network • Earn rewards from successful partnerships
@@ -540,13 +541,16 @@ export default function AffiliatePage() {
                 <div className="flex gap-2 justify-center">
                   <Button 
                     onClick={() => window.location.href = '/donations'}
-                    variant="default"
+                    className="btn-binance hover:transform hover:-translate-y-0.5 transition-all duration-200"
+                    data-testid="button-make-donation"
                   >
                     Make a Donation
                   </Button>
                   <Button 
                     onClick={() => window.location.href = '/create-campaign'}
                     variant="outline"
+                    className="hover:transform hover:-translate-y-0.5 transition-all duration-200"
+                    data-testid="button-create-campaign"
                   >
                     Create Campaign
                   </Button>

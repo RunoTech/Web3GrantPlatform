@@ -66,7 +66,7 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center space-y-8 max-w-lg mx-auto p-8">
-            <div className="w-32 h-32 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+            <div className="w-32 h-32 bg-binance-yellow rounded-2xl flex items-center justify-center mx-auto shadow-binance">
               <Wallet className="w-16 h-16 icon-on-primary" />
             </div>
             <div className="space-y-4">
@@ -76,7 +76,7 @@ export default function ProfilePage() {
               </p>
             </div>
             <WalletConnectButton />
-            <Button variant="outline" asChild className="mt-6">
+            <Button variant="outline" asChild className="mt-6 btn-secondary hover:border-primary">
               <Link href="/">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 {t('common.back_to_home')}
@@ -98,7 +98,7 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-background">
       <Header currentPage="profile" />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container-main section-spacing">
         {/* Dashboard Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
@@ -107,13 +107,13 @@ export default function ProfilePage() {
               <p className="text-muted-foreground">Manage your campaigns, track rewards, and view analytics</p>
             </div>
             <div className="flex gap-3">
-              <Button asChild className="bg-primary hover:bg-primary/90">
+              <Button asChild className="btn-binance btn-md hover:transform hover:-translate-y-0.5">
                 <Link href="/create-campaign">
                   <Target className="w-4 h-4 mr-2" />
                   Create Campaign
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="border-primary/20 hover:bg-primary/10">
+              <Button asChild variant="outline" className="btn-secondary hover:border-primary">
                 <Link href="/affiliate">
                   <Share2 className="w-4 h-4 mr-2" />
                   Affiliate Dashboard
@@ -124,14 +124,14 @@ export default function ProfilePage() {
         </div>
         {/* Quick Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="cyber-card">
+          <Card className="card-standard">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total Campaigns</p>
                   <p className="text-3xl font-bold text-foreground">{userCampaigns.length}</p>
                 </div>
-                <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-binance-yellow shadow-binance rounded-lg flex items-center justify-center">
                   <Target className="w-6 h-6 icon-on-primary" />
                 </div>
               </div>
@@ -142,14 +142,14 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          <Card className="cyber-card">
+          <Card className="card-standard">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total Raised</p>
                   <p className="text-3xl font-bold text-foreground">{totalDonationsReceived.toFixed(2)}</p>
                 </div>
-                <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-binance-yellow shadow-binance rounded-lg flex items-center justify-center">
                   <DollarSign className="w-6 h-6 icon-on-primary" />
                 </div>
               </div>
@@ -159,14 +159,14 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          <Card className="cyber-card">
+          <Card className="card-standard">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total Supporters</p>
                   <p className="text-3xl font-bold text-foreground">{totalSupporters}</p>
                 </div>
-                <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-binance-yellow shadow-binance rounded-lg flex items-center justify-center">
                   <Users className="w-6 h-6 icon-on-primary" />
                 </div>
               </div>
@@ -177,14 +177,14 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          <Card className="cyber-card">
+          <Card className="card-standard">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Daily Rewards</p>
                   <p className="text-3xl font-bold text-foreground">{dailyParticipationCount}</p>
                 </div>
-                <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-binance-yellow shadow-binance rounded-lg flex items-center justify-center">
                   <Gift className="w-6 h-6 icon-on-primary" />
                 </div>
               </div>
@@ -197,7 +197,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Profile Info Card */}
-        <Card className="cyber-card mb-8">
+        <Card className="card-standard mb-8">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -227,7 +227,7 @@ export default function ProfilePage() {
 
         {/* Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-surface-2">
+          <TabsList className="grid w-full grid-cols-4 surface-secondary shadow-binance">
             <TabsTrigger 
               value="overview" 
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center"
@@ -260,7 +260,7 @@ export default function ProfilePage() {
 
           <TabsContent value="overview" className="space-y-6 mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="cyber-card">
+              <Card className="card-standard">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Activity className="w-5 h-5 mr-2 text-primary" />
@@ -270,7 +270,7 @@ export default function ProfilePage() {
                 <CardContent>
                   <div className="space-y-4">
                     {userCampaigns.slice(0, 3).map((campaign: Campaign) => (
-                      <div key={campaign.id} className="flex items-center justify-between p-3 bg-surface rounded-lg">
+                      <div key={campaign.id} className="flex items-center justify-between p-3 surface-secondary border border-border rounded-lg">
                         <div>
                           <p className="font-medium text-foreground">{campaign.title}</p>
                           <p className="text-sm text-muted-foreground">{campaign.totalDonations || '0'} USDT raised</p>
@@ -285,7 +285,7 @@ export default function ProfilePage() {
                 </CardContent>
               </Card>
 
-              <Card className="cyber-card">
+              <Card className="card-standard">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <TrendingUp className="w-5 h-5 mr-2 text-primary" />
@@ -324,14 +324,14 @@ export default function ProfilePage() {
                 ))}
               </div>
             ) : (
-              <Card className="cyber-card">
+              <Card className="card-standard">
                 <CardContent className="py-12 text-center">
                   <Target className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-foreground mb-2">No campaigns yet</h3>
                   <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                     Create your first campaign to start raising funds for your cause.
                   </p>
-                  <Button asChild className="bg-primary hover:bg-primary/90">
+                  <Button asChild className="btn-binance btn-md hover:transform hover:-translate-y-0.5">
                     <Link href="/create-campaign">
                       <Target className="w-4 h-4 mr-2" />
                       Create Campaign
@@ -343,7 +343,7 @@ export default function ProfilePage() {
           </TabsContent>
 
           <TabsContent value="rewards" className="space-y-6 mt-6">
-            <Card className="cyber-card">
+            <Card className="card-standard">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Gift className="w-5 h-5 mr-2 text-primary" />
@@ -352,22 +352,22 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/60 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-binance-yellow rounded-full flex items-center justify-center mx-auto mb-4 shadow-binance">
                     <Calendar className="w-8 h-8 text-black" />
                   </div>
                   <h3 className="text-2xl font-bold text-foreground mb-2">{dailyParticipationCount}</h3>
                   <p className="text-muted-foreground mb-4">Total participations</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto">
-                    <div className="bg-surface p-4 rounded-lg">
+                    <div className="surface-secondary border border-border p-4 rounded-lg">
                       <p className="text-xl font-bold text-foreground">{dailyParticipationCount}</p>
                       <p className="text-sm text-muted-foreground">Days Participated</p>
                     </div>
-                    <div className="bg-surface p-4 rounded-lg">
+                    <div className="surface-secondary border border-border p-4 rounded-lg">
                       <p className="text-xl font-bold text-foreground">{dailyParticipationCount}</p>
                       <p className="text-sm text-muted-foreground">Entries Made</p>
                     </div>
                   </div>
-                  <Button asChild className="mt-6 bg-primary hover:bg-primary/90">
+                  <Button asChild className="mt-6 btn-binance btn-md hover:transform hover:-translate-y-0.5">
                     <Link href="/daily-rewards">
                       <Trophy className="w-4 h-4 mr-2" />
                       Join Today's Reward
@@ -379,7 +379,7 @@ export default function ProfilePage() {
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6 mt-6">
-            <Card className="cyber-card">
+            <Card className="card-standard">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Settings className="w-5 h-5 mr-2 text-primary" />
@@ -387,7 +387,7 @@ export default function ProfilePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center justify-between p-4 bg-surface rounded-lg">
+                <div className="flex items-center justify-between p-4 surface-secondary border border-border rounded-lg">
                   <div>
                     <h4 className="font-medium text-foreground">Wallet Address</h4>
                     <p className="text-sm text-muted-foreground">{address}</p>
@@ -395,7 +395,7 @@ export default function ProfilePage() {
                   <Badge variant="outline">Connected</Badge>
                 </div>
                 
-                <div className="flex items-center justify-between p-4 bg-surface rounded-lg">
+                <div className="flex items-center justify-between p-4 surface-secondary border border-border rounded-lg">
                   <div>
                     <h4 className="font-medium text-foreground">Account Status</h4>
                     <p className="text-sm text-muted-foreground">Verified and active</p>
@@ -404,7 +404,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="pt-4 border-t border-border">
-                  <Button variant="outline" asChild className="w-full">
+                  <Button variant="outline" asChild className="w-full btn-secondary">
                     <Link href="/">
                       <ArrowLeft className="w-4 h-4 mr-2" />
                       Back to Home

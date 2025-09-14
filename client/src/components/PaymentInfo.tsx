@@ -108,8 +108,8 @@ export default function PaymentInfo({ onPaymentVerified }: PaymentInfoProps) {
   return (
     <div className="space-y-6">
       {/* Network Selection */}
-      <Card className="cyber-card p-6">
-        <h3 className="text-lg font-semibold neon-text mb-4 uppercase tracking-wide">
+      <Card className="card-standard p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-4">
           {t('selectNetwork')}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -119,15 +119,15 @@ export default function PaymentInfo({ onPaymentVerified }: PaymentInfoProps) {
               onClick={() => setSelectedNetwork(fee.network)}
               className={`p-4 rounded-lg border-2 transition-all duration-200 ${
                 selectedNetwork === fee.network
-                  ? 'border-cyber-cyan neon-border bg-cyber-cyan/10'
-                  : 'border-border hover:border-cyber-purple'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:border-primary/50'
               }`}
             >
               <div className="text-left">
                 <div className="font-semibold uppercase tracking-wide">
                   {fee.network === 'ethereum' ? 'ETHEREUM' : 'BSC'}
                 </div>
-                <div className="text-cyber-cyan font-mono">
+                <div className="text-primary font-mono">
                   {fee.amount} {fee.tokenSymbol}
                 </div>
               </div>
@@ -138,12 +138,12 @@ export default function PaymentInfo({ onPaymentVerified }: PaymentInfoProps) {
 
       {/* Payment Instructions */}
       {selectedFee && platformWallet && (
-        <Card className="cyber-card p-6">
-          <h3 className="text-lg font-semibold neon-text mb-4 uppercase tracking-wide">
+        <Card className="card-standard p-6">
+          <h3 className="text-lg font-semibold text-foreground mb-4">
             {t('paymentInstructions')}
           </h3>
           
-          <Alert className="mb-4 border-cyber-purple">
+          <Alert className="mb-4 border-yellow-500">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="text-sm">
               {t('paymentWarning')}
@@ -157,7 +157,7 @@ export default function PaymentInfo({ onPaymentVerified }: PaymentInfoProps) {
                 {t('network')}
               </Label>
               <div className="flex items-center gap-2 mt-1">
-                <Badge variant="outline" className="text-cyber-cyan border-cyber-cyan">
+                <Badge variant="outline" className="text-primary border-primary">
                   {selectedNetwork === 'ethereum' ? 'ETHEREUM MAINNET' : 'BSC MAINNET'}
                 </Badge>
               </div>
@@ -168,7 +168,7 @@ export default function PaymentInfo({ onPaymentVerified }: PaymentInfoProps) {
               <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                 {t('amount')}
               </Label>
-              <div className="text-lg font-mono text-cyber-green mt-1">
+              <div className="text-lg font-mono text-green-500 mt-1">
                 {selectedFee.amount} {selectedFee.tokenSymbol}
               </div>
             </div>
@@ -186,7 +186,7 @@ export default function PaymentInfo({ onPaymentVerified }: PaymentInfoProps) {
                   size="sm"
                   variant="ghost"
                   onClick={() => copyToClipboard(platformWallet)}
-                  className="hover:text-cyber-cyan"
+                  className="hover:text-primary"
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -206,7 +206,7 @@ export default function PaymentInfo({ onPaymentVerified }: PaymentInfoProps) {
                   size="sm"
                   variant="ghost"
                   onClick={() => copyToClipboard(selectedFee.tokenAddress)}
-                  className="hover:text-cyber-cyan"
+                  className="hover:text-primary"
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -217,8 +217,8 @@ export default function PaymentInfo({ onPaymentVerified }: PaymentInfoProps) {
       )}
 
       {/* Transaction Verification */}
-      <Card className="cyber-card p-6">
-        <h3 className="text-lg font-semibold neon-text mb-4 uppercase tracking-wide">
+      <Card className="card-standard p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-4">
           {t('verifyPayment')}
         </h3>
         
@@ -241,7 +241,7 @@ export default function PaymentInfo({ onPaymentVerified }: PaymentInfoProps) {
             <Button
               onClick={verifyTransaction}
               disabled={!txHash.trim() || isVerifying}
-              className="gradient-primary hover:opacity-90"
+              className="btn-binance hover:opacity-90"
               data-testid="button-verify-payment"
             >
               {isVerifying ? t('verifying') + '...' : t('verifyPayment')}
@@ -252,7 +252,7 @@ export default function PaymentInfo({ onPaymentVerified }: PaymentInfoProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => window.open(getExplorerUrl(selectedNetwork, txHash.trim()), '_blank')}
-                className="hover:text-cyber-cyan"
+                className="hover:text-primary"
                 data-testid="button-view-explorer"
               >
                 <ExternalLink className="h-4 w-4 mr-1" />
@@ -264,29 +264,29 @@ export default function PaymentInfo({ onPaymentVerified }: PaymentInfoProps) {
       </Card>
 
       {/* Step-by-step Guide */}
-      <Card className="cyber-card p-6">
-        <h3 className="text-lg font-semibold neon-text mb-4 uppercase tracking-wide">
+      <Card className="card-standard p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-4">
           {t('howToPay')}
         </h3>
         <div className="space-y-3 text-sm text-muted-foreground">
           <div className="flex items-start gap-3">
-            <Badge variant="outline" className="text-cyber-cyan border-cyber-cyan min-w-fit">1</Badge>
+            <Badge variant="outline" className="text-primary border-primary min-w-fit">1</Badge>
             <div>{t('step1ConnectWallet')}</div>
           </div>
           <div className="flex items-start gap-3">
-            <Badge variant="outline" className="text-cyber-cyan border-cyber-cyan min-w-fit">2</Badge>
+            <Badge variant="outline" className="text-primary border-primary min-w-fit">2</Badge>
             <div>{t('step2SelectNetwork')}</div>
           </div>
           <div className="flex items-start gap-3">
-            <Badge variant="outline" className="text-cyber-cyan border-cyber-cyan min-w-fit">3</Badge>
+            <Badge variant="outline" className="text-primary border-primary min-w-fit">3</Badge>
             <div>{t('step3SendTokens')}</div>
           </div>
           <div className="flex items-start gap-3">
-            <Badge variant="outline" className="text-cyber-cyan border-cyber-cyan min-w-fit">4</Badge>
+            <Badge variant="outline" className="text-primary border-primary min-w-fit">4</Badge>
             <div>{t('step4CopyTxHash')}</div>
           </div>
           <div className="flex items-start gap-3">
-            <Badge variant="outline" className="text-cyber-cyan border-cyber-cyan min-w-fit">5</Badge>
+            <Badge variant="outline" className="text-primary border-primary min-w-fit">5</Badge>
             <div>{t('step5VerifyHere')}</div>
           </div>
         </div>

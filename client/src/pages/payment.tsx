@@ -92,10 +92,10 @@ export default function PaymentPage() {
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 neon-border">
+          <div className="w-16 h-16 btn-binance rounded-full flex items-center justify-center mx-auto mb-4">
             <CreditCard className="w-8 h-8 text-background" />
           </div>
-          <h1 className="text-3xl font-bold neon-text mb-2 uppercase tracking-wide">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             {t('activateAccount')}
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -105,15 +105,15 @@ export default function PaymentPage() {
 
         {/* Success State */}
         {isActivated && (
-          <Card className="cyber-card p-8 mb-8 text-center border-cyber-green">
-            <CheckCircle className="w-16 h-16 text-cyber-green mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-cyber-green mb-2 uppercase tracking-wide">
+          <Card className="card-standard p-8 mb-8 text-center border-green-500">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-green-500 mb-2">
               {t('accountActivated')}
             </h2>
             <p className="text-muted-foreground mb-4">
               {t('activationSuccess')}
             </p>
-            <Badge variant="outline" className="text-cyber-green border-cyber-green">
+            <Badge variant="outline" className="text-green-500 border-green-500">
               {t('redirectingToProfile')}
             </Badge>
           </Card>
@@ -121,9 +121,9 @@ export default function PaymentPage() {
 
         {/* Wallet Connection Required */}
         {!isConnected && (
-          <Card className="cyber-card p-8 mb-8 text-center">
-            <Wallet className="w-16 h-16 text-cyber-purple mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-4 uppercase tracking-wide">
+          <Card className="card-standard p-8 mb-8 text-center">
+            <Wallet className="w-16 h-16 text-primary mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-4">
               {t('connectWalletRequired')}
             </h2>
             <p className="text-muted-foreground mb-6">
@@ -134,32 +134,32 @@ export default function PaymentPage() {
         )}
 
         {/* Features & Benefits */}
-        <Card className="cyber-card p-6 mb-8">
-          <h2 className="text-xl font-semibold neon-text mb-6 uppercase tracking-wide">
+        <Card className="card-standard p-6 mb-8">
+          <h2 className="text-xl font-semibold text-foreground mb-6">
             {t('activationBenefits')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center mx-auto mb-3">
+              <div className="w-12 h-12 btn-binance rounded-lg flex items-center justify-center mx-auto mb-3">
                 <Heart className="w-6 h-6 text-background" />
               </div>
-              <h3 className="font-semibold mb-2 uppercase tracking-wide">{t('createCampaigns')}</h3>
+              <h3 className="font-semibold mb-2">{t('createCampaigns')}</h3>
               <p className="text-sm text-muted-foreground">{t('createCampaignsDesc')}</p>
             </div>
             
             <div className="text-center">
-              <div className="w-12 h-12 bg-cyber-purple/20 border border-cyber-purple rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Zap className="w-6 h-6 text-cyber-purple" />
+              <div className="w-12 h-12 bg-primary/20 border border-primary rounded-lg flex items-center justify-center mx-auto mb-3">
+                <Zap className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="font-semibold mb-2 uppercase tracking-wide">{t('dailyRewards')}</h3>
+              <h3 className="font-semibold mb-2">{t('dailyRewards')}</h3>
               <p className="text-sm text-muted-foreground">{t('dailyRewardsDesc')}</p>
             </div>
             
             <div className="text-center">
-              <div className="w-12 h-12 bg-cyber-green/20 border border-cyber-green rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Shield className="w-6 h-6 text-cyber-green" />
+              <div className="w-12 h-12 bg-green-500/20 border border-green-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <Shield className="w-6 h-6 text-green-500" />
               </div>
-              <h3 className="font-semibold mb-2 uppercase tracking-wide">{t('prioritySupport')}</h3>
+              <h3 className="font-semibold mb-2">{t('prioritySupport')}</h3>
               <p className="text-sm text-muted-foreground">{t('prioritySupportDesc')}</p>
             </div>
           </div>
@@ -169,8 +169,8 @@ export default function PaymentPage() {
         {isConnected && !isActivated && (
           <>
             {/* Payment Options Header */}
-            <Card className="cyber-card p-6 mb-6">
-              <h2 className="text-xl font-semibold neon-text mb-4 uppercase tracking-wide text-center">
+            <Card className="card-standard p-6 mb-6">
+              <h2 className="text-xl font-semibold text-foreground mb-4 text-center">
                 Ödeme Seçenekleri
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -265,7 +265,7 @@ export default function PaymentPage() {
               </div>
             </Card>
 
-            <Alert className="mb-6 border-cyber-green">
+            <Alert className="mb-6 border-green-500">
               <CheckCircle className="h-4 w-4" />
               <AlertDescription>
                 <strong>YENİ:</strong> Kredi kartı ile kripto satın alabilir ve direkt bağış yapabilirsiniz!
@@ -275,8 +275,8 @@ export default function PaymentPage() {
             <AutoPayment onPaymentSuccess={handlePaymentSuccess} />
 
             {isActivating && (
-              <Card className="cyber-card p-6 mt-6 text-center">
-                <div className="animate-spin w-8 h-8 border-2 border-cyber-cyan border-t-transparent rounded-full mx-auto mb-4"></div>
+              <Card className="card-standard p-6 mt-6 text-center">
+                <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
                 <p className="text-muted-foreground">
                   {t('activatingAccount')}...
                 </p>
@@ -286,8 +286,8 @@ export default function PaymentPage() {
         )}
 
         {/* FAQ Section */}
-        <Card className="cyber-card p-6 mt-8">
-          <h2 className="text-xl font-semibold neon-text mb-6 uppercase tracking-wide">
+        <Card className="card-standard p-6 mt-8">
+          <h2 className="text-xl font-semibold text-foreground mb-6">
             {t('frequentlyAsked')}
           </h2>
           <div className="space-y-4">

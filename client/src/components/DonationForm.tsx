@@ -162,38 +162,38 @@ export default function DonationForm({ campaignId, ownerWallet, campaignTitle, o
   };
 
   return (
-    <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-      <CardContent className="p-6 space-y-4">
-        <div className="flex items-center space-x-2 mb-4">
-          <Heart className="w-5 h-5 text-green-600" />
-          <h3 className="text-lg font-semibold text-green-800">Bağış Yap</h3>
+    <Card className="card-standard">
+      <CardContent className="p-6 space-6">
+        <div className="flex items-center space-2 mb-4">
+          <Heart className="w-5 h-5 text-primary" />
+          <h3 className="text-lg font-semibold text-foreground">Bağış Yap</h3>
         </div>
 
         {!isConnected ? (
           <div className="text-center space-y-4">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               Bağış yapmak için önce cüzdanınızı bağlayın
             </p>
             <Button 
               onClick={handleConnect}
-              className="w-full bg-primary text-primary-foreground"
+              className="w-full btn-binance btn-lg"
               data-testid="button-connect-for-donation"
             >
-              <Wallet className="w-4 h-4 mr-2" />
+              <Wallet className="w-4 h-4 mr-2 icon-on-primary" />
               Cüzdan Bağla
             </Button>
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 p-3 bg-white rounded-lg border">
-              <CheckCircle className="w-4 h-4 text-green-500" />
-              <span className="text-sm font-mono text-slate-600">
+          <div className="space-6">
+            <div className="flex items-center space-2 p-3 surface-card rounded-lg border border-border" data-testid="connected-wallet">
+              <CheckCircle className="w-4 h-4 text-primary" />
+              <span className="text-sm font-mono text-foreground">
                 {address?.slice(0, 6)}...{address?.slice(-4)}
               </span>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
+            <div className="space-2">
+              <label className="text-sm font-semibold text-foreground">
                 Bağış Miktarı (USDT)
               </label>
               <Input
@@ -208,11 +208,11 @@ export default function DonationForm({ campaignId, ownerWallet, campaignTitle, o
               />
             </div>
 
-            <div className="bg-blue-50 p-3 rounded-lg">
-              <p className="text-xs text-blue-700">
+            <div className="surface-secondary p-3 rounded-lg border border-border" data-testid="donation-recipient-info">
+              <p className="text-xs text-muted-foreground">
                 <strong>Alıcı:</strong> {ownerWallet.slice(0, 10)}...{ownerWallet.slice(-4)}
               </p>
-              <p className="text-xs text-blue-700">
+              <p className="text-xs text-muted-foreground">
                 <strong>Kampanya:</strong> {campaignTitle}
               </p>
             </div>
@@ -220,7 +220,7 @@ export default function DonationForm({ campaignId, ownerWallet, campaignTitle, o
             <Button 
               onClick={handleDonate}
               disabled={isProcessing || !amount}
-              className="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white py-3 font-semibold"
+              className="w-full btn-binance btn-lg py-3 font-bold hover:transform hover:-translate-y-0.5 transition-all duration-200"
               data-testid="button-make-donation"
             >
               {isProcessing ? (
@@ -230,13 +230,13 @@ export default function DonationForm({ campaignId, ownerWallet, campaignTitle, o
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">
-                  <Send className="w-4 h-4" />
+                  <Send className="w-4 h-4 icon-on-primary" />
                   <span>Bağış Yap</span>
                 </div>
               )}
             </Button>
 
-            <p className="text-xs text-slate-500 text-center">
+            <p className="text-xs text-muted-foreground text-center">
               İşlem onaylandıktan sonra bağışınız otomatik kaydedilir
             </p>
           </div>

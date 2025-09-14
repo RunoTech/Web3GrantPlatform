@@ -306,7 +306,7 @@ export default function CreateCampaignPage() {
     return (
       <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
         <div className="text-center space-y-6 max-w-md mx-auto p-8">
-          <div className="w-24 h-24 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-3xl flex items-center justify-center mx-auto">
+          <div className="w-24 h-24 bg-primary rounded-3xl flex items-center justify-center mx-auto">
             <Lock className="w-12 h-12 text-black" />
           </div>
           <h1 className="text-3xl font-bold text-black dark:text-white">Connect Wallet</h1>
@@ -337,8 +337,8 @@ export default function CreateCampaignPage() {
             <div 
               className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
                 campaignType === "FUND" 
-                  ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" 
-                  : "border-gray-200 dark:border-gray-700 hover:border-yellow-300 dark:hover:border-yellow-600"
+                  ? "border-primary bg-primary/10" 
+                  : "border-border hover:border-primary/60"
               }`}
               onClick={() => {
                 setCampaignType("FUND");
@@ -346,7 +346,7 @@ export default function CreateCampaignPage() {
               }}
             >
               <div className="flex items-center space-x-3 mb-4">
-                <Building className="w-8 h-8 text-yellow-600" />
+                <Building className="w-8 h-8 text-primary" />
                 <h3 className="text-xl font-bold text-black dark:text-white">FUND Campaign</h3>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
@@ -372,8 +372,8 @@ export default function CreateCampaignPage() {
             <div 
               className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
                 campaignType === "DONATE" 
-                  ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" 
-                  : "border-gray-200 dark:border-gray-700 hover:border-yellow-300 dark:hover:border-yellow-600"
+                  ? "border-primary bg-primary/10" 
+                  : "border-border hover:border-primary/60"
               }`}
               onClick={() => {
                 setCampaignType("DONATE");
@@ -381,7 +381,7 @@ export default function CreateCampaignPage() {
               }}
             >
               <div className="flex items-center space-x-3 mb-4">
-                <Users className="w-8 h-8 text-yellow-600" />
+                <Users className="w-8 h-8 text-primary" />
                 <h3 className="text-xl font-bold text-black dark:text-white">DONATE Campaign</h3>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
@@ -407,12 +407,12 @@ export default function CreateCampaignPage() {
 
         {/* Campaign Type Info - Show when locked */}
         {isLocked && (
-          <div className="mb-8 p-6 border-2 border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
+          <div className="mb-8 p-6 border-2 border-primary bg-primary/10 rounded-xl">
             <div className="flex items-center space-x-3 mb-4">
               {campaignType === "FUND" ? (
-                <Building className="w-8 h-8 text-yellow-600" />
+                <Building className="w-8 h-8 text-primary" />
               ) : (
-                <Users className="w-8 h-8 text-yellow-600" />
+                <Users className="w-8 h-8 text-primary" />
               )}
               <h3 className="text-xl font-bold text-black dark:text-white">
                 Creating {campaignType} Campaign
@@ -464,7 +464,7 @@ export default function CreateCampaignPage() {
         )}
 
         {/* Campaign Form */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="card-standard">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               
@@ -590,7 +590,7 @@ export default function CreateCampaignPage() {
 
               {/* Company Information Section - Only for FUND campaigns */}
               {campaignType === "FUND" && (
-                <div className="space-y-6 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="space-y-6 p-6 surface-secondary rounded-lg border border-border">
                   <div className="flex items-center space-x-3 mb-4">
                     <Building className="w-6 h-6 text-blue-600" />
                     <h3 className="text-lg font-bold text-black dark:text-white">Company Information</h3>
@@ -848,16 +848,16 @@ export default function CreateCampaignPage() {
               {/* Credit Card Payment Section */}
               <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                 <div className="flex items-center space-x-3 mb-4">
-                  <CreditCard className="w-6 h-6 text-yellow-600" />
+                  <CreditCard className="w-6 h-6 text-primary" />
                   <h3 className="text-lg font-semibold text-black dark:text-white">Credit Card Payment Option</h3>
                 </div>
                 
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
+                <div className="surface-primary border border-primary/20 rounded-lg p-4 mb-4">
                   <div className="flex items-start space-x-3">
-                    <Shield className="w-5 h-5 text-yellow-600 mt-0.5" />
+                    <Shield className="w-5 h-5 text-primary mt-0.5" />
                     <div>
-                      <h4 className="font-medium text-yellow-800 dark:text-yellow-200 mb-1">Enable Credit Card Donations</h4>
-                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                      <h4 className="font-medium text-primary mb-1">Enable Credit Card Donations</h4>
+                      <p className="text-sm text-muted-foreground">
                         Allow donors to contribute using credit cards. Requires a {collateralInfo.collateralAmount} {collateralInfo.collateralToken} collateral payment to activate this feature.
                       </p>
                     </div>
@@ -875,7 +875,7 @@ export default function CreateCampaignPage() {
                         setCreditCardEnabled(e.target.checked);
                         form.setValue("creditCardEnabled", e.target.checked);
                       }}
-                      className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+                      className="w-4 h-4 text-primary border-border rounded focus:ring-primary/50"
                       data-testid="checkbox-credit-card-enabled"
                     />
                     <label htmlFor="creditCardEnabled" className="text-black dark:text-white font-medium cursor-pointer">
@@ -885,7 +885,7 @@ export default function CreateCampaignPage() {
 
                   {/* Collateral Section */}
                   {creditCardEnabled && (
-                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
+                    <div className="surface-secondary border border-border rounded-lg p-4 space-y-4">
                       <div className="flex items-center space-x-2">
                         <DollarSign className="w-5 h-5 text-green-600" />
                         <h4 className="font-medium text-black dark:text-white">Collateral Payment Required</h4>
@@ -918,7 +918,7 @@ export default function CreateCampaignPage() {
                         <Button
                           type="button"
                           onClick={handleCollateralPayment}
-                          className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold"
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors"
                           data-testid="button-pay-collateral"
                         >
                           Pay Collateral ({form.watch("collateralAmount") || collateralInfo.collateralAmount} {collateralInfo.collateralToken})
@@ -926,7 +926,7 @@ export default function CreateCampaignPage() {
                       )}
 
                       {collateralPaid && (
-                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                        <div className="surface-primary border border-emerald-200 dark:border-emerald-800 rounded-lg p-3">
                           <div className="flex items-center space-x-2">
                             <CheckCircle className="w-5 h-5 text-green-600" />
                             <span className="text-green-800 dark:text-green-200 font-medium">Collateral Paid Successfully ({collateralInfo.collateralAmount} {collateralInfo.collateralToken})</span>
@@ -944,7 +944,7 @@ export default function CreateCampaignPage() {
               {/* Submit Button */}
               <Button 
                 type="submit" 
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                className="w-full btn-binance font-bold text-lg h-12 transition-all duration-200 hover:transform hover:-translate-y-0.5 hover:shadow-lg"
                 disabled={createCampaignMutation.isPending}
                 data-testid="button-create-campaign"
               >
@@ -957,7 +957,7 @@ export default function CreateCampaignPage() {
 
         {/* Campaign Type Info - Only show when not locked */}
         {!isLocked && (
-          <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="mt-8 p-4 surface-secondary rounded-lg">
             <h3 className="font-semibold text-black dark:text-white mb-2">
               {campaignType === "FUND" ? "FUND Campaign" : "DONATE Campaign"} Information:
             </h3>

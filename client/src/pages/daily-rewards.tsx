@@ -112,7 +112,7 @@ export default function DailyRewardsPage() {
         </Button>
 
         {/* Daily Rewards Header Section */}
-        <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-3xl p-12 mb-12">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-12 mb-12 shadow-lg">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center space-x-3 mb-6">
               <Gift className="w-16 h-16 text-yellow-500" />
@@ -126,10 +126,10 @@ export default function DailyRewardsPage() {
           </div>
 
           {/* Daily Reward Participation Section */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border-2 border-yellow-200 dark:border-yellow-800 p-8 max-w-2xl mx-auto">
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 max-w-2xl mx-auto">
             <div className="text-center space-y-6">
-              <div className="w-24 h-24 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto">
-                <Coins className="w-12 h-12 icon-on-primary" />
+              <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center mx-auto shadow-binance">
+                <Coins className="w-12 h-12 text-black" />
               </div>
               
               <h2 className="text-3xl font-bold text-foreground">
@@ -172,7 +172,8 @@ export default function DailyRewardsPage() {
                   <Button 
                     onClick={joinDailyReward}
                     disabled={joinRewardMutation.isPending || hasJoinedToday}
-                    className="w-full btn-cyber font-bold text-lg py-4 px-8"
+                    className="w-full btn-binance font-bold text-lg py-4 px-8 hover:transform hover:-translate-y-0.5 transition-all duration-200"
+                    data-testid="button-join-daily-reward"
                   >
                     {joinRewardMutation.isPending ? (
                       "Processing participation..."
@@ -192,7 +193,7 @@ export default function DailyRewardsPage() {
               )}
 
               {/* Reward Rules */}
-              <div className="text-left space-y-2 text-sm text-gray-600 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
+              <div className="text-left space-y-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
                 <h3 className="font-semibold text-foreground mb-2">📋 Draw Rules:</h3>
                 <ul className="space-y-1">
                   <li>• You can only participate once per day</li>
@@ -217,10 +218,10 @@ export default function DailyRewardsPage() {
             <div className="space-y-4">
               {announcements.map((announcement) => (
                 <Card key={announcement.id} className={`p-4 border-l-4 ${
-                  announcement.type === 'success' ? 'border-l-green-500 bg-green-50 dark:bg-green-900/20' :
-                  announcement.type === 'warning' ? 'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' :
-                  announcement.type === 'error' ? 'border-l-red-500 bg-red-50 dark:bg-red-900/20' :
-                  'border-l-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                  announcement.type === 'success' ? 'border-l-green-500 bg-green-50 dark:bg-green-900/30' :
+                  announcement.type === 'warning' ? 'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-900/30' :
+                  announcement.type === 'error' ? 'border-l-red-500 bg-red-50 dark:bg-red-900/30' :
+                  'border-l-blue-500 bg-blue-50 dark:bg-blue-900/30'
                 }`} data-testid={`announcement-${announcement.id}`}>
                   <div className="flex items-start space-x-3">
                     <div className={`p-1 rounded-full ${
@@ -288,14 +289,14 @@ export default function DailyRewardsPage() {
           ) : lastWinners.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {lastWinners.map((winner, index) => (
-                <Card key={winner.id} className="p-6 hover:scale-105 transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+                <Card key={winner.id} className="p-6 hover:transform hover:-translate-y-1 transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-binance">
                   <div className="text-center space-y-4">
                     <div className="relative">
-                      <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${
-                        index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
-                        index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-500' :
-                        index === 2 ? 'bg-gradient-to-r from-orange-400 to-orange-600' :
-                        'bg-gradient-to-r from-blue-400 to-blue-600'
+                      <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center shadow-lg ${
+                        index === 0 ? 'bg-primary' :
+                        index === 1 ? 'bg-gray-400' :
+                        index === 2 ? 'bg-orange-500' :
+                        'bg-blue-500'
                       }`}>
                         {index < 3 ? (
                           <Trophy className="w-8 h-8 text-white dark:text-white" />
@@ -304,11 +305,11 @@ export default function DailyRewardsPage() {
                         )}
                       </div>
                       <Badge 
-                        className={`absolute -top-2 -right-2 text-xs font-bold ${
-                          index === 0 ? 'bg-yellow-500 text-black' :
-                          index === 1 ? 'bg-gray-400 text-white' :
-                          index === 2 ? 'bg-orange-500 text-white' :
-                          'bg-blue-500 text-white'
+                        className={`absolute -top-2 -right-2 text-xs font-bold shadow-sm ${
+                          index === 0 ? 'bg-primary text-black border-yellow-300' :
+                          index === 1 ? 'bg-gray-400 text-white border-gray-300' :
+                          index === 2 ? 'bg-orange-500 text-white border-orange-400' :
+                          'bg-blue-500 text-white border-blue-400'
                         }`}
                       >
                         #{index + 1}

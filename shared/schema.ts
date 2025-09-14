@@ -12,6 +12,7 @@ import {
   timestamp,
   varchar,
   serial,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -157,7 +158,10 @@ export const dailyEntries = pgTable("daily_entries", {
   wallet: varchar("wallet", { length: 42 }).notNull(),
   date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  // Prevent duplicate entries per wallet per day
+  uniqueWalletDate: uniqueIndex("unique_wallet_date").on(table.wallet, table.date),
+}));
 
 export const dailyWinners = pgTable("daily_winners", {
   id: serial("id").primaryKey(),

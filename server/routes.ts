@@ -15,6 +15,8 @@ import {
 } from "../shared/schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { z } from "zod";
+import { ethers } from "ethers";
 
 // Security: JWT Secret - MUST be set in production
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -192,9 +194,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Check if user can participate in daily reward (public)
+  const canParticipateSchema = z.object({
+    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid wallet address format")
+  });
+  
   app.get("/api/can-participate-daily/:wallet", async (req, res) => {
     try {
-      const { wallet } = req.params;
+      const validation = canParticipateSchema.safeParse({ wallet: req.params.wallet });
+      if (!validation.success) {
+        return res.status(400).json({ error: "Invalid wallet address format" });
+      }
+      
+      const { wallet } = validation.data;
       const today = new Date().toISOString().split('T')[0];
       const canParticipate = await storage.canParticipateDaily(wallet, today);
       
@@ -206,13 +217,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auto participate in daily reward (public)
+  const autoDailyEntrySchema = z.object({
+    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid wallet address format"),
+    signature: z.string().optional(),
+    timestamp: z.number().optional()
+  });
+  
   app.post("/api/auto-daily-entry", async (req, res) => {
     try {
-      const { wallet } = req.body;
-      
-      if (!wallet) {
-        return res.status(400).json({ error: "Wallet address is required" });
+      const validation = autoDailyEntrySchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: "Invalid request data", details: validation.error.errors });
       }
+      
+      const { wallet } = validation.data;
 
       const today = new Date().toISOString().split('T')[0];
       const canParticipate = await storage.canParticipateDaily(wallet, today);
@@ -2202,9 +2220,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auto select daily winner (admin only)
+  const autoSelectWinnerSchema = z.object({
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format").optional()
+  });
+  
   app.post("/api/youhonor/auto-select-daily-winner", authenticateAdmin, async (req: any, res) => {
     try {
-      const { date } = req.body;
+      const validation = autoSelectWinnerSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: "Invalid request data", details: validation.error.errors });
+      }
+      
+      const { date } = validation.data;
       const adminId = req.admin.id;
       const targetDate = date || new Date().toISOString().split('T')[0];
       

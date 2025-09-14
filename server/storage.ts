@@ -331,10 +331,14 @@ export class DatabaseStorage implements IStorage {
 
   async canParticipateDaily(wallet: string, date: string): Promise<boolean> {
     const account = await this.getAccount(wallet);
-    if (!account) return false;
+    if (!account || !account.active) return false;
     
-    // Check if already participated today
-    return account.lastDailyEntryDate !== date;
+    // Check if already participated today by looking at actual daily entries
+    const existingEntry = await db.select().from(dailyEntries)
+      .where(and(eq(dailyEntries.wallet, wallet), eq(dailyEntries.date, date)))
+      .limit(1);
+    
+    return existingEntry.length === 0;
   }
 
   // Campaigns

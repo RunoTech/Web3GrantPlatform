@@ -73,6 +73,12 @@ export const accounts = pgTable("accounts", {
   activationTxHash: varchar("activation_tx_hash", { length: 66 }),
   activationDate: timestamp("activation_date"),
   
+  // User activity tracking
+  lastLoginAt: timestamp("last_login_at"), // Last wallet connection time
+  totalLogins: integer("total_logins").default(0), // Total login count
+  lastDailyEntryDate: varchar("last_daily_entry_date", { length: 10 }), // Last daily reward entry date (YYYY-MM-DD)
+  totalDailyEntries: integer("total_daily_entries").default(0), // Total daily entries count
+  
   // Affiliate system fields
   referralCode: varchar("referral_code", { length: 20 }).unique(), // Unique referral code for this user
   referredBy: varchar("referred_by", { length: 42 }), // Wallet address of the user who referred this account

@@ -73,10 +73,31 @@ export function useWallet() {
 
         setAddress(connectedAddress);
         setIsConnected(true);
-        toast({
-          title: "Success!",
-          description: "Wallet connected successfully",
-        });
+        
+        // Auto participate in daily reward if possible
+        try {
+          const dailyResponse = await apiRequest("POST", "/api/auto-daily-entry", {
+            wallet: connectedAddress
+          });
+          
+          if (dailyResponse.success) {
+            toast({
+              title: "Success!",
+              description: "Wallet connected & auto-entered daily reward draw",
+            });
+          } else {
+            toast({
+              title: "Success!",
+              description: "Wallet connected successfully",
+            });
+          }
+        } catch (dailyError: any) {
+          // Don't show error for daily entry failure, just show wallet connection success
+          toast({
+            title: "Success!",
+            description: "Wallet connected successfully",
+          });
+        }
       }
     } catch (error: any) {
       toast({

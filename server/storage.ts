@@ -65,6 +65,8 @@ export interface IStorage {
   updateAccount(wallet: string, updates: Partial<Account>): Promise<void>;
   getAllAccounts(limit?: number, offset?: number): Promise<Account[]>;
   getActiveAccountsCount(): Promise<number>;
+  recordUserLogin(wallet: string): Promise<void>;
+  canParticipateDaily(wallet: string, date: string): Promise<boolean>;
 
   // Campaigns
   getCampaigns(limit?: number, offset?: number): Promise<Campaign[]>;
@@ -307,6 +309,32 @@ export class DatabaseStorage implements IStorage {
       .from(accounts)
       .where(eq(accounts.active, true));
     return Number(result.count);
+  }
+
+  async recordUserLogin(wallet: string): Promise<void> {
+    const account = await this.getAccount(wallet);
+    if (!account) {
+      // Create account if doesn't exist
+      await this.createAccount({ wallet });
+    }
+    
+    // Update login info
+    await db
+      .update(accounts)
+      .set({ 
+        lastLoginAt: new Date(),
+        totalLogins: sql`${accounts.totalLogins} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(accounts.wallet, wallet));
+  }
+
+  async canParticipateDaily(wallet: string, date: string): Promise<boolean> {
+    const account = await this.getAccount(wallet);
+    if (!account) return false;
+    
+    // Check if already participated today
+    return account.lastDailyEntryDate !== date;
   }
 
   // Campaigns

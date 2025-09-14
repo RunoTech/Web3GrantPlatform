@@ -48,21 +48,22 @@ export default function AdminDailyRewardsPage() {
     queryKey: ["/api/youhonor/daily-stats"],
   });
 
-  // Random winner selection mutation
-  const selectRandomWinnerMutation = useMutation({
-    mutationFn: (date: string) => api.post(`/api/youhonor/select-random-winner`, { date, amount: rewardAmount }),
-    onSuccess: (data) => {
+  // Auto winner selection mutation
+  const selectAutoWinnerMutation = useMutation({
+    mutationFn: (date: string) => api.post(`/api/youhonor/auto-select-daily-winner`, { date }),
+    onSuccess: (data: any) => {
       toast({
         title: "Winner Selected!",
-        description: `Random winner selected for ${selectedDate}`,
+        description: data.message || `Auto winner selected for ${selectedDate}`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/youhonor/daily-winner"] });
       queryClient.invalidateQueries({ queryKey: ["/api/get-last-winners"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/youhonor/daily-entries"] });
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to select winner",
+        description: error.message || "Failed to auto-select winner",
         variant: "destructive",
       });
     },
@@ -90,8 +91,8 @@ export default function AdminDailyRewardsPage() {
     },
   });
 
-  const handleRandomWinner = () => {
-    selectRandomWinnerMutation.mutate(selectedDate);
+  const handleAutoWinner = () => {
+    selectAutoWinnerMutation.mutate(selectedDate);
   };
 
   const handleManualWinner = () => {
@@ -299,16 +300,17 @@ export default function AdminDailyRewardsPage() {
                   <div className="space-y-4">
                     {/* Random Winner Selection */}
                     <Button
-                      onClick={handleRandomWinner}
-                      disabled={selectRandomWinnerMutation.isPending || entriesLoading || todayEntries.length === 0}
+                      onClick={handleAutoWinner}
+                      disabled={selectAutoWinnerMutation.isPending || entriesLoading || todayEntries.length === 0}
                       className="w-full bg-yellow-500 hover:bg-yellow-600 text-black"
+                      data-testid="button-auto-select-winner"
                     >
-                      {selectRandomWinnerMutation.isPending ? (
+                      {selectAutoWinnerMutation.isPending ? (
                         <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                       ) : (
                         <Trophy className="w-4 h-4 mr-2" />
                       )}
-                      Select Random Winner ({todayEntries.length} entries)
+                      Auto Select Winner ({todayEntries.length} entries)
                     </Button>
 
                     {/* Manual Winner Selection */}

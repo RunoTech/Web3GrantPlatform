@@ -191,6 +191,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check if user can participate in daily reward (public)
+  app.get("/api/can-participate-daily/:wallet", async (req, res) => {
+    try {
+      const { wallet } = req.params;
+      const today = new Date().toISOString().split('T')[0];
+      const canParticipate = await storage.canParticipateDaily(wallet, today);
+      
+      res.json({ canParticipate, date: today });
+    } catch (error) {
+      console.error("Error checking daily participation:", error);
+      res.status(500).json({ error: "Failed to check participation status" });
+    }
+  });
+
+  // Auto participate in daily reward (public)
+  app.post("/api/auto-daily-entry", async (req, res) => {
+    try {
+      const { wallet } = req.body;
+      
+      if (!wallet) {
+        return res.status(400).json({ error: "Wallet address is required" });
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      const canParticipate = await storage.canParticipateDaily(wallet, today);
+      
+      if (!canParticipate) {
+        return res.status(400).json({ error: "Already participated today" });
+      }
+
+      // Check if account exists and is active
+      const account = await storage.getAccount(wallet);
+      if (!account) {
+        return res.status(404).json({ error: "Account not found" });
+      }
+
+      if (!account.active) {
+        return res.status(400).json({ error: "Account must be activated to participate" });
+      }
+
+      // Create daily entry
+      const entry = await storage.createDailyEntry({
+        wallet,
+        date: today
+      });
+
+      // Update account daily entry tracking
+      await storage.updateAccount(wallet, {
+        lastDailyEntryDate: today,
+        totalDailyEntries: account.totalDailyEntries ? account.totalDailyEntries + 1 : 1
+      });
+
+      res.json({ success: true, entry, message: "Successfully participated in today's reward draw" });
+    } catch (error) {
+      console.error("Error in auto daily entry:", error);
+      res.status(500).json({ error: "Failed to participate in daily reward" });
+    }
+  });
+
   // Create account (public)
   app.post("/api/create-account", async (req, res) => {
     try {
@@ -198,10 +257,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const existingAccount = await storage.getAccount(accountData.wallet);
       
       if (existingAccount) {
-        return res.status(409).json({ error: "Account already exists" });
+        // Record login for existing user
+        await storage.recordUserLogin(accountData.wallet);
+        return res.status(200).json({ message: "Account exists, login recorded", account: existingAccount });
       }
 
       const account = await storage.createAccount(accountData);
+      // Record initial login
+      await storage.recordUserLogin(accountData.wallet);
       res.json(account);
     } catch (error) {
       console.error("Error creating account:", error);
@@ -2135,6 +2198,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching credit card info:', error);
       res.status(500).json({ error: 'Failed to fetch credit card info' });
+    }
+  });
+
+  // Auto select daily winner (admin only)
+  app.post("/api/youhonor/auto-select-daily-winner", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { date } = req.body;
+      const adminId = req.admin.id;
+      const targetDate = date || new Date().toISOString().split('T')[0];
+      
+      // Check if winner already selected for this date
+      const existingWinner = await storage.getDailyWinnerByDate(targetDate);
+      if (existingWinner) {
+        return res.status(400).json({ error: "Winner already selected for this date" });
+      }
+      
+      // Get all entries for target date
+      const entries = await storage.getDailyEntriesByDate(targetDate);
+      if (entries.length === 0) {
+        return res.status(400).json({ error: "No participants found for this date" });
+      }
+      
+      // Select random winner
+      const randomIndex = Math.floor(Math.random() * entries.length);
+      const selectedEntry = entries[randomIndex];
+      
+      // Get reward amount from settings
+      const rewardSettings = await storage.getPlatformSettings("rewards");
+      const rewardAmountSetting = rewardSettings.find(s => s.key === "daily_reward_amount");
+      const rewardAmount = rewardAmountSetting?.value || "10";
+      
+      // Create winner record
+      const winner = await storage.createDailyWinner({
+        wallet: selectedEntry.wallet,
+        date: targetDate,
+        amount: rewardAmount,
+        selectedBy: adminId
+      });
+      
+      // Log admin action
+      await storage.createAdminLog({
+        adminId,
+        action: "auto_select_daily_winner",
+        details: {
+          date: targetDate,
+          winnerWallet: selectedEntry.wallet,
+          rewardAmount,
+          totalParticipants: entries.length
+        },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+      
+      res.json({ 
+        success: true, 
+        winner,
+        totalParticipants: entries.length,
+        message: `Winner selected from ${entries.length} participants` 
+      });
+    } catch (error) {
+      console.error("Error auto-selecting daily winner:", error);
+      res.status(500).json({ error: "Failed to select daily winner" });
     }
   });
 

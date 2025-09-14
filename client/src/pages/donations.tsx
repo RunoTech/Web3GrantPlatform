@@ -130,7 +130,7 @@ export default function DonationsPage() {
             <p className="text-lg text-muted-foreground">{t('donations.popular_subtitle')}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          <div className="campaign-grid mb-12">
             {(popularCampaigns as Campaign[]).slice(0, 6).map((campaign: Campaign) => (
               <div key={campaign.id} className="relative">
                 <div className="absolute -top-3 -right-3 z-10">
@@ -207,7 +207,7 @@ export default function DonationsPage() {
 
             {/* Campaigns Grid */}
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="campaign-grid">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="card-modern p-6 animate-pulse">
                     <div className="h-48 bg-slate-200 rounded-xl mb-4"></div>
@@ -219,7 +219,7 @@ export default function DonationsPage() {
                 ))}
               </div>
             ) : filteredCampaigns.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" data-testid="campaigns-grid">
+              <div className="campaign-grid" data-testid="campaigns-grid">
                 {filteredCampaigns.map((campaign: Campaign) => (
                   <CampaignCard key={campaign.id} campaign={campaign} />
                 ))}

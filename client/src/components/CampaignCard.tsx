@@ -9,93 +9,99 @@ interface CampaignCardProps {
   campaign: Campaign;
 }
 
-const pastelBackgrounds = [
-  'bg-pastel-blue',
-  'bg-pastel-purple', 
-  'bg-pastel-cream',
-  'bg-pastel-green',
-  'bg-pastel-orange'
+// Professional color system for placeholders
+const professionalBackgrounds = [
+  'bg-primary/10 text-primary',
+  'bg-secondary/10 text-secondary-foreground', 
+  'bg-muted/20 text-muted-foreground',
+  'bg-accent/10 text-accent-foreground',
+  'bg-card text-card-foreground'
 ];
 
 export default function CampaignCard({ campaign }: CampaignCardProps) {
-  const bgClass = pastelBackgrounds[campaign.id % pastelBackgrounds.length];
+  const bgClass = professionalBackgrounds[campaign.id % professionalBackgrounds.length];
   
   return (
     <Link href={`/campaign/${campaign.id}`}>
       <div 
-        className={`group bg-white dark:bg-gray-900 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] overflow-hidden border border-gray-200 dark:border-gray-700 cursor-pointer`}
+        className="campaign-card group cursor-pointer"
         data-testid={`campaign-card-${campaign.id}`}
       >
-        {/* Campaign Image */}
-        <div className="relative h-48">
+        {/* Campaign Image - OpenSea Style 1:1 Aspect Ratio */}
+        <div className="campaign-image relative">
           {campaign.imageUrl ? (
             <img 
               src={campaign.imageUrl} 
               alt={campaign.title}
               className="w-full h-full object-cover"
+              loading="lazy"
             />
           ) : (
             <div className={`w-full h-full ${bgClass} flex items-center justify-center`}>
-              <Heart className="w-16 h-16 text-gray-600 dark:text-gray-300" />
+              <Heart className="w-12 h-12" />
             </div>
           )}
-          <div className="absolute top-4 right-4">
+          <div className="absolute top-3 right-3">
             {campaign.featured ? (
-              <Badge className="bg-pastel-orange text-orange-800">
+              <Badge className="bg-primary text-primary-foreground font-semibold">
                 Öne Çıkan
               </Badge>
             ) : (
-              <Badge className="bg-pastel-green text-green-800">
+              <Badge variant="secondary" className="font-semibold">
                 Aktif
               </Badge>
             )}
           </div>
         </div>
         
-        {/* Campaign Content */}
-        <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 transition-colors line-clamp-2">
-            {campaign.title}
-          </h3>
-          <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm leading-relaxed line-clamp-3">
-            {campaign.description}
-          </p>
-          
-          {/* Campaign Stats */}
-          <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-slate-100">
-            <div className="flex items-center space-x-1">
-              <Target className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 dark:text-gray-400" />
-              <div className="space-y-0.5 sm:space-y-1">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Toplanan</p>
-                <p className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-100">{parseFloat(campaign.totalDonations || "0").toFixed(2)} USDT</p>
+        {/* Campaign Content - Professional Layout */}
+        <div className="campaign-content">
+          <div className="p-4 space-y-3">
+            <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+              {campaign.title}
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+              {campaign.description}
+            </p>
+            
+            {/* Professional Stats Grid */}
+            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4 text-muted-foreground" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Toplanan</p>
+                  <p className="text-sm font-semibold text-foreground">{parseFloat(campaign.totalDonations || "0").toFixed(2)} USDT</p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Users className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 dark:text-gray-400" />
-              <div className="space-y-0.5 sm:space-y-1 text-right">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Destekçi</p>
-                <p className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-100">{campaign.donationCount}</p>
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-muted-foreground" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Destekçi</p>
+                  <p className="text-sm font-semibold text-foreground">{campaign.donationCount}</p>
+                </div>
               </div>
             </div>
           </div>
           
-          {/* Owner Info and Share Button */}
-          <div className="flex items-center justify-between pt-1 sm:pt-2">
-            <div className="flex items-center space-x-2">
-              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex-shrink-0"></div>
-              <span className="text-xs text-slate-500 font-mono truncate">
-                {campaign.ownerWallet.slice(0, 6)}...{campaign.ownerWallet.slice(-4)}
-              </span>
-            </div>
-            {/* Share Button - Prevent event bubbling to card link */}
-            <div onClick={(e) => e.preventDefault()}>
-              <ShareButton 
-                shareData={generateCampaignShareLink(campaign.id, campaign.title)}
-                variant="ghost"
-                size="sm"
-                showText={false}
-                className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800"
-              />
+          {/* Fixed Action Bar - OpenSea Style */}
+          <div className="campaign-actions">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-primary rounded-full flex-shrink-0"></div>
+                <span className="text-xs text-muted-foreground font-mono truncate">
+                  {campaign.ownerWallet.slice(0, 6)}...{campaign.ownerWallet.slice(-4)}
+                </span>
+              </div>
+              {/* Professional Share Button */}
+              <div onClick={(e) => e.preventDefault()}>
+                <ShareButton 
+                  shareData={generateCampaignShareLink(campaign.id, campaign.title)}
+                  variant="ghost"
+                  size="sm"
+                  showText={false}
+                  className="h-8 w-8 p-0 hover:bg-accent"
+                />
+              </div>
             </div>
           </div>
         </div>

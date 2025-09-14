@@ -21,15 +21,15 @@ export default function Header({ currentPage }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-16">
-          <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 gradient-primary rounded-lg flex items-center justify-center neon-border">
-              <Heart className="w-4 h-4 sm:w-6 sm:h-6 icon-on-primary" />
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
+      <div className="container-main">
+        <div className="flex items-center justify-between header-height">
+          <div className="flex items-center gap-6 flex-shrink-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 btn-primary rounded-lg flex items-center justify-center">
+              <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
             </div>
             <Link href="/">
-              <h1 className="text-lg sm:text-xl font-bold text-foreground neon-text uppercase tracking-wide cursor-pointer">
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground uppercase tracking-wide cursor-pointer hover:text-primary transition-colors">
                 {t('duxxan')}
               </h1>
             </Link>
@@ -46,10 +46,10 @@ export default function Header({ currentPage }: HeaderProps) {
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
 
-          <nav className="hidden md:flex items-center space-x-4 lg:space-x-8 flex-1 justify-center max-w-2xl">
+          <nav className="hidden md:flex items-center gap-8 flex-1 justify-center max-w-3xl">
             <Link 
               href="/donations" 
-              className={`font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
+              className={`nav-item font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
                 currentPage === 'donations' 
                   ? 'text-primary border-b-2 border-primary' 
                   : 'text-muted-foreground hover:text-primary'
@@ -59,7 +59,7 @@ export default function Header({ currentPage }: HeaderProps) {
             </Link>
             <Link 
               href="/funds" 
-              className={`font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
+              className={`nav-item font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
                 currentPage === 'funds' 
                   ? 'text-primary border-b-2 border-primary' 
                   : 'text-muted-foreground hover:text-primary'
@@ -69,7 +69,7 @@ export default function Header({ currentPage }: HeaderProps) {
             </Link>
             <Link 
               href="/daily-rewards" 
-              className={`font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
+              className={`nav-item font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
                 currentPage === 'daily-rewards' 
                   ? 'text-primary border-b-2 border-primary' 
                   : 'text-muted-foreground hover:text-primary'
@@ -79,7 +79,7 @@ export default function Header({ currentPage }: HeaderProps) {
             </Link>
             <Link 
               href="/affiliate" 
-              className={`font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
+              className={`nav-item font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
                 currentPage === 'affiliate' 
                   ? 'text-primary border-b-2 border-primary' 
                   : 'text-muted-foreground hover:text-primary'
@@ -89,7 +89,7 @@ export default function Header({ currentPage }: HeaderProps) {
             </Link>
           </nav>
 
-          <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-8 flex-shrink-0">
+          <div className="flex items-center gap-4 flex-shrink-0">
             <CryptoOnramp />
             <ThemeToggle />
             <LanguageSelector />
@@ -99,9 +99,9 @@ export default function Header({ currentPage }: HeaderProps) {
                   <Button 
                     variant="ghost" 
                     size="icon"
-                    className={`transition-colors hover:text-cyber-cyan ${
+                    className={`transition-colors hover:text-primary ${
                       currentPage === 'profile' 
-                        ? 'text-cyber-cyan' 
+                        ? 'text-primary' 
                         : 'text-muted-foreground'
                     }`}
                   >

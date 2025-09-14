@@ -1,12 +1,97 @@
 import { ethers } from "ethers";
+import { db } from "./db";
+import { platformSettings } from "../shared/schema";
+import { eq } from "drizzle-orm";
 
-// Network configurations - Only Ethereum Mainnet
-export const networks = {
+// Cache for dynamic settings to avoid frequent database queries
+let networkConfigCache: any = null;
+let cacheLastUpdated = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
+
+// Dynamic network configuration loader
+export async function getNetworkConfig() {
+  const now = Date.now();
+  
+  // Return cached config if still valid
+  if (networkConfigCache && (now - cacheLastUpdated) < CACHE_DURATION) {
+    return networkConfigCache;
+  }
+  
+  try {
+    // Fetch blockchain settings from database
+    const settings = await db.select({
+      key: platformSettings.key,
+      value: platformSettings.value
+    })
+    .from(platformSettings)
+    .where(eq(platformSettings.category, 'blockchain'));
+    
+    const settingsMap = settings.reduce((acc, setting) => {
+      if (setting.value) {
+        acc[setting.key] = setting.value;
+      }
+      return acc;
+    }, {} as Record<string, string>);
+    
+    // Build network config with database settings and fallbacks
+    networkConfigCache = {
+      ethereum: {
+        name: "Ethereum Mainnet",
+        chainId: 1,
+        rpcUrl: settingsMap['ethereum_rpc_url'] || process.env.ETH_RPC_URL || "https://eth.llamarpc.com",
+        rpcBackup: settingsMap['ethereum_rpc_backup'] || "https://rpc.ankr.com/eth",
+        wsUrl: process.env.ETH_WS_URL || "wss://ethereum-rpc.publicnode.com",
+        nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+        timeout: parseInt(settingsMap['rpc_timeout_ms'] || '10000'),
+        monitoringEnabled: settingsMap['blockchain_monitoring_enabled'] === 'true'
+      },
+      bsc: {
+        name: "BSC Mainnet",
+        chainId: 56,
+        rpcUrl: settingsMap['bsc_rpc_url'] || "https://bsc.llamarpc.com",
+        rpcBackup: settingsMap['bsc_rpc_backup'] || "https://rpc.ankr.com/bsc",
+        nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
+        timeout: parseInt(settingsMap['rpc_timeout_ms'] || '10000'),
+        monitoringEnabled: settingsMap['blockchain_monitoring_enabled'] === 'true'
+      }
+    };
+    
+    cacheLastUpdated = now;
+    console.log('🔧 Network configuration loaded from database:', {
+      ethereum_rpc: networkConfigCache.ethereum.rpcUrl,
+      bsc_rpc: networkConfigCache.bsc.rpcUrl,
+      monitoring: networkConfigCache.ethereum.monitoringEnabled
+    });
+    
+    return networkConfigCache;
+    
+  } catch (error) {
+    console.error('⚠️  Failed to load network config from database, using fallbacks:', error);
+    
+    // Return hardcoded fallbacks if database fails
+    networkConfigCache = {
+      ethereum: {
+        name: "Ethereum Mainnet",
+        chainId: 1,
+        rpcUrl: process.env.ETH_RPC_URL || "https://eth.llamarpc.com",
+        wsUrl: process.env.ETH_WS_URL || "wss://ethereum-rpc.publicnode.com",
+        nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+        timeout: 10000,
+        monitoringEnabled: true
+      }
+    };
+    
+    return networkConfigCache;
+  }
+}
+
+// Legacy static export for backwards compatibility (will be dynamically updated)
+export let networks = {
   ethereum: {
     name: "Ethereum Mainnet",
     chainId: 1,
-    rpcUrl: process.env.ETH_RPC_URL || "https://eth.llamarpc.com",
-    wsUrl: process.env.ETH_WS_URL || "wss://ethereum-rpc.publicnode.com",
+    rpcUrl: "https://eth.llamarpc.com", // Will be updated by getNetworkConfig
+    wsUrl: "wss://ethereum-rpc.publicnode.com",
     nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   }
 };
@@ -49,11 +134,13 @@ export async function verifyPayment(
   to?: string;
 }> {
   try {
-    if (!networks[network as keyof typeof networks]) {
+    const networkConfig = await getNetworkConfig();
+    
+    if (!networkConfig[network]) {
       return { success: false, error: "Unsupported network" };
     }
 
-    const provider = new ethers.JsonRpcProvider(networks[network as keyof typeof networks].rpcUrl);
+    const provider = new ethers.JsonRpcProvider(networkConfig[network].rpcUrl);
     
     // Get transaction receipt
     const receipt = await provider.getTransactionReceipt(txHash);
@@ -162,7 +249,8 @@ export async function verifyPayment(
  */
 export async function getGasPrices(network: string) {
   try {
-    const provider = new ethers.JsonRpcProvider(networks[network as keyof typeof networks].rpcUrl);
+    const networkConfig = await getNetworkConfig();
+    const provider = new ethers.JsonRpcProvider(networkConfig[network].rpcUrl);
     const feeData = await provider.getFeeData();
     
     return {
@@ -181,10 +269,11 @@ export async function getGasPrices(network: string) {
  */
 export async function testRpcConnection() {
   try {
-    const provider = new ethers.JsonRpcProvider(networks.ethereum.rpcUrl);
+    const networkConfig = await getNetworkConfig();
+    const provider = new ethers.JsonRpcProvider(networkConfig.ethereum.rpcUrl);
     const blockNumber = await provider.getBlockNumber();
-    console.log(`✅ Ethereum RPC connected. Latest block: ${blockNumber}`);
-    return { success: true, blockNumber };
+    console.log(`✅ Ethereum RPC connected (${networkConfig.ethereum.rpcUrl}). Latest block: ${blockNumber}`);
+    return { success: true, blockNumber, rpcUrl: networkConfig.ethereum.rpcUrl };
   } catch (error) {
     console.error("❌ RPC connection failed:", error);
     return { success: false, error: String(error) };
@@ -202,14 +291,16 @@ export async function startWalletListener(platformWallet: string, onPaymentRecei
     const checksummedWallet = ethers.getAddress(platformWallet);
     console.log(`🔍 Starting real-time wallet listener for: ${checksummedWallet}`);
     
+    const networkConfig = await getNetworkConfig();
+    
     // Try WebSocket first for real-time monitoring
     let provider;
     try {
-      provider = new ethers.WebSocketProvider(networks.ethereum.wsUrl);
-      console.log(`🌐 Connected via WebSocket: ${networks.ethereum.wsUrl}`);
+      provider = new ethers.WebSocketProvider(networkConfig.ethereum.wsUrl);
+      console.log(`🌐 Connected via WebSocket: ${networkConfig.ethereum.wsUrl}`);
     } catch (wsError) {
       console.warn("WebSocket failed, falling back to HTTP RPC");
-      provider = new ethers.JsonRpcProvider(networks.ethereum.rpcUrl);
+      provider = new ethers.JsonRpcProvider(networkConfig.ethereum.rpcUrl);
     }
     
     const usdtContract = new ethers.Contract(TOKENS.ethereum.USDT, ERC20_ABI, provider);
@@ -289,14 +380,16 @@ export async function startCampaignListener(
       return { success: true, status: "already_active" };
     }
     
+    const networkConfig = await getNetworkConfig();
+    
     // Try WebSocket first for real-time monitoring
     let provider;
     try {
-      provider = new ethers.WebSocketProvider(networks.ethereum.wsUrl);
+      provider = new ethers.WebSocketProvider(networkConfig.ethereum.wsUrl);
       console.log(`🌐 Connected via WebSocket for Campaign #${campaignId}`);
     } catch (wsError) {
       console.warn(`WebSocket failed for Campaign #${campaignId}, falling back to HTTP RPC`);
-      provider = new ethers.JsonRpcProvider(networks.ethereum.rpcUrl);
+      provider = new ethers.JsonRpcProvider(networkConfig.ethereum.rpcUrl);
     }
     
     const usdtContract = new ethers.Contract(TOKENS.ethereum.USDT, ERC20_ABI, provider);

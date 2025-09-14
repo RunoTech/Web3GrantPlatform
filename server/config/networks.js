@@ -1,3 +1,6 @@
+// Import dynamic network configuration
+import { getNetworkConfig } from '../blockchain.js';
+
 export const networks = {
   ethereum: {
     name: 'Ethereum Mainnet',
@@ -6,6 +9,30 @@ export const networks = {
     platformWallet: process.env.PLATFORM_WALLET_ETH || '',
   }
 };
+
+// Function to get dynamic networks from database
+export async function getDynamicNetworks() {
+  try {
+    const networkConfig = await getNetworkConfig();
+    return {
+      ethereum: {
+        name: networkConfig.ethereum.name,
+        chainId: networkConfig.ethereum.chainId,
+        rpcUrl: networkConfig.ethereum.rpcUrl,
+        platformWallet: process.env.PLATFORM_WALLET_ETH || '',
+      },
+      bsc: networkConfig.bsc ? {
+        name: networkConfig.bsc.name,
+        chainId: networkConfig.bsc.chainId,
+        rpcUrl: networkConfig.bsc.rpcUrl,
+        platformWallet: process.env.PLATFORM_WALLET_BSC || '',
+      } : undefined
+    };
+  } catch (error) {
+    console.warn('Failed to get dynamic networks, using fallback:', error);
+    return networks;
+  }
+}
 
 // ERC20 ABI for token transfers
 export const ERC20_ABI = [

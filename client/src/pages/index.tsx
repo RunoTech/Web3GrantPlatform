@@ -94,15 +94,15 @@ export default function HomePage() {
 
       {/* Referral Banner */}
       {showReferralBanner && referralCode && (
-        <div className="bg-gradient-to-r from-cyber-cyan/10 to-cyber-yellow/10 border-b border-cyber-cyan/30">
+        <div className="bg-gradient-to-r from-primary/5 to-primary/10 border-b border-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Alert className="border-cyber-cyan/30 bg-transparent py-4">
-              <Users className="h-4 w-4 text-cyber-cyan" />
+            <Alert className="border-border bg-transparent py-4">
+              <Users className="h-4 w-4 text-primary" />
               <AlertDescription className="text-foreground">
                 🎉 You were referred by a DUXXAN user! Connect your wallet and get started to activate affiliate benefits.{" "}
                 <Button
                   variant="link"
-                  className="h-auto p-0 text-cyber-cyan hover:text-cyber-yellow"
+                  className="h-auto p-0 text-primary hover:text-primary/80"
                   onClick={() => setShowReferralBanner(false)}
                 >
                   Dismiss
@@ -114,24 +114,21 @@ export default function HomePage() {
       )}
 
       {/* Hero Section */}
-      <section className="relative py-8 sm:py-16 lg:py-20 overflow-hidden bg-surface">
+      <section className="relative section-spacing-lg overflow-hidden surface-primary">
         <div className="absolute inset-0">
-          <div className="absolute top-10 sm:top-20 left-4 sm:left-20 w-16 sm:w-32 h-16 sm:h-32 cyber-cyan-bg rounded-full blur-3xl opacity-20"></div>
-          <div className="absolute bottom-10 sm:bottom-20 right-4 sm:right-20 w-20 sm:w-40 h-20 sm:h-40 cyber-purple-bg rounded-full blur-3xl opacity-20"></div>
-          <div className="absolute top-1/2 left-1/4 sm:left-1/3 w-12 sm:w-24 h-12 sm:h-24 cyber-green-bg rounded-full blur-3xl opacity-20"></div>
+          <div className="absolute top-20 left-20 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-20 right-20 w-40 h-40 bg-muted/10 rounded-full blur-2xl"></div>
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-6 sm:space-y-8 lg:space-y-12">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 gradient-primary rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto neon-border shadow-2xl">
-              <Heart className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 icon-on-primary drop-shadow-2xl" />
+            <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 bg-primary rounded-xl flex items-center justify-center mx-auto shadow-binance">
+              <Heart className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 icon-on-primary" />
             </div>
             
             <div className="space-y-4 sm:space-y-6">
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground leading-tight tracking-wider uppercase">
-                <span className="neon-text">
-                  {t('hero.title')}
-                </span>
+                {t('hero.title')}
               </h1>
               
               <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed px-4">
@@ -143,22 +140,22 @@ export default function HomePage() {
               <Button 
                 asChild
                 size="lg"
-                className="cyber-cyan-bg px-4 sm:px-6 lg:px-8 py-3 sm:py-4 font-bold text-sm sm:text-base uppercase tracking-wide btn-cyber shadow-2xl hover:scale-105 transition-transform duration-300 w-full sm:w-auto"
+                className="btn-primary w-full sm:w-auto font-semibold"
                 data-testid="button-create-campaign"
               >
                 <Link href="/create-campaign">
-                  <Target className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2 icon-on-primary" />
+                  <Target className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2" />
                   {t('hero.create_campaign')}
                 </Link>
               </Button>
               <Button 
                 asChild
                 size="lg"
-                className="btn-cyber px-4 sm:px-6 lg:px-8 py-3 sm:py-4 font-bold text-sm sm:text-base shadow-2xl hover:scale-105 transition-transform duration-300 w-full sm:w-auto"
+                className="btn-secondary w-full sm:w-auto font-semibold"
                 data-testid="button-explore-campaigns"
               >
                 <Link href="/campaigns">
-                  <Search className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2 icon-on-primary" />
+                  <Search className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2" />
                   {t('hero.explore_campaigns')}
                 </Link>
               </Button>
@@ -168,7 +165,7 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-surface-2">
+      <section className="section-spacing-lg surface-secondary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 sm:space-y-6 lg:space-y-8 mb-12 sm:mb-16 lg:mb-20">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground uppercase tracking-wider">
@@ -180,9 +177,9 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            <div className="cyber-card p-4 sm:p-6 lg:p-8 text-center group hover:scale-105 transition-transform duration-300">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 cyber-cyan-bg rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-2xl neon-border">
-                <Shield className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 icon-on-primary drop-shadow-2xl" />
+            <div className="card-standard p-6 lg:p-8 text-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-binance">
+                <Shield className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 icon-on-primary" />
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 sm:mb-4 uppercase tracking-wide">{t('features.blockchain_security')}</h3>
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
@@ -190,9 +187,9 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="cyber-card p-4 sm:p-6 lg:p-8 text-center group hover:scale-105 transition-transform duration-300">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 cyber-green-bg rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-2xl neon-border">
-                <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 icon-on-primary drop-shadow-2xl" />
+            <div className="card-standard p-6 lg:p-8 text-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-success rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-binance">
+                <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-white" />
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 sm:mb-4 uppercase tracking-wide">{t('features.commission_free')}</h3>
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
@@ -200,9 +197,9 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="cyber-card p-8 text-center group hover:scale-105 transition-transform duration-300">
-              <div className="w-24 h-24 cyber-purple-bg rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl neon-border">
-                <Zap className="w-12 h-12 icon-on-primary drop-shadow-2xl" />
+            <div className="card-standard p-6 lg:p-8 text-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-secondary rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-binance">
+                <Zap className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-secondary-foreground" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">{t('features.fast_easy')}</h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -257,7 +254,7 @@ export default function HomePage() {
                 shareData={generateAffiliateShareLink()}
                 variant="default"
                 size="lg"
-                className="bg-primary hover:bg-primary/90 px-8 py-4 font-bold text-primary-foreground shadow-lg hover:scale-105 transition-transform duration-300"
+                className="bg-primary hover:bg-primary/90 px-8 py-4 font-bold text-primary-foreground shadow-binance"
               />
               <Button asChild variant="outline" size="lg" className="px-8 py-4">
                 <Link href="/affiliate">
@@ -271,30 +268,28 @@ export default function HomePage() {
       </section>
 
       {/* Daily Tether Reward Section */}
-      <section id="odul-sistemi" className="py-16 bg-gradient-to-b from-surface-2 to-surface relative overflow-hidden">
+      <section id="odul-sistemi" className="section-spacing-lg surface-primary relative overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 cyber-cyan-bg opacity-5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 right-1/4 w-80 h-80 cyber-purple-bg opacity-5 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 cyber-green-bg opacity-5 rounded-full blur-3xl"></div>
+          <div className="absolute top-20 left-1/4 w-96 h-96 bg-primary/3 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-1/4 w-80 h-80 bg-muted/5 rounded-full blur-2xl"></div>
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Section Header */}
           <div className="text-center mb-16">
             <div className="inline-flex items-center justify-center space-x-4 mb-6">
-              <div className="w-24 h-24 gradient-primary rounded-3xl flex items-center justify-center neon-border relative shadow-2xl group">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyber-cyan/20 to-cyber-yellow/20 rounded-3xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
-                <Trophy className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
-                <div className="absolute -top-3 -right-3 w-8 h-8 cyber-yellow-bg rounded-full flex items-center justify-center shadow-xl neon-border">
-                  <Sparkles className="w-4 h-4 text-black" />
+              <div className="w-24 h-24 bg-primary rounded-xl flex items-center justify-center relative shadow-binance">
+                <Trophy className="w-12 h-12 text-primary-foreground" />
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-accent rounded-full flex items-center justify-center shadow-binance">
+                  <Sparkles className="w-3 h-3 text-accent-foreground" />
                 </div>
               </div>
               <div className="text-center">
-                <h2 className="text-3xl md:text-4xl font-bold neon-text uppercase tracking-wide mb-2">
+                <h2 className="text-3xl md:text-4xl font-bold text-foreground uppercase tracking-wide mb-2">
                   {t('daily.title')}
                 </h2>
-                <div className="w-24 h-1 bg-gradient-to-r from-cyber-cyan via-cyber-yellow to-cyber-green mx-auto"></div>
+                <div className="w-24 h-1 bg-gradient-to-r from-primary to-accent mx-auto"></div>
               </div>
             </div>
             
@@ -304,14 +299,14 @@ export default function HomePage() {
             
             {/* Daily Prize Pool */}
             <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center justify-center">
-              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-cyber-yellow/10 to-cyber-green/10 px-6 py-3 rounded-full border border-cyber-yellow/20">
-                <DollarSign className="w-5 h-5 text-cyber-yellow" />
-                <span className="text-lg font-bold text-cyber-yellow">1500 USDT</span>
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary/10 to-success/10 px-6 py-3 rounded-full border border-primary/20">
+                <DollarSign className="w-5 h-5 text-primary" />
+                <span className="text-lg font-bold text-primary">1500 USDT</span>
                 <span className="text-sm text-muted-foreground">daily total prize</span>
               </div>
-              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-cyber-cyan/10 to-cyber-purple/10 px-4 py-2 rounded-full border border-cyber-cyan/20">
-                <Clock className="w-4 h-4 text-cyber-cyan" />
-                <span className="text-sm font-bold text-cyber-cyan">3 DRAWS</span>
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-accent/10 to-muted/10 px-4 py-2 rounded-full border border-accent/20">
+                <Clock className="w-4 h-4 text-accent" />
+                <span className="text-sm font-bold text-accent">3 DRAWS</span>
                 <span className="text-xs text-muted-foreground">daily</span>
               </div>
             </div>
@@ -320,19 +315,18 @@ export default function HomePage() {
           {/* Daily Draw Times */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             {/* Morning Draw */}
-            <div className="cyber-card p-6 relative overflow-hidden group hover:scale-105 transition-all duration-300">
-              <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-cyber-yellow/20 to-cyber-green/20 rounded-full blur-2xl"></div>
-              <div className="absolute top-4 right-4 w-10 h-6 cyber-yellow-bg rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-black">MORNING</span>
+            <div className="card-standard p-6 relative overflow-hidden">
+              <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-primary/10 to-success/10 rounded-full blur-2xl"></div>
+              <div className="absolute top-4 right-4 w-12 h-6 bg-primary rounded-full flex items-center justify-center">
+                <span className="text-xs font-bold text-primary-foreground">MORNING</span>
               </div>
               
               <div className="relative z-10 text-center space-y-4">
-                <div className="w-28 h-28 cyber-yellow-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl neon-border relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-orange-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                  <Sun className="w-14 h-14 text-black relative z-10 drop-shadow-2xl" />
+                <div className="w-28 h-28 bg-primary rounded-xl flex items-center justify-center mx-auto shadow-binance relative">
+                  <Sun className="w-14 h-14 text-primary-foreground" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-cyber-yellow mb-1">09:00 DRAW</h3>
+                  <h3 className="text-xl font-bold text-primary mb-1">09:00 DRAW</h3>
                   <p className="text-3xl font-bold text-foreground">500 USDT</p>
                   <p className="text-sm text-muted-foreground">7 winners • Morning draw</p>
                 </div>
@@ -340,19 +334,18 @@ export default function HomePage() {
             </div>
 
             {/* Afternoon Draw */}
-            <div className="cyber-card p-6 relative overflow-hidden group hover:scale-105 transition-all duration-300">
-              <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-cyber-cyan/20 to-cyber-purple/20 rounded-full blur-2xl"></div>
-              <div className="absolute top-4 right-4 w-12 h-6 cyber-cyan-bg rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-black">NOON</span>
+            <div className="card-standard p-6 relative overflow-hidden">
+              <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-accent/10 to-secondary/10 rounded-full blur-2xl"></div>
+              <div className="absolute top-4 right-4 w-12 h-6 bg-accent rounded-full flex items-center justify-center">
+                <span className="text-xs font-bold text-accent-foreground">NOON</span>
               </div>
               
               <div className="relative z-10 text-center space-y-4">
-                <div className="w-28 h-28 cyber-cyan-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl neon-border relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-yellow-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                  <Sunset className="w-14 h-14 text-black relative z-10 drop-shadow-2xl" />
+                <div className="w-28 h-28 bg-accent rounded-xl flex items-center justify-center mx-auto shadow-binance relative">
+                  <Sunset className="w-14 h-14 text-accent-foreground" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-cyber-cyan mb-1">15:00 DRAW</h3>
+                  <h3 className="text-xl font-bold text-accent mb-1">15:00 DRAW</h3>
                   <p className="text-3xl font-bold text-foreground">500 USDT</p>
                   <p className="text-sm text-muted-foreground">7 winners • Afternoon draw</p>
                 </div>
@@ -360,19 +353,18 @@ export default function HomePage() {
             </div>
 
             {/* Evening Draw */}
-            <div className="cyber-card p-6 relative overflow-hidden group hover:scale-105 transition-all duration-300">
-              <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-cyber-green/20 to-cyber-purple/20 rounded-full blur-2xl"></div>
-              <div className="absolute top-4 right-4 w-12 h-6 cyber-green-bg rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-black">EVENING</span>
+            <div className="card-standard p-6 relative overflow-hidden">
+              <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-success/10 to-secondary/10 rounded-full blur-2xl"></div>
+              <div className="absolute top-4 right-4 w-12 h-6 bg-success rounded-full flex items-center justify-center">
+                <span className="text-xs font-bold text-white">EVENING</span>
               </div>
               
               <div className="relative z-10 text-center space-y-4">
-                <div className="w-28 h-28 cyber-green-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl neon-border relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-yellow-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                  <Moon className="w-14 h-14 text-black relative z-10 drop-shadow-2xl" />
+                <div className="w-28 h-28 bg-success rounded-xl flex items-center justify-center mx-auto shadow-binance relative">
+                  <Moon className="w-14 h-14 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-cyber-green mb-1">21:00 DRAW</h3>
+                  <h3 className="text-xl font-bold text-success mb-1">21:00 DRAW</h3>
                   <p className="text-3xl font-bold text-foreground">500 USDT</p>
                   <p className="text-sm text-muted-foreground">7 winners • Evening draw</p>
                 </div>
@@ -383,14 +375,13 @@ export default function HomePage() {
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             {/* Participation Card */}
-            <div className="cyber-card p-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyber-cyan/10 to-cyber-purple/10 rounded-full blur-2xl"></div>
+            <div className="card-standard p-8 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/5 to-accent/5 rounded-full blur-2xl"></div>
               
               <div className="space-y-8 relative z-10">
                 <div className="text-center space-y-4">
-                  <div className="w-24 h-24 cyber-cyan-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl neon-border relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-3xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
-                    <Zap className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
+                  <div className="w-24 h-24 bg-primary rounded-xl flex items-center justify-center mx-auto shadow-binance">
+                    <Zap className="w-12 h-12 text-primary-foreground" />
                   </div>
                   <h3 className="text-2xl font-bold text-foreground uppercase tracking-wide">
                     PARTICIPATION PROCESS
@@ -398,35 +389,32 @@ export default function HomePage() {
                 </div>
                 
                 <div className="grid grid-cols-1 gap-4">
-                  <div className="flex items-center space-x-4 p-4 cyber-card border border-cyber-cyan/30 relative group hover:scale-105 transition-transform duration-300">
-                    <div className="w-16 h-16 cyber-cyan-bg rounded-2xl flex items-center justify-center flex-shrink-0 neon-border relative group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                      <Wallet className="w-8 h-8 text-black relative z-10 drop-shadow-lg" />
+                  <div className="flex items-center space-x-4 p-4 bg-muted/30 border border-border rounded-lg">
+                    <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Wallet className="w-8 h-8 text-primary-foreground" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-cyber-cyan uppercase tracking-wide">Connect Wallet</h4>
+                      <h4 className="font-bold text-primary uppercase tracking-wide">Connect Wallet</h4>
                       <p className="text-sm text-muted-foreground">Connect with MetaMask or Trust Wallet</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-4 p-4 cyber-card border border-cyber-purple/30 relative group hover:scale-105 transition-transform duration-300">
-                    <div className="w-16 h-16 cyber-purple-bg rounded-2xl flex items-center justify-center flex-shrink-0 neon-border relative group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-violet-500 rounded-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                      <Clock className="w-8 h-8 text-black relative z-10 drop-shadow-lg" />
+                  <div className="flex items-center space-x-4 p-4 bg-muted/30 border border-border rounded-lg">
+                    <div className="w-16 h-16 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Clock className="w-8 h-8 text-accent-foreground" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-cyber-purple uppercase tracking-wide">Daily Participation</h4>
+                      <h4 className="font-bold text-accent uppercase tracking-wide">Daily Participation</h4>
                       <p className="text-sm text-muted-foreground">Join once a day for free</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-4 p-4 cyber-card border border-cyber-green/30 relative group hover:scale-105 transition-transform duration-300">
-                    <div className="w-16 h-16 cyber-green-bg rounded-2xl flex items-center justify-center flex-shrink-0 neon-border relative group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                      <Gift className="w-8 h-8 text-black relative z-10 drop-shadow-lg" />
+                  <div className="flex items-center space-x-4 p-4 bg-muted/30 border border-border rounded-lg">
+                    <div className="w-16 h-16 bg-success rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Gift className="w-8 h-8 text-white" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-cyber-green uppercase tracking-wide">Win Rewards</h4>
+                      <h4 className="font-bold text-success uppercase tracking-wide">Win Rewards</h4>
                       <p className="text-sm text-muted-foreground">Try your luck and win USDT</p>
                     </div>
                   </div>
@@ -438,20 +426,18 @@ export default function HomePage() {
                     <Button 
                       onClick={handleDailyReward}
                       size="lg"
-                      className="bg-gradient-to-r from-cyber-cyan to-cyber-green hover:from-cyber-cyan/80 hover:to-cyber-green/80 text-black px-12 py-4 font-bold uppercase tracking-wide rounded-2xl relative overflow-hidden group shadow-2xl"
+                      className="btn-primary px-12 py-4 font-bold uppercase tracking-wide"
                       data-testid="button-daily-reward"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                      <div className="relative z-10 flex items-center space-x-3">
+                      <div className="flex items-center space-x-3">
                         <DollarSign className="w-6 h-6" />
                         <span>JOIN TODAY</span>
                         <Sparkles className="w-6 h-6" />
                       </div>
                     </Button>
                   ) : (
-                    <div className="cyber-card px-8 py-4 neon-border relative rounded-2xl">
-                      <div className="absolute inset-0 bg-gradient-to-r from-cyber-cyan/10 to-cyber-purple/10 rounded-2xl"></div>
-                      <span className="text-cyber-cyan font-bold uppercase tracking-wide relative z-10 text-lg">
+                    <div className="bg-muted/50 border border-border px-8 py-4 rounded-lg">
+                      <span className="text-primary font-bold uppercase tracking-wide text-lg">
                         CONNECT WALLET FIRST
                       </span>
                     </div>
@@ -461,14 +447,13 @@ export default function HomePage() {
             </div>
             
             {/* Winners Leaderboard */}
-            <div className="cyber-card p-8 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-cyber-yellow/10 to-cyber-green/10 rounded-full blur-2xl"></div>
+            <div className="card-standard p-8 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-primary/5 to-success/5 rounded-full blur-2xl"></div>
               
               <div className="space-y-6 relative z-10">
                 <div className="text-center space-y-4">
-                  <div className="w-24 h-24 cyber-yellow-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl neon-border relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-3xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
-                    <Trophy className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
+                  <div className="w-24 h-24 bg-primary rounded-xl flex items-center justify-center mx-auto shadow-binance">
+                    <Trophy className="w-12 h-12 text-primary-foreground" />
                   </div>
                   <h3 className="text-2xl font-bold text-foreground uppercase tracking-wide">
                     YESTERDAY'S WINNERS
@@ -478,18 +463,18 @@ export default function HomePage() {
                 <div className="space-y-3" data-testid="winners-list">
                   {(lastWinners as any[]).length > 0 ? (
                     (lastWinners as any[]).slice(0, 7).map((winner: any, index: number) => (
-                      <div key={index} className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-300 hover:scale-105 ${
-                        index === 0 ? 'bg-gradient-to-r from-cyber-yellow/10 to-cyber-green/10 border-cyber-yellow/40' :
-                        index === 1 ? 'bg-gradient-to-r from-cyber-cyan/10 to-cyber-purple/10 border-cyber-cyan/40' :
-                        index === 2 ? 'bg-gradient-to-r from-cyber-green/10 to-cyber-purple/10 border-cyber-green/40' :
-                        'bg-surface-3 border-border'
+                      <div key={index} className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-300 ${
+                        index === 0 ? 'bg-gradient-to-r from-primary/10 to-success/10 border-primary/40' :
+                        index === 1 ? 'bg-gradient-to-r from-accent/10 to-secondary/10 border-accent/40' :
+                        index === 2 ? 'bg-gradient-to-r from-success/10 to-secondary/10 border-success/40' :
+                        'bg-muted/50 border-border'
                       }`}>
                         <div className="flex items-center space-x-3">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
-                            index === 0 ? 'cyber-yellow-bg text-black' :
-                            index === 1 ? 'cyber-cyan-bg text-black' :
-                            index === 2 ? 'cyber-green-bg text-black' :
-                            'bg-surface text-foreground'
+                            index === 0 ? 'bg-primary text-primary-foreground' :
+                            index === 1 ? 'bg-accent text-accent-foreground' :
+                            index === 2 ? 'bg-success text-white' :
+                            'bg-muted text-foreground'
                           }`}>
                             #{index + 1}
                           </div>
@@ -503,16 +488,16 @@ export default function HomePage() {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          {index === 0 ? <Trophy className="w-7 h-7 text-cyber-yellow drop-shadow-lg" /> :
-                           index === 1 ? <Award className="w-7 h-7 text-cyber-cyan drop-shadow-lg" /> :
-                           index === 2 ? <Gift className="w-7 h-7 text-cyber-green drop-shadow-lg" /> :
+                          {index === 0 ? <Trophy className="w-7 h-7 text-primary" /> :
+                           index === 1 ? <Award className="w-7 h-7 text-accent" /> :
+                           index === 2 ? <Gift className="w-7 h-7 text-success" /> :
                            <Star className="w-6 h-6 text-muted-foreground" />}
                         </div>
                       </div>
                     ))
                   ) : (
                     <div className="text-center py-12 space-y-4">
-                      <div className="w-20 h-20 bg-surface-3 rounded-3xl flex items-center justify-center mx-auto neon-border relative group">
+                      <div className="w-20 h-20 bg-muted rounded-xl flex items-center justify-center mx-auto border border-border relative">
                         <div className="absolute inset-0 bg-gradient-to-r from-gray-400 to-gray-500 rounded-3xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
                         <Trophy className="w-10 h-10 text-muted-foreground relative z-10" />
                       </div>
@@ -533,63 +518,47 @@ export default function HomePage() {
           
           {/* Enhanced Statistics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center p-6 cyber-card border border-cyber-yellow/30 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-cyber-yellow/5 to-cyber-green/5"></div>
-              <div className="relative z-10">
-                <div className="w-20 h-20 cyber-yellow-bg rounded-3xl flex items-center justify-center mx-auto mb-3 neon-border relative group shadow-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-orange-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                  <Coins className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
-                </div>
-                <div className="text-2xl font-bold text-cyber-yellow mb-1">1500</div>
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">DAILY TOTAL</div>
+            <div className="text-center p-6 card-standard">
+              <div className="w-20 h-20 bg-primary rounded-xl flex items-center justify-center mx-auto mb-3 shadow-binance">
+                <Coins className="w-12 h-12 text-primary-foreground" />
               </div>
+              <div className="text-2xl font-bold text-primary mb-1">1500</div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">DAILY TOTAL</div>
             </div>
             
-            <div className="text-center p-6 cyber-card border border-cyber-cyan/30 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-cyber-cyan/5 to-cyber-purple/5"></div>
-              <div className="relative z-10">
-                <div className="w-20 h-20 cyber-cyan-bg rounded-3xl flex items-center justify-center mx-auto mb-3 neon-border relative group shadow-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-yellow-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                  <Star className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
-                </div>
-                <div className="text-2xl font-bold text-cyber-cyan mb-1">21</div>
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">TOTAL WINNERS</div>
+            <div className="text-center p-6 card-standard">
+              <div className="w-20 h-20 bg-accent rounded-xl flex items-center justify-center mx-auto mb-3 shadow-binance">
+                <Star className="w-12 h-12 text-accent-foreground" />
               </div>
+              <div className="text-2xl font-bold text-accent mb-1">21</div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">TOTAL WINNERS</div>
             </div>
             
-            <div className="text-center p-6 cyber-card border border-cyber-green/30 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-cyber-green/5 to-cyber-purple/5"></div>
-              <div className="relative z-10">
-                <div className="w-20 h-20 cyber-green-bg rounded-3xl flex items-center justify-center mx-auto mb-3 neon-border relative group shadow-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-yellow-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                  <Clock className="w-12 h-12 text-black relative z-10 drop-shadow-2xl" />
-                </div>
-                <div className="text-2xl font-bold text-cyber-green mb-1">3</div>
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">DRAW COUNT</div>
+            <div className="text-center p-6 card-standard">
+              <div className="w-20 h-20 bg-success rounded-xl flex items-center justify-center mx-auto mb-3 shadow-binance">
+                <Clock className="w-12 h-12 text-white" />
               </div>
+              <div className="text-2xl font-bold text-success mb-1">3</div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">DRAW COUNT</div>
             </div>
             
-            <div className="text-center p-6 cyber-card border border-cyber-purple/30 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-cyber-purple/5 to-cyber-yellow/5"></div>
-              <div className="relative z-10">
-                <div className="w-20 h-20 cyber-purple-bg rounded-3xl flex items-center justify-center mx-auto mb-3 neon-border relative group shadow-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-yellow-400 rounded-3xl opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                  <Gem className="w-12 h-12 text-black drop-shadow-2xl relative z-10" />
-                </div>
-                <div className="text-2xl font-bold text-cyber-purple mb-1">100%</div>
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">SECURE</div>
+            <div className="text-center p-6 card-standard">
+              <div className="w-20 h-20 bg-secondary rounded-xl flex items-center justify-center mx-auto mb-3 shadow-binance">
+                <Gem className="w-12 h-12 text-secondary-foreground" />
               </div>
+              <div className="text-2xl font-bold text-secondary-foreground mb-1">100%</div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">SECURE</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Popular Campaigns Section */}
-      <section className="py-20 bg-surface">
+      <section className="section-spacing-lg surface-primary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-8 mb-20">
             <h2 className="text-3xl md:text-5xl font-bold text-foreground uppercase tracking-wider">
-              <span className="neon-text">{t('popular.title')}</span>
+              {t('popular.title')}
             </h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
               {t('popular.subtitle')}
@@ -601,8 +570,8 @@ export default function HomePage() {
               (popularCampaigns as any[]).map((campaign: any) => (
                 <div key={campaign.id} className="relative">
                   <div className="absolute -top-3 -right-3 z-10">
-                    <div className="w-8 h-8 gradient-accent rounded-lg flex items-center justify-center neon-border">
-                      <Sparkles className="w-4 h-4 text-black" />
+                    <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center border border-border">
+                      <Sparkles className="w-4 h-4 text-accent-foreground" />
                     </div>
                   </div>
                   <CampaignCard campaign={campaign} />
@@ -610,12 +579,12 @@ export default function HomePage() {
               ))
             ) : (
               <div className="col-span-full text-center py-16">
-                <div className="w-32 h-32 cyber-cyan-bg rounded-3xl flex items-center justify-center mx-auto mb-6 neon-border shadow-2xl">
-                  <Target className="w-16 h-16 text-black drop-shadow-2xl" />
+                <div className="w-32 h-32 bg-primary rounded-xl flex items-center justify-center mx-auto mb-6 shadow-binance">
+                  <Target className="w-16 h-16 text-primary-foreground" />
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-2 uppercase tracking-wide">{t('popular.no_campaigns')}</h3>
                 <p className="text-muted-foreground mb-8">{t('popular.create_first')}</p>
-                <Button asChild className="btn-cyber">
+                <Button asChild className="btn-primary">
                   <Link href="/funds">
                     <Plus className="w-5 h-5 mr-2" />
                     {t('hero.create_campaign')}
@@ -628,7 +597,7 @@ export default function HomePage() {
           <div className="text-center">
             <Button 
               asChild
-              className="btn-cyber px-8 py-3"
+              className="btn-secondary px-8 py-3"
               data-testid="button-view-all-campaigns"
             >
               <Link href="/campaigns">
@@ -643,15 +612,15 @@ export default function HomePage() {
 
 
       {/* Footer */}
-      <footer className="bg-surface-2 border-t border-border py-12">
+      <footer className="surface-secondary border-t border-border section-spacing">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center neon-border">
-                  <Heart className="w-6 h-6 text-black" />
+                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center border border-border">
+                  <Heart className="w-6 h-6 text-primary-foreground" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground neon-text uppercase tracking-wide">{t('duxxan')}</h3>
+                <h3 className="text-xl font-bold text-foreground uppercase tracking-wide">{t('duxxan')}</h3>
               </div>
               <p className="text-muted-foreground">
                 {t('footer.description')}
@@ -661,32 +630,32 @@ export default function HomePage() {
             <div className="space-y-4">
               <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.platform')}</h4>
               <ul className="space-y-2 text-muted-foreground">
-                <li><Link href="/campaigns" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">{t('campaigns')}</Link></li>
-                <li><Link href="/funds" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">{t('hero.create_campaign')}</Link></li>
-                <li><a href="#odul-sistemi" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">{t('daily.title')}</a></li>
+                <li><Link href="/campaigns" className="hover:text-primary transition-colors uppercase tracking-wide">{t('campaigns')}</Link></li>
+                <li><Link href="/funds" className="hover:text-primary transition-colors uppercase tracking-wide">{t('hero.create_campaign')}</Link></li>
+                <li><a href="#odul-sistemi" className="hover:text-primary transition-colors uppercase tracking-wide">{t('daily.title')}</a></li>
               </ul>
             </div>
             
             <div className="space-y-4">
               <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.support')}</h4>
               <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">{t('footer.how_it_works')}</a></li>
-                <li><a href="#" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">{t('footer.security')}</a></li>
-                <li><a href="#" className="hover:text-cyber-cyan transition-colors uppercase tracking-wide">{t('footer.faq')}</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors uppercase tracking-wide">{t('footer.how_it_works')}</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors uppercase tracking-wide">{t('footer.security')}</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors uppercase tracking-wide">{t('footer.faq')}</a></li>
               </ul>
             </div>
             
             <div className="space-y-4">
               <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.connection')}</h4>
               <div className="flex space-x-4">
-                <a href="#" className="w-10 h-10 cyber-card rounded-lg flex items-center justify-center hover:neon-border transition-colors">
-                  <span className="text-sm text-cyber-cyan">TW</span>
+                <a href="#" className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:border-primary border border-border transition-colors">
+                  <span className="text-sm text-primary">TW</span>
                 </a>
-                <a href="#" className="w-10 h-10 cyber-card rounded-lg flex items-center justify-center hover:neon-border transition-colors">
-                  <span className="text-sm text-cyber-cyan">DC</span>
+                <a href="#" className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:border-primary border border-border transition-colors">
+                  <span className="text-sm text-primary">DC</span>
                 </a>
-                <a href="#" className="w-10 h-10 cyber-card rounded-lg flex items-center justify-center hover:neon-border transition-colors">
-                  <span className="text-sm text-cyber-cyan">TG</span>
+                <a href="#" className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:border-primary border border-border transition-colors">
+                  <span className="text-sm text-primary">TG</span>
                 </a>
               </div>
             </div>

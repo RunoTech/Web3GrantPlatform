@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
 import { validateCard, formatCardNumber, formatExpiryDate, getBinInfo, type CardBrand } from '@/lib/payments';
 import { Link, useLocation } from 'wouter';
+import { apiRequest } from '@/lib/queryClient';
 
 // Form validation schema
 const virtualPosSchema = z.object({
@@ -85,45 +86,106 @@ export default function VirtualPosPage() {
     form.setValue('expiryDate', formattedValue);
   };
 
-  // Simulate payment processing with 5-second delay
-  const simulateProcessing = async (): Promise<void> => {
-    return new Promise((resolve) => {
-      let progress = 0;
-      const stages = ['validating', 'authorizing', 'processing', 'completed'] as const;
-      let currentStageIndex = 0;
+  // Process payment with backend API call
+  const processPayment = async (formData: VirtualPosForm): Promise<void> => {
+    const cleanCardNumber = formData.cardNumber.replace(/\D/g, '');
+    const [expMonth, expYear] = formData.expiryDate.split('/').map(Number);
+    
+    // Prepare metadata for backend (no sensitive PAN/CVV data)
+    const paymentData = {
+      bin: cleanCardNumber.slice(0, 8), // First 6-8 digits
+      last4: cleanCardNumber.slice(-4), // Last 4 digits
+      brand: cardBrand?.name || 'unknown',
+      expMonth: expMonth,
+      expYear: 2000 + expYear, // Convert YY to YYYY
+      amount: formData.amount,
+      currency: 'USD',
+      cvvLength: formData.cvv.length,
+    };
 
+    console.log('🏦 Virtual POS: Processing payment with backend API', { paymentData });
+
+    // Start processing animation
+    let progress = 0;
+    const stages = ['validating', 'authorizing', 'processing', 'completed'] as const;
+
+    setProcessingState({
+      isProcessing: true,
+      stage: 'validating',
+      progress: 0,
+    });
+
+    // Progress animation during API call
+    const progressInterval = setInterval(() => {
+      progress = Math.min(progress + 12, 95); // Don't complete until API response
+      const currentStageIndex = Math.min(Math.floor(progress / 30), stages.length - 2);
+      
+      setProcessingState(prev => ({
+        ...prev,
+        stage: stages[currentStageIndex],
+        progress,
+      }));
+    }, 400);
+
+    try {
+      console.log('🏦 Virtual POS: Making API call to /api/virtual-pos/authorize');
+      
+      // API call to backend (will take ~5 seconds and return 402 error)
+      const response = await apiRequest("POST", "/api/virtual-pos/authorize", paymentData);
+      
+      // This should not execute due to 402 error, but handle success case
+      console.log('🏦 Virtual POS: Unexpected success response', response);
+      clearInterval(progressInterval);
       setProcessingState({
-        isProcessing: true,
-        stage: stages[0],
-        progress: 0,
+        isProcessing: false,
+        stage: 'completed',
+        progress: 100,
+      });
+      
+      toast({
+        title: "İşlem Başarılı",
+        description: "Ödeme işlemi tamamlandı.",
+      });
+      
+    } catch (error: any) {
+      console.log('🏦 Virtual POS: API error (expected for demo)', error);
+      clearInterval(progressInterval);
+      
+      // Complete progress bar
+      setProcessingState({
+        isProcessing: false,
+        stage: 'completed',
+        progress: 100,
       });
 
-      const interval = setInterval(() => {
-        progress += 20;
-        
-        if (progress >= 100) {
-          setProcessingState({
-            isProcessing: false,
-            stage: 'completed',
-            progress: 100,
-          });
-          clearInterval(interval);
-          resolve();
-        } else {
-          // Update stage every 25% progress
-          const newStageIndex = Math.floor(progress / 25);
-          if (newStageIndex < stages.length) {
-            currentStageIndex = newStageIndex;
-          }
-          
-          setProcessingState({
-            isProcessing: true,
-            stage: stages[currentStageIndex],
-            progress,
-          });
-        }
-      }, 1000); // 1 second intervals for 5 total seconds
-    });
+      // Handle expected 402 insufficient funds error
+      if (error.status === 402 || error.code === 'INSUFFICIENT_FUNDS') {
+        setPaymentError({
+          code: 'INSUFFICIENT_FUNDS',
+          message: 'Bakiye Yetersiz',
+          details: error.details || 'Kartınızda yeterli bakiye bulunmamaktadır.',
+        });
+
+        toast({
+          title: "Ödeme Hatası",
+          description: "Bakiye Yetersiz - Kartınızda yeterli bakiye bulunmamaktadır.",
+          variant: "destructive",
+        });
+      } else {
+        // Handle other errors
+        setPaymentError({
+          code: 'PROCESSING_ERROR',
+          message: 'İşlem Hatası',
+          details: error.message || 'Beklenmeyen bir hata oluştu.',
+        });
+
+        toast({
+          title: "İşlem Hatası",
+          description: error.message || "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const onSubmit = async (data: VirtualPosForm) => {
@@ -148,28 +210,11 @@ export default function VirtualPosPage() {
     }
 
     try {
-      // Start processing simulation
-      await simulateProcessing();
-
-      // Always return insufficient balance error as requested
-      setPaymentError({
-        code: 'INSUFFICIENT_FUNDS',
-        message: 'Bakiye Yetersiz',
-        details: 'Kartınızda yeterli bakiye bulunmamaktadır. Lütfen başka bir kart deneyin veya bakiyenizi kontrol edin.',
-      });
-
-      toast({
-        title: 'Ödeme Başarısız',
-        description: 'Bakiye yetersiz - işlem gerçekleştirilemedi',
-        variant: 'destructive',
-      });
-
+      // Process payment with backend API
+      await processPayment(data);
     } catch (error) {
-      setPaymentError({
-        code: 'PROCESSING_ERROR',
-        message: 'İşlem Hatası',
-        details: 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.',
-      });
+      console.error('Payment processing error:', error);
+      // Error handling is done inside processPayment function
     }
   };
 

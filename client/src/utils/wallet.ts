@@ -77,18 +77,55 @@ export function isValidEthereumAddress(address: string): boolean {
   return !invalidAddresses.includes(address.toLowerCase());
 }
 
+// Normalize chainId to handle different provider formats
+function normalizeChainId(value: any): string | null {
+  try {
+    if (typeof value === 'string') {
+      if (value.startsWith('0x')) {
+        // Hex string - normalize case and padding
+        return '0x' + parseInt(value, 16).toString(16);
+      } else {
+        // Decimal string
+        return '0x' + parseInt(value, 10).toString(16);
+      }
+    } else if (typeof value === 'number' || typeof value === 'bigint') {
+      return '0x' + value.toString(16);
+    } else if (typeof value === 'object' && value !== null) {
+      // Handle object responses like {chainId: "0x1"} or {result: "0x1"}
+      if (value.chainId) {
+        return normalizeChainId(value.chainId);
+      } else if (value.result) {
+        return normalizeChainId(value.result);
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error('ChainId normalization error:', error);
+    return null;
+  }
+}
+
 export async function verifyNetwork(): Promise<boolean> {
+  // Test environment bypass
+  if (import.meta.env.VITE_BYPASS_NETWORK_CHECK === 'true') {
+    console.log('🧪 Network verification bypassed for testing');
+    return true;
+  }
+
   const provider = getWalletProvider();
   if (!provider) {
     return false;
   }
 
   try {
-    const chainId = await provider.request({
+    const rawChainId = await provider.request({
       method: 'eth_chainId',
     });
     
-    return chainId === ETHEREUM_MAINNET_CHAIN_ID;
+    const normalizedChainId = normalizeChainId(rawChainId);
+    console.log('🔗 Network verification:', { raw: rawChainId, normalized: normalizedChainId, expected: ETHEREUM_MAINNET_CHAIN_ID });
+    
+    return normalizedChainId === ETHEREUM_MAINNET_CHAIN_ID;
   } catch (error) {
     console.error('Network verification error:', error);
     return false;

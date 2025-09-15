@@ -127,7 +127,7 @@ export default function HomePage() {
             </div>
             
             <div className="space-y-4 sm:space-y-6">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground leading-tight tracking-wider uppercase">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight tracking-wider uppercase bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
                 {t('hero.title')}
               </h1>
               
@@ -151,7 +151,7 @@ export default function HomePage() {
               <Button 
                 asChild
                 size="lg"
-                className="btn-secondary w-full sm:w-auto font-semibold"
+                className="btn-primary w-full sm:w-auto font-semibold"
                 data-testid="button-explore-campaigns"
               >
                 <Link href="/campaigns">

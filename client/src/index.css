@@ -307,19 +307,24 @@ h6 { font-size: 1rem; line-height: 1.4; }      /* 16px - Button text (16-18px) *
   gap: 8px;
 }
 
-/* Clean Professional Buttons */
-.btn-primary {
-  background: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.2s ease;
+/* Clean Professional Buttons - Enhanced Override */
+.btn-primary,
+button.btn-primary,
+[class*="btn-primary"] {
+  background: #F0B90B !important; /* Direct Binance Yellow */
+  color: #0B0E11 !important; /* Dark text on yellow */
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
 }
 
-.btn-primary:hover {
-  background: hsl(var(--primary) / 0.9);
-  transform: translateY(-1px);
+.btn-primary:hover,
+button.btn-primary:hover,
+[class*="btn-primary"]:hover {
+  background: #E6A500 !important; /* Darker yellow on hover */
+  color: #0B0E11 !important;
+  transform: translateY(-1px) !important;
 }
 
 .btn-secondary {

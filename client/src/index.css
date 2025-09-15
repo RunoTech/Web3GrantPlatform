@@ -336,27 +336,31 @@ h6 { font-size: 1rem; line-height: 1.4; }      /* 16px - Button text (16-18px) *
   border-color: hsl(var(--primary));
 }
 
-/* Professional Card System - OpenSea Inspired */
+/* Professional Card System with Yellow Border - Binance Inspired */
 .card-standard {
   background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
+  border: 2px solid hsl(var(--primary)); /* Binance Yellow Border */
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(240, 185, 11, 0.15); /* Yellow shadow */
   transition: all 0.2s ease;
 }
 
 .card-standard:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border-color: hsl(var(--primary) / 0.8); /* Slightly darker yellow on hover */
+  box-shadow: 0 4px 16px rgba(240, 185, 11, 0.25); /* Enhanced yellow shadow */
   transform: translateY(-2px);
 }
 
+/* Dark theme card styling with yellow border */
 .dark .card-standard {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 2px solid hsl(var(--primary)); /* Same yellow border in dark mode */
+  box-shadow: 0 2px 8px rgba(240, 185, 11, 0.2); /* Stronger yellow shadow in dark */
 }
 
 .dark .card-standard:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  border-color: hsl(var(--primary) / 0.9); /* Brighter yellow on hover in dark */
+  box-shadow: 0 4px 16px rgba(240, 185, 11, 0.3); /* Enhanced yellow shadow in dark */
 }
 
 /* Campaign Card Grid - OpenSea Style */

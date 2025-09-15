@@ -173,7 +173,7 @@ export default function PaymentPage() {
               <h2 className="text-xl font-semibold text-foreground mb-4 text-center">
                 Ödeme Seçenekleri
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Option 1: Buy Crypto First */}
                 <div style={{
                   background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.05), rgba(255, 0, 255, 0.05))',
@@ -261,6 +261,51 @@ export default function PaymentPage() {
                   }}>
                     HIZLI
                   </Badge>
+                </div>
+
+                {/* Option 3: Virtual POS (Credit Card Direct) */}
+                <div style={{
+                  background: 'linear-gradient(135deg, rgba(240, 185, 11, 0.05), rgba(255, 165, 0, 0.05))',
+                  border: '2px solid rgba(240, 185, 11, 0.3)',
+                  borderRadius: '15px',
+                  padding: '24px',
+                  textAlign: 'center'
+                }}>
+                  <CreditCard className="w-12 h-12 mx-auto mb-4" style={{ color: '#F0B90B' }} />
+                  <h3 style={{
+                    fontSize: '1.1rem',
+                    fontWeight: '600',
+                    color: '#ffffff',
+                    marginBottom: '8px',
+                    fontFamily: "'Orbitron', monospace"
+                  }}>
+                    Kredi Kartı ile Direkt Öde
+                  </h3>
+                  <p style={{
+                    color: '#888',
+                    fontSize: '0.9rem',
+                    marginBottom: '16px'
+                  }}>
+                    Güvenli Virtual POS sistemi ile kredi kartınızla direkt ödeme
+                  </p>
+                  <Badge style={{
+                    background: 'rgba(240, 185, 11, 0.2)',
+                    color: '#F0B90B',
+                    border: '1px solid rgba(240, 185, 11, 0.3)',
+                    marginBottom: '16px'
+                  }}>
+                    YENİ
+                  </Badge>
+                  <div>
+                    <Button 
+                      className="btn-binance w-full" 
+                      onClick={() => setLocation('/virtual-pos')}
+                      data-testid="button-virtual-pos"
+                    >
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Virtual POS
+                    </Button>
+                  </div>
                 </div>
               </div>
             </Card>

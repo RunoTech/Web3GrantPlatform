@@ -15,6 +15,7 @@ import DonationsPage from "@/pages/donations";
 import FundsPage from "@/pages/funds";
 import DailyRewardsPage from "@/pages/daily-rewards";
 import PaymentPage from "@/pages/payment";
+import VirtualPosPage from "@/pages/virtual-pos";
 import AffiliatePage from "@/pages/affiliate";
 import AdminLoginPage from "@/pages/admin/login";
 import AdminDashboardPage from "@/pages/admin/index";
@@ -31,6 +32,7 @@ function Router() {
       <Route path="/funds" component={FundsPage} />
       <Route path="/daily-rewards" component={DailyRewardsPage} />
       <Route path="/payment" component={PaymentPage} />
+      <Route path="/virtual-pos" component={VirtualPosPage} />
       <Route path="/affiliate" component={AffiliatePage} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/campaign/:id" component={CampaignDetailPage} />

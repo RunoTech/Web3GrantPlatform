@@ -337,30 +337,38 @@ h6 { font-size: 1rem; line-height: 1.4; }      /* 16px - Button text (16-18px) *
 }
 
 /* Professional Card System with Yellow Border - Binance Inspired */
-.card-standard {
-  background: hsl(var(--card));
-  border: 2px solid hsl(var(--primary)); /* Binance Yellow Border */
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(240, 185, 11, 0.15); /* Yellow shadow */
-  transition: all 0.2s ease;
+.card-standard,
+div.card-standard,
+[class*="card-standard"] {
+  background: hsl(var(--card)) !important;
+  border: 2px solid #F0B90B !important; /* Direct Binance Yellow Border */
+  border-radius: 12px !important;
+  padding: 16px !important;
+  box-shadow: 0 2px 8px rgba(240, 185, 11, 0.15) !important; /* Yellow shadow */
+  transition: all 0.2s ease !important;
 }
 
-.card-standard:hover {
-  border-color: hsl(var(--primary) / 0.8); /* Slightly darker yellow on hover */
-  box-shadow: 0 4px 16px rgba(240, 185, 11, 0.25); /* Enhanced yellow shadow */
-  transform: translateY(-2px);
+.card-standard:hover,
+div.card-standard:hover,
+[class*="card-standard"]:hover {
+  border-color: #E6A500 !important; /* Darker yellow on hover */
+  box-shadow: 0 4px 16px rgba(240, 185, 11, 0.25) !important; /* Enhanced yellow shadow */
+  transform: translateY(-2px) !important;
 }
 
 /* Dark theme card styling with yellow border */
-.dark .card-standard {
-  border: 2px solid hsl(var(--primary)); /* Same yellow border in dark mode */
-  box-shadow: 0 2px 8px rgba(240, 185, 11, 0.2); /* Stronger yellow shadow in dark */
+.dark .card-standard,
+.dark div.card-standard,
+.dark [class*="card-standard"] {
+  border: 2px solid #F0B90B !important; /* Direct yellow border in dark mode */
+  box-shadow: 0 2px 8px rgba(240, 185, 11, 0.2) !important; /* Stronger yellow shadow in dark */
 }
 
-.dark .card-standard:hover {
-  border-color: hsl(var(--primary) / 0.9); /* Brighter yellow on hover in dark */
-  box-shadow: 0 4px 16px rgba(240, 185, 11, 0.3); /* Enhanced yellow shadow in dark */
+.dark .card-standard:hover,
+.dark div.card-standard:hover,
+.dark [class*="card-standard"]:hover {
+  border-color: #F3C52B !important; /* Brighter yellow on hover in dark */
+  box-shadow: 0 4px 16px rgba(240, 185, 11, 0.3) !important; /* Enhanced yellow shadow in dark */
 }
 
 /* Campaign Card Grid - OpenSea Style */

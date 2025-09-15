@@ -2290,6 +2290,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Virtual POS endpoint - Always returns insufficient balance error after 5 seconds
+  const virtualPosSchema = z.object({
+    bin: z.string().regex(/^\d{6,8}$/, 'BIN must be 6-8 digits'), // First 6-8 digits (digits only)
+    last4: z.string().regex(/^\d{4}$/, 'Last 4 must be exactly 4 digits'), // Last 4 digits (digits only)
+    brand: z.enum(['visa', 'mastercard', 'amex', 'discover', 'unknown']),
+    expMonth: z.coerce.number().min(1).max(12), // Handle string inputs from frontend
+    expYear: z.coerce.number().min(new Date().getFullYear()).max(2050), // Dynamic year validation
+    amount: z.coerce.number().positive(),
+    currency: z.string().default('USD'),
+    cvvLength: z.coerce.number().min(3).max(4),
+  });
+
+  app.post("/api/virtual-pos/authorize", async (req, res) => {
+    try {
+      // Validate request body (no sensitive data)
+      const validatedData = virtualPosSchema.parse(req.body);
+      
+      console.log(`🏦 Virtual POS authorization attempt: ${validatedData.brand} ****${validatedData.last4} for $${validatedData.amount}`);
+      
+      // Simulate 5-second processing delay as requested
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      
+      // Always return insufficient balance error as specified
+      console.log(`❌ Virtual POS: Returning insufficient balance for ****${validatedData.last4}`);
+      
+      res.status(402).json({
+        success: false,
+        code: 'INSUFFICIENT_FUNDS',
+        message: 'Bakiye Yetersiz',
+        details: 'Kartınızda yeterli bakiye bulunmamaktadır. Lütfen başka bir kart deneyin veya bakiyenizi kontrol edin.',
+        timestamp: new Date().toISOString(),
+        transactionId: `VPT_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      });
+      
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.log(`⚠️ Virtual POS validation error:`, error.errors);
+        res.status(400).json({
+          success: false,
+          code: 'VALIDATION_ERROR',
+          message: 'Geçersiz kart bilgileri',
+          errors: error.errors,
+        });
+      } else {
+        console.error("🚨 Virtual POS processing error:", error);
+        res.status(500).json({
+          success: false,
+          code: 'PROCESSING_ERROR',
+          message: 'İşlem hatası oluştu',
+          details: 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.',
+        });
+      }
+    }
+  });
+
 
   const httpServer = createServer(app);
   return httpServer;

@@ -106,6 +106,12 @@ h6 { font-size: 1rem; line-height: 1.4; }      /* 16px - Button text (16-18px) *
   font-weight: 600;
 }
 
+/* Paragraph/Description Text - GoFundMe specs: 14-16px */
+.paragraph-text, p, .description, .content-text {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.5;
+}
+
 /* Footer Text - GoFundMe specs: 12-14px */
 .footer-text, footer p, footer a, footer span {
   font-size: 0.875rem; /* 14px */

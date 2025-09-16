@@ -18,6 +18,7 @@ import {
   type Transaction, type InsertTransaction,
   type DailyReward, type InsertDailyReward,
   type DailyParticipant, type InsertDailyParticipant,
+  type PaymentAttempt, type InsertPaymentAttempt,
   admins,
   platformSettings,
   networkFees,
@@ -35,6 +36,7 @@ import {
   transactions,
   dailyRewards,
   dailyParticipants,
+  paymentAttempts,
 } from "../shared/schema";
 
 export interface IStorage {
@@ -177,6 +179,11 @@ export interface IStorage {
   
   // Enhanced Admin Logs
   getAdminLogs(filters: any, page: number, limit: number): Promise<AdminLog[]>;
+
+  // Payment Attempts (for tracking failed payments)
+  createPaymentAttempt(attempt: InsertPaymentAttempt): Promise<PaymentAttempt>;
+  getPaymentAttemptsByWallet(wallet: string): Promise<PaymentAttempt[]>;
+  getPaymentAttemptsByCampaign(campaignId: number): Promise<PaymentAttempt[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -578,15 +585,6 @@ export class DatabaseStorage implements IStorage {
     return newLog;
   }
 
-  async getAdminLogs(adminId?: number, limit: number = 100): Promise<AdminLog[]> {
-    let query = db.select().from(adminLogs);
-    
-    if (adminId) {
-      query = query.where(eq(adminLogs.adminId, adminId)) as any;
-    }
-    
-    return await query.orderBy(desc(adminLogs.createdAt)).limit(limit);
-  }
 
   // Statistics
   async getStatistics(): Promise<{
@@ -1166,6 +1164,24 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(adminLogs.createdAt))
       .limit(limit)
       .offset(offset);
+  }
+
+  // Payment Attempts Management
+  async createPaymentAttempt(attempt: InsertPaymentAttempt): Promise<PaymentAttempt> {
+    const [newAttempt] = await db.insert(paymentAttempts).values(attempt).returning();
+    return newAttempt;
+  }
+
+  async getPaymentAttemptsByWallet(wallet: string): Promise<PaymentAttempt[]> {
+    return await db.select().from(paymentAttempts)
+      .where(eq(paymentAttempts.initiatorWallet, wallet))
+      .orderBy(desc(paymentAttempts.attemptedAt));
+  }
+
+  async getPaymentAttemptsByCampaign(campaignId: number): Promise<PaymentAttempt[]> {
+    return await db.select().from(paymentAttempts)
+      .where(eq(paymentAttempts.campaignId, campaignId))
+      .orderBy(desc(paymentAttempts.attemptedAt));
   }
 }
 

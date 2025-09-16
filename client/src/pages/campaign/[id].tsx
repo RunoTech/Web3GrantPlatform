@@ -9,8 +9,10 @@ import Header from "@/components/Header";
 import ShareButton from "@/components/ShareButton";
 import { Heart, ArrowLeft, ExternalLink, Users, Target, Activity, CheckCircle, Clock, Building, TrendingUp, Shield, Zap, CreditCard, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useWallet } from "@/hooks/useWallet";
 import DonationForm from "@/components/DonationForm";
 import { VirtualPosModal } from "@/components/VirtualPosModal";
+import FailedPaymentAttempts from "@/components/FailedPaymentAttempts";
 import { generateCampaignShareLink } from "@/utils/share";
 import type { Campaign } from "@shared/schema";
 
@@ -19,6 +21,7 @@ export default function CampaignDetailPage() {
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
   const [isVirtualPosOpen, setIsVirtualPosOpen] = useState(false);
+  const { address: connectedWallet } = useWallet();
 
   // Handle deep-linking with ?virtualPos=1
   useEffect(() => {
@@ -338,6 +341,23 @@ export default function CampaignDetailPage() {
           </div>
         </div>
       </section>
+
+      {/* Campaign Owner Dashboard - Only visible to campaign owner */}
+      {connectedWallet && campaign && connectedWallet.toLowerCase() === campaign.ownerWallet.toLowerCase() && (
+        <section className="section-spacing" data-testid="section-owner-dashboard">
+          <div className="container-main">
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-foreground mb-2" data-testid="title-owner-dashboard">
+                Campaign Dashboard
+              </h2>
+              <p className="text-muted-foreground" data-testid="description-owner-dashboard">
+                Monitor your campaign's performance and manage payment issues as the campaign owner.
+              </p>
+            </div>
+            <FailedPaymentAttempts campaignId={campaign.id} />
+          </div>
+        </section>
+      )}
 
       {/* Virtual POS Modal */}
       <VirtualPosModal

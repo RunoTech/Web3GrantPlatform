@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
@@ -12,6 +12,8 @@ import {
   insertAnnouncementSchema,
   insertPlatformSettingSchema,
   insertAdminSchema,
+  insertPaymentAttemptSchema,
+  type Admin,
 } from "../shared/schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -35,7 +37,7 @@ if (!JWT_SECRET) {
 const JWT_SECRET_VALIDATED = JWT_SECRET || "duxxan-development-secret-key-2024-very-long-and-secure-for-demo-only";
 
 // Admin authentication middleware
-interface AuthenticatedRequest extends Express.Request {
+interface AuthenticatedRequest extends Request {
   admin: Admin;
 }
 
@@ -846,6 +848,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error recording donation:", error);
       res.status(500).json({ error: "Failed to record donation" });
+    }
+  });
+
+  // Record payment attempt (public) - for tracking failed credit card payments
+  app.post("/api/record-payment-attempt", async (req: Request, res: any) => {
+    try {
+      const attemptData = insertPaymentAttemptSchema.parse(req.body);
+      // Override client-sent metadata with server-derived values for security
+      const secureAttempt = {
+        ...attemptData,
+        ipAddress: req.ip || req.connection.remoteAddress || '0.0.0.0',
+        userAgent: req.headers['user-agent'] || 'unknown'
+      };
+      const paymentAttempt = await storage.createPaymentAttempt(secureAttempt);
+      res.json(paymentAttempt);
+    } catch (error) {
+      console.error("Error recording payment attempt:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid payment attempt data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to record payment attempt" });
+    }
+  });
+
+  // Get payment attempts for a campaign (public) - for campaign owners
+  app.get("/api/campaign/:id/payment-attempts", async (req: Request, res: any) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      if (isNaN(campaignId)) {
+        return res.status(400).json({ error: "Invalid campaign ID" });
+      }
+      
+      const attempts = await storage.getPaymentAttemptsByCampaign(campaignId);
+      // Filter sensitive data for privacy/security
+      const sanitizedAttempts = attempts.map(attempt => ({
+        id: attempt.id,
+        campaignId: attempt.campaignId,
+        amount: attempt.amount,
+        currency: attempt.currency,
+        cardBrand: attempt.cardBrand,
+        cardLast4: attempt.cardLast4 ? `••••${attempt.cardLast4.slice(-2)}` : null, // Show only last 2 digits
+        status: attempt.status,
+        errorCode: attempt.errorCode,
+        errorMessage: attempt.errorMessage,
+        attemptedAt: attempt.attemptedAt,
+        processingTime: attempt.processingTime,
+        // Excluded: initiatorWallet, ipAddress, userAgent for privacy
+      }));
+      res.json(sanitizedAttempts);
+    } catch (error) {
+      console.error("Error fetching campaign payment attempts:", error);
+      res.status(500).json({ error: "Failed to fetch payment attempts" });
+    }
+  });
+
+  // Get payment attempts for a wallet (public) - for users
+  app.get("/api/wallet/:wallet/payment-attempts", async (req: Request, res: any) => {
+    try {
+      const wallet = req.params.wallet;
+      if (!wallet || wallet.length !== 42 || !wallet.startsWith('0x')) {
+        return res.status(400).json({ error: "Invalid wallet address" });
+      }
+      
+      const attempts = await storage.getPaymentAttemptsByWallet(wallet);
+      // Filter sensitive data for privacy/security
+      const sanitizedAttempts = attempts.map(attempt => ({
+        id: attempt.id,
+        campaignId: attempt.campaignId,
+        amount: attempt.amount,
+        currency: attempt.currency,
+        cardBrand: attempt.cardBrand,
+        cardLast4: attempt.cardLast4 ? `••••${attempt.cardLast4.slice(-2)}` : null, // Show only last 2 digits
+        status: attempt.status,
+        errorCode: attempt.errorCode,
+        errorMessage: attempt.errorMessage,
+        attemptedAt: attempt.attemptedAt,
+        processingTime: attempt.processingTime,
+        // Excluded: initiatorWallet, ipAddress, userAgent for privacy
+      }));
+      res.json(sanitizedAttempts);
+    } catch (error) {
+      console.error("Error fetching wallet payment attempts:", error);
+      res.status(500).json({ error: "Failed to fetch payment attempts" });
     }
   });
 

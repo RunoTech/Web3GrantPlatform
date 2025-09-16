@@ -260,6 +260,32 @@ export const transactions = pgTable("transactions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Credit card payment attempts (for tracking failed payments)
+export const paymentAttempts = pgTable("payment_attempts", {
+  id: serial("id").primaryKey(),
+  campaignId: integer("campaign_id").notNull().references(() => campaigns.id),
+  initiatorWallet: varchar("initiator_wallet", { length: 42 }).notNull(), // Who tried to make the payment
+  amount: decimal("amount", { precision: 18, scale: 8 }).notNull(), // Payment amount
+  currency: varchar("currency", { length: 10 }).notNull().default("USD"),
+  
+  // Card information (anonymized for security)
+  cardBrand: varchar("card_brand", { length: 20 }), // visa, mastercard, etc.
+  cardLast4: varchar("card_last4", { length: 4 }), // Last 4 digits
+  
+  // Payment processing details
+  status: varchar("status", { length: 20 }).notNull(), // "success", "failed", "pending"
+  errorCode: varchar("error_code", { length: 50 }), // "insufficient_funds", "card_declined", etc.
+  errorMessage: text("error_message"), // Detailed error message
+  
+  // Processing metadata
+  processingTime: integer("processing_time"), // Time taken in milliseconds
+  attemptedAt: timestamp("attempted_at").defaultNow(),
+  
+  // Tracking fields
+  ipAddress: varchar("ip_address", { length: 45 }), // For fraud prevention
+  userAgent: text("user_agent"), // Browser/device info
+});
+
 // Daily rewards comprehensive table (replacing dailyEntries/dailyWinners)
 export const dailyRewards = pgTable("daily_rewards", {
   id: serial("id").primaryKey(),
@@ -486,6 +512,11 @@ export const insertAffiliateApplicationSchema = createInsertSchema(affiliateAppl
   updatedAt: true 
 });
 
+export const insertPaymentAttemptSchema = createInsertSchema(paymentAttempts).omit({
+  id: true,
+  attemptedAt: true,
+});
+
 // Types
 export type Admin = typeof admins.$inferSelect;
 export type InsertAdmin = z.infer<typeof insertAdminSchema>;
@@ -521,3 +552,5 @@ export type DailyReward = typeof dailyRewards.$inferSelect;
 export type InsertDailyReward = z.infer<typeof insertDailyRewardSchema>;
 export type DailyParticipant = typeof dailyParticipants.$inferSelect;
 export type InsertDailyParticipant = z.infer<typeof insertDailyParticipantSchema>;
+export type PaymentAttempt = typeof paymentAttempts.$inferSelect;
+export type InsertPaymentAttempt = z.infer<typeof insertPaymentAttemptSchema>;

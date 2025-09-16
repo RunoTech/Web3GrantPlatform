@@ -227,13 +227,13 @@ export default function SimplePayButton({ onPaymentSuccess }: SimplePayButtonPro
                       {fee.amount} {fee.tokenSymbol}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Activation Fee
+                      Aktivasyon Ücreti
                     </div>
                   </div>
 
                   <div className="flex items-center justify-center gap-2 text-green-500">
                     <Zap className="w-4 h-4" />
-                    <span className="text-sm font-semibold">OTOMATIK ÖDEME</span>
+                    <span className="text-sm font-semibold">OTOMATİK ÖDEME</span>
                   </div>
                 </div>
               </button>

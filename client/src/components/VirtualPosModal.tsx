@@ -299,7 +299,7 @@ export function VirtualPosModal({ open, onOpenChange, campaignId, defaultAmount 
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="JOHN DOE"
+                      placeholder="MEHMET YILMAZ"
                       onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                       data-testid="input-card-holder"
                     />

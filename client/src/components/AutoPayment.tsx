@@ -85,7 +85,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
       if (typeof window.ethereum === 'undefined') {
         toast({
           title: t('error'),
-          description: "MetaMask not detected. Please install MetaMask.",
+          description: "MetaMask algılanamadı. Lütfen MetaMask yükleyin.",
           variant: "destructive",
         });
         return;
@@ -103,7 +103,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
       } catch (switchError: any) {
         toast({
           title: t('error'),
-          description: "Please switch to Ethereum Mainnet",
+          description: "Lütfen Ethereum Mainnet'e geçin",
           variant: "destructive",
         });
         return;
@@ -119,7 +119,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
       if (balance < requiredAmount) {
         toast({
           title: t('error'),
-          description: `Insufficient ${selectedFee.tokenSymbol} balance`,
+          description: `Yetersiz ${selectedFee.tokenSymbol} bakiyesi`,
           variant: "destructive",
         });
         return;
@@ -129,8 +129,8 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
       const tx = await tokenContract.transfer(platformWallet, requiredAmount);
       
       toast({
-        title: "Transaction Sent",
-        description: "Please wait for confirmation...",
+        title: "İşlem Gönderildi",
+        description: "Lütfen onay bekleyin...",
       });
 
       // Wait for transaction confirmation
@@ -153,36 +153,36 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
           
           if (activationResult.success) {
             toast({
-              title: "Account Activated!",
-              description: `${selectedFee.amount} ${selectedFee.tokenSymbol} payment successful`,
+              title: "Hesap Aktive Edildi!",
+              description: `${selectedFee.amount} ${selectedFee.tokenSymbol} ödeme başarılı`,
             });
             
             onPaymentSuccess?.(tx.hash, selectedNetwork);
           } else {
-            throw new Error(activationResult.error || "Activation failed");
+            throw new Error(activationResult.error || "Aktivasyon başarısız");
           }
         } catch (activationError) {
           console.error("Activation error:", activationError);
           // Still show success for payment
           toast({
-            title: "Payment Completed",
-            description: "Please refresh the page for account activation",
+            title: "Ödeme Tamamlandı",
+            description: "Hesap aktivasyonu için sayfayı yenileyin",
           });
           
           onPaymentSuccess?.(tx.hash, selectedNetwork);
         }
       } else {
-        throw new Error("Transaction failed");
+        throw new Error("İşlem başarısız");
       }
 
     } catch (error: any) {
       console.error("Auto payment error:", error);
-      let errorMessage = "Transaction failed";
+      let errorMessage = "İşlem başarısız";
       
       if (error.code === 'ACTION_REJECTED') {
-        errorMessage = "Transaction was rejected by user";
+        errorMessage = "İşlem kullanıcı tarafından reddedildi";
       } else if (error.message?.includes('insufficient funds')) {
-        errorMessage = "Insufficient funds for gas fees";
+        errorMessage = "Gas ücretleri için yetersiz bakiye";
       }
       
       toast({
@@ -247,7 +247,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
       {selectedFee && platformWallet && (
         <Card className="card-standard p-6">
           <h3 className="text-lg font-semibold text-foreground mb-6">
-            AUTOMATIC PAYMENT OPTIONS
+OTOMATİK ÖDEME SEÇENEKLERİ
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -258,8 +258,8 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
                   <Zap className="w-5 h-5 text-green-500" />
                 </div>
                 <div>
-                  <h4 className="font-semibold">INSTANT PAY</h4>
-                  <p className="text-sm text-muted-foreground">One-click payment</p>
+                  <h4 className="font-semibold">ANLIK ÖDEME</h4>
+                  <p className="text-sm text-muted-foreground">Tek tıkla ödeme</p>
                 </div>
               </div>
               
@@ -272,20 +272,20 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
                 {isProcessing ? (
                   <div className="flex items-center gap-2">
                     <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    PROCESSING...
+                    İŞLENİYOR...
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <CreditCard className="w-4 h-4" />
-                    PAY {selectedFee.amount} {selectedFee.tokenSymbol}
+                    ÖDE {selectedFee.amount} {selectedFee.tokenSymbol}
                   </div>
                 )}
               </Button>
               
               <div className="text-xs text-muted-foreground">
-                ✓ Automatic network switch<br/>
-                ✓ Balance check<br/>
-                ✓ Instant activation
+                ✓ Otomatik ağ değişimi<br/>
+                ✓ Bakiye kontrolü<br/>
+                ✓ Anlık aktivasyon
               </div>
             </div>
 
@@ -296,7 +296,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
                   <Smartphone className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h4 className="font-semibold">MOBILE PAY</h4>
+                  <h4 className="font-semibold">MOBİL ÖDEME</h4>
                   <p className="text-sm text-muted-foreground">Trust Wallet, Rainbow</p>
                 </div>
               </div>
@@ -309,7 +309,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
                   data-testid="button-mobile-payment"
                 >
                   <Wallet className="w-4 h-4 mr-2" />
-                  OPEN IN WALLET
+                  CÜZDANDA AÇ
                 </Button>
                 
                 <Button
@@ -319,7 +319,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
                   data-testid="button-show-qr"
                 >
                   <QrCode className="w-4 h-4 mr-2" />
-                  {showQR ? 'HIDE QR CODE' : 'SHOW QR CODE'}
+                  {showQR ? 'QR KODU GİZLE' : 'QR KODU GÖSTER'}
                 </Button>
               </div>
               
@@ -328,7 +328,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
                   <div className="w-full h-32 bg-gray-100 rounded-lg flex items-center justify-center">
                     <div className="text-center text-gray-600">
                       <QrCode className="w-8 h-8 mx-auto mb-2" />
-                      <div className="text-xs">QR Code for<br/>{selectedFee.tokenSymbol} payment</div>
+                      <div className="text-xs">{selectedFee.tokenSymbol} ödemesi<br/>için QR Kod</div>
                     </div>
                   </div>
                 </div>
@@ -339,9 +339,9 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
           <Alert className="mt-6 border-blue-500">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Desktop:</strong> Use "Instant Pay" for automatic MetaMask payment.
+              <strong>Masaüstü:</strong> Otomatik MetaMask ödemesi için "Anlık Ödeme" kullanın.
               <br />
-              <strong>Mobile:</strong> Use "Mobile Pay" to open payment in your wallet app.
+              <strong>Mobil:</strong> Cüzdan uygulamanızda ödeme açmak için "Mobil Ödeme" kullanın.
             </AlertDescription>
           </Alert>
         </Card>
@@ -350,7 +350,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
       {/* Manual Payment Info (Fallback) */}
       <Card className="card-standard p-6">
         <h3 className="text-lg font-semibold text-foreground mb-4">
-          MANUAL PAYMENT (FALLBACK)
+          MANUEL ÖDEME (YEDEK)
         </h3>
         
         {selectedFee && platformWallet && (
@@ -360,7 +360,7 @@ export default function AutoPayment({ onPaymentSuccess }: AutoPaymentProps) {
                 ETHEREUM MAINNET
               </Badge>
               <div className="text-sm text-muted-foreground">
-                Send exactly <span className="text-green-500 font-mono">{selectedFee.amount} {selectedFee.tokenSymbol}</span> to:
+                Tam olarak <span className="text-green-500 font-mono">{selectedFee.amount} {selectedFee.tokenSymbol}</span> gönderin:
               </div>
             </div>
             

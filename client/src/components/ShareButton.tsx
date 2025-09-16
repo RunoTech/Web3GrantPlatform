@@ -50,14 +50,14 @@ export default function ShareButton({
     const success = await copyLinkToClipboard(shareData.url);
     if (success) {
       toast({
-        title: "Link Copied!",
-        description: "The link has been copied to your clipboard.",
+        title: "Link Kopyalandı!",
+        description: "Link panonuza kopyalandı.",
         variant: "default"
       });
     } else {
       toast({
-        title: "Copy Failed",
-        description: "Failed to copy link. Please try again.",
+        title: "Kopyalama Başarısız",
+        description: "Link kopyalanamadı. Lütfen tekrar deneyin.",
         variant: "destructive"
       });
     }
@@ -79,7 +79,7 @@ export default function ShareButton({
           data-testid="button-share"
         >
           <Share2 className="w-4 h-4" />
-          {showText && <span className="ml-1 hidden sm:inline">Share</span>}
+          {showText && <span className="ml-1 hidden sm:inline">Paylaş</span>}
         </Button>
       </DropdownMenuTrigger>
       
@@ -95,7 +95,7 @@ export default function ShareButton({
           data-testid="share-copy-link"
         >
           <Copy className="w-4 h-4 text-muted-foreground" />
-          <span>Copy Link</span>
+          <span>Linki Kopyala</span>
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />

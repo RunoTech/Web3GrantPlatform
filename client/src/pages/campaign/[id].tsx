@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import Header from "@/components/Header";
 import ShareButton from "@/components/ShareButton";
-import { Heart, ArrowLeft, ExternalLink, Users, Target, Activity, CheckCircle, Clock, Building, TrendingUp, Shield, Zap } from "lucide-react";
+import { Heart, ArrowLeft, ExternalLink, Users, Target, Activity, CheckCircle, Clock, Building, TrendingUp, Shield, Zap, CreditCard, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DonationForm from "@/components/DonationForm";
 import { generateCampaignShareLink } from "@/utils/share";
@@ -231,6 +231,43 @@ export default function CampaignDetailPage() {
                     queryClient.invalidateQueries({ queryKey: ["/api/campaign", id] });
                   }}
                 />
+                
+                {/* Virtual POS Credit Card Payment Option */}
+                {campaign.creditCardEnabled && (
+                  <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-700">
+                    <div className="text-center">
+                      <div className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-100 dark:bg-blue-800 rounded-full border border-blue-300 dark:border-blue-600 mb-4">
+                        <CreditCard className="w-4 h-4 text-blue-600 dark:text-blue-300" />
+                        <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                          Virtual POS
+                        </span>
+                      </div>
+                      <h4 className="text-xl font-bold text-blue-900 dark:text-blue-100 mb-2">
+                        Kredi Kartıyla Öde
+                      </h4>
+                      <p className="text-blue-700 dark:text-blue-300 text-sm mb-4">
+                        Visa, Mastercard, American Express ve diğer kredi kartlarını kabul ediyoruz
+                      </p>
+                      <Button 
+                        asChild
+                        className="btn-primary w-full font-semibold"
+                        data-testid="button-virtual-pos"
+                      >
+                        <Link href={`/virtual-pos?campaignId=${campaign.id}`}>
+                          <CreditCard className="w-4 h-4 mr-2" />
+                          Kredi Kartıyla Öde
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Link>
+                      </Button>
+                      <div className="mt-3 flex items-center justify-center space-x-2">
+                        <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        <span className="text-xs text-blue-600 dark:text-blue-400">
+                          3D Secure doğrulama ile güvenli ödeme
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
                 {/* Professional Process Steps */}
                 <div className="mt-8 p-6 surface-secondary rounded-xl border border-border" data-testid="process-steps">

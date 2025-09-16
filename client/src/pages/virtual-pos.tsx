@@ -485,21 +485,6 @@ export default function VirtualPosPage() {
             </CardContent>
           </Card>
 
-          {/* Test Information */}
-          <Card className="card-standard mt-6 bg-muted/30">
-            <CardHeader>
-              <CardTitle className="text-lg">Test Bilgileri</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              <p className="mb-2">
-                <strong>Bu bir test sistemidir.</strong> Herhangi bir geçerli kart numarası girebilirsiniz.
-              </p>
-              <p>
-                Sistem BIN kontrolü, CVV doğrulaması ve Luhn algoritması ile kart doğrulaması yapar, 
-                ancak 5 saniye sonra her zaman "Bakiye Yetersiz" hatası döndürür.
-              </p>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>

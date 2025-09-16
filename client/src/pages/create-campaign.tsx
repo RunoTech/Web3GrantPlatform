@@ -894,28 +894,17 @@ export default function CreateCampaignPage() {
                       <FormField
                         control={form.control}
                         name="collateralAmount"
-                        rules={{
-                          required: "Collateral amount is required",
-                          validate: (value) => {
-                            const numValue = parseFloat(value);
-                            if (isNaN(numValue) || numValue < collateralInfo.collateralAmount) {
-                              return `Minimum amount is ${collateralInfo.collateralAmount} ${collateralInfo.collateralToken}`;
-                            }
-                            return true;
-                          }
-                        }}
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-black dark:text-white">Collateral Amount (USDT)</FormLabel>
                             <FormControl>
                               <Input 
                                 type="number"
-                                min={creditCardInfoLoading ? 0 : collateralInfo.collateralAmount}
+                                min="2"
                                 step="1"
-                                placeholder={String(collateralInfo.collateralAmount)} 
+                                placeholder="2" 
                                 {...field} 
                                 className="border-gray-300 dark:border-gray-600"
-                                disabled={creditCardInfoLoading}
                                 data-testid="input-collateral-amount"
                               />
                             </FormControl>

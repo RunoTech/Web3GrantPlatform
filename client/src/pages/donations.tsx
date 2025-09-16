@@ -14,7 +14,8 @@ import {
   Filter,
   SortDesc,
   Gift,
-  Heart
+  Heart,
+  Trophy
 } from "lucide-react";
 import type { Campaign } from "@shared/schema";
 
@@ -57,60 +58,39 @@ export default function DonationsPage() {
     <div className="min-h-screen bg-background text-foreground">
       <Header currentPage="donations" />
 
-      {/* Hero Section */}
-      <section className="section-spacing-lg bg-surface-primary">
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-8">
-            <div className="w-24 h-24 bg-primary rounded-lg flex items-center justify-center mx-auto shadow-binance">
-              <Gift className="w-12 h-12 icon-on-primary" />
-            </div>
-            
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+      {/* Simple Header */}
+      <section className="py-8 bg-surface-primary">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-6">
+            <div className="flex items-center justify-center space-x-2">
+              <Gift className="w-8 h-8 icon-accent" />
+              <h1 className="text-3xl font-bold text-foreground">
                 {t('donations.title')}
               </h1>
-              <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8">
-                {t('donations.subtitle')}
-              </p>
-              
-              {/* Create Campaign Button */}
-              <div className="flex justify-center">
-                <Button 
-                  asChild 
-                  size="lg"
-                  className="btn-binance px-8 py-4 shadow-binance hover:shadow-lg transition-all duration-200"
-                >
-                  <Link href="/create-campaign?type=donate">
-                    <Target className="w-6 h-6 mr-2 icon-on-yellow" />
-                    {t('donations.create_campaign')}
-                  </Link>
-                </Button>
-              </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <div className="card-standard text-center">
-                <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Target className="w-8 h-8 icon-on-yellow" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{t('donations.features.reach_goal')}</h3>
-                <p className="text-sm text-muted-foreground">{t('donations.features.reach_desc')}</p>
-              </div>
-              <div className="card-standard text-center">
-                <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 icon-on-yellow" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{t('donations.features.support_community')}</h3>
-                <p className="text-sm text-muted-foreground">{t('donations.features.support_desc')}</p>
-              </div>
-              <div className="card-standard text-center">
-                <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Heart className="w-8 h-8 icon-on-yellow" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{t('donations.features.secure_donation')}</h3>
-                <p className="text-sm text-muted-foreground">{t('donations.features.secure_desc')}</p>
-              </div>
+            
+            {/* Essential Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button 
+                asChild 
+                className="btn-binance font-semibold px-6 py-3 w-full sm:w-auto"
+              >
+                <Link href="/create-campaign?type=donate">
+                  <Target className="w-4 h-4 mr-2 icon-on-primary" />
+                  {t('donations.create_campaign')}
+                </Link>
+              </Button>
+              
+              <Button 
+                asChild
+                variant="outline"
+                className="btn-secondary font-semibold px-6 py-3 w-full sm:w-auto"
+              >
+                <Link href="/campaigns">
+                  <Trophy className="w-4 h-4 mr-2 icon-primary" />
+                  View All Campaigns
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -247,31 +227,6 @@ export default function DonationsPage() {
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="section-spacing-lg bg-surface-secondary">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="card-standard p-12 bg-primary relative overflow-hidden">
-            <div className="space-y-6">
-              <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground">
-                {t('donations.make_difference')}
-              </h2>
-              <p className="text-xl text-primary-foreground/90">
-                {t('donations.create_own')}
-              </p>
-              <Button 
-                asChild 
-                size="lg"
-                className="bg-background text-primary hover:bg-background/90 text-lg px-8 py-4 font-semibold"
-              >
-                <Link href="/create-campaign?type=donate">
-                  <Target className="w-5 h-5 mr-2" />
-                  {t('donations.create_campaign')}
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

@@ -45,25 +45,18 @@ export default function FundsPage() {
           </Link>
         </Button>
 
-        {/* Funds Header Section */}
-        <div className="card-standard section-spacing-lg mb-6 sm:mb-8">
-          <div className="text-center mb-4 sm:mb-6">
-            <div className="flex items-center justify-center space-x-2 mb-2 sm:mb-3">
-              <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 icon-accent" />
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-                FUNDS
-              </h1>
-            </div>
-            <p className="text-base sm:text-lg text-muted-foreground mb-3 sm:mb-4 max-w-2xl mx-auto px-4">
-              Corporate Fundraising Platform - Unlimited funding campaigns for companies
-            </p>
+        {/* Simple Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center space-x-2 mb-6">
+            <DollarSign className="w-8 h-8 icon-accent" />
+            <h1 className="text-3xl font-bold text-foreground">FUNDS</h1>
           </div>
-
-          {/* Quick Actions */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4">
+          
+          {/* Essential Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button 
               asChild
-              className="btn-binance hover:transform hover:-translate-y-0.5 font-semibold px-4 sm:px-6 py-2 sm:py-3 w-full sm:w-auto text-sm sm:text-base"
+              className="btn-binance font-semibold px-6 py-3 w-full sm:w-auto"
             >
               <Link href="/create-campaign?type=fund">
                 <Building className="w-4 h-4 mr-2 icon-on-primary" />
@@ -74,7 +67,7 @@ export default function FundsPage() {
             <Button 
               asChild
               variant="outline"
-              className="btn-secondary hover:transform hover:-translate-y-0.5 font-semibold px-4 sm:px-6 py-2 sm:py-3 w-full sm:w-auto text-sm sm:text-base"
+              className="btn-secondary font-semibold px-6 py-3 w-full sm:w-auto"
             >
               <Link href="/campaigns">
                 <Trophy className="w-4 h-4 mr-2 icon-primary" />
@@ -82,59 +75,14 @@ export default function FundsPage() {
               </Link>
             </Button>
           </div>
-
-          {/* Info Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-4 sm:mt-6">
-            <div className="card-standard p-3 sm:p-4 text-center">
-              <Building className="w-6 h-6 sm:w-8 sm:h-8 icon-accent mx-auto mb-1 sm:mb-2" />
-              <h3 className="text-xs sm:text-sm font-bold text-foreground mb-1">Companies Only</h3>
-              <p className="text-xs text-muted-foreground">Only registered companies</p>
-            </div>
-            
-            <div className="card-standard p-4 text-center">
-              <Clock className="w-8 h-8 text-success mx-auto mb-2" />
-              <h3 className="text-sm font-bold text-foreground mb-1">Unlimited</h3>
-              <p className="text-xs text-muted-foreground">No end date</p>
-            </div>
-            
-            <div className="card-standard p-4 text-center">
-              <Heart className="w-8 h-8 icon-accent mx-auto mb-2" />
-              <h3 className="text-sm font-bold text-foreground mb-1">Zero Commission</h3>
-              <p className="text-xs text-muted-foreground">Direct to wallet</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <Card className="card-standard p-3 text-center">
-            <DollarSign className="w-6 h-6 text-success mx-auto mb-1" />
-            <h3 className="text-lg font-bold text-foreground">50 USDT</h3>
-            <p className="text-xs text-muted-foreground">Activation Fee</p>
-          </Card>
-          
-          <Card className="card-standard p-3 text-center">
-            <Clock className="w-6 h-6 icon-accent mx-auto mb-1" />
-            <h3 className="text-lg font-bold text-foreground">∞</h3>
-            <p className="text-xs text-muted-foreground">Duration</p>
-          </Card>
-          
-          <Card className="card-standard p-3 text-center">
-            <Building className="w-6 h-6 text-success mx-auto mb-1" />
-            <h3 className="text-lg font-bold text-foreground">Companies</h3>
-            <p className="text-xs text-muted-foreground">Corporate Only</p>
-          </Card>
         </div>
 
         {/* Recent Winners Section */}
         <div className="space-y-8">
-          <div className="text-center space-y-4">
-            <h2 className="text-3xl font-bold text-foreground uppercase tracking-wide">
-              Active Corporate FUND Campaigns
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-foreground">
+              Active FUND Campaigns
             </h2>
-            <p className="text-muted-foreground">
-              Unlimited duration corporate fundraising campaigns
-            </p>
           </div>
 
           {fundsLoading ? (
@@ -174,9 +122,9 @@ export default function FundsPage() {
           ) : (
             <Card className="card-standard p-12 text-center">
               <Building className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-foreground mb-2">No Corporate FUND Campaigns Yet</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-2">No FUND Campaigns Yet</h3>
               <p className="text-muted-foreground mb-6">
-                Be the first company to create a FUND campaign on our platform!
+                Be the first to create a FUND campaign!
               </p>
               <Button asChild className="btn-binance">
                 <Link href="/create-campaign?type=fund">
@@ -188,46 +136,6 @@ export default function FundsPage() {
           )}
         </div>
 
-        {/* How It Works Section */}
-        <div className="space-y-6 mt-8">
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-foreground uppercase tracking-wide">
-              How It Works
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="card-standard p-4 text-center">
-              <div className="w-10 h-10 btn-binance rounded-full flex items-center justify-center mx-auto mb-2">
-                <Building className="w-5 h-5 icon-on-primary" />
-              </div>
-              <h3 className="text-sm font-bold text-foreground mb-1">1. Register</h3>
-              <p className="text-xs text-muted-foreground">
-                Provide company details and pay 50 USDT activation fee
-              </p>
-            </Card>
-
-            <Card className="card-standard p-4 text-center">
-              <div className="w-10 h-10 btn-binance rounded-full flex items-center justify-center mx-auto mb-2">
-                <DollarSign className="w-5 h-5 icon-on-primary" />
-              </div>
-              <h3 className="text-sm font-bold text-foreground mb-1">2. Create FUND</h3>
-              <p className="text-xs text-muted-foreground">
-                Launch unlimited duration fundraising campaign
-              </p>
-            </Card>
-
-            <Card className="card-standard p-4 text-center">
-              <div className="w-10 h-10 btn-binance rounded-full flex items-center justify-center mx-auto mb-2">
-                <Trophy className="w-5 h-5 icon-on-primary" />
-              </div>
-              <h3 className="text-sm font-bold text-foreground mb-1">3. Receive Funds</h3>
-              <p className="text-xs text-muted-foreground">
-                All investments go directly to your wallet
-              </p>
-            </Card>
-          </div>
-        </div>
       </div>
     </div>
   );

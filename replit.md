@@ -8,6 +8,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### SEO and Social Sharing Improvements (September 16, 2025)
+- **CRITICAL FIX**: Resolved link sharing display issues when opened from external sources
+- Added comprehensive meta tags to index.html including SEO, Open Graph, and Twitter Card tags
+- Updated page title to "DUXXAN - Next-Generation Blockchain Donation Platform" for better SEO
+- Added proper meta description, keywords, and social media preview support
+- Implemented theme color (#F0B90B) and canonical URL for better mobile and SEO experience
+- Fixed "Sanal POS Sistemi" wording in credit card payment popup to "Kredi Kartı ile Ödeme"
+- Enhanced payment modal and page descriptions to "Güvenli SSL şifreleme ile korunmaktadır"
+
 ### Credit Card Badge System for Campaign Cards (September 16, 2025)
 - **FEATURE**: Added visual indicator for credit card payment support on campaign cards
 - Implemented "Pay with Credit Card" badge with CreditCard icon for campaigns with `creditCardEnabled=true`

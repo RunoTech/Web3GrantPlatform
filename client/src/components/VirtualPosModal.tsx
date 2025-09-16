@@ -275,10 +275,10 @@ export function VirtualPosModal({ open, onOpenChange, campaignId, defaultAmount 
             <span className="font-semibold text-primary">DUXXAN Platform</span>
           </div>
           <DialogTitle className="text-2xl font-bold">
-            Sanal POS Sistemi
+            Kredi Kartı ile Ödeme
           </DialogTitle>
           <DialogDescription>
-            Güvenli kredi kartı ödeme sistemi
+            Güvenli SSL şifreleme ile korunmaktadır
           </DialogDescription>
         </DialogHeader>
 

@@ -261,10 +261,10 @@ export default function VirtualPosPage() {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Sanal POS Sistemi
+            Kredi Kartı ile Ödeme
           </h1>
           <p className="text-muted-foreground">
-            Güvenli kredi kartı ödeme sistemi
+            Güvenli SSL şifreleme ile korunmaktadır
           </p>
         </div>
 

@@ -262,7 +262,7 @@ export default function CampaignDetailPage() {
                       <div className="mt-3 flex items-center justify-center space-x-2">
                         <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         <span className="text-xs text-blue-600 dark:text-blue-400">
-                          3D Secure doğrulama ile güvenli ödeme
+                          Secure doğrulama ile güvenli ödeme
                         </span>
                       </div>
                     </div>

@@ -56,7 +56,7 @@ export default function WalletSelectionModal({
       id: 'trust',
       name: 'Trust Wallet',
       icon: '🛡️',
-      description: 'Mobil için en popüler cüzdan',
+      description: 'Most popular mobile wallet',
       downloadUrl: 'https://trustwallet.com/',
       detected: detectWallet('trust'),
       priority: 1
@@ -65,7 +65,7 @@ export default function WalletSelectionModal({
       id: 'metamask',
       name: 'MetaMask',
       icon: '🦊',
-      description: 'En yaygın kullanılan browser cüzdanı',
+      description: 'Most popular browser wallet',
       downloadUrl: 'https://metamask.io/',
       detected: detectWallet('metamask'),
       priority: 2
@@ -74,7 +74,7 @@ export default function WalletSelectionModal({
       id: 'coinbase',
       name: 'Coinbase Wallet',
       icon: '🟦',
-      description: 'Coinbase tarafından desteklenir',
+      description: 'Official Coinbase wallet',
       downloadUrl: 'https://www.coinbase.com/wallet',
       detected: detectWallet('coinbase'),
       priority: 3
@@ -83,7 +83,7 @@ export default function WalletSelectionModal({
       id: 'okx',
       name: 'OKX Wallet',
       icon: '⚫',
-      description: 'Çok özellikli Web3 cüzdanı',
+      description: 'Multi-featured Web3 wallet',
       downloadUrl: 'https://www.okx.com/web3',
       detected: detectWallet('okx'),
       priority: 4
@@ -92,7 +92,7 @@ export default function WalletSelectionModal({
       id: 'binance',
       name: 'Binance Wallet',
       icon: '🟡',
-      description: 'Binance ekosistemi için optimize',
+      description: 'Optimized for Binance ecosystem',
       downloadUrl: 'https://www.binance.org/',
       detected: detectWallet('binance'),
       priority: 5
@@ -101,7 +101,7 @@ export default function WalletSelectionModal({
       id: 'brave',
       name: 'Brave Wallet',
       icon: '🦁',
-      description: 'Brave browser yerleşik cüzdanı',
+      description: 'Built into Brave browser',
       downloadUrl: 'https://brave.com/wallet/',
       detected: detectWallet('brave'),
       priority: 6
@@ -125,7 +125,7 @@ export default function WalletSelectionModal({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-bold">Cüzdan Seç</DialogTitle>
+            <DialogTitle className="text-xl font-bold">Select Wallet</DialogTitle>
             <Button
               variant="ghost"
               size="icon"
@@ -162,11 +162,11 @@ export default function WalletSelectionModal({
                       <h3 className="font-semibold text-foreground">{wallet.name}</h3>
                       {wallet.detected ? (
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
-                          Algılandı
+                          Detected
                         </Badge>
                       ) : (
                         <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 text-xs">
-                          Yükle
+                          Install
                         </Badge>
                       )}
                     </div>
@@ -192,8 +192,8 @@ export default function WalletSelectionModal({
             <div className="text-lg">💡</div>
             <div>
               <p className="text-sm text-muted-foreground">
-                <strong>Mobil için:</strong> Trust Wallet uygulamasını indirin<br />
-                <strong>Masaüstü için:</strong> Browser eklentilerini kurun
+                <strong>Mobile:</strong> Download Trust Wallet app<br />
+                <strong>Desktop:</strong> Install browser extensions
               </p>
             </div>
           </div>

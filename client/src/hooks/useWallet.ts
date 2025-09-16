@@ -17,12 +17,13 @@ export function useWallet() {
       if (accounts.length > 0) {
         setAddress(accounts[0]);
         setIsConnected(true);
-        // If we're reconnecting, assume MetaMask (most common)
-        setSelectedWalletId('metamask');
+        // Only auto-set wallet ID if not already set (on initial load)
+        if (!selectedWalletId) {
+          setSelectedWalletId('metamask');
+        }
       } else {
         setAddress(null);
         setIsConnected(false);
-        setSelectedWalletId(null);
       }
     } catch (error) {
       console.error('Error checking wallet connection:', error);
@@ -125,23 +126,8 @@ export function useWallet() {
       setIsConnected(false);
       setSelectedWalletId(null);
       
-      // Try to disconnect from MetaMask if available
-      if (window.ethereum?.disconnect) {
-        await window.ethereum.disconnect();
-      }
-      
-      // Clear any stored connection data
-      if (window.ethereum?.selectedAddress) {
-        // Some wallets support this method
-        try {
-          await window.ethereum.request({
-            method: 'wallet_requestPermissions',
-            params: [{ eth_accounts: {} }]
-          });
-        } catch (error) {
-          // Ignore permission errors, they're expected
-        }
-      }
+      // For most wallets, there's no programmatic disconnect
+      // Just clear local state - user can disconnect from wallet itself if needed
       
       toast({
         title: "Disconnected",
@@ -161,8 +147,14 @@ export function useWallet() {
     }
   }, [selectedWalletId, toast]);
 
+  // Initial connection check - only on mount
   useEffect(() => {
     checkConnection();
+  }, []);
+
+  // Wallet event listeners - separate from connection check  
+  useEffect(() => {
+    if (!selectedWalletId) return;
 
     const handleAccountsChanged = (accounts: string[]) => {
       if (accounts.length === 0) {
@@ -183,7 +175,7 @@ export function useWallet() {
     return () => {
       removeWalletListeners(selectedWalletId || undefined);
     };
-  }, [address, checkConnection, selectedWalletId]);
+  }, [selectedWalletId, address, disconnect]);
 
   // Get provider - supports both MetaMask and WalletConnect
   const getProvider = useCallback(() => {

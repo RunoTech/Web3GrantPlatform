@@ -49,7 +49,7 @@ export default function Header({ currentPage }: HeaderProps) {
           <nav className="hidden md:flex items-center gap-8 flex-1 justify-center max-w-3xl">
             <Link 
               href="/donations" 
-              className={`nav-item font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
+              className={`nav-item text-sm font-medium transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
                 currentPage === 'donations' 
                   ? 'text-primary border-b-2 border-primary' 
                   : 'text-muted-foreground hover:text-primary'
@@ -59,7 +59,7 @@ export default function Header({ currentPage }: HeaderProps) {
             </Link>
             <Link 
               href="/funds" 
-              className={`nav-item font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
+              className={`nav-item text-sm font-medium transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
                 currentPage === 'funds' 
                   ? 'text-primary border-b-2 border-primary' 
                   : 'text-muted-foreground hover:text-primary'
@@ -69,7 +69,7 @@ export default function Header({ currentPage }: HeaderProps) {
             </Link>
             <Link 
               href="/daily-rewards" 
-              className={`nav-item font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
+              className={`nav-item text-sm font-medium transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
                 currentPage === 'daily-rewards' 
                   ? 'text-primary border-b-2 border-primary' 
                   : 'text-muted-foreground hover:text-primary'
@@ -79,7 +79,7 @@ export default function Header({ currentPage }: HeaderProps) {
             </Link>
             <Link 
               href="/affiliate" 
-              className={`nav-item font-semibold transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
+              className={`nav-item text-sm font-medium transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
                 currentPage === 'affiliate' 
                   ? 'text-primary border-b-2 border-primary' 
                   : 'text-muted-foreground hover:text-primary'

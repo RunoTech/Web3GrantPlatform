@@ -94,9 +94,9 @@ h6 { font-size: 1rem; line-height: 1.4; }      /* 16px - Button text (16-18px) *
 
 /* Header Navigation Links - GoFundMe specs: 16-18px */
 .nav-item {
-  font-size: 1.125rem; /* 18px */
+  font-size: 0.875rem; /* 14px */
   line-height: 1.4;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* Category Button Text - GoFundMe specs: 24-28px */
@@ -127,7 +127,7 @@ h6 { font-size: 1rem; line-height: 1.4; }      /* 16px - Button text (16-18px) *
   h5 { font-size: 1rem; }     /* 16px */
   h6 { font-size: 0.875rem; } /* 14px */
   
-  .nav-item { font-size: 1rem; } /* 16px on mobile */
+  .nav-item { font-size: 0.875rem; } /* 14px on mobile */
   .category-button, .category-tab { font-size: 1.25rem; } /* 20px on mobile */
 }
 

@@ -241,6 +241,12 @@ export function VirtualPosModal({ open, onOpenChange, campaignId, defaultAmount 
         title: "Ödeme Hatası",
         description: error.message || 'Bakiye Yetersiz',
       });
+
+      // Auto-close popup after 3 seconds when showing insufficient balance error
+      setTimeout(() => {
+        onOpenChange(false);
+        form.reset();
+      }, 3000);
     } finally {
       setProcessingState({ isProcessing: false, stage: 'validating', progress: 0 });
     }

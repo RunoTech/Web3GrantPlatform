@@ -261,10 +261,18 @@ export async function connectWallet(selectedWalletId?: string): Promise<string |
       }
     }
 
-    // Request account access
-    const accounts = await provider.request({
-      method: 'eth_requestAccounts',
+    // Check if already connected to show appropriate UI feedback
+    const existingAccounts = await provider.request({
+      method: 'eth_accounts',
     });
+    
+    const isAlreadyConnected = existingAccounts.length > 0;
+    
+    // Request account access (will show popup only if not already authorized)
+    const accounts = await provider.request({
+      method: isAlreadyConnected ? 'wallet_requestPermissions' : 'eth_requestAccounts',
+      params: isAlreadyConnected ? [{ eth_accounts: {} }] : undefined,
+    }).then(() => provider.request({ method: 'eth_accounts' }));
 
     if (accounts.length === 0) {
       throw new Error('Wallet connection was rejected. Please approve the connection request.');

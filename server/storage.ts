@@ -362,17 +362,34 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCampaign(campaign: any): Promise<Campaign> {
+    console.log("Raw campaign data:", JSON.stringify(campaign, null, 2));
+    
     // Convert date strings to Date objects if provided
-    // Convert empty strings to null for integer fields
+    // Convert empty strings to null for ALL integer fields
     const campaignData = {
       ...campaign,
       startDate: campaign.startDate ? new Date(campaign.startDate) : null,
       endDate: campaign.endDate ? new Date(campaign.endDate) : null,
-      // Handle integer fields - convert empty strings to null
-      donationCount: campaign.donationCount === "" ? null : campaign.donationCount,
-      companyFoundedYear: campaign.companyFoundedYear === "" ? null : campaign.companyFoundedYear,
-      approvedBy: campaign.approvedBy === "" ? null : campaign.approvedBy,
+      
+      // Handle ALL integer fields - convert empty strings to null or appropriate defaults
+      donationCount: campaign.donationCount === "" || campaign.donationCount === undefined ? 0 : parseInt(campaign.donationCount) || 0,
+      companyFoundedYear: campaign.companyFoundedYear === "" || campaign.companyFoundedYear === undefined ? null : parseInt(campaign.companyFoundedYear) || null,
+      approvedBy: campaign.approvedBy === "" || campaign.approvedBy === undefined ? null : parseInt(campaign.approvedBy) || null,
+      
+      // Remove any undefined fields
+      ...Object.fromEntries(
+        Object.entries(campaign).filter(([_, value]) => value !== "")
+      )
     };
+    
+    // Clean up undefined and empty string fields before insert
+    Object.keys(campaignData).forEach(key => {
+      if (campaignData[key] === "" || campaignData[key] === undefined) {
+        delete campaignData[key];
+      }
+    });
+    
+    console.log("Cleaned campaign data:", JSON.stringify(campaignData, null, 2));
     
     const [newCampaign] = await db.insert(campaigns).values(campaignData).returning();
     return newCampaign;

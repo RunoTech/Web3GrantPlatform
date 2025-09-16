@@ -21,7 +21,7 @@ const virtualPosSchema = z.object({
   cardHolder: z.string().min(2, 'Kart sahibi adı gereklidir'),
   expiryDate: z.string().regex(/^(0[1-9]|1[0-2])\/[0-9]{2}$/, 'MM/YY formatında giriniz'),
   cvv: z.string().min(3, 'CVV en az 3 haneli olmalıdır'),
-  amount: z.number().min(1, 'Tutar 1$ den fazla olmalıdır'),
+  amount: z.number().min(5000, 'Minimum tutar $5,000 olmalıdır').max(999999999, 'Maksimum tutar $999,999,999 olmalıdır'),
 });
 
 type VirtualPosForm = z.infer<typeof virtualPosSchema>;
@@ -56,7 +56,7 @@ export default function VirtualPosPage() {
       cardHolder: '',
       expiryDate: '',
       cvv: '',
-      amount: 500, // Fixed amount as requested
+      amount: 5000, // Minimum $5,000 as requested
     },
   });
 
@@ -277,10 +277,10 @@ export default function VirtualPosPage() {
                 <span className="font-semibold">DUXXAN Platform</span>
               </div>
               <CardTitle className="text-2xl font-bold text-primary">
-                $500.00 USD
+                $5,000.00 USD
               </CardTitle>
               <CardDescription>
-                Hesap Aktivasyon Ücreti
+                Minimum Ödeme Tutarı
               </CardDescription>
             </CardHeader>
           </Card>
@@ -453,7 +453,7 @@ export default function VirtualPosPage() {
                     ) : (
                       <>
                         <CreditCard className="w-4 h-4 mr-2" />
-                        $500.00 Öde
+$5,000.00 Öde
                       </>
                     )}
                   </Button>

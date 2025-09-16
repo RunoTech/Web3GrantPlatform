@@ -264,7 +264,7 @@ export default function VirtualPosPage() {
             Sanal POS Sistemi
           </h1>
           <p className="text-muted-foreground">
-            Güvenli kredi kartı ödeme sistemi - Test Ortamı
+            Güvenli kredi kartı ödeme sistemi
           </p>
         </div>
 
@@ -478,7 +478,7 @@ export default function VirtualPosPage() {
                   {/* Security Notice */}
                   <div className="text-center text-xs text-muted-foreground">
                     <Lock className="w-3 h-3 inline mr-1" />
-                    Bu test ortamıdır. Gerçek ödeme işlemi yapılmaz.
+                    SSL şifreleme ile korunmaktadır. Güvenli ödeme işlemi.
                   </div>
                 </form>
               </Form>

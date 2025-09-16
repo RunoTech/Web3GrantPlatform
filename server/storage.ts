@@ -368,8 +368,8 @@ export class DatabaseStorage implements IStorage {
     // Convert empty strings to null for ALL integer fields
     const campaignData = {
       ...campaign,
-      startDate: campaign.startDate ? new Date(campaign.startDate) : null,
-      endDate: campaign.endDate ? new Date(campaign.endDate) : null,
+      startDate: campaign.startDate && campaign.startDate !== "" ? new Date(campaign.startDate + "T00:00:00.000Z") : null,
+      endDate: campaign.endDate && campaign.endDate !== "" ? new Date(campaign.endDate + "T23:59:59.999Z") : null,
       
       // Handle ALL integer fields - convert empty strings to null or appropriate defaults
       donationCount: campaign.donationCount === "" || campaign.donationCount === undefined ? 0 : parseInt(campaign.donationCount) || 0,

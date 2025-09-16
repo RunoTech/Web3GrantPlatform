@@ -114,11 +114,13 @@ export function useWallet() {
 
   const disconnect = useCallback(async () => {
     try {
+      // Remove listeners BEFORE clearing the selectedWalletId
+      removeWalletListeners(selectedWalletId || undefined);
+      
       // Clear local state
       setAddress(null);
       setIsConnected(false);
       setSelectedWalletId(null);
-      removeWalletListeners(selectedWalletId || undefined);
       
       // Try to disconnect from MetaMask if available
       if (window.ethereum?.disconnect) {
@@ -144,10 +146,10 @@ export function useWallet() {
       });
     } catch (error) {
       // Even if disconnect fails, clear local state
+      removeWalletListeners(selectedWalletId || undefined);
       setAddress(null);
       setIsConnected(false);
       setSelectedWalletId(null);
-      removeWalletListeners(selectedWalletId || undefined);
       
       toast({
         title: "Disconnected",
@@ -172,13 +174,13 @@ export function useWallet() {
       window.location.reload();
     };
 
-    onAccountsChanged(handleAccountsChanged);
-    onChainChanged(handleChainChanged);
+    onAccountsChanged(handleAccountsChanged, selectedWalletId || undefined);
+    onChainChanged(handleChainChanged, selectedWalletId || undefined);
 
     return () => {
-      removeWalletListeners();
+      removeWalletListeners(selectedWalletId || undefined);
     };
-  }, [address, disconnect, checkConnection]);
+  }, [address, disconnect, checkConnection, selectedWalletId]);
 
   // Get provider - supports both MetaMask and WalletConnect
   const getProvider = useCallback(() => {
@@ -216,7 +218,7 @@ export function useWallet() {
       });
       return false;
     }
-  }, [toast]);
+  }, [selectedWalletId, toast]);
 
   return {
     isConnected,

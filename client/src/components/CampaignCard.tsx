@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Users, Target } from "lucide-react";
+import { Heart, Users, Target, CreditCard } from "lucide-react";
 import ShareButton from "@/components/ShareButton";
 import { generateCampaignShareLink } from "@/utils/share";
 import type { Campaign } from "@shared/schema";
@@ -41,15 +41,23 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
               <Heart className="w-12 h-12" />
             </div>
           )}
-          <div className="absolute top-3 right-3">
-            {campaign.featured ? (
+          <div className="absolute top-3 right-3 flex flex-col gap-2">
+            {campaign.featured && (
               <Badge className="bg-primary text-primary-foreground font-semibold">
                 Öne Çıkan
               </Badge>
-            ) : (
-              <Badge variant="secondary" className="font-semibold">
-                Aktif
+            )}
+            {campaign.creditCardEnabled ? (
+              <Badge className="bg-green-600 text-white font-semibold flex items-center gap-1">
+                <CreditCard className="w-3 h-3" />
+                Pay with Credit Card
               </Badge>
+            ) : (
+              !campaign.featured && (
+                <Badge variant="secondary" className="font-semibold">
+                  Aktif
+                </Badge>
+              )
             )}
           </div>
         </div>

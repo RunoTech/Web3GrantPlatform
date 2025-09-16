@@ -8,6 +8,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Credit Card Badge System for Campaign Cards (September 16, 2025)
+- **FEATURE**: Added visual indicator for credit card payment support on campaign cards
+- Implemented "Pay with Credit Card" badge with CreditCard icon for campaigns with `creditCardEnabled=true`
+- Enhanced badge system to support multiple badges simultaneously (featured + credit card)
+- Added vertical stacking layout for badges using `flex-col gap-2`
+- Badge priority system: Featured badge + Credit Card badge can appear together on same campaign
+- Green-colored badge with icon for clear visual distinction from other badge types
+- System dynamically reads `creditCardEnabled` field from campaigns table schema
+
 ### Daily Rewards System Database-Driven Implementation (September 16, 2025)
 - **CRITICAL CLEANUP**: Successfully removed all demo/mock data from daily rewards system
 - Cleared all test entries from `daily_winners` and `daily_entries` tables, reset sequences to start fresh

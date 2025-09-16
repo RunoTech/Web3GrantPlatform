@@ -17,9 +17,12 @@ export function useWallet() {
       if (accounts.length > 0) {
         setAddress(accounts[0]);
         setIsConnected(true);
+        // If we're reconnecting, assume MetaMask (most common)
+        setSelectedWalletId('metamask');
       } else {
         setAddress(null);
         setIsConnected(false);
+        setSelectedWalletId(null);
       }
     } catch (error) {
       console.error('Error checking wallet connection:', error);
@@ -74,7 +77,7 @@ export function useWallet() {
 
         setAddress(connectedAddress);
         setIsConnected(true);
-        setSelectedWalletId(selectedWalletId || null);
+        setSelectedWalletId(selectedWalletId || 'metamask');
         
         // Auto participate in daily reward if possible
         try {
@@ -113,7 +116,6 @@ export function useWallet() {
   }, [isConnecting, toast]);
 
   const disconnect = useCallback(async () => {
-    console.log('🔌 Disconnect function called!', { selectedWalletId, isConnected, address });
     try {
       // Remove listeners BEFORE clearing the selectedWalletId
       removeWalletListeners(selectedWalletId || undefined);

@@ -364,30 +364,42 @@ export class DatabaseStorage implements IStorage {
   async createCampaign(campaign: any): Promise<Campaign> {
     console.log("Raw campaign data:", JSON.stringify(campaign, null, 2));
     
-    // Start with a clean copy and convert fields properly
-    const campaignData: any = {};
+    // Clean conversion without spreading that causes overwrite
+    const campaignData: any = {
+      // Copy basic fields, skip empty strings
+      title: campaign.title,
+      description: campaign.description,
+      imageUrl: campaign.imageUrl || "",
+      ownerWallet: campaign.ownerWallet,
+      campaignType: campaign.campaignType,
+      creatorType: campaign.creatorType,
+      targetAmount: campaign.targetAmount,
+      creditCardEnabled: campaign.creditCardEnabled || false,
+      collateralAmount: campaign.collateralAmount,
+      collateralTxHash: campaign.collateralTxHash,
+      collateralPaid: campaign.collateralPaid || false,
+      
+      // Integer fields with defaults
+      donationCount: 0,
+      
+      // Date conversion
+      startDate: campaign.startDate && campaign.startDate !== "" ? new Date(campaign.startDate + "T00:00:00.000Z") : null,
+      endDate: campaign.endDate && campaign.endDate !== "" ? new Date(campaign.endDate + "T23:59:59.999Z") : null,
+    };
     
-    // Copy all non-empty fields
-    Object.entries(campaign).forEach(([key, value]) => {
-      if (value !== "" && value !== undefined && value !== null) {
-        campaignData[key] = value;
-      }
-    });
-    
-    // Convert date fields specifically
-    if (campaign.startDate && campaign.startDate !== "") {
-      campaignData.startDate = new Date(campaign.startDate + "T00:00:00.000Z");
-    }
-    if (campaign.endDate && campaign.endDate !== "") {
-      campaignData.endDate = new Date(campaign.endDate + "T23:59:59.999Z");
-    }
-    
-    // Handle integer fields specifically
-    campaignData.donationCount = 0; // Default value
+    // Add optional company fields only if not empty
+    if (campaign.companyName && campaign.companyName !== "") campaignData.companyName = campaign.companyName;
+    if (campaign.companyRegistrationNumber && campaign.companyRegistrationNumber !== "") campaignData.companyRegistrationNumber = campaign.companyRegistrationNumber;
+    if (campaign.companyAddress && campaign.companyAddress !== "") campaignData.companyAddress = campaign.companyAddress;
+    if (campaign.companyWebsite && campaign.companyWebsite !== "") campaignData.companyWebsite = campaign.companyWebsite;
+    if (campaign.companyEmail && campaign.companyEmail !== "") campaignData.companyEmail = campaign.companyEmail;
+    if (campaign.companyPhone && campaign.companyPhone !== "") campaignData.companyPhone = campaign.companyPhone;
+    if (campaign.companyCEO && campaign.companyCEO !== "") campaignData.companyCEO = campaign.companyCEO;
+    if (campaign.companyIndustry && campaign.companyIndustry !== "") campaignData.companyIndustry = campaign.companyIndustry;
+    if (campaign.companyEmployeeCount && campaign.companyEmployeeCount !== "") campaignData.companyEmployeeCount = campaign.companyEmployeeCount;
     if (campaign.companyFoundedYear && campaign.companyFoundedYear !== "") {
       campaignData.companyFoundedYear = parseInt(campaign.companyFoundedYear);
     }
-    // approvedBy will be set by admin later, default to null
     
     console.log("Cleaned campaign data:", JSON.stringify(campaignData, null, 2));
     

@@ -159,7 +159,7 @@ export function useWallet() {
         description: "Wallet connection cleared locally",
       });
     }
-  }, [toast]);
+  }, [selectedWalletId, toast]);
 
   useEffect(() => {
     checkConnection();
@@ -183,7 +183,7 @@ export function useWallet() {
     return () => {
       removeWalletListeners(selectedWalletId || undefined);
     };
-  }, [address, disconnect, checkConnection, selectedWalletId]);
+  }, [address, checkConnection, selectedWalletId]);
 
   // Get provider - supports both MetaMask and WalletConnect
   const getProvider = useCallback(() => {

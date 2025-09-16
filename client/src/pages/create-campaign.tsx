@@ -900,9 +900,9 @@ export default function CreateCampaignPage() {
                             <FormControl>
                               <Input 
                                 type="number"
-                                min="50"
+                                min="2"
                                 step="1"
-                                placeholder="100" 
+                                placeholder="2" 
                                 {...field} 
                                 className="border-gray-300 dark:border-gray-600"
                                 data-testid="input-collateral-amount"

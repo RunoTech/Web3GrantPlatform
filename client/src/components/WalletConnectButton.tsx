@@ -34,7 +34,10 @@ export default function WalletConnectButton() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => disconnect()}
+          onClick={() => {
+            console.log('🖱️ Disconnect button clicked!');
+            disconnect();
+          }}
           className="hover:text-red-600 border-muted-foreground/20 transition-all duration-200"
           data-testid="button-disconnect-wallet"
         >

@@ -113,6 +113,7 @@ export function useWallet() {
   }, [isConnecting, toast]);
 
   const disconnect = useCallback(async () => {
+    console.log('🔌 Disconnect function called!', { selectedWalletId, isConnected, address });
     try {
       // Remove listeners BEFORE clearing the selectedWalletId
       removeWalletListeners(selectedWalletId || undefined);

@@ -8,6 +8,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Daily Rewards System Database-Driven Implementation (September 16, 2025)
+- **CRITICAL CLEANUP**: Successfully removed all demo/mock data from daily rewards system
+- Cleared all test entries from `daily_winners` and `daily_entries` tables, reset sequences to start fresh
+- Replaced all hardcoded "100 USDT" values with dynamic settings from `platform_settings` table
+- Added dynamic reward amount fetching via `/api/settings-map` endpoint integration
+- Updated all UI text to use database-driven values: hero descriptions, participation rules, winner displays, and empty states
+- Platform now shows actual `daily_reward_amount` (currently 100 USDT) from settings instead of hardcoded values
+- Enhanced winner display to show actual `winner.amount` from database records rather than static text
+- System ready for real reward distribution with no placeholder/demo data remaining
+
 ### Blockchain Infrastructure Assessment (August 28, 2025)
 - **STATUS**: System ready for demo, missing only production environment variables
 - **RPC CONNECTION**: Ethereum mainnet active via public RPC (eth.llamarpc.com)

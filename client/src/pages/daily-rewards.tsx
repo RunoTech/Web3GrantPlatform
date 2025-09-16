@@ -44,6 +44,14 @@ export default function DailyRewardsPage() {
     queryKey: ["/api/today-stats"],
   });
 
+  const { data: settings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/settings-map"],
+  });
+
+  // Get dynamic reward amount from settings
+  const rewardAmount = settings?.daily_reward_amount || "100";
+  const maxWinners = settings?.max_daily_winners || "1";
+
   const { data: announcements = [] } = useQuery<Announcement[]>({
     queryKey: ["/api/announcements"],
   });
@@ -121,7 +129,7 @@ export default function DailyRewardsPage() {
               </h1>
             </div>
             <p className="text-2xl text-gray-600 dark:text-gray-400 mb-8 max-w-4xl mx-auto">
-              Join free daily rewards! Your chance to win 100 USDT every day.
+              Join free daily rewards! Your chance to win {rewardAmount} USDT every day.
             </p>
           </div>
 
@@ -137,7 +145,7 @@ export default function DailyRewardsPage() {
               </h2>
               
               <p className="text-lg text-gray-600 dark:text-gray-400">
-                You can participate in the draw for free every day. Winner receives 100 USDT daily!
+                You can participate in the draw for free every day. Winner receives {rewardAmount} USDT daily!
               </p>
 
               {/* Today's Stats */}
@@ -198,7 +206,7 @@ export default function DailyRewardsPage() {
                 <ul className="space-y-1">
                   <li>• You can only participate once per day</li>
                   <li>• Participation is completely free</li>
-                  <li>• Daily reward: 100 USDT</li>
+                  <li>• Daily reward: {rewardAmount} USDT</li>
                   <li>• Winner is randomly selected daily</li>
                   <li>• Results are announced at the end of the day</li>
                 </ul>
@@ -335,7 +343,7 @@ export default function DailyRewardsPage() {
                         <div className="flex items-center justify-center space-x-2">
                           <DollarSign className="w-4 h-4 text-green-500" />
                           <span className="font-bold text-green-600 dark:text-green-400">
-                            100 USDT
+                            {winner.amount} USDT
                           </span>
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -356,7 +364,7 @@ export default function DailyRewardsPage() {
                 No winners yet
               </h3>
               <p className="text-gray-500 dark:text-gray-500 mb-8">
-                Be the first to participate and try your luck!
+                Be the first to participate and try your luck to win {rewardAmount} USDT!
               </p>
               {!isConnected && <WalletConnectButton />}
             </div>

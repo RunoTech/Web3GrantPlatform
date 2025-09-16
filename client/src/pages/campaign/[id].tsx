@@ -1,4 +1,5 @@
-import { Link, useParams } from "wouter";
+import { useState, useEffect } from "react";
+import { Link, useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -9,12 +10,39 @@ import ShareButton from "@/components/ShareButton";
 import { Heart, ArrowLeft, ExternalLink, Users, Target, Activity, CheckCircle, Clock, Building, TrendingUp, Shield, Zap, CreditCard, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DonationForm from "@/components/DonationForm";
+import { VirtualPosModal } from "@/components/VirtualPosModal";
 import { generateCampaignShareLink } from "@/utils/share";
 import type { Campaign } from "@shared/schema";
 
 export default function CampaignDetailPage() {
   const { id } = useParams();
   const { toast } = useToast();
+  const [location, setLocation] = useLocation();
+  const [isVirtualPosOpen, setIsVirtualPosOpen] = useState(false);
+
+  // Handle deep-linking with ?virtualPos=1
+  useEffect(() => {
+    const params = new URLSearchParams(location.split('?')[1] || '');
+    if (params.get('virtualPos') === '1') {
+      setIsVirtualPosOpen(true);
+    }
+  }, [location]);
+
+  const handleVirtualPosOpen = () => {
+    setIsVirtualPosOpen(true);
+    const params = new URLSearchParams(location.split('?')[1] || '');
+    params.set('virtualPos', '1');
+    setLocation(`${location.split('?')[0]}?${params.toString()}`);
+  };
+
+  const handleVirtualPosClose = () => {
+    setIsVirtualPosOpen(false);
+    const currentPath = location.split('?')[0];
+    const params = new URLSearchParams(location.split('?')[1] || '');
+    params.delete('virtualPos');
+    const newUrl = params.toString() ? `${currentPath}?${params.toString()}` : currentPath;
+    setLocation(newUrl);
+  };
 
   const { data: campaign, isLoading } = useQuery({
     queryKey: ["/api/campaign", id],
@@ -249,15 +277,13 @@ export default function CampaignDetailPage() {
                         Visa, Mastercard, American Express ve diğer kredi kartlarını kabul ediyoruz
                       </p>
                       <Button 
-                        asChild
+                        onClick={handleVirtualPosOpen}
                         className="btn-primary w-full font-semibold"
                         data-testid="button-virtual-pos"
                       >
-                        <Link href={`/virtual-pos?campaignId=${campaign.id}`}>
-                          <CreditCard className="w-4 h-4 mr-2" />
-                          Kredi Kartıyla Öde
-                          <ArrowRight className="w-4 h-4 ml-2" />
-                        </Link>
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        Kredi Kartıyla Öde
+                        <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                       <div className="mt-3 flex items-center justify-center space-x-2">
                         <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -312,6 +338,14 @@ export default function CampaignDetailPage() {
           </div>
         </div>
       </section>
+
+      {/* Virtual POS Modal */}
+      <VirtualPosModal
+        open={isVirtualPosOpen}
+        onOpenChange={handleVirtualPosClose}
+        campaignId={campaign.id}
+        defaultAmount={5000}
+      />
     </div>
   );
 }

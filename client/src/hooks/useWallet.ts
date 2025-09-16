@@ -8,6 +8,7 @@ export function useWallet() {
   const [address, setAddress] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const checkConnection = useCallback(async () => {
@@ -29,12 +30,12 @@ export function useWallet() {
     }
   }, []);
 
-  const connect = useCallback(async () => {
+  const connect = useCallback(async (selectedWalletId?: string) => {
     if (isConnecting) return;
     
     setIsConnecting(true);
     try {
-      const connectedAddress = await connectWallet();
+      const connectedAddress = await connectWallet(selectedWalletId);
       if (connectedAddress) {
         // Check if referral code exists in localStorage
         const referralCode = localStorage.getItem('referralCode');
@@ -73,6 +74,7 @@ export function useWallet() {
 
         setAddress(connectedAddress);
         setIsConnected(true);
+        setSelectedWalletId(selectedWalletId || null);
         
         // Auto participate in daily reward if possible
         try {
@@ -80,7 +82,7 @@ export function useWallet() {
             wallet: connectedAddress
           });
           
-          if (dailyResponse.success) {
+          if ((dailyResponse as any).success) {
             toast({
               title: "Success!",
               description: "Wallet connected & auto-entered daily reward draw",
@@ -115,7 +117,8 @@ export function useWallet() {
       // Clear local state
       setAddress(null);
       setIsConnected(false);
-      removeWalletListeners();
+      setSelectedWalletId(null);
+      removeWalletListeners(selectedWalletId || undefined);
       
       // Try to disconnect from MetaMask if available
       if (window.ethereum?.disconnect) {
@@ -143,7 +146,8 @@ export function useWallet() {
       // Even if disconnect fails, clear local state
       setAddress(null);
       setIsConnected(false);
-      removeWalletListeners();
+      setSelectedWalletId(null);
+      removeWalletListeners(selectedWalletId || undefined);
       
       toast({
         title: "Disconnected",

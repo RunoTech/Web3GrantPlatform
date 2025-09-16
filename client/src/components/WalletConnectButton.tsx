@@ -4,9 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { useWallet } from "@/hooks/useWallet";
 import { Wallet, ChevronDown } from "lucide-react";
 import { getWalletName } from "@/utils/wallet";
+import WalletSelectionModal from "@/components/WalletSelectionModal";
 
 export default function WalletConnectButton() {
   const { isConnected, address, isConnecting, isInitialized, connect, disconnect } = useWallet();
+  const [showWalletModal, setShowWalletModal] = useState(false);
 
   // Don't show anything until wallet state is initialized
   if (!isInitialized) {
@@ -42,18 +44,33 @@ export default function WalletConnectButton() {
     );
   }
 
+  const handleWalletSelect = (walletId: string) => {
+    // Close modal and trigger connection with selected wallet
+    setShowWalletModal(false);
+    connect(walletId);
+  };
+
   return (
-    <Button
-      onClick={connect}
-      disabled={isConnecting}
-      className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-2.5 rounded-2xl font-semibold shadow-md hover:shadow-lg transition-all duration-300"
-      data-testid="button-connect-wallet"
-    >
-      <Wallet className="w-5 h-5 mr-2" />
-      {isConnecting ? "Connecting..." : "Connect Wallet"}
-      <div className="text-xs text-primary-foreground/70 ml-2">
-        (MetaMask / Trust Wallet)
-      </div>
-    </Button>
+    <>
+      <Button
+        onClick={() => setShowWalletModal(true)}
+        disabled={isConnecting}
+        className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-2.5 rounded-2xl font-semibold shadow-md hover:shadow-lg transition-all duration-300"
+        data-testid="button-connect-wallet"
+      >
+        <Wallet className="w-5 h-5 mr-2" />
+        {isConnecting ? "Connecting..." : "Connect Wallet"}
+        <div className="text-xs text-primary-foreground/70 ml-2">
+          (Multiple Options)
+        </div>
+      </Button>
+
+      <WalletSelectionModal
+        isOpen={showWalletModal}
+        onClose={() => setShowWalletModal(false)}
+        onWalletSelect={handleWalletSelect}
+        isConnecting={isConnecting}
+      />
+    </>
   );
 }

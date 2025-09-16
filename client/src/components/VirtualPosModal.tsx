@@ -39,7 +39,7 @@ const virtualPosSchema = z.object({
   cardHolder: z.string().min(2, 'Kart sahibi adı gerekli').max(50, 'Çok uzun isim'),
   expiryDate: z.string().regex(/^(0[1-9]|1[0-2])\/([0-9]{2})$/, 'MM/YY formatında girin'),
   cvv: z.string().min(3, 'CVV gerekli').max(4, 'CVV çok uzun'),
-  amount: z.number().min(5000, 'Minimum tutar $5,000 olmalıdır').max(999999999, 'Maksimum tutar $999,999,999 olmalıdır'),
+  amount: z.coerce.number().min(5000, 'Minimum tutar $5,000 olmalıdır').max(999999999, 'Maksimum tutar $999,999,999 olmalıdır'),
 });
 
 type VirtualPosFormData = z.infer<typeof virtualPosSchema>;
@@ -375,7 +375,10 @@ export function VirtualPosModal({ open, onOpenChange, campaignId, defaultAmount 
                         min="5000"
                         step="100"
                         placeholder="5,000"
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? '' : Number(value));
+                        }}
                         data-testid="input-amount"
                         className="pl-8"
                       />

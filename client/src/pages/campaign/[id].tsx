@@ -342,7 +342,7 @@ export default function CampaignDetailPage() {
       {/* Virtual POS Modal */}
       <VirtualPosModal
         open={isVirtualPosOpen}
-        onOpenChange={handleVirtualPosClose}
+        onOpenChange={(open) => open ? handleVirtualPosOpen() : handleVirtualPosClose()}
         campaignId={campaign.id}
         defaultAmount={5000}
       />

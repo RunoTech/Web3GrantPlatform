@@ -269,21 +269,6 @@ export default function VirtualPosPage() {
         </div>
 
         <div className="max-w-2xl mx-auto">
-          {/* Payment Amount Card */}
-          <Card className="card-standard mb-6">
-            <CardHeader className="text-center">
-              <div className="flex items-center justify-center mb-2">
-                <Building className="w-5 h-5 mr-2 text-primary" />
-                <span className="font-semibold">DUXXAN Platform</span>
-              </div>
-              <CardTitle className="text-2xl font-bold text-primary">
-                $5,000.00 USD
-              </CardTitle>
-              <CardDescription>
-                Minimum Ödeme Tutarı
-              </CardDescription>
-            </CardHeader>
-          </Card>
 
           {/* Payment Form */}
           <Card className="card-standard">
@@ -402,6 +387,38 @@ export default function VirtualPosPage() {
                     />
                   </div>
 
+                  {/* Amount Field */}
+                  <FormField
+                    control={form.control}
+                    name="amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ödeme Tutarı (USD)</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              {...field}
+                              type="number"
+                              min="5000"
+                              step="100"
+                              placeholder="5,000"
+                              onChange={(e) => field.onChange(Number(e.target.value))}
+                              data-testid="input-amount"
+                              className="pl-8"
+                            />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+                              $
+                            </span>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Minimum tutar: $5,000 USD
+                        </p>
+                      </FormItem>
+                    )}
+                  />
+
                   {/* Processing State */}
                   {processingState.isProcessing && (
                     <Card className="bg-primary/5 border-primary/20">
@@ -453,7 +470,7 @@ export default function VirtualPosPage() {
                     ) : (
                       <>
                         <CreditCard className="w-4 h-4 mr-2" />
-$5,000.00 Öde
+                        ${form.watch('amount')?.toLocaleString() || '5,000'}.00 Öde
                       </>
                     )}
                   </Button>

@@ -364,30 +364,30 @@ export class DatabaseStorage implements IStorage {
   async createCampaign(campaign: any): Promise<Campaign> {
     console.log("Raw campaign data:", JSON.stringify(campaign, null, 2));
     
-    // Convert date strings to Date objects if provided
-    // Convert empty strings to null for ALL integer fields
-    const campaignData = {
-      ...campaign,
-      startDate: campaign.startDate && campaign.startDate !== "" ? new Date(campaign.startDate + "T00:00:00.000Z") : null,
-      endDate: campaign.endDate && campaign.endDate !== "" ? new Date(campaign.endDate + "T23:59:59.999Z") : null,
-      
-      // Handle ALL integer fields - convert empty strings to null or appropriate defaults
-      donationCount: campaign.donationCount === "" || campaign.donationCount === undefined ? 0 : parseInt(campaign.donationCount) || 0,
-      companyFoundedYear: campaign.companyFoundedYear === "" || campaign.companyFoundedYear === undefined ? null : parseInt(campaign.companyFoundedYear) || null,
-      approvedBy: campaign.approvedBy === "" || campaign.approvedBy === undefined ? null : parseInt(campaign.approvedBy) || null,
-      
-      // Remove any undefined fields
-      ...Object.fromEntries(
-        Object.entries(campaign).filter(([_, value]) => value !== "")
-      )
-    };
+    // Start with a clean copy and convert fields properly
+    const campaignData: any = {};
     
-    // Clean up undefined and empty string fields before insert
-    Object.keys(campaignData).forEach(key => {
-      if (campaignData[key] === "" || campaignData[key] === undefined) {
-        delete campaignData[key];
+    // Copy all non-empty fields
+    Object.entries(campaign).forEach(([key, value]) => {
+      if (value !== "" && value !== undefined && value !== null) {
+        campaignData[key] = value;
       }
     });
+    
+    // Convert date fields specifically
+    if (campaign.startDate && campaign.startDate !== "") {
+      campaignData.startDate = new Date(campaign.startDate + "T00:00:00.000Z");
+    }
+    if (campaign.endDate && campaign.endDate !== "") {
+      campaignData.endDate = new Date(campaign.endDate + "T23:59:59.999Z");
+    }
+    
+    // Handle integer fields specifically
+    campaignData.donationCount = 0; // Default value
+    if (campaign.companyFoundedYear && campaign.companyFoundedYear !== "") {
+      campaignData.companyFoundedYear = parseInt(campaign.companyFoundedYear);
+    }
+    // approvedBy will be set by admin later, default to null
     
     console.log("Cleaned campaign data:", JSON.stringify(campaignData, null, 2));
     

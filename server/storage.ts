@@ -363,10 +363,15 @@ export class DatabaseStorage implements IStorage {
 
   async createCampaign(campaign: any): Promise<Campaign> {
     // Convert date strings to Date objects if provided
+    // Convert empty strings to null for integer fields
     const campaignData = {
       ...campaign,
       startDate: campaign.startDate ? new Date(campaign.startDate) : null,
       endDate: campaign.endDate ? new Date(campaign.endDate) : null,
+      // Handle integer fields - convert empty strings to null
+      donationCount: campaign.donationCount === "" ? null : campaign.donationCount,
+      companyFoundedYear: campaign.companyFoundedYear === "" ? null : campaign.companyFoundedYear,
+      approvedBy: campaign.approvedBy === "" ? null : campaign.approvedBy,
     };
     
     const [newCampaign] = await db.insert(campaigns).values(campaignData).returning();

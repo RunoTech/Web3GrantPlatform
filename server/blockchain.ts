@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { db } from "./db";
 import { platformSettings } from "../shared/schema";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 
 // Cache for dynamic settings to avoid frequent database queries
 let networkConfigCache: any = null;
@@ -24,7 +24,10 @@ export async function getNetworkConfig() {
       value: platformSettings.value
     })
     .from(platformSettings)
-    .where(eq(platformSettings.category, 'blockchain'));
+    .where(or(
+      eq(platformSettings.category, 'blockchain'),
+      eq(platformSettings.category, 'payment')
+    ));
     
     const settingsMap = settings.reduce((acc, setting) => {
       if (setting.value) {
@@ -40,7 +43,7 @@ export async function getNetworkConfig() {
         chainId: 1,
         rpcUrl: settingsMap['ethereum_rpc_url'] || process.env.ETH_RPC_URL || "https://eth.llamarpc.com",
         rpcBackup: settingsMap['ethereum_rpc_backup'] || "https://rpc.ankr.com/eth",
-        wsUrl: process.env.ETH_WS_URL || "wss://ethereum-rpc.publicnode.com",
+        wsUrl: settingsMap['ethereum_ws_url'] || process.env.ETH_WS_URL || "wss://ethereum-rpc.publicnode.com",
         nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
         timeout: parseInt(settingsMap['rpc_timeout_ms'] || '10000'),
         monitoringEnabled: settingsMap['blockchain_monitoring_enabled'] === 'true'
@@ -50,6 +53,7 @@ export async function getNetworkConfig() {
         chainId: 56,
         rpcUrl: settingsMap['bsc_rpc_url'] || "https://bsc.llamarpc.com",
         rpcBackup: settingsMap['bsc_rpc_backup'] || "https://rpc.ankr.com/bsc",
+        wsUrl: settingsMap['bsc_ws_url'] || "wss://bsc-rpc.publicnode.com",
         nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
         timeout: parseInt(settingsMap['rpc_timeout_ms'] || '10000'),
         monitoringEnabled: settingsMap['blockchain_monitoring_enabled'] === 'true'
@@ -68,14 +72,25 @@ export async function getNetworkConfig() {
   } catch (error) {
     console.error('⚠️  Failed to load network config from database, using fallbacks:', error);
     
-    // Return hardcoded fallbacks if database fails
+    // Return hardcoded fallbacks with BSC included if database fails
     networkConfigCache = {
       ethereum: {
         name: "Ethereum Mainnet",
         chainId: 1,
         rpcUrl: process.env.ETH_RPC_URL || "https://eth.llamarpc.com",
+        rpcBackup: "https://rpc.ankr.com/eth",
         wsUrl: process.env.ETH_WS_URL || "wss://ethereum-rpc.publicnode.com",
         nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+        timeout: 10000,
+        monitoringEnabled: true
+      },
+      bsc: {
+        name: "BSC Mainnet",
+        chainId: 56,
+        rpcUrl: process.env.BSC_RPC_URL || "https://bsc.llamarpc.com",
+        rpcBackup: "https://rpc.ankr.com/bsc",
+        wsUrl: process.env.BSC_WS_URL || "wss://bsc-rpc.publicnode.com",
+        nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
         timeout: 10000,
         monitoringEnabled: true
       }
@@ -85,16 +100,26 @@ export async function getNetworkConfig() {
   }
 }
 
-// Legacy static export for backwards compatibility (will be dynamically updated)
-export let networks = {
+// ⚠️  DEPRECATED: Legacy static export - DO NOT USE!
+// Use getNetworkConfig() instead for dynamic configuration
+// This export is kept only for backwards compatibility and will be removed
+const _DEPRECATED_networks = {
   ethereum: {
     name: "Ethereum Mainnet",
     chainId: 1,
-    rpcUrl: "https://eth.llamarpc.com", // Will be updated by getNetworkConfig
+    rpcUrl: "https://eth.llamarpc.com", // Hardcoded - use getNetworkConfig() instead!
     wsUrl: "wss://ethereum-rpc.publicnode.com",
     nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   }
 };
+
+// Deprecated export with runtime warning
+export const networks = new Proxy(_DEPRECATED_networks, {
+  get(target, prop) {
+    console.warn('⚠️  DEPRECATED: Using hardcoded networks export. Use getNetworkConfig() instead!');
+    return target[prop as keyof typeof target];
+  }
+});
 
 // ERC-20 Token ABI for balance and transfer checks
 export const ERC20_ABI = [
@@ -105,17 +130,85 @@ export const ERC20_ABI = [
   "event Transfer(address indexed from, address indexed to, uint256 value)"
 ];
 
-// Platform wallet addresses (from database settings)
-export const PLATFORM_WALLETS = {
-  ethereum: "0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8"  // Updated platform wallet
+// Dynamic platform wallet addresses (loaded from database)
+export async function getPlatformWallets() {
+  const settings = await db.select({
+    key: platformSettings.key,
+    value: platformSettings.value
+  })
+  .from(platformSettings)
+  .where(eq(platformSettings.category, 'payment'));
+  
+  const settingsMap = settings.reduce((acc, setting) => {
+    if (setting.value) {
+      acc[setting.key] = setting.value;
+    }
+    return acc;
+  }, {} as Record<string, string>);
+
+  return {
+    ethereum: settingsMap['ethereum_wallet_address'] || "0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8",
+    bsc: settingsMap['bsc_wallet_address'] || "0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8"
+  };
+}
+
+// ⚠️  DEPRECATED: Legacy hardcoded wallet addresses - DO NOT USE!
+// Use getPlatformWallets() instead for dynamic database loading
+// This export creates configuration drift risks and will be removed
+const _DEPRECATED_PLATFORM_WALLETS = {
+  ethereum: "0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8"  // Hardcoded - use getPlatformWallets() instead!
 };
 
-// Token addresses - Only Ethereum USDT
-export const TOKENS = {
+// Deprecated export with runtime warning
+export const PLATFORM_WALLETS = new Proxy(_DEPRECATED_PLATFORM_WALLETS, {
+  get(target, prop) {
+    console.warn('⚠️  DEPRECATED: Using hardcoded PLATFORM_WALLETS. Use getPlatformWallets() instead!');
+    return target[prop as keyof typeof target];
+  }
+});
+
+// Dynamic token addresses (loaded from database)
+export async function getTokenAddresses() {
+  const settings = await db.select({
+    key: platformSettings.key,
+    value: platformSettings.value
+  })
+  .from(platformSettings)
+  .where(eq(platformSettings.category, 'payment'));
+  
+  const settingsMap = settings.reduce((acc, setting) => {
+    if (setting.value) {
+      acc[setting.key] = setting.value;
+    }
+    return acc;
+  }, {} as Record<string, string>);
+
+  return {
+    ethereum: {
+      USDT: settingsMap['ethereum_usdt_contract'] || "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    bsc: {
+      USDT: settingsMap['bsc_usdt_contract'] || "0x55d398326f99059fF775485246999027B3197955"
+    }
+  };
+}
+
+// ⚠️  DEPRECATED: Legacy hardcoded token addresses - DO NOT USE!
+// Use getTokenAddresses() instead for dynamic database loading
+// This export creates configuration drift risks and will be removed
+const _DEPRECATED_TOKENS = {
   ethereum: {
-    USDT: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    USDT: "0xdAC17F958D2ee523a2206206994597C13D831ec7"  // Hardcoded - use getTokenAddresses() instead!
   }
 };
+
+// Deprecated export with runtime warning
+export const TOKENS = new Proxy(_DEPRECATED_TOKENS, {
+  get(target, prop) {
+    console.warn('⚠️  DEPRECATED: Using hardcoded TOKENS. Use getTokenAddresses() instead!');
+    return target[prop as keyof typeof target];
+  }
+});
 
 /**
  * Verify a payment transaction
@@ -292,6 +385,7 @@ export async function startWalletListener(platformWallet: string, onPaymentRecei
     console.log(`🔍 Starting real-time wallet listener for: ${checksummedWallet}`);
     
     const networkConfig = await getNetworkConfig();
+    const tokenAddresses = await getTokenAddresses();
     
     // Try WebSocket first for real-time monitoring
     let provider;
@@ -303,7 +397,7 @@ export async function startWalletListener(platformWallet: string, onPaymentRecei
       provider = new ethers.JsonRpcProvider(networkConfig.ethereum.rpcUrl);
     }
     
-    const usdtContract = new ethers.Contract(TOKENS.ethereum.USDT, ERC20_ABI, provider);
+    const usdtContract = new ethers.Contract(tokenAddresses.ethereum.USDT, ERC20_ABI, provider);
     
     // Listen for USDT transfers TO platform wallet
     const transferFilter = usdtContract.filters.Transfer(null, checksummedWallet);
@@ -381,6 +475,7 @@ export async function startCampaignListener(
     }
     
     const networkConfig = await getNetworkConfig();
+    const tokenAddresses = await getTokenAddresses();
     
     // Try WebSocket first for real-time monitoring
     let provider;
@@ -392,7 +487,7 @@ export async function startCampaignListener(
       provider = new ethers.JsonRpcProvider(networkConfig.ethereum.rpcUrl);
     }
     
-    const usdtContract = new ethers.Contract(TOKENS.ethereum.USDT, ERC20_ABI, provider);
+    const usdtContract = new ethers.Contract(tokenAddresses.ethereum.USDT, ERC20_ABI, provider);
     
     // Listen for USDT transfers TO this campaign wallet
     const transferFilter = usdtContract.filters.Transfer(null, checksummedWallet);

@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { getNetworkConfig, getTokenAddresses } from "./blockchain";
 
 // ERC-20 ABI for token operations
 const ERC20_ABI = [
@@ -9,23 +10,38 @@ const ERC20_ABI = [
   "event Transfer(address indexed from, address indexed to, uint256 value)"
 ];
 
-// Network configurations for direct payment processing
-const networks = {
-  ethereum: {
-    chainId: 1,
-    name: "Ethereum Mainnet",
-    rpcUrl: process.env.ETH_RPC_URL || "https://eth.llamarpc.com",
-    nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
-    blockExplorer: "https://etherscan.io"
+// Dynamic network configurations loaded from database  
+async function getPaymentNetworks() {
+  const networkConfig = await getNetworkConfig();
+  
+  const networks: any = {
+    ethereum: {
+      chainId: networkConfig.ethereum.chainId,
+      name: networkConfig.ethereum.name,
+      rpcUrl: networkConfig.ethereum.rpcUrl,
+      nativeCurrency: networkConfig.ethereum.nativeCurrency,
+      blockExplorer: "https://etherscan.io"
+    }
+  };
+  
+  // Only add BSC if configuration exists
+  if (networkConfig.bsc) {
+    networks.bsc = {
+      chainId: networkConfig.bsc.chainId,
+      name: networkConfig.bsc.name, 
+      rpcUrl: networkConfig.bsc.rpcUrl,
+      nativeCurrency: networkConfig.bsc.nativeCurrency,
+      blockExplorer: "https://bscscan.com"
+    };
   }
-};
+  
+  return networks;
+}
 
-// Token addresses for payments
-export const PAYMENT_TOKENS = {
-  ethereum: {
-    USDT: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-  }
-};
+// Dynamic token addresses loaded from database
+export async function getPaymentTokens() {
+  return await getTokenAddresses();
+}
 
 interface DirectPaymentResult {
   success: boolean;
@@ -48,6 +64,8 @@ export async function processDirectPayment(
   decimals: number
 ): Promise<DirectPaymentResult> {
   try {
+    const networks = await getPaymentNetworks();
+    
     if (!networks[network as keyof typeof networks]) {
       return { success: false, error: "Unsupported network" };
     }
@@ -92,12 +110,14 @@ export async function processDirectPayment(
 /**
  * Validate payment request before processing
  */
-export function validatePaymentRequest(
+export async function validatePaymentRequest(
   network: string,
   userWallet: string,
   platformWallet: string,
   amount: string
-): { valid: boolean; error?: string } {
+): Promise<{ valid: boolean; error?: string }> {
+  const networks = await getPaymentNetworks();
+  
   if (!network || !networks[network as keyof typeof networks]) {
     return { valid: false, error: "Invalid or unsupported network" };
   }

@@ -1,5 +1,5 @@
 // Import dynamic network configuration
-import { getNetworkConfig } from '../blockchain.js';
+import { getNetworkConfig, getPlatformWallets } from '../blockchain.js';
 
 export const networks = {
   ethereum: {
@@ -14,18 +14,20 @@ export const networks = {
 export async function getDynamicNetworks() {
   try {
     const networkConfig = await getNetworkConfig();
+    const platformWallets = await getPlatformWallets();
+    
     return {
       ethereum: {
         name: networkConfig.ethereum.name,
         chainId: networkConfig.ethereum.chainId,
         rpcUrl: networkConfig.ethereum.rpcUrl,
-        platformWallet: process.env.PLATFORM_WALLET_ETH || '',
+        platformWallet: platformWallets.ethereum || process.env.PLATFORM_WALLET_ETH || '',
       },
       bsc: networkConfig.bsc ? {
         name: networkConfig.bsc.name,
         chainId: networkConfig.bsc.chainId,
         rpcUrl: networkConfig.bsc.rpcUrl,
-        platformWallet: process.env.PLATFORM_WALLET_BSC || '',
+        platformWallet: platformWallets.bsc || process.env.PLATFORM_WALLET_BSC || '',
       } : undefined
     };
   } catch (error) {

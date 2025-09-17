@@ -7,12 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import Header from "@/components/Header";
 import ShareButton from "@/components/ShareButton";
-import { Heart, ArrowLeft, ExternalLink, Users, Target, Activity, CheckCircle, Clock, Building, TrendingUp, Shield, Zap, CreditCard, ArrowRight } from "lucide-react";
+import { Heart, ArrowLeft, ExternalLink, Users, Target, Activity, CheckCircle, Clock, Building, TrendingUp, Shield, Zap, CreditCard, ArrowRight, Settings, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useWallet } from "@/hooks/useWallet";
 import DonationForm from "@/components/DonationForm";
 import { VirtualPosModal } from "@/components/VirtualPosModal";
-import FailedPaymentAttempts from "@/components/FailedPaymentAttempts";
 import { generateCampaignShareLink } from "@/utils/share";
 import type { Campaign } from "@shared/schema";
 
@@ -342,19 +341,21 @@ export default function CampaignDetailPage() {
         </div>
       </section>
 
-      {/* Campaign Owner Dashboard - Only visible to campaign owner */}
+      {/* Campaign Owner Management Link - Only visible to campaign owner */}
       {connectedWallet && campaign && connectedWallet.toLowerCase() === campaign.ownerWallet.toLowerCase() && (
-        <section className="section-spacing" data-testid="section-owner-dashboard">
+        <section className="section-spacing" data-testid="section-owner-actions">
           <div className="container-main">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-foreground mb-2" data-testid="title-owner-dashboard">
-                Campaign Dashboard
-              </h2>
-              <p className="text-muted-foreground" data-testid="description-owner-dashboard">
-                Monitor your campaign's performance and manage payment issues as the campaign owner.
-              </p>
+            <div className="text-center py-6 surface-card rounded-lg border border-border">
+              <Settings className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Campaign Owner</h3>
+              <p className="text-sm text-muted-foreground mb-4">Manage your campaign settings and view detailed analytics</p>
+              <Button asChild className="btn-binance">
+                <Link href={`/profile?tab=campaigns&manage=${campaign.id}`} data-testid="button-manage-campaign">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Manage Campaign
+                </Link>
+              </Button>
             </div>
-            <FailedPaymentAttempts campaignId={campaign.id} />
           </div>
         </section>
       )}

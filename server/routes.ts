@@ -1,5 +1,6 @@
 import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
+import rateLimit from "express-rate-limit";
 import { storage } from "./storage";
 import { 
   insertNetworkFeeSchema,
@@ -102,7 +103,61 @@ async function authenticateUser(req: UserAuthenticatedRequest, res: any, next: a
   }
 }
 
+// Rate limiting configurations
+const authRateLimit = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 10, // 10 requests per minute per IP
+  message: { error: "Too many authentication attempts, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const accountRateLimit = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute 
+  max: 5, // 5 requests per minute per IP
+  message: { error: "Too many account creation attempts, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const adminAuthRateLimit = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 5, // 5 requests per minute per IP
+  message: { error: "Too many admin login attempts, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const generalApiRateLimit = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 100, // 100 requests per minute per IP
+  message: { error: "Too many requests, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Input validation helper
+const validatePaginationParams = (req: any, res: any, next: any) => {
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = parseInt(req.query.offset) || 0;
+  
+  // Cap limits to prevent DoS
+  if (limit > 100) {
+    return res.status(400).json({ error: "Limit cannot exceed 100" });
+  }
+  if (offset < 0) {
+    return res.status(400).json({ error: "Offset cannot be negative" });
+  }
+  
+  req.query.limit = Math.min(limit, 100);
+  req.query.offset = Math.max(offset, 0);
+  next();
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Apply general rate limiting to all routes
+  app.use("/api", generalApiRateLimit);
+  
   // Public API Routes (existing functionality)
   
   // Get network fees (public) - Ethereum only
@@ -320,7 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create account (protected - requires authentication)
-  app.post("/api/create-account", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+  app.post("/api/create-account", accountRateLimit, authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
       // Security: Use authenticated wallet instead of trusting client data
       const accountData = {
@@ -348,7 +403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Activate account with payment verification (protected - requires authentication)
-  app.post("/api/activate-account", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+  app.post("/api/activate-account", accountRateLimit, authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
       const { txHash, network } = req.body;
       
@@ -653,7 +708,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Register with referral code (protected - requires authentication)
-  app.post("/api/register-with-referral", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+  app.post("/api/register-with-referral", accountRateLimit, authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
       const { referralCode } = req.body;
       
@@ -695,7 +750,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Direct payment activation (protected - requires authentication)
-  app.post("/api/direct-activate", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+  app.post("/api/direct-activate", accountRateLimit, authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
       const { network, txHash } = req.body;
       
@@ -1388,7 +1443,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===== USER AUTHENTICATION ENDPOINTS (SIWE) =====
   
   // Generate nonce for wallet signature
-  app.post("/auth/nonce", async (req, res) => {
+  app.post("/auth/nonce", authRateLimit, async (req, res) => {
     try {
       const { wallet } = req.body;
       
@@ -1421,7 +1476,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Verify signature and create session
-  app.post("/auth/verify", async (req, res) => {
+  app.post("/auth/verify", authRateLimit, async (req, res) => {
     try {
       const { wallet, signature, nonce } = req.body;
       
@@ -1500,7 +1555,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Logout - invalidate session
-  app.post("/auth/logout", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+  app.post("/auth/logout", authRateLimit, authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
       await storage.invalidateUserSession(req.sessionId);
       res.json({ success: true, message: "Successfully logged out" });

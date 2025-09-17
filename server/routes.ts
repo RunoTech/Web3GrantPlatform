@@ -368,8 +368,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       res.json({ success: true, entry, message: "Successfully participated in today's reward draw" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in auto daily entry:", error);
+      
+      // Handle race condition - already participated
+      if (error.message === 'ALREADY_PARTICIPATED') {
+        return res.status(400).json({ 
+          error: "Already participated today",
+          success: false
+        });
+      }
+      
       res.status(500).json({ error: "Failed to participate in daily reward" });
     }
   });
@@ -927,8 +936,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const entry = await storage.createDailyEntry(entryData);
       res.json({ success: true, message: "Successfully joined daily reward!" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating daily entry:", error);
+      
+      // Handle race condition - already participated
+      if (error.message === 'ALREADY_PARTICIPATED') {
+        return res.status(409).json({ 
+          error: "Already entered today",
+          success: false
+        });
+      }
+      
       res.status(500).json({ error: "Failed to join daily reward" });
     }
   });

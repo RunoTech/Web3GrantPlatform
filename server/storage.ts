@@ -499,8 +499,16 @@ export class DatabaseStorage implements IStorage {
 
   // Daily Rewards
   async createDailyEntry(entry: InsertDailyEntry): Promise<DailyEntry> {
-    const [newEntry] = await db.insert(dailyEntries).values(entry).returning();
-    return newEntry;
+    try {
+      const [newEntry] = await db.insert(dailyEntries).values(entry).returning();
+      return newEntry;
+    } catch (error: any) {
+      // Handle unique constraint violation (duplicate wallet + date)
+      if (error.code === '23505' || error.message?.includes('unique_wallet_date')) {
+        throw new Error('ALREADY_PARTICIPATED');
+      }
+      throw error;
+    }
   }
 
   async getDailyEntries(date: string): Promise<DailyEntry[]> {

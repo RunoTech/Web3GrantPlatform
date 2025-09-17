@@ -9,7 +9,19 @@ export function useWallet() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const { toast } = useToast();
+
+  // Check authentication token on initialization
+  const checkAuthToken = useCallback(() => {
+    const token = localStorage.getItem('duxxan_auth_token');
+    if (token) {
+      setAuthToken(token);
+      setIsAuthenticated(true);
+    }
+  }, []);
 
   const checkConnection = useCallback(async () => {
     try {
@@ -21,18 +33,117 @@ export function useWallet() {
         if (!selectedWalletId) {
           setSelectedWalletId('metamask');
         }
+        // Check authentication token
+        checkAuthToken();
       } else {
         setAddress(null);
         setIsConnected(false);
+        setIsAuthenticated(false);
+        setAuthToken(null);
+        localStorage.removeItem('duxxan_auth_token');
       }
     } catch (error) {
       console.error('Error checking wallet connection:', error);
       setAddress(null);
       setIsConnected(false);
+      setIsAuthenticated(false);
+      setAuthToken(null);
     } finally {
       setIsInitialized(true);
     }
-  }, [selectedWalletId]);
+  }, [selectedWalletId, checkAuthToken]);
+
+  // Get provider - supports both MetaMask and WalletConnect
+  const getProvider = useCallback(() => {
+    if (typeof window.ethereum !== 'undefined') {
+      return window.ethereum;
+    }
+    return null;
+  }, []);
+
+  // SIWE Authentication Flow
+  const authenticate = useCallback(async (walletAddress: string): Promise<boolean> => {
+    if (isAuthenticating) return false;
+    
+    setIsAuthenticating(true);
+    try {
+      // Step 1: Get nonce from server
+      const nonceResponse = await apiRequest("POST", "/auth/nonce", {
+        wallet: walletAddress
+      }) as any;
+      
+      if (!nonceResponse.nonce || !nonceResponse.message) {
+        throw new Error("Failed to get authentication nonce");
+      }
+
+      // Step 2: Sign the message with MetaMask
+      const provider = getProvider();
+      if (!provider) {
+        throw new Error("Wallet provider not available");
+      }
+
+      const signature = await provider.request({
+        method: 'personal_sign',
+        params: [nonceResponse.message, walletAddress],
+      });
+
+      // Step 3: Verify signature on server
+      const verifyResponse = await apiRequest("POST", "/auth/verify", {
+        wallet: walletAddress,
+        signature: signature,
+        nonce: nonceResponse.nonce
+      }) as any;
+
+      if (!verifyResponse.success || !verifyResponse.token) {
+        throw new Error("Authentication verification failed");
+      }
+
+      // Step 4: Store JWT token
+      localStorage.setItem('duxxan_auth_token', verifyResponse.token);
+      setAuthToken(verifyResponse.token);
+      setIsAuthenticated(true);
+
+      toast({
+        title: "Authenticated Successfully",
+        description: "Wallet signature verified - you're now authenticated",
+      });
+
+      return true;
+    } catch (error: any) {
+      console.error('Authentication error:', error);
+      toast({
+        title: "Authentication Failed",
+        description: error.message || "Failed to authenticate wallet",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsAuthenticating(false);
+    }
+  }, [isAuthenticating, getProvider, toast]);
+
+  // Logout function
+  const logout = useCallback(async () => {
+    try {
+      // Call server logout if authenticated
+      if (authToken) {
+        await apiRequest("POST", "/auth/logout", {});
+      }
+    } catch (error) {
+      console.error('Logout API error:', error);
+      // Continue with local logout even if server call fails
+    }
+
+    // Clear local state
+    localStorage.removeItem('duxxan_auth_token');
+    setAuthToken(null);
+    setIsAuthenticated(false);
+    
+    toast({
+      title: "Logged Out",
+      description: "Authentication session ended",
+    });
+  }, [authToken, toast]);
 
   const connect = useCallback(async (selectedWalletId?: string) => {
     if (isConnecting) return;
@@ -80,28 +191,39 @@ export function useWallet() {
         setIsConnected(true);
         setSelectedWalletId(selectedWalletId || 'metamask');
         
-        // Auto participate in daily reward if possible
-        try {
-          const dailyResponse = await apiRequest("POST", "/api/auto-daily-entry", {
-            wallet: connectedAddress
-          });
-          
-          if ((dailyResponse as any).success) {
-            toast({
-              title: "Success!",
-              description: "Wallet connected & auto-entered daily reward draw",
+        // Step 2: Authenticate the wallet with SIWE
+        const authSuccess = await authenticate(connectedAddress);
+        
+        if (authSuccess) {
+          // Step 3: Auto participate in daily reward if authenticated
+          try {
+            const dailyResponse = await apiRequest("POST", "/api/auto-daily-entry", {
+              wallet: connectedAddress
             });
-          } else {
+            
+            if ((dailyResponse as any).success) {
+              toast({
+                title: "Success!",
+                description: "Wallet connected, authenticated & auto-entered daily reward draw",
+              });
+            } else {
+              toast({
+                title: "Success!",
+                description: "Wallet connected & authenticated successfully",
+              });
+            }
+          } catch (dailyError: any) {
+            // Don't show error for daily entry failure, just show connection success
             toast({
               title: "Success!",
-              description: "Wallet connected successfully",
+              description: "Wallet connected & authenticated successfully",
             });
           }
-        } catch (dailyError: any) {
-          // Don't show error for daily entry failure, just show wallet connection success
+        } else {
           toast({
-            title: "Success!",
-            description: "Wallet connected successfully",
+            title: "Partial Success",
+            description: "Wallet connected but authentication failed. Some features may be limited.",
+            variant: "destructive",
           });
         }
       }
@@ -177,14 +299,6 @@ export function useWallet() {
     };
   }, [selectedWalletId, address, disconnect]);
 
-  // Get provider - supports both MetaMask and WalletConnect
-  const getProvider = useCallback(() => {
-    if (typeof window.ethereum !== 'undefined') {
-      return window.ethereum;
-    }
-    return null;
-  }, []);
-
   // Network verification functions
   const checkNetwork = useCallback(async (): Promise<boolean> => {
     try {
@@ -220,8 +334,13 @@ export function useWallet() {
     address,
     isConnecting,
     isInitialized,
+    isAuthenticated,
+    isAuthenticating,
+    authToken,
     connect,
     disconnect,
+    authenticate,
+    logout,
     getProvider,
     checkNetwork,
     switchToMainnet,

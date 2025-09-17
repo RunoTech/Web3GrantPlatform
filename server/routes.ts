@@ -231,10 +231,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all campaigns (public)
-  app.get("/api/get-campaigns", async (req, res) => {
+  app.get("/api/get-campaigns", validatePaginationParams, async (req, res) => {
     try {
-      const limit = parseInt(req.query.limit as string) || 50;
-      const offset = parseInt(req.query.offset as string) || 0;
+      const limit = req.query.limit as number;
+      const offset = req.query.offset as number;
       const campaigns = await storage.getCampaigns(limit, offset);
       // Filter out company private information for public API
       const publicCampaigns = campaigns.map(filterCampaignForPublic);
@@ -705,9 +705,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // 🎯 NEW: Affiliate leaderboard (public)
-  app.get("/api/affiliate/leaderboard", async (req, res) => {
+  app.get("/api/affiliate/leaderboard", validatePaginationParams, async (req, res) => {
     try {
-      const limit = parseInt(req.query.limit as string) || 10;
+      const limit = req.query.limit as number;
       const leaderboard = await storage.getAffiliateLeaderboard(limit);
       res.json(leaderboard);
     } catch (error) {

@@ -97,6 +97,25 @@ export const userSessions = pgTable("user_sessions", {
   index("idx_user_sessions_expires").on(table.expiresAt),
 ]);
 
+// Used transactions tracking for payment idempotency
+export const usedTransactions = pgTable("used_transactions", {
+  id: serial("id").primaryKey(),
+  txHash: varchar("tx_hash", { length: 66 }).notNull().unique(), // Ethereum transaction hash
+  network: varchar("network", { length: 20 }).notNull().default('ethereum'), // Should always be ethereum
+  purpose: varchar("purpose", { length: 50 }).notNull(), // 'account_activation', 'campaign_collateral'
+  wallet: varchar("wallet", { length: 42 }).notNull(), // Wallet that used this transaction
+  amount: decimal("amount", { precision: 18, scale: 8 }).notNull(), // Amount processed
+  tokenAddress: varchar("token_address", { length: 42 }), // Token contract address used
+  blockNumber: integer("block_number"), // Block number for confirmation tracking
+  processedAt: timestamp("processed_at").defaultNow(), // When transaction was processed
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_used_transactions_hash").on(table.txHash),
+  index("idx_used_transactions_wallet").on(table.wallet),
+  index("idx_used_transactions_purpose").on(table.purpose),
+  index("idx_used_transactions_processed").on(table.processedAt),
+]);
+
 // User accounts
 export const accounts = pgTable("accounts", {
   id: serial("id").primaryKey(),
@@ -559,6 +578,12 @@ export const insertUserSessionSchema = createInsertSchema(userSessions).omit({
   lastUsedAt: true,
 });
 
+export const insertUsedTransactionSchema = createInsertSchema(usedTransactions).omit({
+  id: true,
+  processedAt: true,
+  createdAt: true,
+});
+
 // Types
 export type Admin = typeof admins.$inferSelect;
 export type InsertAdmin = z.infer<typeof insertAdminSchema>;
@@ -600,3 +625,5 @@ export type UserNonce = typeof userNonces.$inferSelect;
 export type InsertUserNonce = z.infer<typeof insertUserNonceSchema>;
 export type UserSession = typeof userSessions.$inferSelect;
 export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
+export type UsedTransaction = typeof usedTransactions.$inferSelect;
+export type InsertUsedTransaction = z.infer<typeof insertUsedTransactionSchema>;

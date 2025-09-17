@@ -472,13 +472,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Activate account with payment verification (protected - requires authentication)
   app.post("/api/activate-account", accountRateLimit, authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
-      const { txHash, network } = req.body;
+      const { txHash } = req.body;
       
       // Security: Use authenticated wallet instead of trusting client data
       const wallet = req.userWallet;
       
-      if (!txHash || !network) {
-        return res.status(400).json({ error: "Transaction hash and network are required" });
+      if (!txHash) {
+        return res.status(400).json({ error: "Transaction hash is required" });
+      }
+
+      // Security: Validate transaction hash format
+      if (!/^0x[a-fA-F0-9]{64}$/.test(txHash)) {
+        return res.status(400).json({ error: "Invalid transaction hash format" });
+      }
+
+      // Security: Check transaction idempotency - prevent replay attacks
+      const transactionAlreadyUsed = await storage.isTransactionUsed(txHash);
+      if (transactionAlreadyUsed) {
+        return res.status(409).json({ 
+          error: "Transaction hash already processed", 
+          code: "TRANSACTION_ALREADY_USED"
+        });
       }
 
       // Check if account exists
@@ -491,35 +505,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Account is already active" });
       }
 
-      // Get network fee and platform wallet
+      // Security: Hardcode Ethereum mainnet and server-side configuration
+      const NETWORK = 'ethereum';
+      
+      // Get Ethereum network fee (server-side configuration)
       const networkFees = await storage.getActiveNetworkFees();
-      const networkFee = networkFees.find(fee => fee.network === network);
+      const networkFee = networkFees.find(fee => fee.network === NETWORK);
       
       if (!networkFee) {
-        return res.status(400).json({ error: "Network fee not found" });
+        return res.status(500).json({ error: "Ethereum network fee not configured" });
       }
 
-      // Get platform wallet address
+      // Get Ethereum platform wallet address (server-side configuration)
       const settings = await storage.getPlatformSettings("payment");
-      const platformWalletSetting = settings.find(s => s.key === `${network}_wallet_address`);
+      const platformWalletSetting = settings.find(s => s.key === "ethereum_wallet_address");
       
-      if (!platformWalletSetting) {
-        return res.status(400).json({ error: "Platform wallet address not configured" });
+      if (!platformWalletSetting?.value) {
+        return res.status(500).json({ error: "Ethereum platform wallet not configured" });
       }
 
-      // Verify payment using blockchain
+      // Verify payment using enhanced blockchain verification with confirmations
       const { verifyPayment } = await import("./blockchain");
       const verification = await verifyPayment(
-        network,
+        NETWORK,
         txHash,
         networkFee.amount || "0",
         networkFee.tokenAddress || "",
-        platformWalletSetting.value || ""
+        platformWalletSetting.value
       );
 
       if (!verification.success) {
         return res.status(400).json({ error: verification.error || "Payment verification failed" });
       }
+
+      // Security: Store used transaction to prevent reuse
+      await storage.createUsedTransaction({
+        txHash,
+        network: NETWORK,
+        purpose: 'account_activation',
+        wallet,
+        amount: verification.amount || "0",
+        tokenAddress: networkFee.tokenAddress,
+        blockNumber: verification.blockNumber
+      });
 
       // Activate account
       await storage.updateAccount(wallet, {
@@ -532,6 +560,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true,
         verified: true,
         amount: verification.amount,
+        confirmations: verification.confirmations,
+        blockNumber: verification.blockNumber,
         message: "Account activated successfully"
       });
     } catch (error) {
@@ -821,16 +851,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Direct payment activation (protected - requires authentication)
+  // SECURED: Direct payment activation (protected - requires authentication)
+  // Previously CRITICAL VULNERABILITY - now uses proper blockchain verification
   app.post("/api/direct-activate", accountRateLimit, authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
-      const { network, txHash } = req.body;
+      const { txHash } = req.body;
       
       // Security: Use authenticated wallet instead of trusting client data
       const wallet = req.userWallet;
       
-      if (!network || !txHash) {
-        return res.status(400).json({ error: "Network and transaction hash are required" });
+      if (!txHash) {
+        return res.status(400).json({ error: "Transaction hash is required" });
+      }
+
+      // Security: Validate transaction hash format
+      if (!/^0x[a-fA-F0-9]{64}$/.test(txHash)) {
+        return res.status(400).json({ error: "Invalid transaction hash format" });
+      }
+
+      // Security: Check transaction idempotency - prevent replay attacks
+      const transactionAlreadyUsed = await storage.isTransactionUsed(txHash);
+      if (transactionAlreadyUsed) {
+        return res.status(409).json({ 
+          error: "Transaction hash already processed", 
+          code: "TRANSACTION_ALREADY_USED"
+        });
       }
 
       // Check if account exists, create if not
@@ -846,15 +891,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Account is already active" });
       }
 
-      // Get network fee for response
+      // Security: Hardcode Ethereum mainnet and server-side configuration
+      const NETWORK = 'ethereum';
+      
+      // Get Ethereum network fee (server-side configuration)
       const networkFees = await storage.getActiveNetworkFees();
-      const networkFee = networkFees.find(fee => fee.network === network);
+      const networkFee = networkFees.find(fee => fee.network === NETWORK);
       
       if (!networkFee) {
-        return res.status(400).json({ error: "Network fee not found" });
+        return res.status(500).json({ error: "Ethereum network fee not configured" });
       }
 
-      // Activate account immediately (trust frontend MetaMask transaction)
+      // Get Ethereum platform wallet address (server-side configuration)
+      const settings = await storage.getPlatformSettings("payment");
+      const platformWalletSetting = settings.find(s => s.key === "ethereum_wallet_address");
+      
+      if (!platformWalletSetting?.value) {
+        return res.status(500).json({ error: "Ethereum platform wallet not configured" });
+      }
+
+      // SECURITY: Now verify payment using enhanced blockchain verification with confirmations
+      // Previously this endpoint trusted client without ANY verification - CRITICAL VULNERABILITY FIXED
+      const { verifyPayment } = await import("./blockchain");
+      const verification = await verifyPayment(
+        NETWORK,
+        txHash,
+        networkFee.amount || "0",
+        networkFee.tokenAddress || "",
+        platformWalletSetting.value
+      );
+
+      if (!verification.success) {
+        return res.status(400).json({ error: verification.error || "Payment verification failed" });
+      }
+
+      // Security: Store used transaction to prevent reuse
+      await storage.createUsedTransaction({
+        txHash,
+        network: NETWORK,
+        purpose: 'account_activation',
+        wallet,
+        amount: verification.amount || "0",
+        tokenAddress: networkFee.tokenAddress,
+        blockNumber: verification.blockNumber
+      });
+
+      // Activate account (now with proper verification)
       await storage.updateAccount(wallet, {
         active: true,
         activationTxHash: txHash,
@@ -864,7 +946,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         success: true,
         verified: true,
-        amount: networkFee.amount,
+        amount: verification.amount,
+        confirmations: verification.confirmations,
+        blockNumber: verification.blockNumber,
         tokenSymbol: networkFee.tokenSymbol,
         txHash: txHash,
         message: "Account activated successfully"
@@ -932,31 +1016,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!campaignData.collateralTxHash) {
           return res.status(400).json({ error: "Collateral transaction hash is required" });
         }
+
+        // Security: Validate transaction hash format
+        if (!/^0x[a-fA-F0-9]{64}$/.test(campaignData.collateralTxHash)) {
+          return res.status(400).json({ error: "Invalid collateral transaction hash format" });
+        }
+
+        // Security: Check transaction idempotency - prevent replay attacks for collateral
+        const transactionAlreadyUsed = await storage.isTransactionUsed(campaignData.collateralTxHash);
+        if (transactionAlreadyUsed) {
+          return res.status(409).json({ 
+            error: "Collateral transaction hash already processed", 
+            code: "TRANSACTION_ALREADY_USED"
+          });
+        }
         
-        // Get platform wallet address for Ethereum
+        // Security: Hardcode Ethereum mainnet
+        const NETWORK = 'ethereum';
+        
+        // Get platform wallet address for Ethereum (server-side configuration)
         const paymentSettings = await storage.getPlatformSettings("payment");
         const platformWalletSetting = paymentSettings.find(s => s.key === "ethereum_wallet_address");
         
         if (!platformWalletSetting?.value) {
-          return res.status(500).json({ error: "Platform wallet address not configured" });
+          return res.status(500).json({ error: "Ethereum platform wallet not configured" });
         }
+
+        // Security: Use server-side token configuration instead of hardcoded address
+        const tokenSettings = await storage.getPlatformSettings("payment");
+        const usdtContractSetting = tokenSettings.find(s => s.key === "ethereum_usdt_contract");
+        const usdtContract = usdtContractSetting?.value || "0xdAC17F958D2ee523a2206206994597C13D831ec7";
         
-        // Verify collateral payment on blockchain (instead of trusting client)
+        // Verify collateral payment using enhanced blockchain verification with confirmations
         try {
           const { verifyPayment } = await import("./blockchain");
           const verification = await verifyPayment(
-            'ethereum',
+            NETWORK,
             campaignData.collateralTxHash,
             requiredCollateral.toString(),
-            '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT contract
+            usdtContract,
             platformWalletSetting.value
           );
           
           if (!verification.success) {
             return res.status(400).json({ 
-              error: `Collateral payment verification failed. Required: ${requiredCollateral} USDT` 
+              error: `Collateral payment verification failed: ${verification.error}. Required: ${requiredCollateral} USDT with minimum 3 confirmations.` 
             });
           }
+
+          // Security: Store used transaction to prevent reuse
+          await storage.createUsedTransaction({
+            txHash: campaignData.collateralTxHash,
+            network: NETWORK,
+            purpose: 'campaign_collateral',
+            wallet: req.userWallet,
+            amount: verification.amount || requiredCollateral.toString(),
+            tokenAddress: usdtContract,
+            blockNumber: verification.blockNumber
+          });
           
           // Set collateral as paid after successful verification
           campaignData.collateralPaid = true;
@@ -965,7 +1082,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } catch (error) {
           console.error('Collateral verification error:', error);
           return res.status(400).json({ 
-            error: `Failed to verify collateral payment. Please ensure you sent ${requiredCollateral} USDT to the platform wallet.` 
+            error: `Failed to verify collateral payment: ${error}. Please ensure you sent ${requiredCollateral} USDT to the platform wallet with sufficient confirmations.` 
           });
         }
       }

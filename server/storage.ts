@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, desc, and, sql, gt } from "drizzle-orm";
+import { eq, desc, and, sql, gt, or } from "drizzle-orm";
 import {
   type Admin, type InsertAdmin,
   type PlatformSetting, type InsertPlatformSetting,
@@ -21,6 +21,7 @@ import {
   type PaymentAttempt, type InsertPaymentAttempt,
   type UserNonce, type InsertUserNonce,
   type UserSession, type InsertUserSession,
+  type UsedTransaction, type InsertUsedTransaction,
   admins,
   platformSettings,
   networkFees,
@@ -41,6 +42,7 @@ import {
   paymentAttempts,
   userNonces,
   userSessions,
+  usedTransactions,
 } from "../shared/schema";
 
 export interface IStorage {
@@ -64,6 +66,11 @@ export interface IStorage {
   invalidateUserSession(sessionId: string): Promise<void>;
   invalidateAllUserSessions(wallet: string): Promise<void>;
   cleanupExpiredSessions(): Promise<void>;
+
+  // Transaction Idempotency (Security)
+  createUsedTransaction(transaction: InsertUsedTransaction): Promise<UsedTransaction>;
+  isTransactionUsed(txHash: string): Promise<boolean>;
+  getUsedTransaction(txHash: string): Promise<UsedTransaction | undefined>;
 
   // Platform Settings
   getPlatformSettings(category?: string): Promise<PlatformSetting[]>;
@@ -1331,6 +1338,24 @@ export class DatabaseStorage implements IStorage {
         eq(userSessions.active, false),
         sql`${userSessions.expiresAt} < NOW()`
       ));
+  }
+
+  // Transaction Idempotency Implementation (Security)
+  async createUsedTransaction(transaction: InsertUsedTransaction): Promise<UsedTransaction> {
+    const [newTransaction] = await db.insert(usedTransactions).values(transaction).returning();
+    return newTransaction;
+  }
+
+  async isTransactionUsed(txHash: string): Promise<boolean> {
+    const [existingTx] = await db.select().from(usedTransactions)
+      .where(eq(usedTransactions.txHash, txHash));
+    return !!existingTx;
+  }
+
+  async getUsedTransaction(txHash: string): Promise<UsedTransaction | undefined> {
+    const [transaction] = await db.select().from(usedTransactions)
+      .where(eq(usedTransactions.txHash, txHash));
+    return transaction || undefined;
   }
 }
 

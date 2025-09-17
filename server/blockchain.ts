@@ -186,7 +186,10 @@ export const TOKENS = new Proxy(_DEPRECATED_TOKENS, {
 });
 
 /**
- * Verify a payment transaction
+ * Verify a payment transaction with enhanced security
+ * - Requires minimum 3 confirmations
+ * - Validates chainId for cross-chain attack prevention
+ * - Enforces Ethereum mainnet only
  */
 export async function verifyPayment(
   network: string,
@@ -200,8 +203,15 @@ export async function verifyPayment(
   amount?: string;
   from?: string;
   to?: string;
+  blockNumber?: number;
+  confirmations?: number;
 }> {
   try {
+    // Security: Enforce Ethereum mainnet only
+    if (network !== 'ethereum') {
+      return { success: false, error: "Only Ethereum mainnet is supported" };
+    }
+
     const networkConfig = await getNetworkConfig();
     
     if (!networkConfig[network]) {
@@ -224,6 +234,25 @@ export async function verifyPayment(
     const tx = await provider.getTransaction(txHash);
     if (!tx) {
       return { success: false, error: "Transaction details not found" };
+    }
+
+    // Security: Validate chainId to prevent cross-chain attacks
+    if (tx.chainId !== 1) {
+      return { 
+        success: false, 
+        error: `Invalid chainId. Expected Ethereum mainnet (1), got ${tx.chainId}` 
+      };
+    }
+
+    // Security: Check minimum confirmations (3 required)
+    const currentBlock = await provider.getBlockNumber();
+    const confirmations = currentBlock - (receipt.blockNumber || 0);
+    
+    if (confirmations < 3) {
+      return { 
+        success: false, 
+        error: `Insufficient confirmations. Required: 3, Current: ${confirmations}. Please wait for more confirmations.` 
+      };
     }
 
     // For ERC-20 tokens, check transfer events in logs
@@ -276,7 +305,9 @@ export async function verifyPayment(
         success: true,
         amount: formattedAmount,
         from: parsed.args.from,
-        to: parsed.args.to
+        to: parsed.args.to,
+        blockNumber: receipt.blockNumber || 0,
+        confirmations
       };
     }
 
@@ -300,7 +331,9 @@ export async function verifyPayment(
       success: true,
       amount,
       from: tx.from,
-      to: tx.to
+      to: tx.to,
+      blockNumber: receipt.blockNumber || 0,
+      confirmations
     };
 
   } catch (error) {

@@ -319,10 +319,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create account (public)
-  app.post("/api/create-account", async (req, res) => {
+  // Create account (protected - requires authentication)
+  app.post("/api/create-account", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
-      const accountData = insertAccountSchema.parse(req.body);
+      // Security: Use authenticated wallet instead of trusting client data
+      const accountData = {
+        wallet: req.userWallet, // Use authenticated wallet address
+        active: req.body.active || false, // Allow other fields from body
+        referredBy: req.body.referredBy || null
+      };
+      
       const existingAccount = await storage.getAccount(accountData.wallet);
       
       if (existingAccount) {
@@ -341,13 +347,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Activate account with payment verification (public)
-  app.post("/api/activate-account", async (req, res) => {
+  // Activate account with payment verification (protected - requires authentication)
+  app.post("/api/activate-account", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
-      const { wallet, txHash, network } = req.body;
+      const { txHash, network } = req.body;
       
-      if (!wallet || !txHash || !network) {
-        return res.status(400).json({ error: "Wallet, transaction hash, and network are required" });
+      // Security: Use authenticated wallet instead of trusting client data
+      const wallet = req.userWallet;
+      
+      if (!txHash || !network) {
+        return res.status(400).json({ error: "Transaction hash and network are required" });
       }
 
       // Check if account exists
@@ -428,15 +437,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Affiliate Application endpoints
   
-  // Submit affiliate application
-  app.post("/api/affiliate/apply", async (req, res) => {
+  // Submit affiliate application (protected - requires authentication)
+  app.post("/api/affiliate/apply", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
-      const { wallet, applicationText } = req.body;
+      const { applicationText } = req.body;
+      
+      // Security: Use authenticated wallet instead of trusting client data
+      const wallet = req.userWallet;
 
-      if (!wallet || !applicationText) {
+      if (!applicationText) {
         return res.status(400).json({ 
           success: false, 
-          message: "Wallet address and application text are required" 
+          message: "Application text is required" 
         });
       }
 
@@ -640,14 +652,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Register with referral code (public)
-  app.post("/api/register-with-referral", async (req, res) => {
+  // Register with referral code (protected - requires authentication)
+  app.post("/api/register-with-referral", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
-      const { wallet, referralCode } = req.body;
+      const { referralCode } = req.body;
       
-      if (!wallet) {
-        return res.status(400).json({ error: "Wallet is required" });
-      }
+      // Security: Use authenticated wallet instead of trusting client data
+      const wallet = req.userWallet;
 
       // Check if account already exists
       const existingAccount = await storage.getAccount(wallet);
@@ -683,13 +694,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Direct payment activation (new system - no transaction hash verification needed)
-  app.post("/api/direct-activate", async (req, res) => {
+  // Direct payment activation (protected - requires authentication)
+  app.post("/api/direct-activate", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
-      const { wallet, network, txHash } = req.body;
+      const { network, txHash } = req.body;
       
-      if (!wallet || !network || !txHash) {
-        return res.status(400).json({ error: "Wallet, network, and transaction hash are required" });
+      // Security: Use authenticated wallet instead of trusting client data
+      const wallet = req.userWallet;
+      
+      if (!network || !txHash) {
+        return res.status(400).json({ error: "Network and transaction hash are required" });
       }
 
       // Check if account exists, create if not
@@ -838,10 +852,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Join daily reward (free for everyone, once per day)
-  app.post("/api/join-daily-reward", async (req, res) => {
+  // Join daily reward (protected - requires authentication)
+  app.post("/api/join-daily-reward", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
-      const { wallet } = req.body;
+      // Security: Use authenticated wallet instead of trusting client data
+      const wallet = req.userWallet;
       const today = new Date().toISOString().split('T')[0];
       
       // Check if entry already exists for today

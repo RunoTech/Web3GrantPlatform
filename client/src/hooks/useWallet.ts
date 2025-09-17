@@ -152,53 +152,41 @@ export function useWallet() {
     try {
       const connectedAddress = await connectWallet(selectedWalletId);
       if (connectedAddress) {
-        // Check if referral code exists in localStorage
-        const referralCode = localStorage.getItem('referralCode');
-        
-        // Try to create account with referral if available
-        if (referralCode) {
-          try {
-            await apiRequest("POST", "/api/register-with-referral", {
-              wallet: connectedAddress,
-              referralCode: referralCode,
-            });
-            // Clear referral code after successful registration
-            localStorage.removeItem('referralCode');
-          } catch (error: any) {
-            // If referral registration fails, try regular account creation
-            try {
-              await apiRequest("POST", "/api/create-account", {
-                wallet: connectedAddress,
-              });
-            } catch (createError) {
-              // Account might already exist, which is fine
-              console.log("Account creation note:", createError);
-            }
-          }
-        } else {
-          // No referral code, create regular account
-          try {
-            await apiRequest("POST", "/api/create-account", {
-              wallet: connectedAddress,
-            });
-          } catch (error) {
-            // Account might already exist, which is fine
-            console.log("Account creation note:", error);
-          }
-        }
-
         setAddress(connectedAddress);
         setIsConnected(true);
         setSelectedWalletId(selectedWalletId || 'metamask');
         
-        // Step 2: Authenticate the wallet with SIWE
+        // SECURITY FIX: Authenticate FIRST, then create account
+        // Step 1: Authenticate the wallet with SIWE
         const authSuccess = await authenticate(connectedAddress);
         
         if (authSuccess) {
-          // Step 3: Auto participate in daily reward if authenticated
+          // Step 2: Create account after authentication (now secure)
+          const referralCode = localStorage.getItem('referralCode');
+          
+          try {
+            if (referralCode) {
+              // Create account with referral using authenticated endpoint
+              await apiRequest("POST", "/api/register-with-referral", {
+                referralCode: referralCode, // wallet is taken from authenticated session
+              });
+              // Clear referral code after successful registration
+              localStorage.removeItem('referralCode');
+            } else {
+              // Create regular account using authenticated endpoint
+              await apiRequest("POST", "/api/create-account", {
+                // wallet is taken from authenticated session
+              });
+            }
+          } catch (error: any) {
+            // Account might already exist, which is fine
+            console.log("Account creation note:", error);
+          }
+          
+          // Step 3: Auto participate in daily reward
           try {
             const dailyResponse = await apiRequest("POST", "/api/auto-daily-entry", {
-              wallet: connectedAddress
+              wallet: connectedAddress // This endpoint validates wallet matches authenticated user
             });
             
             if ((dailyResponse as any).success) {
@@ -221,10 +209,13 @@ export function useWallet() {
           }
         } else {
           toast({
-            title: "Partial Success",
-            description: "Wallet connected but authentication failed. Some features may be limited.",
+            title: "Connection Failed",
+            description: "Wallet connected but authentication failed. Please try again.",
             variant: "destructive",
           });
+          // Clear connection state if authentication fails
+          setAddress(null);
+          setIsConnected(false);
         }
       }
     } catch (error: any) {

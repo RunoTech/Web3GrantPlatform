@@ -66,6 +66,42 @@ async function authenticateAdmin(req: AuthenticatedRequest, res: any, next: any)
   }
 }
 
+// User authentication middleware
+interface UserAuthenticatedRequest extends Request {
+  userWallet: string;
+  sessionId: string;
+}
+
+async function authenticateUser(req: UserAuthenticatedRequest, res: any, next: any) {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ error: "Authentication required. Please connect your wallet and sign the message." });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET_VALIDATED) as any;
+    if (!decoded.sessionId || !decoded.wallet) {
+      return res.status(401).json({ error: "Invalid authentication token" });
+    }
+
+    // Verify session is still valid
+    const session = await storage.getUserSession(decoded.sessionId);
+    if (!session || !session.active || session.expiresAt <= new Date()) {
+      return res.status(401).json({ error: "Session expired. Please reconnect your wallet." });
+    }
+
+    // Update last used
+    await storage.updateSessionLastUsed(decoded.sessionId);
+
+    req.userWallet = session.wallet;
+    req.sessionId = session.sessionId;
+    next();
+  } catch (error) {
+    console.error("User auth error:", error);
+    res.status(401).json({ error: "Invalid authentication token" });
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Public API Routes (existing functionality)
   
@@ -229,7 +265,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     timestamp: z.number().optional()
   });
   
-  app.post("/api/auto-daily-entry", async (req, res) => {
+  app.post("/api/auto-daily-entry", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
       const validation = autoDailyEntrySchema.safeParse(req.body);
       if (!validation.success) {
@@ -237,6 +273,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const { wallet } = validation.data;
+      
+      // Security: Verify wallet ownership - only authenticated user can participate for their own wallet
+      if (wallet.toLowerCase() !== req.userWallet.toLowerCase()) {
+        return res.status(403).json({ 
+          error: "Daily participation can only be done for your authenticated wallet address",
+          expected: req.userWallet,
+          provided: wallet 
+        });
+      }
 
       const today = new Date().toISOString().split('T')[0];
       const canParticipate = await storage.canParticipateDaily(wallet, today);
@@ -690,9 +735,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create campaign (public - but requires active account)
-  app.post("/api/create-campaign", async (req, res) => {
+  app.post("/api/create-campaign", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
       const campaignData = req.body;
+      
+      // Security: Verify wallet ownership - only authenticated user can create campaigns for their own wallet
+      if (!campaignData.ownerWallet || campaignData.ownerWallet.toLowerCase() !== req.userWallet.toLowerCase()) {
+        return res.status(403).json({ 
+          error: "Campaign can only be created for your authenticated wallet address",
+          expected: req.userWallet,
+          provided: campaignData.ownerWallet 
+        });
+      }
       
       // Validate FUND/DONATE rules
       if (campaignData.campaignType === "FUND" && campaignData.creatorType !== "company") {
@@ -835,9 +889,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Record donation (public)
-  app.post("/api/record-donation", async (req, res) => {
+  app.post("/api/record-donation", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
       const donationData = insertDonationSchema.parse(req.body);
+      
+      // Security: Verify wallet ownership - only authenticated user can record donations for their own wallet
+      if (!donationData.donorWallet || donationData.donorWallet.toLowerCase() !== req.userWallet.toLowerCase()) {
+        return res.status(403).json({ 
+          error: "Donation can only be recorded for your authenticated wallet address",
+          expected: req.userWallet,
+          provided: donationData.donorWallet 
+        });
+      }
+      
       const donation = await storage.createDonation(donationData);
       
       // Activate affiliate system for donor (if first donation/campaign)
@@ -876,12 +940,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get payment attempts for a campaign (public) - for campaign owners
-  app.get("/api/campaign/:id/payment-attempts", async (req: Request, res: any) => {
+  // Get payment attempts for a campaign (protected) - for campaign owners only
+  app.get("/api/campaign/:id/payment-attempts", authenticateUser, async (req: UserAuthenticatedRequest, res: any) => {
     try {
       const campaignId = parseInt(req.params.id);
       if (isNaN(campaignId)) {
         return res.status(400).json({ error: "Invalid campaign ID" });
+      }
+      
+      // Security: Verify campaign ownership - only campaign owner can see payment attempts
+      const campaign = await storage.getCampaign(campaignId);
+      if (!campaign) {
+        return res.status(404).json({ error: "Campaign not found" });
+      }
+      
+      if (campaign.ownerWallet.toLowerCase() !== req.userWallet.toLowerCase()) {
+        return res.status(403).json({ 
+          error: "Access denied. Payment attempts can only be viewed by campaign owner",
+          expected: campaign.ownerWallet,
+          provided: req.userWallet 
+        });
       }
       
       const attempts = await storage.getPaymentAttemptsByCampaign(campaignId);
@@ -907,12 +985,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get payment attempts for a wallet (public) - for users
-  app.get("/api/wallet/:wallet/payment-attempts", async (req: Request, res: any) => {
+  // Get payment attempts for a wallet (protected) - for wallet owners only
+  app.get("/api/wallet/:wallet/payment-attempts", authenticateUser, async (req: UserAuthenticatedRequest, res: any) => {
     try {
       const wallet = req.params.wallet;
       if (!wallet || wallet.length !== 42 || !wallet.startsWith('0x')) {
         return res.status(400).json({ error: "Invalid wallet address" });
+      }
+      
+      // Security: Verify wallet ownership - only wallet owner can see their payment attempts
+      if (wallet.toLowerCase() !== req.userWallet.toLowerCase()) {
+        return res.status(403).json({ 
+          error: "Access denied. Payment attempts can only be viewed by wallet owner",
+          expected: req.userWallet,
+          provided: wallet 
+        });
       }
       
       const attempts = await storage.getPaymentAttemptsByWallet(wallet);
@@ -1280,6 +1367,152 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error verifying transaction:", error);
       res.status(500).json({ error: "Failed to verify transaction" });
+    }
+  });
+
+  // ===== USER AUTHENTICATION ENDPOINTS (SIWE) =====
+  
+  // Generate nonce for wallet signature
+  app.post("/auth/nonce", async (req, res) => {
+    try {
+      const { wallet } = req.body;
+      
+      if (!wallet || !ethers.isAddress(wallet)) {
+        return res.status(400).json({ error: "Valid wallet address is required" });
+      }
+
+      // Clean up expired nonces first
+      await storage.cleanupExpiredNonces();
+
+      // Generate random nonce
+      const nonce = ethers.hexlify(ethers.randomBytes(16));
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+      const userNonce = await storage.createUserNonce({
+        wallet: wallet.toLowerCase(),
+        nonce,
+        expiresAt,
+        used: false
+      });
+
+      res.json({ 
+        nonce: userNonce.nonce,
+        message: `Welcome to DUXXAN!\n\nPlease sign this message to authenticate your wallet.\n\nWallet: ${wallet.toLowerCase()}\nNonce: ${userNonce.nonce}\nTimestamp: ${new Date().toISOString()}\n\nThis request will not trigger a blockchain transaction or cost any gas fees.`
+      });
+    } catch (error) {
+      console.error("Error generating nonce:", error);
+      res.status(500).json({ error: "Failed to generate authentication nonce" });
+    }
+  });
+
+  // Verify signature and create session
+  app.post("/auth/verify", async (req, res) => {
+    try {
+      const { wallet, signature, nonce } = req.body;
+      
+      if (!wallet || !signature || !nonce) {
+        return res.status(400).json({ error: "Wallet address, signature, and nonce are required" });
+      }
+
+      if (!ethers.isAddress(wallet)) {
+        return res.status(400).json({ error: "Invalid wallet address format" });
+      }
+
+      // Find the nonce
+      const userNonce = await storage.getUserNonce(nonce);
+      if (!userNonce) {
+        return res.status(400).json({ error: "Invalid or expired nonce" });
+      }
+
+      // Verify that nonce belongs to this wallet
+      if (userNonce.wallet !== wallet.toLowerCase()) {
+        return res.status(400).json({ error: "Nonce does not match wallet address" });
+      }
+
+      // Reconstruct the message that was signed
+      const message = `Welcome to DUXXAN!\n\nPlease sign this message to authenticate your wallet.\n\nWallet: ${wallet.toLowerCase()}\nNonce: ${nonce}\nTimestamp: ${new Date(userNonce.createdAt).toISOString()}\n\nThis request will not trigger a blockchain transaction or cost any gas fees.`;
+
+      try {
+        // Verify the signature
+        const recoveredAddress = ethers.verifyMessage(message, signature);
+        
+        if (recoveredAddress.toLowerCase() !== wallet.toLowerCase()) {
+          return res.status(401).json({ error: "Invalid signature - wallet verification failed" });
+        }
+      } catch (sigError) {
+        console.error("Signature verification error:", sigError);
+        return res.status(401).json({ error: "Invalid signature format" });
+      }
+
+      // Mark nonce as used
+      await storage.markNonceAsUsed(userNonce.id);
+
+      // Create session
+      const sessionId = ethers.hexlify(ethers.randomBytes(32));
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      const session = await storage.createUserSession({
+        sessionId,
+        wallet: wallet.toLowerCase(),
+        expiresAt,
+        active: true,
+        lastUsedAt: new Date()
+      });
+
+      // Create JWT token
+      const token = jwt.sign(
+        { 
+          sessionId: session.sessionId, 
+          wallet: session.wallet,
+          type: 'user'
+        },
+        JWT_SECRET_VALIDATED,
+        { expiresIn: '24h' }
+      );
+
+      res.json({ 
+        success: true, 
+        token, 
+        wallet: session.wallet,
+        expiresAt: session.expiresAt,
+        message: "Successfully authenticated" 
+      });
+
+    } catch (error) {
+      console.error("Error verifying signature:", error);
+      res.status(500).json({ error: "Failed to verify authentication" });
+    }
+  });
+
+  // Logout - invalidate session
+  app.post("/auth/logout", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      await storage.invalidateUserSession(req.sessionId);
+      res.json({ success: true, message: "Successfully logged out" });
+    } catch (error) {
+      console.error("Error during logout:", error);
+      res.status(500).json({ error: "Failed to logout" });
+    }
+  });
+
+  // Get current user session info
+  app.get("/auth/me", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const session = await storage.getUserSession(req.sessionId);
+      if (!session) {
+        return res.status(401).json({ error: "Invalid session" });
+      }
+
+      res.json({
+        wallet: session.wallet,
+        sessionId: session.sessionId,
+        expiresAt: session.expiresAt,
+        lastUsedAt: session.lastUsedAt,
+        authenticated: true
+      });
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+      res.status(500).json({ error: "Failed to fetch user information" });
     }
   });
 

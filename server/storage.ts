@@ -19,6 +19,8 @@ import {
   type DailyReward, type InsertDailyReward,
   type DailyParticipant, type InsertDailyParticipant,
   type PaymentAttempt, type InsertPaymentAttempt,
+  type UserNonce, type InsertUserNonce,
+  type UserSession, type InsertUserSession,
   admins,
   platformSettings,
   networkFees,
@@ -37,6 +39,8 @@ import {
   dailyRewards,
   dailyParticipants,
   paymentAttempts,
+  userNonces,
+  userSessions,
 } from "../shared/schema";
 
 export interface IStorage {
@@ -47,6 +51,19 @@ export interface IStorage {
   createAdmin(admin: InsertAdmin): Promise<Admin>;
   updateAdmin(id: number, updates: Partial<Admin>): Promise<void>;
   getAllAdmins(): Promise<Admin[]>;
+
+  // User Authentication (SIWE)
+  createUserNonce(nonce: InsertUserNonce): Promise<UserNonce>;
+  getUserNonce(nonce: string): Promise<UserNonce | undefined>;
+  markNonceAsUsed(id: number): Promise<void>;
+  cleanupExpiredNonces(): Promise<void>;
+  createUserSession(session: InsertUserSession): Promise<UserSession>;
+  getUserSession(sessionId: string): Promise<UserSession | undefined>;
+  getUserSessionsByWallet(wallet: string): Promise<UserSession[]>;
+  updateSessionLastUsed(sessionId: string): Promise<void>;
+  invalidateUserSession(sessionId: string): Promise<void>;
+  invalidateAllUserSessions(wallet: string): Promise<void>;
+  cleanupExpiredSessions(): Promise<void>;
 
   // Platform Settings
   getPlatformSettings(category?: string): Promise<PlatformSetting[]>;
@@ -1216,6 +1233,96 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(paymentAttempts)
       .where(eq(paymentAttempts.campaignId, campaignId))
       .orderBy(desc(paymentAttempts.attemptedAt));
+  }
+
+  // ===== USER AUTHENTICATION (SIWE) IMPLEMENTATIONS =====
+  
+  // User Nonces Management
+  async createUserNonce(nonce: InsertUserNonce): Promise<UserNonce> {
+    const [newNonce] = await db.insert(userNonces).values(nonce).returning();
+    return newNonce;
+  }
+
+  async getUserNonce(nonce: string): Promise<UserNonce | undefined> {
+    const [userNonce] = await db.select().from(userNonces)
+      .where(and(
+        eq(userNonces.nonce, nonce),
+        eq(userNonces.used, false),
+        gt(userNonces.expiresAt, new Date())
+      ));
+    return userNonce || undefined;
+  }
+
+  async markNonceAsUsed(id: number): Promise<void> {
+    await db.update(userNonces)
+      .set({ used: true })
+      .where(eq(userNonces.id, id));
+  }
+
+  async cleanupExpiredNonces(): Promise<void> {
+    await db.delete(userNonces)
+      .where(and(
+        eq(userNonces.used, true)
+      ));
+    
+    // Also cleanup expired unused nonces
+    await db.delete(userNonces)
+      .where(and(
+        eq(userNonces.used, false),
+        sql`${userNonces.expiresAt} < NOW()`
+      ));
+  }
+
+  // User Sessions Management
+  async createUserSession(session: InsertUserSession): Promise<UserSession> {
+    const [newSession] = await db.insert(userSessions).values(session).returning();
+    return newSession;
+  }
+
+  async getUserSession(sessionId: string): Promise<UserSession | undefined> {
+    const [session] = await db.select().from(userSessions)
+      .where(and(
+        eq(userSessions.sessionId, sessionId),
+        eq(userSessions.active, true),
+        gt(userSessions.expiresAt, new Date())
+      ));
+    return session || undefined;
+  }
+
+  async getUserSessionsByWallet(wallet: string): Promise<UserSession[]> {
+    return await db.select().from(userSessions)
+      .where(and(
+        eq(userSessions.wallet, wallet),
+        eq(userSessions.active, true),
+        gt(userSessions.expiresAt, new Date())
+      ))
+      .orderBy(desc(userSessions.createdAt));
+  }
+
+  async updateSessionLastUsed(sessionId: string): Promise<void> {
+    await db.update(userSessions)
+      .set({ lastUsedAt: new Date() })
+      .where(eq(userSessions.sessionId, sessionId));
+  }
+
+  async invalidateUserSession(sessionId: string): Promise<void> {
+    await db.update(userSessions)
+      .set({ active: false })
+      .where(eq(userSessions.sessionId, sessionId));
+  }
+
+  async invalidateAllUserSessions(wallet: string): Promise<void> {
+    await db.update(userSessions)
+      .set({ active: false })
+      .where(eq(userSessions.wallet, wallet));
+  }
+
+  async cleanupExpiredSessions(): Promise<void> {
+    await db.delete(userSessions)
+      .where(or(
+        eq(userSessions.active, false),
+        sql`${userSessions.expiresAt} < NOW()`
+      ));
   }
 }
 

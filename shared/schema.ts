@@ -66,6 +66,37 @@ export const networkFees = pgTable("network_fees", {
   updatedBy: integer("updated_by").references(() => admins.id),
 });
 
+// User authentication nonces - for SIWE (Sign-In With Ethereum)
+export const userNonces = pgTable("user_nonces", {
+  id: serial("id").primaryKey(),
+  wallet: varchar("wallet", { length: 42 }).notNull(),
+  nonce: varchar("nonce", { length: 64 }).notNull().unique(), // Random nonce for signature
+  used: boolean("used").default(false),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_user_nonces_wallet").on(table.wallet),
+  index("idx_user_nonces_nonce").on(table.nonce),
+  index("idx_user_nonces_expires").on(table.expiresAt),
+]);
+
+// User sessions - JWT alternative for authenticated users
+export const userSessions = pgTable("user_sessions", {
+  id: serial("id").primaryKey(),
+  sessionId: varchar("session_id", { length: 128 }).notNull().unique(),
+  wallet: varchar("wallet", { length: 42 }).notNull(),
+  active: boolean("active").default(true),
+  ipAddress: varchar("ip_address", { length: 45 }), // Support IPv6
+  userAgent: text("user_agent"),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  lastUsedAt: timestamp("last_used_at").defaultNow(),
+}, (table) => [
+  index("idx_user_sessions_wallet").on(table.wallet),
+  index("idx_user_sessions_session_id").on(table.sessionId),
+  index("idx_user_sessions_expires").on(table.expiresAt),
+]);
+
 // User accounts
 export const accounts = pgTable("accounts", {
   id: serial("id").primaryKey(),
@@ -517,6 +548,17 @@ export const insertPaymentAttemptSchema = createInsertSchema(paymentAttempts).om
   attemptedAt: true,
 });
 
+export const insertUserNonceSchema = createInsertSchema(userNonces).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserSessionSchema = createInsertSchema(userSessions).omit({
+  id: true,
+  createdAt: true,
+  lastUsedAt: true,
+});
+
 // Types
 export type Admin = typeof admins.$inferSelect;
 export type InsertAdmin = z.infer<typeof insertAdminSchema>;
@@ -554,3 +596,7 @@ export type DailyParticipant = typeof dailyParticipants.$inferSelect;
 export type InsertDailyParticipant = z.infer<typeof insertDailyParticipantSchema>;
 export type PaymentAttempt = typeof paymentAttempts.$inferSelect;
 export type InsertPaymentAttempt = z.infer<typeof insertPaymentAttemptSchema>;
+export type UserNonce = typeof userNonces.$inferSelect;
+export type InsertUserNonce = z.infer<typeof insertUserNonceSchema>;
+export type UserSession = typeof userSessions.$inferSelect;
+export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;

@@ -13,7 +13,11 @@ import {
   insertPlatformSettingSchema,
   insertAdminSchema,
   insertPaymentAttemptSchema,
+  insertUserNonceSchema,
+  insertUserSessionSchema,
   type Admin,
+  type UserNonce,
+  type UserSession,
 } from "../shared/schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";

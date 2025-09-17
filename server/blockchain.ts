@@ -36,7 +36,7 @@ export async function getNetworkConfig() {
       return acc;
     }, {} as Record<string, string>);
     
-    // Build network config with database settings and fallbacks
+    // Build network config with database settings and fallbacks - ETHEREUM ONLY
     networkConfigCache = {
       ethereum: {
         name: "Ethereum Mainnet",
@@ -47,23 +47,12 @@ export async function getNetworkConfig() {
         nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
         timeout: parseInt(settingsMap['rpc_timeout_ms'] || '10000'),
         monitoringEnabled: settingsMap['blockchain_monitoring_enabled'] === 'true'
-      },
-      bsc: {
-        name: "BSC Mainnet",
-        chainId: 56,
-        rpcUrl: settingsMap['bsc_rpc_url'] || "https://bsc.llamarpc.com",
-        rpcBackup: settingsMap['bsc_rpc_backup'] || "https://rpc.ankr.com/bsc",
-        wsUrl: settingsMap['bsc_ws_url'] || "wss://bsc-rpc.publicnode.com",
-        nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
-        timeout: parseInt(settingsMap['rpc_timeout_ms'] || '10000'),
-        monitoringEnabled: settingsMap['blockchain_monitoring_enabled'] === 'true'
       }
     };
     
     cacheLastUpdated = now;
     console.log('🔧 Network configuration loaded from database:', {
       ethereum_rpc: networkConfigCache.ethereum.rpcUrl,
-      bsc_rpc: networkConfigCache.bsc.rpcUrl,
       monitoring: networkConfigCache.ethereum.monitoringEnabled
     });
     
@@ -72,7 +61,7 @@ export async function getNetworkConfig() {
   } catch (error) {
     console.error('⚠️  Failed to load network config from database, using fallbacks:', error);
     
-    // Return hardcoded fallbacks with BSC included if database fails
+    // Return hardcoded fallbacks - ETHEREUM ONLY
     networkConfigCache = {
       ethereum: {
         name: "Ethereum Mainnet",
@@ -81,16 +70,6 @@ export async function getNetworkConfig() {
         rpcBackup: "https://rpc.ankr.com/eth",
         wsUrl: process.env.ETH_WS_URL || "wss://ethereum-rpc.publicnode.com",
         nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-        timeout: 10000,
-        monitoringEnabled: true
-      },
-      bsc: {
-        name: "BSC Mainnet",
-        chainId: 56,
-        rpcUrl: process.env.BSC_RPC_URL || "https://bsc.llamarpc.com",
-        rpcBackup: "https://rpc.ankr.com/bsc",
-        wsUrl: process.env.BSC_WS_URL || "wss://bsc-rpc.publicnode.com",
-        nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
         timeout: 10000,
         monitoringEnabled: true
       }
@@ -147,8 +126,7 @@ export async function getPlatformWallets() {
   }, {} as Record<string, string>);
 
   return {
-    ethereum: settingsMap['ethereum_wallet_address'] || "0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8",
-    bsc: settingsMap['bsc_wallet_address'] || "0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8"
+    ethereum: settingsMap['ethereum_wallet_address'] || "0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8"
   };
 }
 
@@ -186,9 +164,6 @@ export async function getTokenAddresses() {
   return {
     ethereum: {
       USDT: settingsMap['ethereum_usdt_contract'] || "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-    },
-    bsc: {
-      USDT: settingsMap['bsc_usdt_contract'] || "0x55d398326f99059fF775485246999027B3197955"
     }
   };
 }

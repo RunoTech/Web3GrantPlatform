@@ -1,6 +1,7 @@
 import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 import { storage } from "./storage";
 import { 
   insertNetworkFeeSchema,
@@ -24,6 +25,36 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { ethers } from "ethers";
+
+// Security: HTML/XSS Sanitization utility
+function sanitizeHtml(input: string): string {
+  if (!input || typeof input !== 'string') return '';
+  return input
+    .replace(/<script[^>]*>.*?<\/script>/gi, '')
+    .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+    .replace(/<object[^>]*>.*?<\/object>/gi, '')
+    .replace(/<embed[^>]*>/gi, '')
+    .replace(/<link[^>]*>/gi, '')
+    .replace(/<meta[^>]*>/gi, '')
+    .replace(/on\w+="[^"]*"/gi, '')
+    .replace(/on\w+='[^']*'/gi, '')
+    .replace(/javascript:/gi, '')
+    .replace(/vbscript:/gi, '')
+    .replace(/data:text\/html/gi, '')
+    .trim();
+}
+
+// Campaign ownership validation helper
+async function validateCampaignOwnership(campaignId: number, userWallet: string): Promise<boolean> {
+  try {
+    const campaign = await storage.getCampaign(campaignId);
+    if (!campaign) return false;
+    return campaign.creatorWallet.toLowerCase() === userWallet.toLowerCase();
+  } catch (error) {
+    console.error('Campaign ownership validation error:', error);
+    return false;
+  }
+}
 
 // Security: JWT Secret - MUST be set in production
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -155,6 +186,33 @@ const validatePaginationParams = (req: any, res: any, next: any) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Security: Apply Helmet middleware for security headers
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://js.stripe.com", "https://checkout.stripe.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'", "https://api.stripe.com", "https://ethereum-rpc.publicnode.com", "wss://ethereum-rpc.publicnode.com"],
+        frameSrc: ["https://js.stripe.com", "https://checkout.stripe.com"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: { policy: "cross-origin" },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true
+    },
+    noSniff: true,
+    xssFilter: true,
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" }
+  }));
+  
   // Apply general rate limiting to all routes
   app.use("/api", generalApiRateLimit);
   
@@ -822,6 +880,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const campaignData = req.body;
       
+      // Security: Input Sanitization - Sanitize HTML/XSS from user inputs
+      if (campaignData.title) {
+        campaignData.title = sanitizeHtml(campaignData.title);
+      }
+      if (campaignData.description) {
+        campaignData.description = sanitizeHtml(campaignData.description);
+      }
+      if (campaignData.companyName) {
+        campaignData.companyName = sanitizeHtml(campaignData.companyName);
+      }
+      if (campaignData.companyCEO) {
+        campaignData.companyCEO = sanitizeHtml(campaignData.companyCEO);
+      }
+      
       // Security: Verify wallet ownership - only authenticated user can create campaigns for their own wallet
       if (!campaignData.ownerWallet || campaignData.ownerWallet.toLowerCase() !== req.userWallet.toLowerCase()) {
         return res.status(403).json({ 
@@ -1171,7 +1243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Get daily entries for a specific date
-  app.get("/api/youhonor/daily-entries/:date", async (req, res) => {
+  app.get("/api/youhonor/daily-entries/:date", authenticateAdmin, async (req, res) => {
     try {
       const { date } = req.params;
       const entries = await storage.getDailyEntriesByDate(date);
@@ -1183,7 +1255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Get daily winner for a specific date
-  app.get("/api/youhonor/daily-winner/:date", async (req, res) => {
+  app.get("/api/youhonor/daily-winner/:date", authenticateAdmin, async (req, res) => {
     try {
       const { date } = req.params;
       const winner = await storage.getDailyWinnerByDate(date);
@@ -1195,7 +1267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Get daily reward statistics
-  app.get("/api/youhonor/daily-stats", async (req, res) => {
+  app.get("/api/youhonor/daily-stats", authenticateAdmin, async (req, res) => {
     try {
       const stats = await storage.getDailyRewardStats();
       res.json(stats);
@@ -1239,7 +1311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Select random winner
-  app.post("/api/youhonor/select-random-winner", async (req, res) => {
+  app.post("/api/youhonor/select-random-winner", authenticateAdmin, async (req, res) => {
     try {
       const { date, amount } = req.body;
       const adminId = 1; // Default admin for demo
@@ -1392,7 +1464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Select manual winner
-  app.post("/api/youhonor/select-manual-winner", async (req, res) => {
+  app.post("/api/youhonor/select-manual-winner", authenticateAdmin, async (req, res) => {
     try {
       const { date, wallet, amount } = req.body;
       const adminId = 1; // Default admin for demo

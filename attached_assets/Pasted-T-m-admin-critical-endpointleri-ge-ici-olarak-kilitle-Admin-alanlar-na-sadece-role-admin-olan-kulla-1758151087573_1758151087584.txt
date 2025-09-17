@@ -1,0 +1,87 @@
+Tüm admin/critical endpointleri geçici olarak kilitle
+
+Admin alanlarına sadece role=admin olan kullanıcıların erişmesine izin ver. Eğer hızlı değişiklik mümkün değilse admin route’larını maintenance moduna al.
+
+Kabul kriteri: Admin route’una normal kullanıcıyla erişim denemesi erişim reddi (403) dönmeli; admin ile başarılı.
+
+Ownership kontrolü ekle (update/delete)
+
+Tüm kampanya/objekt update ve delete işlemlerinde, isteği yapan kullanıcının ilgili kaydın sahibi olduğunu veya admin olduğunu kontrol et.
+
+Kabul kriteri: Başka bir kullanıcı id’si ile güncelleme isteği 403 döndürüyor.
+
+Sunucu tarafı sanitizasyonu aktif et
+
+Campaign title/description ve kullanıcıdan gelen tüm metin alanları sunucuda sanitize edilsin; HTML/JS içerik bloke edilsin veya izin verilen temel etiketlere indirgensin.
+
+Kabul kriteri: Test olarak zararlı script içeren string kaydedilirse DB’de temizlenmiş/escaped olarak saklansın.
+
+Kritik işlemleri geçici olarak korumaya al
+
+Para çekme, transfer, admin-onay gerektiren işlemler için step-up auth (2FA veya e-posta onayı) zorunlu hale getir veya bu işlemleri kapat.
+
+Kabul kriteri: Bu işlemler 2FA/ek onay olmadan gerçekleşmiyor.
+
+Logging ve uyarı aç
+
+Admin erişimleri, ownership hataları, ödeme işlemleri ve token kullanımına ilişkin anormal faaliyetler için log + Slack/email uyarısı yapılsın.
+
+Kabul kriteri: Bir test olayı yaratıldığında belirlenen kanala uyarı gidiyor.
+
+ÖNCELİK 2 — ÖDEME DOĞRULAMA (Money-loss riski — MUST FIX)
+
+Client tarafı 'ödeme tamamlandı' bildirimlerine güvenme
+
+Kullanıcı veya frontend’den gelen “ödeme başarılı” bildirimleri kesin ödeme onayı sayılmaz.
+
+Tüm ödeme sağlayıcıları için sunucu-side doğrulama (webhook veya provider API) devreye alın
+
+Stripe, PayPal, MoonPay vb. işlemler için resmi webhook/notification doğrulaması aktif olsun ve yalnızca bu doğrulanmış event’ler sonrası uygulama içi kredi/donation işlesin.
+
+Kabul kriteri: Stripe/PayPal/MoonPay’den gelen test webhook’u sunucuda doğrulanıp kaydediliyor; client bildirimi tek başına donation yaratmıyor.
+
+On-chain/tx doğrulama (varsa)
+
+Kripto transferi ile ilgiliyse backend, işlem hash’ini provider veya node üzerinden doğrulamalı (hash var, gönderici/alıcı/amount beklenenle uyumlu).
+
+Kabul kriteri: Sahte tx hash’leri reddediliyor; gerçek tx doğrulaması işleniyor.
+
+İdempotency ve reconciliation
+
+Ödeme işlemleri idempotent olun; her ödeme için provider id, durum ve doğrulama zamanı kaydı tutuluyor.
+
+Kabul kriteri: Aynı provider-id ile ikinci kez gelen event duplicate olarak işlenmiyor.
+
+ÖNCELİK 3 — JWT & SESSION RİSKİNİ AZALT (XSS kaynaklı çalmaya karşı)
+
+LocalStorage’ta JWT saklamayı durdurun
+
+Mevcut sistemde token localStorage veya sessionStorage ise bunu derhal durdurun; migration planı hazırla.
+
+Refresh token’ları HttpOnly cookie’ye taşıyın
+
+Refresh token’lar HttpOnly, Secure, SameSite cookie olarak set edilsin; access token kısa ömürlü olsun ve mümkünse memory-only (veya kısa lived).
+
+Acil token invalidation mekanizması
+
+Acil durumda (saldırı şüphesi) tüm aktif oturumları geçersiz kılacak mekanizma (tokenVersion user field veya blacklist) devreye alınsın.
+
+Kabul kriteri: “logout all” tetiklendiğinde eski tokenler ile API erişimi reddediliyor.
+
+ÖNCELİK 4 — GENEL GÜÇLENDİRME (orta vadeli)
+
+CSP Header uygulayın
+
+Content-Security-Policy ile inline script’leri ve dış kaynakları kısıtlayın.
+
+WAF / Rate limiting
+
+Admin/auth/payment endpointlerine rate-limit ekleyin; WAF kurallarını (XSS pattern, suspicious payload) etkinleştirin.
+
+SAST/DAST pipeline
+
+CI/CD’ye otomatik güvenlik tarayıcıları ekleyin (dependency alerts, SAST/DAST).
+
+Secrets rotation
+
+JWT secret ve provider secret’larda rotasyon planı hazırlayın.

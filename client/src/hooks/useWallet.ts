@@ -14,7 +14,7 @@ export function useWallet() {
   const checkConnection = useCallback(async () => {
     try {
       const accounts = await getAccounts();
-      if (accounts.length > 0) {
+      if (accounts && accounts.length > 0) {
         setAddress(accounts[0]);
         setIsConnected(true);
         // Only auto-set wallet ID if not already set (on initial load)
@@ -32,7 +32,7 @@ export function useWallet() {
     } finally {
       setIsInitialized(true);
     }
-  }, []);
+  }, [selectedWalletId]);
 
   const connect = useCallback(async (selectedWalletId?: string) => {
     if (isConnecting) return;
@@ -157,7 +157,7 @@ export function useWallet() {
     if (!selectedWalletId) return;
 
     const handleAccountsChanged = (accounts: string[]) => {
-      if (accounts.length === 0) {
+      if (!accounts || accounts.length === 0) {
         disconnect();
       } else if (accounts[0] !== address) {
         setAddress(accounts[0]);

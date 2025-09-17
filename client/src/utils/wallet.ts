@@ -308,7 +308,7 @@ export async function getAccounts(selectedWalletId?: string): Promise<string[]> 
     const accounts = await provider.request({
       method: 'eth_accounts',
     });
-    return accounts;
+    return Array.isArray(accounts) ? accounts : [];
   } catch (error) {
     console.error('Error getting accounts:', error);
     return [];

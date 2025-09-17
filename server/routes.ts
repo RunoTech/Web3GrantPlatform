@@ -737,11 +737,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const allAccounts = await storage.getAllAccounts();
         const referrer = allAccounts.find(acc => acc.referralCode === referralCode);
         
-        if (referrer) {
-          referredBy = referrer.wallet;
-        } else {
+        if (!referrer) {
           return res.status(400).json({ error: "Invalid referral code" });
         }
+        
+        // Security: Prevent self-referral
+        if (referrer.wallet.toLowerCase() === wallet.toLowerCase()) {
+          return res.status(400).json({ error: "Cannot refer yourself" });
+        }
+        
+        referredBy = referrer.wallet;
       }
 
       // Create account with referral info

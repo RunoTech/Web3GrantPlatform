@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { connectWallet, getAccounts, onAccountsChanged, onChainChanged, removeWalletListeners, verifyNetwork, switchToEthereumMainnet } from '@/utils/wallet';
+import { verifyNetwork, switchToEthereumMainnet } from '@/utils/wallet';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -8,9 +8,7 @@ export function useWallet() {
   const [address, setAddress] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authToken, setAuthToken] = useState<string | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const { toast } = useToast();
 
@@ -18,56 +16,56 @@ export function useWallet() {
   const checkAuthToken = useCallback(async () => {
     try {
       // Try to make an authenticated request - if it succeeds, we're authenticated
-      const response = await apiRequest("GET", "/auth/status");
-      if (response.ok) {
-        const data = await response.json();
-        if (data.authenticated) {
-          setIsAuthenticated(true);
-          // Note: No token storage needed - httpOnly cookies handle authentication
-        }
+      const data = await apiRequest("GET", "/auth/status") as any;
+      if (data?.authenticated) {
+        setIsAuthenticated(true);
+        // Note: No token storage needed - httpOnly cookies handle authentication
+      } else {
+        setIsAuthenticated(false);
       }
     } catch (error) {
       // Not authenticated or network error
       setIsAuthenticated(false);
-      setAuthToken(null);
     }
   }, []);
 
   const checkConnection = useCallback(async () => {
     try {
-      const accounts = await getAccounts();
-      if (accounts && accounts.length > 0) {
-        setAddress(accounts[0]);
-        setIsConnected(true);
-        // Only auto-set wallet ID if not already set (on initial load)
-        if (!selectedWalletId) {
-          setSelectedWalletId('metamask');
+      // Direct MetaMask connection check
+      if (window.ethereum) {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts && accounts.length > 0) {
+          setAddress(accounts[0]);
+          setIsConnected(true);
+          // Check authentication status
+          await checkAuthToken();
+        } else {
+          setAddress(null);
+          setIsConnected(false);
+          setIsAuthenticated(false);
         }
-        // Check authentication status
-        await checkAuthToken();
       } else {
         setAddress(null);
         setIsConnected(false);
         setIsAuthenticated(false);
-        setAuthToken(null);
-        // SECURITY FIX: No localStorage cleanup needed - httpOnly cookies managed by server
       }
     } catch (error) {
-      console.error('Error checking wallet connection:', error);
+      console.error('Error checking MetaMask connection:', error);
       setAddress(null);
       setIsConnected(false);
       setIsAuthenticated(false);
-      setAuthToken(null);
     } finally {
       setIsInitialized(true);
     }
-  }, [selectedWalletId, checkAuthToken]);
+  }, [checkAuthToken]);
 
-  // Get provider - supports both MetaMask and WalletConnect
+  // Get MetaMask provider only
   const getProvider = useCallback(() => {
-    if (typeof window.ethereum !== 'undefined') {
+    if (typeof window !== 'undefined' && window.ethereum) {
+      console.log('🦊 MetaMask detected');
       return window.ethereum;
     }
+    console.warn('⚠️ MetaMask not detected');
     return null;
   }, []);
 
@@ -147,7 +145,6 @@ export function useWallet() {
 
     // Clear local authentication state
     setIsAuthenticated(false);
-    setAuthToken(null);
     
     // SECURITY FIX: Refresh auth status from server to ensure consistency
     try {
@@ -163,102 +160,130 @@ export function useWallet() {
     });
   }, [isAuthenticated, checkAuthToken, toast]);
 
-  const connect = useCallback(async (selectedWalletId?: string) => {
+  const connect = useCallback(async () => {
     if (isConnecting) return;
     
     setIsConnecting(true);
     try {
-      const connectedAddress = await connectWallet(selectedWalletId);
-      if (connectedAddress) {
-        setAddress(connectedAddress);
-        setIsConnected(true);
-        setSelectedWalletId(selectedWalletId || 'metamask');
+      // SECURITY FIX: Check network FIRST before any connection attempt
+      console.log('🔒 Verifying Ethereum Mainnet...');
+      const networkValid = await verifyNetwork();
+      if (!networkValid) {
+        console.log('🔄 Attempting to switch to Ethereum Mainnet...');
+        const switchSuccess = await switchToEthereumMainnet();
+        if (!switchSuccess) {
+          throw new Error("Please switch to Ethereum Mainnet before connecting your wallet.");
+        }
+      }
+      
+      // Check if MetaMask is available
+      if (!window.ethereum) {
+        throw new Error("MetaMask not detected. Please install MetaMask first.");
+      }
+      
+      console.log('🦊 Requesting MetaMask connection...');
+      
+      // Request account access
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      
+      if (!accounts || accounts.length === 0) {
+        throw new Error("No accounts returned from MetaMask");
+      }
+      
+      const connectedAddress = accounts[0];
+      console.log('✅ MetaMask connected:', connectedAddress);
+      
+      // SECURITY FIX: Final network recheck after connection
+      const postConnectNetworkValid = await verifyNetwork();
+      if (!postConnectNetworkValid) {
+        throw new Error("Network verification failed after connection. Please ensure you are on Ethereum Mainnet.");
+      }
+      
+      setAddress(connectedAddress);
+      setIsConnected(true);
+      
+      // SECURITY FIX: Authenticate FIRST, then create account
+      // Step 1: Authenticate the wallet with SIWE
+      console.log('🔐 Starting authentication...');
+      const authSuccess = await authenticate(connectedAddress);
+      
+      if (authSuccess) {
+        // Step 2: Create account after authentication (now secure)
+        const referralCode = localStorage.getItem('referralCode');
         
-        // SECURITY FIX: Authenticate FIRST, then create account
-        // Step 1: Authenticate the wallet with SIWE
-        const authSuccess = await authenticate(connectedAddress);
-        
-        if (authSuccess) {
-          // Step 2: Create account after authentication (now secure)
-          const referralCode = localStorage.getItem('referralCode');
-          
-          try {
-            if (referralCode) {
-              // Create account with referral using authenticated endpoint
-              await apiRequest("POST", "/api/register-with-referral", {
-                referralCode: referralCode, // wallet is taken from authenticated session
-              });
-              // Clear referral code after successful registration
-              localStorage.removeItem('referralCode');
-            } else {
-              // Create regular account using authenticated endpoint
-              await apiRequest("POST", "/api/create-account", {
-                // wallet is taken from authenticated session
-              });
-            }
-          } catch (error: any) {
-            // Account might already exist, which is fine
-            console.log("Account creation note:", error);
-          }
-          
-          // Step 3: Auto participate in daily reward
-          try {
-            const dailyResponse = await apiRequest("POST", "/api/auto-daily-entry", {
-              wallet: connectedAddress // This endpoint validates wallet matches authenticated user
+        try {
+          if (referralCode) {
+            // Create account with referral using authenticated endpoint
+            await apiRequest("POST", "/api/register-with-referral", {
+              referralCode: referralCode, // wallet is taken from authenticated session
             });
-            
-            if ((dailyResponse as any).success) {
-              toast({
-                title: "Success!",
-                description: "Wallet connected, authenticated & auto-entered daily reward draw",
-              });
-            } else {
-              toast({
-                title: "Success!",
-                description: "Wallet connected & authenticated successfully",
-              });
-            }
-          } catch (dailyError: any) {
-            // Don't show error for daily entry failure, just show connection success
+            // Clear referral code after successful registration
+            localStorage.removeItem('referralCode');
+          } else {
+            // Create regular account using authenticated endpoint
+            await apiRequest("POST", "/api/create-account", {
+              // wallet is taken from authenticated session
+            });
+          }
+        } catch (error: any) {
+          // Account might already exist, which is fine
+          console.log("Account creation note:", error);
+        }
+        
+        // Step 3: Auto participate in daily reward
+        try {
+          const dailyResponse = await apiRequest("POST", "/api/auto-daily-entry", {
+            wallet: connectedAddress // This endpoint validates wallet matches authenticated user
+          });
+          
+          if ((dailyResponse as any).success) {
+            toast({
+              title: "Success!",
+              description: "Wallet connected, authenticated & auto-entered daily reward draw",
+            });
+          } else {
             toast({
               title: "Success!",
               description: "Wallet connected & authenticated successfully",
             });
           }
-        } else {
+        } catch (dailyError: any) {
+          // Don't show error for daily entry failure, just show connection success
           toast({
-            title: "Connection Failed",
-            description: "Wallet connected but authentication failed. Please try again.",
-            variant: "destructive",
+            title: "Success!",
+            description: "Wallet connected & authenticated successfully",
           });
-          // Clear connection state if authentication fails
-          setAddress(null);
-          setIsConnected(false);
         }
+      } else {
+        toast({
+          title: "Connection Failed",
+          description: "Wallet connected but authentication failed. Please try again.",
+          variant: "destructive",
+        });
+        // Clear connection state if authentication fails
+        setAddress(null);
+        setIsConnected(false);
       }
     } catch (error: any) {
+      console.error('❌ MetaMask connection error:', error);
       toast({
         title: "Connection Error",
-        description: error.message,
+        description: error.message || "Failed to connect to MetaMask",
         variant: "destructive",
       });
     } finally {
       setIsConnecting(false);
     }
-  }, [isConnecting, toast]);
+  }, [isConnecting, authenticate, toast]);
 
   const disconnect = useCallback(async () => {
     try {
-      // Remove listeners BEFORE clearing the selectedWalletId
-      removeWalletListeners(selectedWalletId || undefined);
-      
       // Clear local state
       setAddress(null);
       setIsConnected(false);
-      setSelectedWalletId(null);
+      setIsAuthenticated(false);
       
-      // For most wallets, there's no programmatic disconnect
-      // Just clear local state - user can disconnect from wallet itself if needed
+      console.log('🚫 MetaMask disconnected');
       
       toast({
         title: "Disconnected",
@@ -266,28 +291,28 @@ export function useWallet() {
       });
     } catch (error) {
       // Even if disconnect fails, clear local state
-      removeWalletListeners(selectedWalletId || undefined);
       setAddress(null);
       setIsConnected(false);
-      setSelectedWalletId(null);
+      setIsAuthenticated(false);
       
       toast({
         title: "Disconnected",
         description: "Wallet connection cleared locally",
       });
     }
-  }, [selectedWalletId, toast]);
+  }, [toast]);
 
   // Initial connection check - only on mount
   useEffect(() => {
     checkConnection();
   }, []);
 
-  // Wallet event listeners - separate from connection check  
+  // MetaMask event listeners
   useEffect(() => {
-    if (!selectedWalletId) return;
+    if (!window.ethereum || !isConnected) return;
 
     const handleAccountsChanged = (accounts: string[]) => {
+      console.log('🔄 Accounts changed:', accounts);
       if (!accounts || accounts.length === 0) {
         disconnect();
       } else if (accounts[0] !== address) {
@@ -297,16 +322,22 @@ export function useWallet() {
     };
 
     const handleChainChanged = () => {
+      console.log('🔗 Chain changed, reloading...');
       window.location.reload();
     };
 
-    onAccountsChanged(handleAccountsChanged, selectedWalletId || undefined);
-    onChainChanged(handleChainChanged, selectedWalletId || undefined);
+    // Add MetaMask event listeners
+    window.ethereum.on('accountsChanged', handleAccountsChanged);
+    window.ethereum.on('chainChanged', handleChainChanged);
 
     return () => {
-      removeWalletListeners(selectedWalletId || undefined);
+      // Remove MetaMask event listeners
+      if (window.ethereum) {
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        window.ethereum.removeListener('chainChanged', handleChainChanged);
+      }
     };
-  }, [selectedWalletId, address, disconnect]);
+  }, [isConnected, address, disconnect]);
 
   // Network verification functions
   const checkNetwork = useCallback(async (): Promise<boolean> => {
@@ -336,7 +367,7 @@ export function useWallet() {
       });
       return false;
     }
-  }, [selectedWalletId, toast]);
+  }, [toast]);
 
   return {
     isConnected,
@@ -345,7 +376,6 @@ export function useWallet() {
     isInitialized,
     isAuthenticated,
     isAuthenticating,
-    authToken,
     connect,
     disconnect,
     authenticate,

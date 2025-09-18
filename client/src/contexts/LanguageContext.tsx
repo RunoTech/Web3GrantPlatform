@@ -365,6 +365,9 @@ const translations = {
     'profile.language_note_desc': 'More languages are coming soon! Your selection will be saved automatically.',
     'profile.back_to_home': 'Back to Home',
 
+    // Common
+    'common.home': 'Home',
+
     // Footer
     'footer.platform': 'PLATFORM',
     'footer.support': 'SUPPORT',
@@ -567,6 +570,7 @@ const translations = {
     'profile.back_to_home': 'Ana Sayfaya Dön',
 
     // Common
+    'common.home': 'Ana Sayfa',
     'common.back_to_home': 'Ana Sayfaya Dön',
     'crypto.buy_crypto': 'KRİPTO SATIN AL',
     'crypto.buy_crypto_with_card': 'Kartla Kripto Satın Al',

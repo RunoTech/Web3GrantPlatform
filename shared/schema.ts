@@ -524,6 +524,13 @@ export const insertFooterLinkSchema = createInsertSchema(footerLinks).omit({
   id: true, 
   createdAt: true, 
   updatedAt: true 
+}).extend({
+  url: z.string().refine((url) => {
+    // Allow internal routes or valid HTTP/HTTPS URLs only
+    return url.startsWith('/') || url.startsWith('http://') || url.startsWith('https://');
+  }, {
+    message: "URL must be an internal route starting with '/' or a valid HTTP/HTTPS URL"
+  })
 });
 
 export const insertAnnouncementSchema = createInsertSchema(announcements).omit({ 

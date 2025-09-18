@@ -77,6 +77,21 @@ export default function HomePage() {
     queryKey: ["/api/get-last-winners"],
   });
 
+  // Footer links query for dynamic footer management
+  const { data: footerLinks = [] } = useQuery({
+    queryKey: ["/api/footer-links"],
+  });
+
+  // Group footer links by section for dynamic rendering
+  const groupedFooterLinks = footerLinks.reduce((acc: any, link: any) => {
+    if (!acc[link.section]) {
+      acc[link.section] = [];
+    }
+    acc[link.section].push(link);
+    return acc;
+  }, {});
+
+
   const handleDailyReward = async () => {
     if (!address) return;
     
@@ -627,59 +642,64 @@ export default function HomePage() {
               </p>
             </div>
             
-            <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.platform')}</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li><Link href="/campaigns" className="hover:text-primary transition-colors uppercase tracking-wide">{t('campaigns')}</Link></li>
-                <li><Link href="/funds" className="hover:text-primary transition-colors uppercase tracking-wide">{t('hero.create_campaign')}</Link></li>
-                <li><a href="#odul-sistemi" className="hover:text-primary transition-colors uppercase tracking-wide">{t('daily.title')}</a></li>
-              </ul>
-            </div>
-            
-            <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.support')}</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors uppercase tracking-wide">{t('footer.how_it_works')}</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors uppercase tracking-wide">{t('footer.security')}</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors uppercase tracking-wide">{t('footer.faq')}</a></li>
-              </ul>
-            </div>
-            
-            <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.connection')}</h4>
-              <div className="flex items-center gap-4">
-                <a 
-                  href="https://twitter.com/duxxan" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:border-primary border border-border transition-colors hover:bg-primary/10"
-                  aria-label="Twitter"
-                  data-testid="footer-twitter-link"
-                >
-                  <span className="text-xs font-semibold text-primary">TW</span>
-                </a>
-                <a 
-                  href="https://discord.gg/duxxan" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:border-primary border border-border transition-colors hover:bg-primary/10"
-                  aria-label="Discord"
-                  data-testid="footer-discord-link"
-                >
-                  <span className="text-xs font-semibold text-primary">DC</span>
-                </a>
-                <a 
-                  href="https://t.me/duxxan" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:border-primary border border-border transition-colors hover:bg-primary/10"
-                  aria-label="Telegram"
-                  data-testid="footer-telegram-link"
-                >
-                  <span className="text-xs font-semibold text-primary">TG</span>
-                </a>
+            {/* Dynamic Platform Section */}
+            {groupedFooterLinks.platform && (
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.platform')}</h4>
+                <ul className="space-y-2 text-muted-foreground">
+                  {groupedFooterLinks.platform.map((link: any) => (
+                    <li key={link.id}>
+                      <Link 
+                        href={link.url} 
+                        className="hover:text-primary transition-colors uppercase tracking-wide"
+                        data-testid={`footer-platform-${link.id}`}
+                      >
+                        {link.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
+            )}
+            
+            {/* Dynamic Support Section */}
+            {groupedFooterLinks.support && (
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.support')}</h4>
+                <ul className="space-y-2 text-muted-foreground">
+                  {groupedFooterLinks.support.map((link: any) => (
+                    <li key={link.id}>
+                      <Link 
+                        href={link.url} 
+                        className="hover:text-primary transition-colors uppercase tracking-wide"
+                        data-testid={`footer-support-${link.id}`}
+                      >
+                        {link.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {/* Dynamic Connection Section */}
+            {groupedFooterLinks.connection && (
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.connection')}</h4>
+                <div className="flex items-center gap-4">
+                  {groupedFooterLinks.connection.map((link: any) => (
+                    <Link 
+                      key={link.id}
+                      href={link.url} 
+                      className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:border-primary border border-border transition-colors hover:bg-primary/10"
+                      data-testid={`footer-connection-${link.id}`}
+                    >
+                      <span className="text-xs font-semibold text-primary">{link.title}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="border-t border-border mt-12 pt-8 text-center text-muted-foreground">

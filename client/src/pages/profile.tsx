@@ -11,7 +11,11 @@ import CampaignCard from "@/components/CampaignCard";
 import Header from "@/components/Header";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { 
   User, 
   Wallet, 
@@ -41,7 +45,18 @@ import {
   Pause,
   Play,
   MoreHorizontal,
-  Trash2
+  Trash2,
+  Bell,
+  Shield,
+  Moon,
+  Sun,
+  Globe,
+  Lock,
+  Mail,
+  Smartphone,
+  Monitor,
+  Check,
+  X
 } from "lucide-react";
 import type { Campaign } from "@shared/schema";
 import UserDashboardAnalytics from "@/components/analytics/UserDashboardAnalytics";
@@ -59,6 +74,75 @@ export default function ProfilePage() {
   const [viewMode, setViewMode] = useState("grid");
   const [selectedCampaigns, setSelectedCampaigns] = useState<number[]>([]);
   const [showBulkActions, setShowBulkActions] = useState(false);
+  
+  // Settings Integration
+  const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage } = useLanguage();
+  
+  // Settings Form Schema
+  const settingsSchema = z.object({
+    // Notification Preferences
+    emailCampaignUpdates: z.boolean(),
+    emailNewDonations: z.boolean(), 
+    emailDailyRewards: z.boolean(),
+    pushInstantDonations: z.boolean(),
+    pushGoalMilestones: z.boolean(),
+    pushSecurityAlerts: z.boolean(),
+    inAppActivityFeed: z.boolean(),
+    inAppPopupNotifications: z.boolean(),
+    inAppSoundNotifications: z.boolean(),
+    // Privacy Settings
+    profileVisibility: z.enum(["public", "private"]),
+    analyticsData: z.boolean(),
+    marketingCommunications: z.boolean(),
+    thirdPartySharing: z.boolean(),
+    // Theme & Language
+    themePreference: z.enum(["light", "dark", "system"]),
+    languagePreference: z.enum(["en", "tr", "es", "fr", "de", "ja"])
+  });
+  
+  type SettingsFormData = z.infer<typeof settingsSchema>;
+  
+  // Load settings from localStorage with defaults
+  const getStoredSettings = (): SettingsFormData => {
+    const stored = localStorage.getItem('userSettings');
+    const defaults: SettingsFormData = {
+      emailCampaignUpdates: true,
+      emailNewDonations: true,
+      emailDailyRewards: false,
+      pushInstantDonations: true,
+      pushGoalMilestones: true,
+      pushSecurityAlerts: true,
+      inAppActivityFeed: true,
+      inAppPopupNotifications: false,
+      inAppSoundNotifications: false,
+      profileVisibility: "public",
+      analyticsData: true,
+      marketingCommunications: false,
+      thirdPartySharing: false,
+      themePreference: theme === 'light' ? 'light' : theme === 'dark' ? 'dark' : 'system',
+      languagePreference: language as any
+    };
+    
+    if (stored) {
+      try {
+        return { ...defaults, ...JSON.parse(stored) };
+      } catch (e) {
+        return defaults;
+      }
+    }
+    return defaults;
+  };
+  
+  // Settings Form
+  const settingsForm = useForm<SettingsFormData>({
+    resolver: zodResolver(settingsSchema),
+    defaultValues: getStoredSettings()
+  });
+  
+  // Watch theme and language changes to apply immediately
+  const watchedTheme = settingsForm.watch('themePreference');
+  const watchedLanguage = settingsForm.watch('languagePreference');
   const [location] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -196,6 +280,110 @@ export default function ProfilePage() {
   useEffect(() => {
     setShowBulkActions(selectedCampaigns.length > 0);
   }, [selectedCampaigns]);
+  
+  // Apply theme changes immediately
+  useEffect(() => {
+    if (watchedTheme === 'light' && theme !== 'light') {
+      // Apply light theme
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+      localStorage.setItem('theme', 'light');
+    } else if (watchedTheme === 'dark' && theme !== 'dark') {
+      // Apply dark theme
+      document.documentElement.classList.remove('light');
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else if (watchedTheme === 'system') {
+      // Apply system theme
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.classList.remove('light', 'dark');
+      document.documentElement.classList.add(systemTheme);
+      localStorage.setItem('theme', systemTheme);
+    }
+  }, [watchedTheme, theme]);
+  
+  // Apply language changes immediately
+  useEffect(() => {
+    if (watchedLanguage && watchedLanguage !== language) {
+      setLanguage(watchedLanguage as any);
+    }
+  }, [watchedLanguage, language, setLanguage]);
+  
+  // Settings Actions
+  const handleSaveSettings = (data: SettingsFormData) => {
+    try {
+      // Save to localStorage
+      localStorage.setItem('userSettings', JSON.stringify(data));
+      
+      // Apply theme if changed
+      if (data.themePreference !== theme) {
+        if (data.themePreference === 'light' || data.themePreference === 'dark') {
+          document.documentElement.classList.remove('light', 'dark');
+          document.documentElement.classList.add(data.themePreference);
+          localStorage.setItem('theme', data.themePreference);
+        } else {
+          // System theme
+          const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          document.documentElement.classList.remove('light', 'dark');
+          document.documentElement.classList.add(systemTheme);
+          localStorage.setItem('theme', systemTheme);
+        }
+      }
+      
+      // Apply language if changed
+      if (data.languagePreference !== language) {
+        setLanguage(data.languagePreference as any);
+      }
+      
+      toast({
+        title: t('profile.settings_saved'),
+        description: t('profile.settings_saved_desc'),
+      });
+    } catch (error) {
+      toast({
+        title: t('profile.settings_error'),
+        description: t('profile.settings_error_desc'),
+        variant: 'destructive'
+      });
+    }
+  };
+  
+  const handleResetSettings = () => {
+    const defaults = {
+      emailCampaignUpdates: true,
+      emailNewDonations: true,
+      emailDailyRewards: false,
+      pushInstantDonations: true,
+      pushGoalMilestones: true,
+      pushSecurityAlerts: true,
+      inAppActivityFeed: true,
+      inAppPopupNotifications: false,
+      inAppSoundNotifications: false,
+      profileVisibility: "public" as const,
+      analyticsData: true,
+      marketingCommunications: false,
+      thirdPartySharing: false,
+      themePreference: "system" as const,
+      languagePreference: "en" as const
+    };
+    
+    settingsForm.reset(defaults);
+    localStorage.removeItem('userSettings');
+    
+    // Apply system theme
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(systemTheme);
+    localStorage.setItem('theme', systemTheme);
+    
+    // Apply English language
+    setLanguage('en');
+    
+    toast({
+      title: t('profile.settings_reset'),
+      description: t('profile.settings_reset_desc')
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -1224,40 +1412,325 @@ export default function ProfilePage() {
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6 mt-6">
-            <Card className="card-standard">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Settings className="w-5 h-5 mr-2 text-primary" />
-                  Profile Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between p-4 surface-secondary border border-border rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-foreground">Wallet Address</h4>
-                    <p className="text-sm text-muted-foreground">{address}</p>
+            <div className="space-y-6">
+              {/* Account Information */}
+              <Card className="card-standard">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <User className="w-5 h-5 mr-2 text-primary" />
+                    {t('profile.account_information')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-4 surface-secondary border border-border rounded-lg">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-foreground">{t('profile.wallet_address')}</h4>
+                          <p className="text-sm text-muted-foreground font-mono">{address?.slice(0, 16)}...{address?.slice(-8)}</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                          <Wallet className="w-3 h-3 mr-1" />
+                          {t('profile.connected')}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 surface-secondary border border-border rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-foreground">{t('profile.account_status')}</h4>
+                          <p className="text-sm text-muted-foreground">{t('profile.verified_and_active')}</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                          <Shield className="w-3 h-3 mr-1" />
+                          {t('profile.verified')}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="p-4 surface-secondary border border-border rounded-lg">
+                        <h4 className="font-medium text-foreground mb-3">{t('profile.account_stats')}</h4>
+                        <div className="grid grid-cols-2 gap-4 text-center">
+                          <div>
+                            <div className="text-xl font-bold text-foreground">{userCampaigns.length}</div>
+                            <div className="text-xs text-muted-foreground">{t('profile.campaigns')}</div>
+                          </div>
+                          <div>
+                            <div className="text-xl font-bold text-foreground">{totalSupporters}</div>
+                            <div className="text-xs text-muted-foreground">{t('profile.supporters')}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <Badge variant="outline">Connected</Badge>
-                </div>
-                
-                <div className="flex items-center justify-between p-4 surface-secondary border border-border rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-foreground">Account Status</h4>
-                    <p className="text-sm text-muted-foreground">Verified and active</p>
+                </CardContent>
+              </Card>
+              
+              {/* Notification Preferences */}
+              <Card className="card-standard">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Bell className="w-5 h-5 mr-2 text-primary" />
+                    {t('profile.notification_preferences')}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t('profile.notification_description')}
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Email Notifications */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Mail className="w-5 h-5 text-blue-600" />
+                        <h4 className="font-medium text-foreground">{t('profile.email_notifications')}</h4>
+                      </div>
+                      <div className="space-y-3">
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                          <div>
+                            <span className="text-sm font-medium text-foreground">{t('profile.campaign_updates')}</span>
+                            <p className="text-xs text-muted-foreground">{t('profile.campaign_updates_desc')}</p>
+                          </div>
+                          <input type="checkbox" {...settingsForm.register('emailCampaignUpdates')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="email-campaign-updates" />
+                        </label>
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                          <div>
+                            <span className="text-sm font-medium text-foreground">{t('profile.new_donations')}</span>
+                            <p className="text-xs text-muted-foreground">{t('profile.new_donations_desc')}</p>
+                          </div>
+                          <input type="checkbox" {...settingsForm.register('emailNewDonations')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="email-donations" />
+                        </label>
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                          <div>
+                            <span className="text-sm font-medium text-foreground">{t('profile.daily_rewards')}</span>
+                            <p className="text-xs text-muted-foreground">{t('profile.daily_rewards_desc')}</p>
+                          </div>
+                          <input type="checkbox" {...settingsForm.register('emailDailyRewards')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="email-rewards" />
+                        </label>
+                      </div>
+                    </div>
+                    
+                    {/* Push Notifications */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Smartphone className="w-5 h-5 text-green-600" />
+                        <h4 className="font-medium text-foreground">{t('profile.push_notifications')}</h4>
+                      </div>
+                      <div className="space-y-3">
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                          <div>
+                            <span className="text-sm font-medium text-foreground">{t('profile.instant_donations')}</span>
+                            <p className="text-xs text-muted-foreground">{t('profile.instant_donations_desc')}</p>
+                          </div>
+                          <input type="checkbox" {...settingsForm.register('pushInstantDonations')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="push-donations" />
+                        </label>
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                          <div>
+                            <span className="text-sm font-medium text-foreground">{t('profile.goal_milestones')}</span>
+                            <p className="text-xs text-muted-foreground">{t('profile.goal_milestones_desc')}</p>
+                          </div>
+                          <input type="checkbox" {...settingsForm.register('pushGoalMilestones')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="push-milestones" />
+                        </label>
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                          <div>
+                            <span className="text-sm font-medium text-foreground">{t('profile.security_alerts')}</span>
+                            <p className="text-xs text-muted-foreground">{t('profile.security_alerts_desc')}</p>
+                          </div>
+                          <input type="checkbox" {...settingsForm.register('pushSecurityAlerts')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="push-security" />
+                        </label>
+                      </div>
+                    </div>
+                    
+                    {/* In-App Notifications */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Monitor className="w-5 h-5 text-purple-600" />
+                        <h4 className="font-medium text-foreground">{t('profile.in_app_notifications')}</h4>
+                      </div>
+                      <div className="space-y-3">
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                          <div>
+                            <span className="text-sm font-medium text-foreground">{t('profile.activity_feed')}</span>
+                            <p className="text-xs text-muted-foreground">{t('profile.activity_feed_desc')}</p>
+                          </div>
+                          <input type="checkbox" {...settingsForm.register('inAppActivityFeed')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="inapp-activity" />
+                        </label>
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                          <div>
+                            <span className="text-sm font-medium text-foreground">{t('profile.popup_notifications')}</span>
+                            <p className="text-xs text-muted-foreground">{t('profile.popup_notifications_desc')}</p>
+                          </div>
+                          <input type="checkbox" {...settingsForm.register('inAppPopupNotifications')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="inapp-popups" />
+                        </label>
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                          <div>
+                            <span className="text-sm font-medium text-foreground">{t('profile.sound_notifications')}</span>
+                            <p className="text-xs text-muted-foreground">{t('profile.sound_notifications_desc')}</p>
+                          </div>
+                          <input type="checkbox" {...settingsForm.register('inAppSoundNotifications')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="inapp-sounds" />
+                        </label>
+                      </div>
+                    </div>
                   </div>
-                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">Verified</Badge>
-                </div>
-
-                <div className="pt-4 border-t border-border">
-                  <Button variant="outline" asChild className="w-full btn-secondary">
-                    <Link href="/">
-                      <ArrowLeft className="w-4 h-4 mr-2" />
-                      Back to Home
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+              
+              {/* Privacy & Security Settings */}
+              <Card className="card-standard">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Shield className="w-5 h-5 mr-2 text-primary" />
+                    {t('profile.privacy_security')}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t('profile.privacy_security_description')}
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-foreground flex items-center gap-2">
+                        <Eye className="w-4 h-4 text-blue-600" />
+                        {t('profile.profile_visibility')}
+                      </h4>
+                      <div className="space-y-3">
+                        <label className="flex items-center justify-between p-4 border border-border rounded-lg cursor-pointer hover:border-primary transition-colors">
+                          <div>
+                            <span className="font-medium text-foreground">{t('profile.public_profile')}</span>
+                            <p className="text-sm text-muted-foreground">{t('profile.public_profile_desc')}</p>
+                          </div>
+                          <input type="radio" {...settingsForm.register('profileVisibility')} value="public" className="w-4 h-4 text-primary" data-testid="visibility-public" />
+                        </label>
+                        <label className="flex items-center justify-between p-4 border border-border rounded-lg cursor-pointer hover:border-primary transition-colors">
+                          <div>
+                            <span className="font-medium text-foreground">{t('profile.private_profile')}</span>
+                            <p className="text-sm text-muted-foreground">{t('profile.private_profile_desc')}</p>
+                          </div>
+                          <input type="radio" {...settingsForm.register('profileVisibility')} value="private" className="w-4 h-4 text-primary" data-testid="visibility-private" />
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-foreground flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-red-600" />
+                        {t('profile.data_sharing')}
+                      </h4>
+                      <div className="space-y-3">
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer">
+                          <div>
+                            <span className="text-sm font-medium text-foreground">{t('profile.analytics_data')}</span>
+                            <p className="text-xs text-muted-foreground">{t('profile.analytics_data_desc')}</p>
+                          </div>
+                          <input type="checkbox" {...settingsForm.register('analyticsData')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="data-analytics" />
+                        </label>
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer">
+                          <div>
+                            <span className="text-sm font-medium text-foreground">{t('profile.marketing_communications')}</span>
+                            <p className="text-xs text-muted-foreground">{t('profile.marketing_communications_desc')}</p>
+                          </div>
+                          <input type="checkbox" {...settingsForm.register('marketingCommunications')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="data-marketing" />
+                        </label>
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer">
+                          <div>
+                            <span className="text-sm font-medium text-foreground">{t('profile.third_party_sharing')}</span>
+                            <p className="text-xs text-muted-foreground">{t('profile.third_party_sharing_desc')}</p>
+                          </div>
+                          <input type="checkbox" {...settingsForm.register('thirdPartySharing')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="data-third-party" />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Theme & Language Preferences */}
+              <Card className="card-standard">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Monitor className="w-5 h-5 mr-2 text-primary" />
+                    {t('profile.appearance_language')}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t('profile.appearance_language_description')}
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-foreground flex items-center gap-2">
+                        <Sun className="w-4 h-4 text-yellow-500" />
+                        {t('profile.theme_preference')}
+                      </h4>
+                      <div className="grid grid-cols-3 gap-3">
+                        <label className="flex flex-col items-center p-4 border border-border rounded-lg cursor-pointer hover:border-primary transition-colors group">
+                          <Sun className="w-6 h-6 text-yellow-500 mb-2 group-hover:scale-110 transition-transform" />
+                          <span className="text-sm font-medium text-foreground">{t('profile.light_theme')}</span>
+                          <input type="radio" {...settingsForm.register('themePreference')} value="light" className="mt-2 w-4 h-4 text-primary" data-testid="theme-light" />
+                        </label>
+                        <label className="flex flex-col items-center p-4 border border-border rounded-lg cursor-pointer hover:border-primary transition-colors group">
+                          <Moon className="w-6 h-6 text-blue-500 mb-2 group-hover:scale-110 transition-transform" />
+                          <span className="text-sm font-medium text-foreground">{t('profile.dark_theme')}</span>
+                          <input type="radio" {...settingsForm.register('themePreference')} value="dark" className="mt-2 w-4 h-4 text-primary" data-testid="theme-dark" />
+                        </label>
+                        <label className="flex flex-col items-center p-4 border border-border rounded-lg cursor-pointer hover:border-primary transition-colors group">
+                          <Monitor className="w-6 h-6 text-slate-500 mb-2 group-hover:scale-110 transition-transform" />
+                          <span className="text-sm font-medium text-foreground">{t('profile.system_theme')}</span>
+                          <input type="radio" {...settingsForm.register('themePreference')} value="system" className="mt-2 w-4 h-4 text-primary" data-testid="theme-system" />
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-foreground flex items-center gap-2">
+                        <Globe className="w-4 h-4 text-green-500" />
+                        {t('profile.language_preference')}
+                      </h4>
+                      <div className="space-y-3">
+                        <select {...settingsForm.register('languagePreference')} className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent" data-testid="language-select">
+                          <option value="en">🇺🇸 English</option>
+                          <option value="tr">🇹🇷 Türkçe</option>
+                          <option value="es">🇪🇸 Español</option>
+                          <option value="fr">🇫🇷 Français</option>
+                          <option value="de">🇩🇪 Deutsch</option>
+                          <option value="ja">🇯🇵 日本語</option>
+                        </select>
+                        
+                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                          <div className="flex items-start gap-3">
+                            <Globe className="w-5 h-5 text-blue-600 mt-0.5" />
+                            <div>
+                              <h5 className="font-medium text-blue-900 dark:text-blue-100 mb-1">{t('profile.language_note_title')}</h5>
+                              <p className="text-sm text-blue-700 dark:text-blue-300">{t('profile.language_note_desc')}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Action Buttons */}
+              <Card className="card-standard">
+                <CardContent className="p-6">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Button onClick={settingsForm.handleSubmit(handleSaveSettings)} className="btn-binance btn-lg flex-1 hover:transform hover:-translate-y-0.5 transition-all" data-testid="save-settings">
+                      <Check className="w-5 h-5 mr-2" />
+                      {t('profile.save_settings')}
+                    </Button>
+                    <Button onClick={handleResetSettings} variant="outline" className="btn-lg flex-1" data-testid="reset-settings">
+                      <X className="w-5 h-5 mr-2" />
+                      {t('profile.reset_to_defaults')}
+                    </Button>
+                    <Button variant="outline" asChild className="btn-lg">
+                      <Link href="/" data-testid="back-home">
+                        <ArrowLeft className="w-5 h-5 mr-2" />
+                        {t('profile.back_to_home')}
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

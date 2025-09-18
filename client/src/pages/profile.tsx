@@ -207,75 +207,179 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-        {/* Quick Stats Cards */}
+        {/* Enhanced Interactive Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="card-standard">
+          <Card 
+            className="card-standard cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 hover:border-primary/50" 
+            onClick={() => setActiveTab('campaigns')}
+            data-testid="stat-card-campaigns"
+          >
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Campaigns</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('profile.total_campaigns')}</p>
                   <p className="text-3xl font-bold text-foreground">{userCampaigns.length}</p>
                 </div>
-                <div className="w-12 h-12 bg-binance-yellow shadow-binance rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-binance-yellow to-yellow-400 shadow-binance rounded-lg flex items-center justify-center">
                   <Target className="w-6 h-6 icon-on-primary" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center text-sm">
-                <ArrowUp className="w-4 h-4 text-green-500 mr-1" />
-                <span className="text-green-500 font-medium">Active: {activeCampaigns}</span>
+              
+              {/* Progress Bar */}
+              <div className="mb-3">
+                <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                  <span>{t('profile.active')}: {activeCampaigns}</span>
+                  <span>{activeCampaigns > 0 ? Math.round((activeCampaigns / userCampaigns.length) * 100) : 0}%</span>
+                </div>
+                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${userCampaigns.length > 0 ? (activeCampaigns / userCampaigns.length) * 100 : 0}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center">
+                  <ArrowUp className="w-4 h-4 text-green-500 mr-1" />
+                  <span className="text-green-500 font-medium">{t('profile.view_campaigns')}</span>
+                </div>
+                <Badge variant="outline" className="text-xs">
+                  {activeCampaigns}/{userCampaigns.length}
+                </Badge>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="card-standard">
+          <Card 
+            className="card-standard cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 hover:border-primary/50" 
+            onClick={() => setActiveTab('analytics')}
+            data-testid="stat-card-raised"
+          >
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Raised</p>
-                  <p className="text-3xl font-bold text-foreground">{totalDonationsReceived.toFixed(2)}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('profile.total_raised')}</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-3xl font-bold text-foreground">{totalDonationsReceived.toFixed(2)}</p>
+                    <span className="text-lg font-semibold text-muted-foreground">USDT</span>
+                  </div>
                 </div>
-                <div className="w-12 h-12 bg-binance-yellow shadow-binance rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 icon-on-primary" />
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 shadow-binance rounded-lg flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-white" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center text-sm">
-                <span className="text-muted-foreground">USDT</span>
+              
+              {/* Average per supporter */}
+              <div className="mb-3">
+                <div className="flex justify-between text-xs text-muted-foreground mb-2">
+                  <span>{t('profile.avg_donation')}</span>
+                  <span className="font-medium text-foreground">
+                    {totalSupporters > 0 ? (totalDonationsReceived / totalSupporters).toFixed(2) : '0.00'} USDT
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
+                    <span className="text-green-500 text-sm font-medium">{t('profile.view_analytics')}</span>
+                  </div>
+                  <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                    📈 {t('profile.growing')}
+                  </Badge>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="card-standard">
+          <Card 
+            className="card-standard cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 hover:border-primary/50" 
+            onClick={() => setActiveTab('donations')}
+            data-testid="stat-card-supporters"
+          >
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Supporters</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('profile.total_supporters')}</p>
                   <p className="text-3xl font-bold text-foreground">{totalSupporters}</p>
                 </div>
-                <div className="w-12 h-12 bg-binance-yellow shadow-binance rounded-lg flex items-center justify-center">
-                  <Users className="w-6 h-6 icon-on-primary" />
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-binance rounded-lg flex items-center justify-center">
+                  <Users className="w-6 h-6 text-white" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center text-sm">
-                <Eye className="w-4 h-4 text-blue-500 mr-1" />
-                <span className="text-blue-500 font-medium">Unique donors</span>
+              
+              {/* Supporter engagement metrics */}
+              <div className="mb-3">
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-2 text-center">
+                    <div className="font-semibold text-foreground">{totalSupporters}</div>
+                    <div className="text-muted-foreground">{t('profile.unique_donors')}</div>
+                  </div>
+                  <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-2 text-center">
+                    <div className="font-semibold text-foreground">{userCampaigns.length}</div>
+                    <div className="text-muted-foreground">{t('profile.campaigns')}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center">
+                  <Eye className="w-4 h-4 text-blue-500 mr-1" />
+                  <span className="text-blue-500 font-medium">{t('profile.view_donations')}</span>
+                </div>
+                <Badge variant="outline" className="text-xs">
+                  🤝 {t('profile.community')}
+                </Badge>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="card-standard">
+          <Card 
+            className="card-standard cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 hover:border-primary/50" 
+            onClick={() => setActiveTab('rewards')}
+            data-testid="stat-card-rewards"
+          >
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Daily Rewards</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('profile.daily_rewards')}</p>
                   <p className="text-3xl font-bold text-foreground">{dailyParticipationCount}</p>
                 </div>
-                <div className="w-12 h-12 bg-binance-yellow shadow-binance rounded-lg flex items-center justify-center">
-                  <Gift className="w-6 h-6 icon-on-primary" />
+                <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 shadow-binance rounded-lg flex items-center justify-center">
+                  <Gift className="w-6 h-6 text-white" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center text-sm">
-                <Trophy className="w-4 h-4 text-yellow-500 mr-1" />
-                <span className="text-yellow-500 font-medium">Participations</span>
+              
+              {/* Reward participation status */}
+              <div className="mb-3">
+                <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+                  <span>{t('profile.participation_streak')}</span>
+                  <span className="font-semibold text-yellow-600 dark:text-yellow-400">
+                    {dailyParticipationCount > 0 ? `${dailyParticipationCount} ${t('profile.days')}` : t('profile.no_streak')}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  {[...Array(7)].map((_, i) => (
+                    <div
+                      key={i}
+                      className={`w-4 h-2 rounded-full ${
+                        i < Math.min(dailyParticipationCount, 7) 
+                          ? 'bg-gradient-to-r from-yellow-400 to-orange-500' 
+                          : 'bg-slate-200 dark:bg-slate-700'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center">
+                  <Trophy className="w-4 h-4 text-yellow-500 mr-1" />
+                  <span className="text-yellow-500 font-medium">{t('profile.view_rewards')}</span>
+                </div>
+                <Badge variant="outline" className="text-xs">
+                  🎯 {dailyParticipationCount > 0 ? t('profile.active') : t('profile.join_today')}
+                </Badge>
               </div>
             </CardContent>
           </Card>

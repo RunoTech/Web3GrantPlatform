@@ -143,15 +143,6 @@ export default function ProfilePage() {
   const [location] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
 
-  // URL parameter'dan tab'ı al
-  useEffect(() => {
-    const params = new URLSearchParams(location.split('?')[1]);
-    const tabParam = params.get('tab');
-    if (tabParam) {
-      setActiveTab(tabParam);
-    }
-  }, [location]);
-
   const { data: campaigns = [] } = useQuery({
     queryKey: ["/api/get-campaigns"],
     enabled: isConnected,
@@ -207,6 +198,49 @@ export default function ProfilePage() {
   const totalSupporters = userCampaigns.reduce((sum: number, c: Campaign) => sum + (c.donationCount || 0), 0);
   const activeCampaigns = userCampaigns.filter((c: Campaign) => c.active).length;
   const dailyParticipationCount = Array.isArray(dailyEntries) ? dailyEntries.length : 0;
+  
+  // ALL useEffect HOOKS MUST BE BEFORE EARLY RETURN - MOVED HERE TO FIX HOOKS ORDER
+  // URL parameter'dan tab'ı al - moved here to fix hooks order
+  useEffect(() => {
+    const params = new URLSearchParams(location.split('?')[1]);
+    const tabParam = params.get('tab');
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, [location]);
+  
+  // Update bulk actions visibility
+  useEffect(() => {
+    setShowBulkActions(selectedCampaigns.length > 0);
+  }, [selectedCampaigns]);
+  
+  // Apply theme changes immediately
+  useEffect(() => {
+    if (watchedTheme === 'light' && theme !== 'light') {
+      // Apply light theme
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+      localStorage.setItem('theme', 'light');
+    } else if (watchedTheme === 'dark' && theme !== 'dark') {
+      // Apply dark theme
+      document.documentElement.classList.remove('light');
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else if (watchedTheme === 'system') {
+      // Apply system theme
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.classList.remove('light', 'dark');
+      document.documentElement.classList.add(systemTheme);
+      localStorage.setItem('theme', systemTheme);
+    }
+  }, [watchedTheme, theme]);
+  
+  // Apply language changes immediately
+  useEffect(() => {
+    if (watchedLanguage && watchedLanguage !== language) {
+      setLanguage(watchedLanguage as any);
+    }
+  }, [watchedLanguage, language, setLanguage]);
 
   if (!isConnected) {
     return (
@@ -278,38 +312,7 @@ export default function ProfilePage() {
     setSelectedCampaigns([]);
   };
 
-  // Update bulk actions visibility
-  useEffect(() => {
-    setShowBulkActions(selectedCampaigns.length > 0);
-  }, [selectedCampaigns]);
-  
-  // Apply theme changes immediately
-  useEffect(() => {
-    if (watchedTheme === 'light' && theme !== 'light') {
-      // Apply light theme
-      document.documentElement.classList.remove('dark');
-      document.documentElement.classList.add('light');
-      localStorage.setItem('theme', 'light');
-    } else if (watchedTheme === 'dark' && theme !== 'dark') {
-      // Apply dark theme
-      document.documentElement.classList.remove('light');
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else if (watchedTheme === 'system') {
-      // Apply system theme
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      document.documentElement.classList.remove('light', 'dark');
-      document.documentElement.classList.add(systemTheme);
-      localStorage.setItem('theme', systemTheme);
-    }
-  }, [watchedTheme, theme]);
-  
-  // Apply language changes immediately
-  useEffect(() => {
-    if (watchedLanguage && watchedLanguage !== language) {
-      setLanguage(watchedLanguage as any);
-    }
-  }, [watchedLanguage, language, setLanguage]);
+  // Duplicate useEffect hooks removed - they are now above before early return
   
   // Settings Actions
   const handleSaveSettings = (data: SettingsFormData) => {

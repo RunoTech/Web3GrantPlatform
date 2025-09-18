@@ -110,7 +110,7 @@ export default function DonationsPage() {
             {(popularCampaigns as Campaign[]).slice(0, 6).map((campaign: Campaign) => (
               <div key={campaign.id} className="relative">
                 <div className="absolute -top-3 -right-3 z-10">
-                  <Badge className="bg-primary text-primary-foreground animate-pulse">
+                  <Badge className="bg-primary text-primary-foreground">
                     🌟 {t('donations.filter_popular')}
                   </Badge>
                 </div>

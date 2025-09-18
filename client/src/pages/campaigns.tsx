@@ -15,6 +15,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Heart, Search, ArrowLeft, CreditCard, Filter, X, SlidersHorizontal } from "lucide-react";
 import type { Campaign } from "@shared/schema";
+import CampaignGridSkeleton from "@/components/skeletons/CampaignGridSkeleton";
 
 interface FilterState {
   search: string;
@@ -300,17 +301,7 @@ export default function CampaignsPage() {
       <section className="section-spacing-lg surface-primary">
         <div className="container-main">
           {isLoading ? (
-            <div className="campaign-grid">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="card-standard animate-pulse">
-                  <div className="h-48 bg-muted rounded-lg mb-4"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-muted rounded w-3/4"></div>
-                    <div className="h-4 bg-muted rounded w-1/2"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <CampaignGridSkeleton count={8} />
           ) : campaigns.length > 0 ? (
             <div className="campaign-grid" data-testid="campaigns-grid">
               {campaigns.map((campaign: Campaign) => (

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, Users, Target, CreditCard } from "lucide-react";
 import ShareButton from "@/components/ShareButton";
 import { generateCampaignShareLink } from "@/utils/share";
+import ProgressiveImage from "@/components/enhanced/ProgressiveImage";
 import type { Campaign } from "@shared/schema";
 
 interface CampaignCardProps {
@@ -27,14 +28,15 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
         className="campaign-card group cursor-pointer"
         data-testid={`campaign-card-${campaign.id}`}
       >
-        {/* Campaign Image - Mobile-Optimized 1:1 Aspect Ratio */}
+        {/* Campaign Image - Enhanced Progressive Loading */}
         <div className="campaign-image relative">
           {campaign.imageUrl ? (
-            <img 
-              src={campaign.imageUrl} 
+            <ProgressiveImage
+              src={campaign.imageUrl}
               alt={campaign.title}
-              className="w-full h-full object-cover"
-              loading="lazy"
+              className="w-full h-full"
+              placeholderClassName={bgClass}
+              fallbackIcon={<Heart className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />}
             />
           ) : (
             <div className={`w-full h-full ${bgClass} flex items-center justify-center`}>

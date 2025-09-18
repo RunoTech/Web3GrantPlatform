@@ -1152,27 +1152,41 @@ export default function ProfilePage() {
           <TabsContent value="campaigns" className="space-y-6 mt-6">
             {userCampaigns.length > 0 ? (
               <div className="space-y-6">
-                {/* Campaign Management Header */}
+                {/* Campaign Management Header - Optimized Layout */}
                 <Card className="bg-gradient-to-r from-primary/5 to-blue-500/10 border-primary/20">
-                  <CardHeader>
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div>
-                        <CardTitle className="flex items-center">
-                          <Target className="w-5 h-5 mr-2 text-primary" />
-                          {t('profile.campaign_management')}
+                  <CardHeader className="space-y-4">
+                    {/* Title Row */}
+                    <div className="flex flex-col space-y-3 sm:flex-row sm:items-start sm:justify-between sm:space-y-0">
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <CardTitle className="flex items-center text-lg sm:text-xl">
+                          <Target className="w-5 h-5 mr-3 text-primary flex-shrink-0" />
+                          <span className="truncate">{t('profile.campaign_management')}</span>
                         </CardTitle>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {userCampaigns.length} {t('profile.total_campaigns')} • {activeCampaigns} {t('profile.active')}
-                        </p>
+                        
+                        {/* Stats Row - Responsive Layout */}
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium text-foreground">{userCampaigns.length}</span>
+                            <span>{t('profile.total_campaigns')}</span>
+                          </div>
+                          <div className="w-px h-4 bg-border"></div>
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium text-foreground">{activeCampaigns}</span>
+                            <span>{t('profile.active')}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button asChild variant="outline" size="sm" data-testid="create-new-campaign">
+                      
+                      {/* Action Buttons - Responsive */}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <Button asChild variant="outline" size="sm" className="min-w-0" data-testid="create-new-campaign">
                           <Link href="/create-campaign">
-                            <Plus className="w-4 h-4 mr-1" />
-                            {t('profile.new_campaign')}
+                            <Plus className="w-4 h-4 mr-2 flex-shrink-0" />
+                            <span className="hidden sm:inline">{t('profile.new_campaign')}</span>
+                            <span className="sm:hidden">New</span>
                           </Link>
                         </Button>
-                        <Button variant="outline" size="sm" className="px-3" data-testid="toggle-view">
+                        <Button variant="outline" size="sm" className="px-3 flex-shrink-0" data-testid="toggle-view">
                           <LayoutGrid className="w-4 h-4" />
                         </Button>
                       </div>

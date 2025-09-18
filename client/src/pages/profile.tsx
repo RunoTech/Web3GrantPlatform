@@ -505,61 +505,303 @@ export default function ProfilePage() {
           </TabsContent>
           
           <TabsContent value="overview" className="space-y-6 mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="card-standard">
+            {/* Quick Action Shortcuts */}
+            <Card className="bg-gradient-to-r from-primary/5 to-binance-yellow/10 border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center text-lg">
+                  <Target className="w-5 h-5 mr-2 text-primary" />
+                  {t('profile.quick_actions')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Button asChild variant="outline" className="h-20 flex-col gap-2 hover:border-primary hover:shadow-md transition-all" data-testid="quick-action-create">
+                    <Link href="/create-campaign">
+                      <Target className="w-6 h-6 text-primary" />
+                      <span className="text-sm font-medium">{t('profile.create_campaign')}</span>
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" className="h-20 flex-col gap-2 hover:border-primary hover:shadow-md transition-all" data-testid="quick-action-rewards">
+                    <Link href="/daily-rewards">
+                      <Gift className="w-6 h-6 text-yellow-600" />
+                      <span className="text-sm font-medium">{t('profile.daily_rewards')}</span>
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" className="h-20 flex-col gap-2 hover:border-primary hover:shadow-md transition-all" data-testid="quick-action-affiliate">
+                    <Link href="/affiliate">
+                      <Share2 className="w-6 h-6 text-blue-600" />
+                      <span className="text-sm font-medium">{t('profile.affiliate')}</span>
+                    </Link>
+                  </Button>
+                  <Button onClick={() => setActiveTab('analytics')} variant="outline" className="h-20 flex-col gap-2 hover:border-primary hover:shadow-md transition-all" data-testid="quick-action-analytics">
+                    <BarChart3 className="w-6 h-6 text-purple-600" />
+                    <span className="text-sm font-medium">{t('profile.view_analytics')}</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Performance Dashboard */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Performance Metrics with Visual Progress */}
+              <Card className="lg:col-span-2 card-standard">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Activity className="w-5 h-5 mr-2 text-primary" />
-                    Recent Activity
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <TrendingUp className="w-5 h-5 mr-2 text-primary" />
+                      {t('profile.performance_metrics')}
+                    </div>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                      📈 {t('profile.trending')}
+                    </Badge>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {userCampaigns.slice(0, 3).map((campaign: Campaign) => (
-                      <div key={campaign.id} className="flex items-center justify-between p-3 surface-secondary border border-border rounded-lg">
-                        <div>
-                          <p className="font-medium text-foreground">{campaign.title}</p>
-                          <p className="text-sm text-muted-foreground">{campaign.totalDonations || '0'} USDT raised</p>
-                        </div>
-                        <Badge variant="outline">{campaign.active ? 'Active' : 'Draft'}</Badge>
-                      </div>
-                    ))}
-                    {userCampaigns.length === 0 && (
-                      <p className="text-center text-muted-foreground py-8">No campaigns yet</p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="card-standard">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <TrendingUp className="w-5 h-5 mr-2 text-primary" />
-                    Performance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
+                <CardContent className="space-y-6">
+                  {/* Success Rate with Progress Bar */}
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Success Rate</span>
-                      <span className="font-medium text-foreground">
+                      <span className="text-sm font-medium text-muted-foreground">{t('profile.success_rate')}</span>
+                      <span className="text-2xl font-bold text-foreground">
                         {userCampaigns.length > 0 ? Math.round((activeCampaigns / userCampaigns.length) * 100) : 0}%
                       </span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Avg. Donation</span>
-                      <span className="font-medium text-foreground">
-                        {totalSupporters > 0 ? (totalDonationsReceived / totalSupporters).toFixed(2) : '0'} USDT
-                      </span>
+                    <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3">
+                      <div 
+                        className="bg-gradient-to-r from-green-500 to-emerald-600 h-3 rounded-full transition-all duration-1000"
+                        style={{ width: `${userCampaigns.length > 0 ? (activeCampaigns / userCampaigns.length) * 100 : 0}%` }}
+                      ></div>
                     </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>{activeCampaigns} {t('profile.active_campaigns')}</span>
+                      <span>{userCampaigns.length} {t('profile.total_campaigns')}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Average Donation with Comparison */}
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Daily Entries</span>
-                      <span className="font-medium text-foreground">{dailyParticipationCount}</span>
+                      <span className="text-sm font-medium text-muted-foreground">{t('profile.avg_donation')}</span>
+                      <div className="text-right">
+                        <span className="text-2xl font-bold text-foreground">
+                          {totalSupporters > 0 ? (totalDonationsReceived / totalSupporters).toFixed(2) : '0.00'}
+                        </span>
+                        <span className="text-sm text-muted-foreground ml-1">USDT</span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
+                        <div className="text-lg font-bold text-foreground">{totalSupporters}</div>
+                        <div className="text-xs text-muted-foreground">{t('profile.supporters')}</div>
+                      </div>
+                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
+                        <div className="text-lg font-bold text-foreground">{totalDonationsReceived.toFixed(2)}</div>
+                        <div className="text-xs text-muted-foreground">{t('profile.total_raised')}</div>
+                      </div>
+                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
+                        <div className="text-lg font-bold text-foreground">{userCampaigns.length}</div>
+                        <div className="text-xs text-muted-foreground">{t('profile.campaigns')}</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Daily Reward Streak */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-muted-foreground">{t('profile.reward_streak')}</span>
+                      <div className="flex items-center gap-2">
+                        <Trophy className="w-5 h-5 text-yellow-500" />
+                        <span className="text-xl font-bold text-foreground">{dailyParticipationCount}</span>
+                        <span className="text-sm text-muted-foreground">{t('profile.days')}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {[...Array(30)].map((_, i) => (
+                        <div
+                          key={i}
+                          className={`w-2 h-6 rounded-full ${
+                            i < Math.min(dailyParticipationCount, 30) 
+                              ? 'bg-gradient-to-t from-yellow-400 to-orange-500' 
+                              : 'bg-slate-200 dark:bg-slate-700'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <div className="text-xs text-muted-foreground text-center">
+                      {dailyParticipationCount > 0 
+                        ? `🔥 ${t('profile.streak_active')} - ${t('profile.keep_going')}!`
+                        : `💫 ${t('profile.start_streak')} - ${t('profile.join_today')}!`
+                      }
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Goal Tracking */}
+              <Card className="card-standard">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Star className="w-5 h-5 mr-2 text-yellow-500" />
+                    {t('profile.goals')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Campaign Goal */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{t('profile.campaign_goal')}</span>
+                      <span className="font-medium">{userCampaigns.length}/5</span>
+                    </div>
+                    <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                      <div 
+                        className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full"
+                        style={{ width: `${Math.min((userCampaigns.length / 5) * 100, 100)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  {/* Fundraising Goal */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{t('profile.fundraising_goal')}</span>
+                      <span className="font-medium">{totalDonationsReceived.toFixed(0)}/1000 USDT</span>
+                    </div>
+                    <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                      <div 
+                        className="bg-gradient-to-r from-green-500 to-emerald-600 h-2 rounded-full"
+                        style={{ width: `${Math.min((totalDonationsReceived / 1000) * 100, 100)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  {/* Supporter Goal */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{t('profile.supporter_goal')}</span>
+                      <span className="font-medium">{totalSupporters}/100</span>
+                    </div>
+                    <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                      <div 
+                        className="bg-gradient-to-r from-purple-500 to-violet-600 h-2 rounded-full"
+                        style={{ width: `${Math.min((totalSupporters / 100) * 100, 100)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  {/* Achievement Badge */}
+                  <div className="pt-4 border-t border-border">
+                    <div className="text-center">
+                      <div className="text-2xl mb-2">
+                        {userCampaigns.length >= 5 ? '🏆' : 
+                         userCampaigns.length >= 3 ? '🥈' :
+                         userCampaigns.length >= 1 ? '🥉' : '🌟'
+                        }
+                      </div>
+                      <div className="text-sm font-medium text-foreground">
+                        {userCampaigns.length >= 5 ? t('profile.champion') : 
+                         userCampaigns.length >= 3 ? t('profile.achiever') :
+                         userCampaigns.length >= 1 ? t('profile.starter') : t('profile.beginner')
+                        }
+                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
+            
+            {/* Enhanced Recent Activity Timeline */}
+            <Card className="card-standard">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <Activity className="w-5 h-5 mr-2 text-primary" />
+                    {t('profile.recent_activity')}
+                  </div>
+                  <Button onClick={() => setActiveTab('campaigns')} variant="ghost" size="sm" className="text-primary hover:text-primary/80" data-testid="view-all-campaigns">
+                    {t('profile.view_all')} →
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {userCampaigns.length > 0 ? (
+                  <div className="space-y-4">
+                    {userCampaigns.slice(0, 4).map((campaign: Campaign, index: number) => {
+                      const progress = campaign.targetAmount ? (parseFloat(campaign.totalDonations || '0') / parseFloat(campaign.targetAmount)) * 100 : 0;
+                      return (
+                        <div key={campaign.id} className="relative">
+                          {index < userCampaigns.slice(0, 4).length - 1 && (
+                            <div className="absolute left-6 top-12 w-px h-8 bg-border" />
+                          )}
+                          <div className="flex items-start space-x-4 p-4 surface-secondary border border-border rounded-xl hover:shadow-md transition-all">
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                              campaign.active 
+                                ? 'bg-gradient-to-br from-green-500 to-emerald-600' 
+                                : 'bg-gradient-to-br from-slate-400 to-slate-500'
+                            }`}>
+                              <Target className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-semibold text-foreground truncate">{campaign.title}</h4>
+                                <Badge variant={campaign.active ? 'default' : 'secondary'} className="ml-2">
+                                  {campaign.active ? t('profile.active') : t('profile.draft')}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                                {campaign.description || t('profile.no_description')}
+                              </p>
+                              <div className="grid grid-cols-3 gap-4 text-sm">
+                                <div>
+                                  <div className="font-medium text-foreground">{campaign.totalDonations || '0'} USDT</div>
+                                  <div className="text-muted-foreground">{t('profile.raised')}</div>
+                                </div>
+                                <div>
+                                  <div className="font-medium text-foreground">{campaign.donationCount || 0}</div>
+                                  <div className="text-muted-foreground">{t('profile.supporters')}</div>
+                                </div>
+                                <div>
+                                  <div className="font-medium text-foreground">{progress.toFixed(0)}%</div>
+                                  <div className="text-muted-foreground">{t('profile.progress')}</div>
+                                </div>
+                              </div>
+                              {campaign.targetAmount && (
+                                <div className="mt-3">
+                                  <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                                    <div 
+                                      className={`h-2 rounded-full transition-all duration-500 ${
+                                        campaign.active 
+                                          ? 'bg-gradient-to-r from-green-500 to-emerald-600'
+                                          : 'bg-gradient-to-r from-slate-400 to-slate-500'
+                                      }`}
+                                      style={{ width: `${Math.min(progress, 100)}%` }}
+                                    ></div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Target className="w-10 h-10 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">{t('profile.no_campaigns')}</h3>
+                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                      {t('profile.create_first_campaign')}
+                    </p>
+                    <Button asChild className="btn-binance btn-lg hover:transform hover:-translate-y-1 transition-all" data-testid="create-first-campaign">
+                      <Link href="/create-campaign">
+                        <Target className="w-5 h-5 mr-2" />
+                        {t('profile.create_campaign')}
+                      </Link>
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="campaigns" className="space-y-6 mt-6">

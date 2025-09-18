@@ -198,6 +198,16 @@ h6 { font-size: 1rem; line-height: 1.4; }      /* 16px - Button text (16-18px) *
 .text-base { font-size: 0.875rem; } /* 14px - Binance default */
 .text-lg { font-size: 1rem; }     /* 16px */
 .text-xl { font-size: 1.125rem; } /* 18px */
+.text-2xl { font-size: 1.5rem; }  /* 24px */
+.text-3xl { font-size: 1.875rem; } /* 30px */
+.text-4xl { font-size: 2.25rem; }  /* 36px */
+.text-5xl { font-size: 3rem; }     /* 48px */
+
+/* Font weights for prominent text */
+.font-extrabold { font-weight: 800; }
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.font-medium { font-weight: 500; }
 
 /* Binance-style Colors */
 .bg-binance-yellow { background-color: var(--binance-yellow); }
@@ -430,20 +440,12 @@ div.card-standard:hover,
   box-shadow: 0 4px 16px rgba(240, 185, 11, 0.3) !important; /* Enhanced yellow shadow in dark */
 }
 
-/* Campaign Card Grid - Mobile-First Responsive Design */
+/* Campaign Card Grid - GoFundMe Style Wide Cards */
 .campaign-grid {
   display: grid;
-  gap: 16px;
+  gap: 20px;
   grid-template-columns: 1fr;
   padding: 0 4px;
-}
-
-@media (min-width: 480px) {
-  .campaign-grid {
-    gap: 20px;
-    grid-template-columns: repeat(2, 1fr);
-    padding: 0 8px;
-  }
 }
 
 @media (min-width: 768px) {
@@ -454,15 +456,9 @@ div.card-standard:hover,
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1200px) {
   .campaign-grid {
     grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 1280px) {
-  .campaign-grid {
-    grid-template-columns: repeat(4, 1fr);
   }
 }
 
@@ -474,8 +470,16 @@ div.card-standard:hover,
   overflow: hidden;
   transition: all 0.3s ease;
   touch-action: manipulation;
-  /* Mobile-optimized touch target */
-  min-height: 320px;
+  /* GoFundMe style horizontal layout */
+  display: flex;
+  min-height: 280px;
+}
+
+@media (max-width: 767px) {
+  .campaign-card {
+    flex-direction: column;
+    min-height: 320px;
+  }
 }
 
 /* Enhanced mobile touch interactions */
@@ -494,19 +498,40 @@ div.card-standard:hover,
 }
 
 .campaign-image {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
+  /* Desktop: Exactly 40% width like GoFundMe */
+  flex: 0 0 40%;
+  width: 40%;
+  height: 280px;
+  min-height: 280px;
   position: relative;
+  overflow: hidden;
+}
+
+@media (max-width: 767px) {
+  .campaign-image {
+    flex: 0 0 auto;
+    width: 100%;
+    height: 200px;
+    min-height: 200px;
+    aspect-ratio: 16/9;
+  }
 }
 
 .campaign-content {
-  padding: 16px;
+  /* Desktop: Exactly 60% width like GoFundMe */
+  flex: 0 0 60%;
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  justify-content: space-between;
 }
 
 @media (max-width: 767px) {
   .campaign-content {
-    padding: 12px;
+    flex: 1;
+    width: 100%;
+    padding: 16px;
   }
 }
 

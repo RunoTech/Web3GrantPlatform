@@ -28,13 +28,13 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
         className="campaign-card group cursor-pointer"
         data-testid={`campaign-card-${campaign.id}`}
       >
-        {/* Campaign Image - Enhanced Progressive Loading */}
+        {/* Campaign Image - GoFundMe Style Side Image */}
         <div className="campaign-image relative">
           {campaign.imageUrl ? (
             <ProgressiveImage
               src={campaign.imageUrl}
               alt={campaign.title}
-              className="w-full h-full"
+              className="w-full h-full object-cover"
               placeholderClassName={bgClass}
               fallbackIcon={<Heart className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />}
             />
@@ -43,75 +43,102 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
               <Heart className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />
             </div>
           )}
-          {/* Mobile-optimized badges with better touch spacing */}
-          <div className="absolute top-2 right-2 flex flex-col gap-1.5">
+          {/* Location Badge - GoFundMe Style */}
+          <div className="absolute top-3 left-3">
+            <Badge variant="secondary" className="bg-black/70 text-white font-medium text-xs px-2 py-1 backdrop-blur-sm">
+              Blockchain Campaign
+            </Badge>
+          </div>
+          
+          {/* Status Badges - Top Right */}
+          <div className="absolute top-3 right-3 flex flex-col gap-1.5">
             {campaign.featured && (
               <Badge className="bg-primary text-primary-foreground font-semibold text-xs px-2 py-1 shadow-sm">
                 Öne Çıkan
               </Badge>
             )}
-            {campaign.creditCardEnabled ? (
+            {campaign.creditCardEnabled && (
               <Badge className="bg-green-600 text-white font-semibold flex items-center gap-1 text-xs px-2 py-1 shadow-sm">
                 <CreditCard className="w-2.5 h-2.5" />
-                <span className="hidden sm:inline">Pay with Credit Card</span>
-                <span className="sm:hidden">Credit Card</span>
+                <span className="hidden sm:inline">Credit Card</span>
               </Badge>
-            ) : (
-              !campaign.featured && (
-                <Badge variant="secondary" className="font-semibold text-xs px-2 py-1 shadow-sm">
-                  Aktif
-                </Badge>
-              )
             )}
           </div>
         </div>
         
-        {/* Campaign Content - Mobile-Optimized Layout */}
-        <div className="campaign-content">
-          <div className="p-3 sm:p-4 space-y-2.5 sm:space-y-3">
-            <h3 className="text-base sm:text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
-              {campaign.title}
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-              {campaign.description}
-            </p>
+        {/* Campaign Content - GoFundMe Style Right Side */}
+        <div className="campaign-content justify-between">
+          {/* Main Content */}
+          <div className="flex-1 space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-lg md:text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                {campaign.title}
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                {campaign.description}
+              </p>
+            </div>
             
-            {/* Mobile-Optimized Stats Grid */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-2 border-t border-border">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground">Toplanan</p>
-                  <p className="text-sm font-semibold text-foreground truncate">{parseFloat(campaign.totalDonations || "0").toFixed(2)} USDT</p>
+            {/* Amount Raised - GoFundMe Style Prominent Display */}
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <div className="campaign-amount">
+                  <div 
+                    className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight"
+                    style={{ fontSize: '1.875rem', fontWeight: '800', lineHeight: '1.2' }}
+                    data-testid={`campaign-amount-${campaign.id}`}
+                  >
+                    ${parseFloat(campaign.totalDonations || "0").toLocaleString()}
+                  </div>
+                  <div 
+                    className="text-lg font-medium text-muted-foreground"
+                    style={{ fontSize: '1rem', fontWeight: '500' }}
+                  >
+                    <span className="text-primary font-semibold">USDT</span> raised
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground">Destekçi</p>
-                  <p className="text-sm font-semibold text-foreground truncate">{campaign.donationCount}</p>
-                </div>
+              
+              {/* Progress Bar - GoFundMe Style */}
+              <div 
+                className="w-full bg-secondary rounded-full h-2.5 progress-bar"
+                role="progressbar"
+                aria-valuenow={Math.min((parseFloat(campaign.totalDonations || "0") / 10000) * 100, 100)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                data-testid={`progress-bar-${campaign.id}`}
+              >
+                <div 
+                  className="bg-primary h-2.5 rounded-full transition-all duration-300"
+                  style={{ 
+                    width: `${Math.min((parseFloat(campaign.totalDonations || "0") / 10000) * 100, 100)}%` 
+                  }}
+                ></div>
               </div>
             </div>
           </div>
           
-          {/* Mobile-Optimized Action Bar */}
-          <div className="campaign-actions">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-primary rounded-full flex-shrink-0"></div>
-                <span className="text-xs text-muted-foreground font-mono truncate">
-                  {campaign.ownerWallet.slice(0, 6)}...{campaign.ownerWallet.slice(-4)}
-                </span>
-              </div>
-              {/* Mobile-Optimized Share Button */}
-              <div onClick={(e) => e.preventDefault()} className="flex-shrink-0">
+          {/* Bottom Info - Supporters & Creator */}
+          <div className="flex items-center justify-between pt-4 border-t border-border mt-auto">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                {campaign.donationCount || 0} supporters
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-primary rounded-full flex-shrink-0"></div>
+              <span className="text-xs text-muted-foreground font-mono">
+                {campaign.ownerWallet.slice(0, 6)}...{campaign.ownerWallet.slice(-4)}
+              </span>
+              <div onClick={(e) => e.preventDefault()}>
                 <ShareButton 
                   shareData={generateCampaignShareLink(campaign.id, campaign.title)}
                   variant="ghost"
                   size="sm"
                   showText={false}
-                  className="h-11 w-11 p-0 hover:bg-accent touch-manipulation min-h-11 min-w-11"
+                  className="h-8 w-8 p-0 hover:bg-accent"
                   data-testid={`share-campaign-${campaign.id}`}
                 />
               </div>

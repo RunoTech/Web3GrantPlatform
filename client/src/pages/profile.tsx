@@ -64,7 +64,8 @@ import DonationHistoryTable from "@/components/analytics/DonationHistoryTable";
 
 export default function ProfilePage() {
   const { isConnected, address } = useWallet();
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const { toast } = useToast();
   
   // Campaign Management State
@@ -74,10 +75,6 @@ export default function ProfilePage() {
   const [viewMode, setViewMode] = useState("grid");
   const [selectedCampaigns, setSelectedCampaigns] = useState<number[]>([]);
   const [showBulkActions, setShowBulkActions] = useState(false);
-  
-  // Settings Integration
-  const { theme, toggleTheme } = useTheme();
-  const { language, setLanguage } = useLanguage();
   
   // Settings Form Schema
   const settingsSchema = z.object({
@@ -164,41 +161,11 @@ export default function ProfilePage() {
     queryKey: ["/api/get-daily-entries", address],
     enabled: isConnected && !!address,
   });
-
-  if (!isConnected) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center space-y-8 max-w-lg mx-auto p-8">
-            <div className="w-32 h-32 bg-binance-yellow rounded-2xl flex items-center justify-center mx-auto shadow-binance">
-              <Wallet className="w-16 h-16 icon-on-primary" />
-            </div>
-            <div className="space-y-4">
-              <h1 className="text-3xl font-bold text-foreground">{t('profile.access_title')}</h1>
-              <p className="text-lg text-slate-600 dark:text-slate-300">
-                {t('profile.connect_wallet_message')}
-              </p>
-            </div>
-            <WalletConnectButton />
-            <Button variant="outline" asChild className="mt-6 btn-secondary hover:border-primary">
-              <Link href="/">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                {t('common.back_to_home')}
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const userCampaigns = (campaigns as Campaign[]).filter((c: Campaign) => c.ownerWallet === address);
-  const totalDonationsReceived = userCampaigns.reduce((sum: number, c: Campaign) => sum + parseFloat(c.totalDonations || '0'), 0);
-  const totalSupporters = userCampaigns.reduce((sum: number, c: Campaign) => sum + (c.donationCount || 0), 0);
-  const activeCampaigns = userCampaigns.filter((c: Campaign) => c.active).length;
-  const dailyParticipationCount = Array.isArray(dailyEntries) ? dailyEntries.length : 0;
-
-  // Campaign Management Logic
+  
+  // Campaign Management Logic - MOVED BEFORE EARLY RETURN to fix hooks order
+  const userCampaigns = isConnected && address && campaigns ? 
+    (campaigns as Campaign[]).filter((c: Campaign) => c.ownerWallet === address) : [];
+    
   const filteredAndSortedCampaigns = useMemo(() => {
     let filtered = userCampaigns;
     
@@ -234,6 +201,41 @@ export default function ProfilePage() {
       return 0;
     });
   }, [userCampaigns, searchTerm, statusFilter, sortBy]);
+  
+  // Stats calculations - safe for early return
+  const totalDonationsReceived = userCampaigns.reduce((sum: number, c: Campaign) => sum + parseFloat(c.totalDonations || '0'), 0);
+  const totalSupporters = userCampaigns.reduce((sum: number, c: Campaign) => sum + (c.donationCount || 0), 0);
+  const activeCampaigns = userCampaigns.filter((c: Campaign) => c.active).length;
+  const dailyParticipationCount = Array.isArray(dailyEntries) ? dailyEntries.length : 0;
+
+  if (!isConnected) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center space-y-8 max-w-lg mx-auto p-8">
+            <div className="w-32 h-32 bg-binance-yellow rounded-2xl flex items-center justify-center mx-auto shadow-binance">
+              <Wallet className="w-16 h-16 icon-on-primary" />
+            </div>
+            <div className="space-y-4">
+              <h1 className="text-3xl font-bold text-foreground">{t('profile.access_title')}</h1>
+              <p className="text-lg text-slate-600 dark:text-slate-300">
+                {t('profile.connect_wallet_message')}
+              </p>
+            </div>
+            <WalletConnectButton />
+            <Button variant="outline" asChild className="mt-6 btn-secondary hover:border-primary">
+              <Link href="/">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                {t('common.back_to_home')}
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Campaign logic moved above to fix React hooks order issue
 
   // Campaign Management Actions
   const handleToggleSelection = (campaignId: number) => {

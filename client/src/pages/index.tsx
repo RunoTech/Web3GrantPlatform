@@ -647,15 +647,36 @@ export default function HomePage() {
             
             <div className="space-y-4">
               <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.connection')}</h4>
-              <div className="flex space-x-4">
-                <a href="#" className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:border-primary border border-border transition-colors">
-                  <span className="text-sm text-primary">TW</span>
+              <div className="flex items-center gap-4">
+                <a 
+                  href="https://twitter.com/duxxan" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:border-primary border border-border transition-colors hover:bg-primary/10"
+                  aria-label="Twitter"
+                  data-testid="footer-twitter-link"
+                >
+                  <span className="text-xs font-semibold text-primary">TW</span>
                 </a>
-                <a href="#" className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:border-primary border border-border transition-colors">
-                  <span className="text-sm text-primary">DC</span>
+                <a 
+                  href="https://discord.gg/duxxan" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:border-primary border border-border transition-colors hover:bg-primary/10"
+                  aria-label="Discord"
+                  data-testid="footer-discord-link"
+                >
+                  <span className="text-xs font-semibold text-primary">DC</span>
                 </a>
-                <a href="#" className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:border-primary border border-border transition-colors">
-                  <span className="text-sm text-primary">TG</span>
+                <a 
+                  href="https://t.me/duxxan" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:border-primary border border-border transition-colors hover:bg-primary/10"
+                  aria-label="Telegram"
+                  data-testid="footer-telegram-link"
+                >
+                  <span className="text-xs font-semibold text-primary">TG</span>
                 </a>
               </div>
             </div>

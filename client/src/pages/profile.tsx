@@ -751,16 +751,16 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Desktop Tab Navigation - Optimized for Layout Stability */}
+          {/* Desktop Tab Navigation - Clean Fixed Layout */}
           <div className="hidden md:block">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-3 p-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-border rounded-xl shadow-sm">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 lg:grid-cols-6 gap-2 p-2 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-border rounded-xl shadow-sm">
               {[
-                { id: 'overview', icon: BarChart3, label: t('profile.overview'), desc: t('profile.overview_desc'), color: 'blue' },
-                { id: 'analytics', icon: Activity, label: t('profile.analytics'), desc: t('profile.analytics_desc'), color: 'purple' },
-                { id: 'donations', icon: DollarSign, label: t('profile.donations'), desc: t('profile.donations_desc'), color: 'green' },
-                { id: 'campaigns', icon: Target, label: t('profile.campaigns'), desc: t('profile.campaigns_desc'), color: 'orange' },
-                { id: 'rewards', icon: Trophy, label: t('profile.rewards'), desc: t('profile.rewards_desc'), color: 'yellow' },
-                { id: 'settings', icon: Settings, label: t('profile.settings'), desc: t('profile.settings_desc'), color: 'slate' }
+                { id: 'overview', icon: BarChart3, label: t('profile.overview'), color: 'blue' },
+                { id: 'analytics', icon: Activity, label: t('profile.analytics'), color: 'purple' },
+                { id: 'donations', icon: DollarSign, label: t('profile.donations'), color: 'green' },
+                { id: 'campaigns', icon: Target, label: t('profile.campaigns'), color: 'orange' },
+                { id: 'rewards', icon: Trophy, label: t('profile.rewards'), color: 'yellow' },
+                { id: 'settings', icon: Settings, label: t('profile.settings'), color: 'slate' }
               ].map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -770,8 +770,7 @@ export default function ProfilePage() {
                     value={tab.id}
                     className={`
                       relative flex flex-col items-center justify-center
-                      min-h-[100px] md:min-h-[110px] lg:min-h-[120px] 
-                      p-3 md:p-4 space-y-2 
+                      min-h-[85px] p-3 space-y-2
                       transition-all duration-300 rounded-lg
                       data-[state=active]:bg-gradient-to-br data-[state=active]:shadow-lg
                       data-[state=active]:transform data-[state=active]:-translate-y-0.5
@@ -788,10 +787,10 @@ export default function ProfilePage() {
                     `}
                     data-testid={`desktop-tab-${tab.id}`}
                   >
-                    {/* Icon Container - Fixed Size */}
+                    {/* Icon Container */}
                     <div className={`
                       flex items-center justify-center
-                      w-10 h-10 rounded-lg flex-shrink-0
+                      w-8 h-8 rounded-lg flex-shrink-0
                       ${isActive 
                         ? 'bg-white/20' 
                         : 'bg-gradient-to-br ' + (
@@ -804,36 +803,22 @@ export default function ProfilePage() {
                           )
                       }
                     `}>
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-white'}`} />
+                      <Icon className="w-4 h-4 text-white" />
                     </div>
 
-                    {/* Text Container - Fixed Layout */}
-                    <div className="text-center space-y-1 flex-1 min-h-[40px] flex flex-col justify-center">
-                      {/* Tab Label - Fixed Height */}
-                      <div className="h-5 flex items-center justify-center">
-                        <span className={`
-                          font-semibold text-sm leading-tight truncate max-w-full px-1
-                          ${isActive ? 'text-white' : 'text-foreground'}
-                        `}>
-                          {tab.label}
-                        </span>
-                      </div>
-                      
-                      {/* Tab Description - Fixed Height */}
-                      <div className="h-4 flex items-center justify-center">
-                        <span className={`
-                          text-xs leading-tight truncate max-w-full px-1
-                          hidden md:block lg:block
-                          ${isActive ? 'text-white/80' : 'text-muted-foreground'}
-                        `}>
-                          {tab.desc}
-                        </span>
-                      </div>
+                    {/* Tab Label - Single Clean Line */}
+                    <div className="text-center">
+                      <span className={`
+                        font-semibold text-xs leading-tight
+                        ${isActive ? 'text-white' : 'text-foreground'}
+                      `}>
+                        {tab.label}
+                      </span>
                     </div>
 
                     {/* Active Indicator */}
                     {isActive && (
-                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-white/60 rounded-full" />
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 h-0.5 bg-white/80 rounded-full" />
                     )}
                   </TabsTrigger>
                 );

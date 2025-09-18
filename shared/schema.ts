@@ -200,7 +200,9 @@ export const donations = pgTable("donations", {
   txHash: varchar("tx_hash", { length: 66 }).notNull(),
   network: varchar("network", { length: 20 }).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_donations_campaign_id").on(table.campaignId),
+]);
 
 // Daily reward system
 export const dailyEntries = pgTable("daily_entries", {
@@ -300,6 +302,7 @@ export const transactions = pgTable("transactions", {
   txHash: varchar("tx_hash", { length: 66 }).notNull().unique(),
   fromAddress: varchar("from_address", { length: 42 }).notNull(),
   toAddress: varchar("to_address", { length: 42 }).notNull(),
+  network: varchar("network", { length: 20 }).notNull().default("ethereum"), // ethereum, bsc
   token: varchar("token", { length: 10 }).notNull(), // USDT, ETH, etc.
   amount: decimal("amount", { precision: 18, scale: 8 }).notNull(),
   status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, confirmed, failed
@@ -308,7 +311,10 @@ export const transactions = pgTable("transactions", {
   gasUsed: varchar("gas_used"),
   gasPrice: varchar("gas_price"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_transactions_network").on(table.network),
+  index("idx_transactions_campaign_id").on(table.campaignId),
+]);
 
 // Credit card payment attempts (for tracking failed payments)
 export const paymentAttempts = pgTable("payment_attempts", {

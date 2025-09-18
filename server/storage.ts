@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, desc, and, sql, gt, or } from "drizzle-orm";
+import { and, or, eq, ilike, gte, lte, asc, desc, sql, gt } from "drizzle-orm";
 import {
   type Admin, type InsertAdmin,
   type PlatformSetting, type InsertPlatformSetting,
@@ -95,7 +95,20 @@ export interface IStorage {
   canParticipateDaily(wallet: string, date: string): Promise<boolean>;
 
   // Campaigns
-  getCampaigns(limit?: number, offset?: number): Promise<Campaign[]>;
+  getCampaigns(
+    limit?: number, 
+    offset?: number,
+    filters?: {
+      search?: string;
+      campaignType?: 'FUND' | 'DONATE';
+      creatorType?: 'company' | 'citizen' | 'association' | 'foundation';
+      status?: 'active' | 'featured' | 'approved';
+      minAmount?: number;
+      maxAmount?: number;
+      sortBy?: 'newest' | 'oldest' | 'most_funded' | 'ending_soon';
+      creditCardEnabled?: boolean;
+    }
+  ): Promise<Campaign[]>;
   getCampaign(id: number): Promise<Campaign | undefined>;
   createCampaign(campaign: InsertCampaign): Promise<Campaign>;
   updateCampaign(id: number, updates: Partial<Campaign>): Promise<void>;
@@ -372,12 +385,90 @@ export class DatabaseStorage implements IStorage {
     return existingEntry.length === 0;
   }
 
-  // Campaigns
-  async getCampaigns(limit: number = 50, offset: number = 0): Promise<Campaign[]> {
-    return await db.select().from(campaigns)
-      .orderBy(desc(campaigns.createdAt))
-      .limit(limit)
-      .offset(offset);
+  // Campaigns with advanced filtering
+  async getCampaigns(
+    limit: number = 50, 
+    offset: number = 0,
+    filters?: {
+      search?: string;
+      campaignType?: 'FUND' | 'DONATE';
+      creatorType?: 'company' | 'citizen' | 'association' | 'foundation';
+      status?: 'active' | 'featured' | 'approved';
+      minAmount?: number;
+      maxAmount?: number;
+      sortBy?: 'newest' | 'oldest' | 'most_funded' | 'ending_soon';
+      creditCardEnabled?: boolean;
+    }
+  ): Promise<Campaign[]> {
+    let query = db.select().from(campaigns);
+    
+    // Apply filters
+    const conditions = [];
+    
+    if (filters?.search) {
+      conditions.push(
+        or(
+          ilike(campaigns.title, `%${filters.search}%`),
+          ilike(campaigns.description, `%${filters.search}%`)
+        )
+      );
+    }
+    
+    if (filters?.campaignType) {
+      conditions.push(eq(campaigns.campaignType, filters.campaignType));
+    }
+    
+    if (filters?.creatorType) {
+      conditions.push(eq(campaigns.creatorType, filters.creatorType));
+    }
+    
+    if (filters?.status === 'active') {
+      conditions.push(eq(campaigns.active, true));
+    }
+    
+    if (filters?.status === 'featured') {
+      conditions.push(eq(campaigns.featured, true));
+    }
+    
+    if (filters?.status === 'approved') {
+      conditions.push(eq(campaigns.approved, true));
+    }
+    
+    if (filters?.minAmount) {
+      conditions.push(gte(campaigns.targetAmount, filters.minAmount.toString()));
+    }
+    
+    if (filters?.maxAmount) {
+      conditions.push(lte(campaigns.targetAmount, filters.maxAmount.toString()));
+    }
+    
+    if (filters?.creditCardEnabled !== undefined) {
+      conditions.push(eq(campaigns.creditCardEnabled, filters.creditCardEnabled));
+    }
+    
+    // Apply where conditions
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    
+    // Apply sorting
+    switch (filters?.sortBy) {
+      case 'oldest':
+        query = query.orderBy(asc(campaigns.createdAt));
+        break;
+      case 'most_funded':
+        query = query.orderBy(desc(campaigns.totalDonations));
+        break;
+      case 'ending_soon':
+        query = query.orderBy(asc(campaigns.endDate));
+        break;
+      case 'newest':
+      default:
+        query = query.orderBy(desc(campaigns.createdAt));
+        break;
+    }
+    
+    return await query.limit(limit).offset(offset);
   }
 
   async getCampaign(id: number): Promise<Campaign | undefined> {

@@ -290,12 +290,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all campaigns (public)
+  // Get all campaigns with filtering (public)
   app.get("/api/get-campaigns", validatePaginationParams, async (req, res) => {
     try {
-      const limit = req.query.limit as number;
-      const offset = req.query.offset as number;
-      const campaigns = await storage.getCampaigns(limit, offset);
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+      
+      // Extract filter parameters
+      const filters: any = {};
+      
+      if (req.query.search) filters.search = req.query.search as string;
+      if (req.query.campaignType) filters.campaignType = req.query.campaignType as string;
+      if (req.query.creatorType) filters.creatorType = req.query.creatorType as string;
+      if (req.query.status) filters.status = req.query.status as string;
+      if (req.query.minAmount) filters.minAmount = parseFloat(req.query.minAmount as string);
+      if (req.query.maxAmount) filters.maxAmount = parseFloat(req.query.maxAmount as string);
+      if (req.query.sortBy) filters.sortBy = req.query.sortBy as string;
+      if (req.query.creditCardEnabled) filters.creditCardEnabled = req.query.creditCardEnabled === 'true';
+      
+      const campaigns = await storage.getCampaigns(limit, offset, filters);
       // Filter out company private information for public API
       const publicCampaigns = campaigns.map(filterCampaignForPublic);
       res.json(publicCampaigns);

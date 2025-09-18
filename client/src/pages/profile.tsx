@@ -680,9 +680,9 @@ export default function ProfilePage() {
 
         {/* Enhanced Mobile-First Tab Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          {/* Mobile Tab Navigation - Horizontal Scroll */}
+          {/* Mobile Tab Navigation - Optimized Horizontal Scroll */}
           <div className="block md:hidden mb-6">
-            <div className="flex overflow-x-auto scrollbar-hide gap-2 pb-2">
+            <div className="flex overflow-x-auto scrollbar-hide gap-3 pb-3 px-1">
               {[
                 { id: 'overview', icon: BarChart3, label: t('profile.overview'), desc: t('profile.overview_desc'), color: 'from-blue-500 to-indigo-600' },
                 { id: 'analytics', icon: Activity, label: t('profile.analytics'), desc: t('profile.analytics_desc'), color: 'from-purple-500 to-violet-600' },
@@ -698,7 +698,8 @@ export default function ProfilePage() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`
-                      flex-shrink-0 relative p-4 rounded-xl transition-all duration-300
+                      flex-shrink-0 relative min-w-[140px] p-4 rounded-xl 
+                      transition-all duration-300
                       ${isActive 
                         ? 'bg-gradient-to-br ' + tab.color + ' text-white shadow-lg transform -translate-y-1' 
                         : 'bg-white dark:bg-slate-800 border border-border hover:border-primary/50 hover:shadow-md'
@@ -706,21 +707,43 @@ export default function ProfilePage() {
                     `}
                     data-testid={`mobile-tab-${tab.id}`}
                   >
-                    <div className="flex items-center space-x-3 min-w-0">
-                      <div className={`p-2 rounded-lg ${isActive ? 'bg-white/20' : 'bg-gradient-to-br ' + tab.color}`}>
-                        <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-white'}`} />
+                    <div className="flex items-center space-x-3 min-w-0 h-[48px]">
+                      {/* Icon Container - Fixed Size */}
+                      <div className={`
+                        flex items-center justify-center flex-shrink-0
+                        w-8 h-8 rounded-lg
+                        ${isActive ? 'bg-white/20' : 'bg-gradient-to-br ' + tab.color}
+                      `}>
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-white'}`} />
                       </div>
-                      <div className="text-left min-w-0">
-                        <div className={`font-semibold text-sm ${isActive ? 'text-white' : 'text-foreground'}`}>
-                          {tab.label}
+                      
+                      {/* Text Container - Fixed Layout */}
+                      <div className="text-left min-w-0 flex-1">
+                        {/* Tab Label - Fixed Height */}
+                        <div className="h-5 flex items-center">
+                          <span className={`
+                            font-semibold text-sm leading-tight truncate
+                            ${isActive ? 'text-white' : 'text-foreground'}
+                          `}>
+                            {tab.label}
+                          </span>
                         </div>
-                        <div className={`text-xs truncate max-w-32 ${isActive ? 'text-white/80' : 'text-muted-foreground'}`}>
-                          {tab.desc}
+                        
+                        {/* Tab Description - Fixed Height */}
+                        <div className="h-4 flex items-center">
+                          <span className={`
+                            text-xs leading-tight truncate
+                            ${isActive ? 'text-white/80' : 'text-muted-foreground'}
+                          `}>
+                            {tab.desc}
+                          </span>
                         </div>
                       </div>
                     </div>
+                    
+                    {/* Active Indicator */}
                     {isActive && (
-                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-white rounded-full" />
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-white/60 rounded-full" />
                     )}
                   </button>
                 );
@@ -728,9 +751,9 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Desktop Tab Navigation - Enhanced Grid */}
+          {/* Desktop Tab Navigation - Optimized for Layout Stability */}
           <div className="hidden md:block">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-2 p-2 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-border rounded-xl shadow-sm">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-3 p-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-border rounded-xl shadow-sm">
               {[
                 { id: 'overview', icon: BarChart3, label: t('profile.overview'), desc: t('profile.overview_desc'), color: 'blue' },
                 { id: 'analytics', icon: Activity, label: t('profile.analytics'), desc: t('profile.analytics_desc'), color: 'purple' },
@@ -746,10 +769,13 @@ export default function ProfilePage() {
                     key={tab.id}
                     value={tab.id}
                     className={`
-                      flex-col p-4 h-auto space-y-2 transition-all duration-300 rounded-lg
+                      relative flex flex-col items-center justify-center
+                      min-h-[100px] md:min-h-[110px] lg:min-h-[120px] 
+                      p-3 md:p-4 space-y-2 
+                      transition-all duration-300 rounded-lg
                       data-[state=active]:bg-gradient-to-br data-[state=active]:shadow-lg
                       data-[state=active]:transform data-[state=active]:-translate-y-0.5
-                      hover:shadow-md hover:scale-105
+                      hover:shadow-md hover:scale-[1.02]
                       ${isActive ? (
                         tab.color === 'blue' ? 'data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600' :
                         tab.color === 'purple' ? 'data-[state=active]:from-purple-500 data-[state=active]:to-violet-600' :
@@ -762,8 +788,11 @@ export default function ProfilePage() {
                     `}
                     data-testid={`desktop-tab-${tab.id}`}
                   >
-                    <div className={`p-2 rounded-lg ${
-                      isActive 
+                    {/* Icon Container - Fixed Size */}
+                    <div className={`
+                      flex items-center justify-center
+                      w-10 h-10 rounded-lg flex-shrink-0
+                      ${isActive 
                         ? 'bg-white/20' 
                         : 'bg-gradient-to-br ' + (
                             tab.color === 'blue' ? 'from-blue-500 to-indigo-600' :
@@ -773,15 +802,39 @@ export default function ProfilePage() {
                             tab.color === 'yellow' ? 'from-yellow-500 to-orange-500' :
                             'from-slate-500 to-gray-600'
                           )
-                    }`}>
+                      }
+                    `}>
                       <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-white'}`} />
                     </div>
-                    <div className="text-center space-y-1">
-                      <div className="font-semibold text-sm">{tab.label}</div>
-                      <div className={`text-xs hidden lg:block ${isActive ? 'text-white/80' : 'text-muted-foreground'}`}>
-                        {tab.desc}
+
+                    {/* Text Container - Fixed Layout */}
+                    <div className="text-center space-y-1 flex-1 min-h-[40px] flex flex-col justify-center">
+                      {/* Tab Label - Fixed Height */}
+                      <div className="h-5 flex items-center justify-center">
+                        <span className={`
+                          font-semibold text-sm leading-tight truncate max-w-full px-1
+                          ${isActive ? 'text-white' : 'text-foreground'}
+                        `}>
+                          {tab.label}
+                        </span>
+                      </div>
+                      
+                      {/* Tab Description - Fixed Height */}
+                      <div className="h-4 flex items-center justify-center">
+                        <span className={`
+                          text-xs leading-tight truncate max-w-full px-1
+                          hidden md:block lg:block
+                          ${isActive ? 'text-white/80' : 'text-muted-foreground'}
+                        `}>
+                          {tab.desc}
+                        </span>
                       </div>
                     </div>
+
+                    {/* Active Indicator */}
+                    {isActive && (
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-white/60 rounded-full" />
+                    )}
                   </TabsTrigger>
                 );
               })}

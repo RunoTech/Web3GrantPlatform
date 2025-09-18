@@ -414,7 +414,6 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <h1 className="text-2xl font-bold text-foreground">{t('profile.welcome_back')}</h1>
                     <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border-green-200">
                       <Wallet className="w-3 h-3 mr-1" />
                       {t('profile.connected')}

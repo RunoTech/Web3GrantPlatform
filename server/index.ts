@@ -1,8 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import cookieParser from "cookie-parser";
 import { testRpcConnection, startAllCampaignListeners, getCampaignListenersStatus } from "./blockchain";
 import { storage } from "./storage";
 import 'dotenv/config';
@@ -14,20 +14,7 @@ const app = express();
 // Security: Trust proxy for accurate rate limiting
 app.set('trust proxy', 1);
 
-// Security: Add security headers
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "wss:", "https:"],
-    },
-  },
-  crossOriginEmbedderPolicy: false,
-}));
+// Security: Headers now managed by registerRoutes function to avoid duplication
 
 // Security: Enable CORS with restrictions
 app.use((req, res, next) => {
@@ -86,6 +73,9 @@ app.use('/api/activate-account', strictLimiter);
 // Security: Request size limits
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+
+// Security: Cookie parser for secure authentication
+app.use(cookieParser());
 
 app.use((req, res, next) => {
   const start = Date.now();

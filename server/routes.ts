@@ -79,9 +79,10 @@ interface AuthenticatedRequest extends Request {
 
 async function authenticateAdmin(req: AuthenticatedRequest, res: any, next: any) {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+    // SECURITY FIX: Read JWT from httpOnly cookie instead of Authorization header
+    const token = req.cookies.admin_auth_token;
     if (!token) {
-      return res.status(401).json({ error: "Token required" });
+      return res.status(401).json({ error: "Authentication required" });
     }
 
     const decoded = jwt.verify(token, JWT_SECRET_VALIDATED) as any;
@@ -94,7 +95,7 @@ async function authenticateAdmin(req: AuthenticatedRequest, res: any, next: any)
     req.admin = admin;
     next();
   } catch (error) {
-    res.status(401).json({ error: "Invalid token" });
+    res.status(401).json({ error: "Invalid authentication token" });
   }
 }
 
@@ -106,7 +107,8 @@ interface UserAuthenticatedRequest extends Request {
 
 async function authenticateUser(req: UserAuthenticatedRequest, res: any, next: any) {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+    // SECURITY FIX: Read JWT from httpOnly cookie instead of Authorization header
+    const token = req.cookies.user_auth_token;
     if (!token) {
       return res.status(401).json({ error: "Authentication required. Please connect your wallet and sign the message." });
     }
@@ -202,7 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       },
     },
     crossOriginEmbedderPolicy: false,
-    crossOriginOpenerPolicy: { policy: "cross-origin" },
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
     hsts: {
       maxAge: 31536000,
       includeSubDomains: true,
@@ -1752,9 +1754,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { expiresIn: '24h' }
       );
 
+      // SECURITY FIX: Set JWT as httpOnly cookie instead of returning in response body
+      res.cookie('user_auth_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      });
+
       res.json({ 
         success: true, 
-        token, 
         wallet: session.wallet,
         expiresAt: session.expiresAt,
         message: "Successfully authenticated" 
@@ -1770,6 +1779,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/auth/logout", authRateLimit, authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {
       await storage.invalidateUserSession(req.sessionId);
+      
+      // SECURITY FIX: Clear httpOnly authentication cookie
+      res.clearCookie('user_auth_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      });
+      
       res.json({ success: true, message: "Successfully logged out" });
     } catch (error) {
       console.error("Error during logout:", error);
@@ -1798,6 +1815,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get authentication status (for checking if httpOnly cookie is valid)
+  app.get("/auth/status", async (req, res) => {
+    try {
+      // Try to read JWT from httpOnly cookie
+      const token = req.cookies.user_auth_token;
+      if (!token) {
+        return res.json({ authenticated: false });
+      }
+
+      // Verify the JWT token
+      const decoded = jwt.verify(token, JWT_SECRET_VALIDATED) as any;
+      if (!decoded.sessionId || !decoded.wallet) {
+        return res.json({ authenticated: false });
+      }
+
+      // Verify session is still valid
+      const session = await storage.getUserSession(decoded.sessionId);
+      if (!session || !session.active || session.expiresAt <= new Date()) {
+        return res.json({ authenticated: false });
+      }
+
+      res.json({ 
+        authenticated: true,
+        wallet: session.wallet
+      });
+    } catch (error) {
+      // Invalid token or other error
+      res.json({ authenticated: false });
+    }
+  });
+
   // ADMIN API ROUTES
   
   // Admin login
@@ -1821,6 +1869,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const token = jwt.sign({ adminId: admin.id }, JWT_SECRET_VALIDATED, { expiresIn: "24h" });
       
+      // SECURITY FIX: Set JWT as httpOnly cookie instead of returning in response body
+      res.cookie('admin_auth_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      });
+      
       // Log admin login
       await storage.createAdminLog({
         adminId: admin.id,
@@ -1832,7 +1888,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         success: true,
-        token,
         admin: {
           id: admin.id,
           username: admin.username,
@@ -1877,6 +1932,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         details: { ip: req.ip, userAgent: req.get('User-Agent') },
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
+      });
+
+      // SECURITY FIX: Clear httpOnly authentication cookie
+      res.clearCookie('admin_auth_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
       });
 
       res.json({

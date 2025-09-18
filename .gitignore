@@ -4,3 +4,9 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Security: Prevent credential file commits
+admin_cookies.txt
+admin_cookie.txt
+*.cookies
+*.cookie

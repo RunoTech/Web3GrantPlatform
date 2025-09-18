@@ -18,7 +18,6 @@ interface LoginCredentials {
 
 interface LoginResponse {
   success: boolean;
-  token: string;
   admin: AdminUser;
   message?: string;
 }
@@ -40,14 +39,12 @@ export function useAdminAuth() {
       return response.json();
     },
     onSuccess: (data) => {
-      if (data.success && data.token) {
-        // Store token in localStorage
-        localStorage.setItem("admin_token", data.token);
-        
+      if (data.success) {
+        // SECURITY FIX: No more localStorage token storage - httpOnly cookies handle authentication
         // Set admin data directly in cache to immediately update isAuthenticated
         queryClient.setQueryData(["/api/youhonor/me"], data.admin);
         
-        // Invalidate admin queries to refetch with new token
+        // Invalidate admin queries to refetch with new authentication state
         queryClient.invalidateQueries({ queryKey: ["/api/youhonor"] });
       }
     },
@@ -60,8 +57,7 @@ export function useAdminAuth() {
       return response.json();
     },
     onSuccess: () => {
-      // Clear token from localStorage
-      localStorage.removeItem("admin_token");
+      // SECURITY FIX: No localStorage cleanup needed - httpOnly cookies cleared by server
       
       // Clear all admin queries
       queryClient.removeQueries({ queryKey: ["/api/youhonor"] });
@@ -71,20 +67,10 @@ export function useAdminAuth() {
     },
   });
 
-  // Setup axios interceptor for admin token on component mount
+  // SECURITY FIX: No manual auth setup needed - httpOnly cookies automatically sent
   const setupAdminAuth = () => {
-    const token = localStorage.getItem("admin_token");
-    if (token) {
-      queryClient.setDefaultOptions({
-        queries: {
-          meta: {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
-        }
-      });
-    }
+    // Authentication now handled automatically via httpOnly cookies
+    // No client-side token management required
   };
 
   return {
@@ -101,13 +87,30 @@ export function useAdminAuth() {
   };
 }
 
-// Utility function to check if user is admin
-export function isAdmin(): boolean {
-  const token = localStorage.getItem("admin_token");
-  return !!token;
+/**
+ * @deprecated This function always returns false due to httpOnly cookie security.
+ * Use the useAdminAuth() hook's `isAuthenticated` state instead.
+ * 
+ * SECURITY: Admin authentication is now managed server-side via httpOnly cookies
+ * which cannot be accessed by client-side JavaScript for security reasons.
+ */
+export function isAdmin(): false {
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(
+      '⚠️ isAdmin() is deprecated and always returns false.\n' +
+      '📝 Use useAdminAuth() hook instead:\n' +
+      '   const { isAuthenticated } = useAdminAuth();\n' +
+      '🔒 This is for security - admin tokens are now in httpOnly cookies.'
+    );
+  }
+  
+  // SECURITY: Cannot check httpOnly cookies client-side - this is intentional
+  // Client should use the useAdminAuth hook's isAuthenticated state instead
+  return false;
 }
 
-// Utility function to get admin token
+// SECURITY FIX: No admin token access - tokens now in httpOnly cookies
 export function getAdminToken(): string | null {
-  return localStorage.getItem("admin_token");
+  // Tokens are now stored in httpOnly cookies and cannot be accessed by client-side JavaScript
+  return null;
 }

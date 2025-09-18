@@ -14,12 +14,22 @@ export function useWallet() {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const { toast } = useToast();
 
-  // Check authentication token on initialization
-  const checkAuthToken = useCallback(() => {
-    const token = localStorage.getItem('duxxan_auth_token');
-    if (token) {
-      setAuthToken(token);
-      setIsAuthenticated(true);
+  // SECURITY FIX: Check authentication by testing server endpoint (cookies sent automatically)
+  const checkAuthToken = useCallback(async () => {
+    try {
+      // Try to make an authenticated request - if it succeeds, we're authenticated
+      const response = await apiRequest("GET", "/auth/status");
+      if (response.ok) {
+        const data = await response.json();
+        if (data.authenticated) {
+          setIsAuthenticated(true);
+          // Note: No token storage needed - httpOnly cookies handle authentication
+        }
+      }
+    } catch (error) {
+      // Not authenticated or network error
+      setIsAuthenticated(false);
+      setAuthToken(null);
     }
   }, []);
 
@@ -33,14 +43,14 @@ export function useWallet() {
         if (!selectedWalletId) {
           setSelectedWalletId('metamask');
         }
-        // Check authentication token
-        checkAuthToken();
+        // Check authentication status
+        await checkAuthToken();
       } else {
         setAddress(null);
         setIsConnected(false);
         setIsAuthenticated(false);
         setAuthToken(null);
-        localStorage.removeItem('duxxan_auth_token');
+        // SECURITY FIX: No localStorage cleanup needed - httpOnly cookies managed by server
       }
     } catch (error) {
       console.error('Error checking wallet connection:', error);
@@ -94,13 +104,12 @@ export function useWallet() {
         nonce: nonceResponse.nonce
       }) as any;
 
-      if (!verifyResponse.success || !verifyResponse.token) {
+      if (!verifyResponse.success) {
         throw new Error("Authentication verification failed");
       }
 
-      // Step 4: Store JWT token
-      localStorage.setItem('duxxan_auth_token', verifyResponse.token);
-      setAuthToken(verifyResponse.token);
+      // SECURITY FIX: No JWT token storage needed - httpOnly cookies handle authentication
+      // Server sets httpOnly cookie automatically in /auth/verify endpoint
       setIsAuthenticated(true);
 
       toast({
@@ -125,8 +134,8 @@ export function useWallet() {
   // Logout function
   const logout = useCallback(async () => {
     try {
-      // Call server logout if authenticated
-      if (authToken) {
+      // SECURITY FIX: Always call server logout when authenticated (no authToken dependency)
+      if (isAuthenticated) {
         await apiRequest("POST", "/auth/logout", {});
       }
     } catch (error) {
@@ -134,16 +143,23 @@ export function useWallet() {
       // Continue with local logout even if server call fails
     }
 
-    // Clear local state
-    localStorage.removeItem('duxxan_auth_token');
-    setAuthToken(null);
+    // Clear local authentication state
     setIsAuthenticated(false);
+    setAuthToken(null);
+    
+    // SECURITY FIX: Refresh auth status from server to ensure consistency
+    try {
+      await checkAuthToken();
+    } catch (error) {
+      // If check fails, ensure we're marked as not authenticated
+      setIsAuthenticated(false);
+    }
     
     toast({
       title: "Logged Out",
       description: "Authentication session ended",
     });
-  }, [authToken, toast]);
+  }, [isAuthenticated, checkAuthToken, toast]);
 
   const connect = useCallback(async (selectedWalletId?: string) => {
     if (isConnecting) return;

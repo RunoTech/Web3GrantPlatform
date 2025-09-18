@@ -18,19 +18,14 @@ export async function apiRequest(
     headers["Content-Type"] = "application/json";
   }
   
-  // Add Authorization header for admin routes
-  if (url.includes("/api/youhonor/")) {
-    const token = localStorage.getItem("admin_token");
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-  }
+  // SECURITY FIX: No Authorization headers needed - httpOnly cookies handle authentication
+  // Cookies are sent automatically with credentials: "include"
 
   const res = await fetch(url, {
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
+    credentials: "include", // Critical: ensures httpOnly cookies are sent
   });
 
   await throwIfResNotOk(res);
@@ -44,19 +39,12 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const url = queryKey.join("/") as string;
-    const headers: Record<string, string> = {};
     
-    // Add Authorization header for admin routes
-    if (url.includes("/api/youhonor/")) {
-      const token = localStorage.getItem("admin_token");
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-    }
+    // SECURITY FIX: No Authorization headers needed - httpOnly cookies handle authentication
+    // Cookies are sent automatically with credentials: "include"
 
     const res = await fetch(url, {
-      headers,
-      credentials: "include",
+      credentials: "include", // Critical: ensures httpOnly cookies are sent
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {

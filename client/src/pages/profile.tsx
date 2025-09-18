@@ -386,52 +386,115 @@ export default function ProfilePage() {
         </div>
 
 
-        {/* Dashboard Tabs */}
+        {/* Enhanced Mobile-First Tab Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 surface-secondary shadow-binance">
-            <TabsTrigger 
-              value="overview" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center"
-            >
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger 
-              value="analytics" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center"
-            >
-              <Activity className="w-4 h-4 mr-2" />
-              Analytics
-            </TabsTrigger>
-            <TabsTrigger 
-              value="donations" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center"
-            >
-              <DollarSign className="w-4 h-4 mr-2" />
-              Donations
-            </TabsTrigger>
-            <TabsTrigger 
-              value="campaigns" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center"
-            >
-              <Target className="w-4 h-4 mr-2" />
-              Campaigns
-            </TabsTrigger>
-            <TabsTrigger 
-              value="rewards" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center"
-            >
-              <Trophy className="w-4 h-4 mr-2" />
-              Rewards
-            </TabsTrigger>
-            <TabsTrigger 
-              value="settings" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
-            </TabsTrigger>
-          </TabsList>
+          {/* Mobile Tab Navigation - Horizontal Scroll */}
+          <div className="block md:hidden mb-6">
+            <div className="flex overflow-x-auto scrollbar-hide gap-2 pb-2">
+              {[
+                { id: 'overview', icon: BarChart3, label: t('profile.overview'), desc: t('profile.overview_desc'), color: 'from-blue-500 to-indigo-600' },
+                { id: 'analytics', icon: Activity, label: t('profile.analytics'), desc: t('profile.analytics_desc'), color: 'from-purple-500 to-violet-600' },
+                { id: 'donations', icon: DollarSign, label: t('profile.donations'), desc: t('profile.donations_desc'), color: 'from-green-500 to-emerald-600' },
+                { id: 'campaigns', icon: Target, label: t('profile.campaigns'), desc: t('profile.campaigns_desc'), color: 'from-orange-500 to-red-600' },
+                { id: 'rewards', icon: Trophy, label: t('profile.rewards'), desc: t('profile.rewards_desc'), color: 'from-yellow-500 to-orange-500' },
+                { id: 'settings', icon: Settings, label: t('profile.settings'), desc: t('profile.settings_desc'), color: 'from-slate-500 to-gray-600' }
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`
+                      flex-shrink-0 relative p-4 rounded-xl transition-all duration-300
+                      ${isActive 
+                        ? 'bg-gradient-to-br ' + tab.color + ' text-white shadow-lg transform -translate-y-1' 
+                        : 'bg-white dark:bg-slate-800 border border-border hover:border-primary/50 hover:shadow-md'
+                      }
+                    `}
+                    data-testid={`mobile-tab-${tab.id}`}
+                  >
+                    <div className="flex items-center space-x-3 min-w-0">
+                      <div className={`p-2 rounded-lg ${isActive ? 'bg-white/20' : 'bg-gradient-to-br ' + tab.color}`}>
+                        <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-white'}`} />
+                      </div>
+                      <div className="text-left min-w-0">
+                        <div className={`font-semibold text-sm ${isActive ? 'text-white' : 'text-foreground'}`}>
+                          {tab.label}
+                        </div>
+                        <div className={`text-xs truncate max-w-32 ${isActive ? 'text-white/80' : 'text-muted-foreground'}`}>
+                          {tab.desc}
+                        </div>
+                      </div>
+                    </div>
+                    {isActive && (
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-white rounded-full" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Desktop Tab Navigation - Enhanced Grid */}
+          <div className="hidden md:block">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-2 p-2 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-border rounded-xl shadow-sm">
+              {[
+                { id: 'overview', icon: BarChart3, label: t('profile.overview'), desc: t('profile.overview_desc'), color: 'blue' },
+                { id: 'analytics', icon: Activity, label: t('profile.analytics'), desc: t('profile.analytics_desc'), color: 'purple' },
+                { id: 'donations', icon: DollarSign, label: t('profile.donations'), desc: t('profile.donations_desc'), color: 'green' },
+                { id: 'campaigns', icon: Target, label: t('profile.campaigns'), desc: t('profile.campaigns_desc'), color: 'orange' },
+                { id: 'rewards', icon: Trophy, label: t('profile.rewards'), desc: t('profile.rewards_desc'), color: 'yellow' },
+                { id: 'settings', icon: Settings, label: t('profile.settings'), desc: t('profile.settings_desc'), color: 'slate' }
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <TabsTrigger 
+                    key={tab.id}
+                    value={tab.id}
+                    className={`
+                      flex-col p-4 h-auto space-y-2 transition-all duration-300 rounded-lg
+                      data-[state=active]:bg-gradient-to-br data-[state=active]:shadow-lg
+                      data-[state=active]:transform data-[state=active]:-translate-y-0.5
+                      hover:shadow-md hover:scale-105
+                      ${isActive ? (
+                        tab.color === 'blue' ? 'data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600' :
+                        tab.color === 'purple' ? 'data-[state=active]:from-purple-500 data-[state=active]:to-violet-600' :
+                        tab.color === 'green' ? 'data-[state=active]:from-green-500 data-[state=active]:to-emerald-600' :
+                        tab.color === 'orange' ? 'data-[state=active]:from-orange-500 data-[state=active]:to-red-600' :
+                        tab.color === 'yellow' ? 'data-[state=active]:from-yellow-500 data-[state=active]:to-orange-500' :
+                        'data-[state=active]:from-slate-500 data-[state=active]:to-gray-600'
+                      ) : ''}
+                      data-[state=active]:text-white
+                    `}
+                    data-testid={`desktop-tab-${tab.id}`}
+                  >
+                    <div className={`p-2 rounded-lg ${
+                      isActive 
+                        ? 'bg-white/20' 
+                        : 'bg-gradient-to-br ' + (
+                            tab.color === 'blue' ? 'from-blue-500 to-indigo-600' :
+                            tab.color === 'purple' ? 'from-purple-500 to-violet-600' :
+                            tab.color === 'green' ? 'from-green-500 to-emerald-600' :
+                            tab.color === 'orange' ? 'from-orange-500 to-red-600' :
+                            tab.color === 'yellow' ? 'from-yellow-500 to-orange-500' :
+                            'from-slate-500 to-gray-600'
+                          )
+                    }`}>
+                      <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-white'}`} />
+                    </div>
+                    <div className="text-center space-y-1">
+                      <div className="font-semibold text-sm">{tab.label}</div>
+                      <div className={`text-xs hidden lg:block ${isActive ? 'text-white/80' : 'text-muted-foreground'}`}>
+                        {tab.desc}
+                      </div>
+                    </div>
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </div>
 
           <TabsContent value="analytics" className="space-y-6 mt-6">
             <UserDashboardAnalytics />

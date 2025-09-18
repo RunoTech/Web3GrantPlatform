@@ -11,6 +11,7 @@ import CampaignCard from "@/components/CampaignCard";
 import Header from "@/components/Header";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useToast } from "@/hooks/use-toast";
 import { 
   User, 
   Wallet, 
@@ -41,6 +42,7 @@ import DonationHistoryTable from "@/components/analytics/DonationHistoryTable";
 export default function ProfilePage() {
   const { isConnected, address } = useWallet();
   const { t } = useLanguage();
+  const { toast } = useToast();
   const [location] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -101,26 +103,107 @@ export default function ProfilePage() {
       <Header currentPage="profile" />
       
       <div className="container-main section-spacing">
-        {/* Dashboard Header */}
+        {/* Modern Dashboard Header with Wallet Info */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
-              <p className="text-muted-foreground">Manage your campaigns, track rewards, and view analytics</p>
+          {/* Main Header Section */}
+          <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-binance-yellow/10 rounded-2xl p-6 border border-primary/20 shadow-binance mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              {/* User Profile & Wallet Info */}
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <Avatar className="h-16 w-16 border-3 border-primary shadow-lg">
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-binance-yellow text-primary-foreground text-xl font-bold">
+                      {address?.slice(2, 4).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-background flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h1 className="text-2xl font-bold text-foreground">{t('profile.welcome_back')}</h1>
+                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border-green-200">
+                      <Wallet className="w-3 h-3 mr-1" />
+                      {t('profile.connected')}
+                    </Badge>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-mono bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg text-foreground">
+                        {address?.slice(0, 8)}...{address?.slice(-6)}
+                      </span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-muted-foreground hover:text-primary" 
+                        data-testid="button-copy-address"
+                        onClick={() => {
+                          if (address) {
+                            navigator.clipboard.writeText(address);
+                            toast({
+                              title: t('profile.address_copied'),
+                              description: t('profile.address_copied_desc')
+                            });
+                          }
+                        }}
+                        title={t('profile.copy_address')}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </Button>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      <Clock className="w-3 h-3 mr-1" />
+                      {t('profile.last_activity_now')}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button asChild className="btn-binance btn-lg shadow-lg hover:transform hover:-translate-y-1 transition-all" data-testid="button-create-campaign">
+                  <Link href="/create-campaign">
+                    <Target className="w-5 h-5 mr-2" />
+                    {t('profile.create_campaign')}
+                  </Link>
+                </Button>
+                <div className="flex gap-2">
+                  <Button asChild variant="outline" className="btn-secondary hover:border-primary hover:shadow-md" data-testid="button-affiliate">
+                    <Link href="/affiliate">
+                      <Share2 className="w-4 h-4 mr-2" />
+                      {t('profile.affiliate')}
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" className="btn-secondary hover:border-primary hover:shadow-md" data-testid="button-daily-rewards">
+                    <Link href="/daily-rewards">
+                      <Gift className="w-4 h-4 mr-2" />
+                      {t('profile.rewards')}
+                    </Link>
+                  </Button>
+                </div>
+              </div>
             </div>
-            <div className="flex gap-3">
-              <Button asChild className="btn-binance btn-md hover:transform hover:-translate-y-0.5">
-                <Link href="/create-campaign">
-                  <Target className="w-4 h-4 mr-2" />
-                  Create Campaign
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="btn-secondary hover:border-primary">
-                <Link href="/affiliate">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Affiliate Dashboard
-                </Link>
-              </Button>
+          </div>
+
+          {/* Quick Navigation Breadcrumb */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <Link href="/" className="hover:text-primary transition-colors" data-testid="link-home">
+                {t('common.home')}
+              </Link>
+              <span>/</span>
+              <span className="text-foreground font-medium">{t('profile.dashboard')}</span>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {new Date().toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
             </div>
           </div>
         </div>
@@ -198,34 +281,6 @@ export default function ProfilePage() {
           </Card>
         </div>
 
-        {/* Profile Info Card */}
-        <Card className="card-standard mb-8">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-16 w-16 border-2 border-primary">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">
-                    {address?.slice(2, 4).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-xl font-bold text-foreground mb-1">
-                    {address?.slice(0, 6)}...{address?.slice(-4)}
-                  </h3>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
-                      Connected
-                    </Badge>
-                    <Badge variant="outline">
-                      Verified Wallet
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

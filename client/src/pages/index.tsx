@@ -121,8 +121,8 @@ export default function HomePage() {
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-6 sm:space-y-8 lg:space-y-12">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 bg-primary rounded-xl flex items-center justify-center mx-auto shadow-binance">
+          <div className="text-center space-y-4 sm:space-y-6 md:space-y-8 lg:space-y-12">
+            <div className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-40 lg:h-40 bg-primary rounded-xl flex items-center justify-center mx-auto shadow-binance">
               <Heart className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 icon-on-primary" />
             </div>
             

@@ -27,7 +27,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
         className="campaign-card group cursor-pointer"
         data-testid={`campaign-card-${campaign.id}`}
       >
-        {/* Campaign Image - OpenSea Style 1:1 Aspect Ratio */}
+        {/* Campaign Image - Mobile-Optimized 1:1 Aspect Ratio */}
         <div className="campaign-image relative">
           {campaign.imageUrl ? (
             <img 
@@ -38,23 +38,25 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
             />
           ) : (
             <div className={`w-full h-full ${bgClass} flex items-center justify-center`}>
-              <Heart className="w-12 h-12" />
+              <Heart className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />
             </div>
           )}
-          <div className="absolute top-3 right-3 flex flex-col gap-2">
+          {/* Mobile-optimized badges with better touch spacing */}
+          <div className="absolute top-2 right-2 flex flex-col gap-1.5">
             {campaign.featured && (
-              <Badge className="bg-primary text-primary-foreground font-semibold">
+              <Badge className="bg-primary text-primary-foreground font-semibold text-xs px-2 py-1 shadow-sm">
                 Öne Çıkan
               </Badge>
             )}
             {campaign.creditCardEnabled ? (
-              <Badge className="bg-green-600 text-white font-semibold flex items-center gap-1">
-                <CreditCard className="w-3 h-3" />
-                Pay with Credit Card
+              <Badge className="bg-green-600 text-white font-semibold flex items-center gap-1 text-xs px-2 py-1 shadow-sm">
+                <CreditCard className="w-2.5 h-2.5" />
+                <span className="hidden sm:inline">Pay with Credit Card</span>
+                <span className="sm:hidden">Credit Card</span>
               </Badge>
             ) : (
               !campaign.featured && (
-                <Badge variant="secondary" className="font-semibold">
+                <Badge variant="secondary" className="font-semibold text-xs px-2 py-1 shadow-sm">
                   Aktif
                 </Badge>
               )
@@ -62,52 +64,53 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
           </div>
         </div>
         
-        {/* Campaign Content - Professional Layout */}
+        {/* Campaign Content - Mobile-Optimized Layout */}
         <div className="campaign-content">
-          <div className="p-4 space-y-3">
-            <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+          <div className="p-3 sm:p-4 space-y-2.5 sm:space-y-3">
+            <h3 className="text-base sm:text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
               {campaign.title}
             </h3>
             <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
               {campaign.description}
             </p>
             
-            {/* Professional Stats Grid */}
-            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
-              <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-muted-foreground" />
-                <div>
+            {/* Mobile-Optimized Stats Grid */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-2 border-t border-border">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                <div className="min-w-0 flex-1">
                   <p className="text-xs text-muted-foreground">Toplanan</p>
-                  <p className="text-sm font-semibold text-foreground">{parseFloat(campaign.totalDonations || "0").toFixed(2)} USDT</p>
+                  <p className="text-sm font-semibold text-foreground truncate">{parseFloat(campaign.totalDonations || "0").toFixed(2)} USDT</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-muted-foreground" />
-                <div>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                <div className="min-w-0 flex-1">
                   <p className="text-xs text-muted-foreground">Destekçi</p>
-                  <p className="text-sm font-semibold text-foreground">{campaign.donationCount}</p>
+                  <p className="text-sm font-semibold text-foreground truncate">{campaign.donationCount}</p>
                 </div>
               </div>
             </div>
           </div>
           
-          {/* Fixed Action Bar - OpenSea Style */}
+          {/* Mobile-Optimized Action Bar */}
           <div className="campaign-actions">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-primary rounded-full flex-shrink-0"></div>
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-primary rounded-full flex-shrink-0"></div>
                 <span className="text-xs text-muted-foreground font-mono truncate">
                   {campaign.ownerWallet.slice(0, 6)}...{campaign.ownerWallet.slice(-4)}
                 </span>
               </div>
-              {/* Professional Share Button */}
-              <div onClick={(e) => e.preventDefault()}>
+              {/* Mobile-Optimized Share Button */}
+              <div onClick={(e) => e.preventDefault()} className="flex-shrink-0">
                 <ShareButton 
                   shareData={generateCampaignShareLink(campaign.id, campaign.title)}
                   variant="ghost"
                   size="sm"
                   showText={false}
-                  className="h-8 w-8 p-0 hover:bg-accent"
+                  className="h-11 w-11 p-0 hover:bg-accent touch-manipulation min-h-11 min-w-11"
+                  data-testid={`share-campaign-${campaign.id}`}
                 />
               </div>
             </div>

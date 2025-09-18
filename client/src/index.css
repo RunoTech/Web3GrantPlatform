@@ -119,16 +119,29 @@ h6 { font-size: 1rem; line-height: 1.4; }      /* 16px - Button text (16-18px) *
 }
 
 /* Mobile Typography Scale */
-@media (max-width: 768px) {
-  h1 { font-size: 1.875rem; } /* 30px */
-  h2 { font-size: 1.5rem; }   /* 24px */
-  h3 { font-size: 1.25rem; }  /* 20px */
-  h4 { font-size: 1.125rem; } /* 18px */
-  h5 { font-size: 1rem; }     /* 16px */
-  h6 { font-size: 0.875rem; } /* 14px */
+/* Mobile-First Typography & Touch Optimization */
+@media (max-width: 480px) {
+  h1 { font-size: 1.75rem; line-height: 1.2; } /* 28px */
+  h2 { font-size: 1.375rem; line-height: 1.3; } /* 22px */
+  h3 { font-size: 1.125rem; line-height: 1.4; } /* 18px */
+  h4 { font-size: 1rem; line-height: 1.4; } /* 16px */
+  h5 { font-size: 0.938rem; line-height: 1.4; } /* 15px */
+  h6 { font-size: 0.875rem; line-height: 1.4; } /* 14px */
   
-  .nav-item { font-size: 0.875rem; } /* 14px on mobile */
-  .category-button, .category-tab { font-size: 1.25rem; } /* 20px on mobile */
+  .nav-item { font-size: 0.938rem; font-weight: 600; } /* 15px on mobile */
+  .category-button, .category-tab { font-size: 1.125rem; } /* 18px on mobile */
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  h1 { font-size: 1.875rem; line-height: 1.2; } /* 30px */
+  h2 { font-size: 1.5rem; line-height: 1.3; } /* 24px */
+  h3 { font-size: 1.25rem; line-height: 1.4; } /* 20px */
+  h4 { font-size: 1.125rem; line-height: 1.4; } /* 18px */
+  h5 { font-size: 1rem; line-height: 1.4; } /* 16px */
+  h6 { font-size: 0.875rem; line-height: 1.4; } /* 14px */
+  
+  .nav-item { font-size: 0.875rem; font-weight: 600; } /* 14px on tablet */
+  .category-button, .category-tab { font-size: 1.25rem; } /* 20px on tablet */
 }
 
 /* GoFundMe-style Button Sizing - Button text: 16-18px */
@@ -276,16 +289,57 @@ h6 { font-size: 1rem; line-height: 1.4; }      /* 16px - Button text (16-18px) *
 .space-12 { gap: 48px; }
 
 /* Professional Container Sizing */
+/* Mobile-First Container System */
 .container-main {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 12px;
+}
+
+@media (min-width: 480px) {
+  .container-main {
+    padding: 0 16px;
+  }
 }
 
 @media (min-width: 768px) {
   .container-main {
     padding: 0 24px;
   }
+}
+
+@media (min-width: 1024px) {
+  .container-main {
+    padding: 0 32px;
+  }
+}
+
+/* Mobile-Optimized Button System */
+.btn-mobile-lg {
+  min-height: 48px;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  touch-action: manipulation;
+}
+
+.btn-mobile-md {
+  min-height: 44px;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+  touch-action: manipulation;
+}
+
+.btn-mobile-sm {
+  min-height: 40px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  touch-action: manipulation;
 }
 
 /* Professional Header Styling */
@@ -376,16 +430,27 @@ div.card-standard:hover,
   box-shadow: 0 4px 16px rgba(240, 185, 11, 0.3) !important; /* Enhanced yellow shadow in dark */
 }
 
-/* Campaign Card Grid - OpenSea Style */
+/* Campaign Card Grid - Mobile-First Responsive Design */
 .campaign-grid {
   display: grid;
-  gap: 24px;
+  gap: 16px;
   grid-template-columns: 1fr;
+  padding: 0 4px;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 480px) {
   .campaign-grid {
+    gap: 20px;
     grid-template-columns: repeat(2, 1fr);
+    padding: 0 8px;
+  }
+}
+
+@media (min-width: 768px) {
+  .campaign-grid {
+    gap: 24px;
+    grid-template-columns: repeat(2, 1fr);
+    padding: 0;
   }
 }
 
@@ -403,35 +468,65 @@ div.card-standard:hover,
 
 .campaign-card {
   width: 100%;
-  max-width: 320px;
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  touch-action: manipulation;
+  /* Mobile-optimized touch target */
+  min-height: 320px;
 }
 
-.campaign-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  transform: translateY(-4px);
+/* Enhanced mobile touch interactions */
+.campaign-card:hover,
+.campaign-card:active {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  transform: translateY(-6px);
+  border-color: hsl(var(--primary));
+}
+
+@media (max-width: 767px) {
+  .campaign-card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
 }
 
 .campaign-image {
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
+  position: relative;
 }
 
 .campaign-content {
   padding: 16px;
 }
 
+@media (max-width: 767px) {
+  .campaign-content {
+    padding: 12px;
+  }
+}
+
 .campaign-actions {
-  height: 48px;
+  min-height: 56px;
   padding: 0 16px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+}
+
+@media (max-width: 767px) {
+  .campaign-actions {
+    min-height: 48px;
+    padding: 0 12px 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
 }
 
 /* Professional Surface System */
@@ -447,9 +542,97 @@ div.card-standard:hover,
   background: hsl(var(--card));
 }
 
-/* Professional Section Spacing */
+/* Professional Section Spacing - Mobile Optimized */
 .section-spacing {
+  padding: 16px 0;
+}
+
+@media (min-width: 640px) {
+  .section-spacing {
+    padding: 24px 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .section-spacing {
+    padding: 32px 0;
+  }
+}
+
+.section-spacing-lg {
   padding: 24px 0;
+}
+
+@media (min-width: 640px) {
+  .section-spacing-lg {
+    padding: 40px 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .section-spacing-lg {
+    padding: 56px 0;
+  }
+}
+
+/* Mobile-First Touch Optimization */
+@media (max-width: 767px) {
+  /* Enhanced touch targets for mobile - WCAG AA compliance */
+  button, .btn, [role="button"], [type="button"], [type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+  
+  /* Icon-only buttons need explicit sizing */
+  button[class*="h-"], .btn[class*="h-"] {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  /* Better spacing for touch interfaces */
+  .touch-friendly {
+    padding: 12px 16px;
+    margin: 8px 4px;
+  }
+  
+  /* Mobile form optimization - Prevents iOS zoom */
+  input, textarea, select, 
+  input[type="text"], input[type="email"], input[type="password"], input[type="number"] {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    padding: 12px;
+    border-radius: 8px;
+    min-height: 44px;
+  }
+  
+  /* Ensure shadcn inputs also comply */
+  .ui-input, [data-ui="input"] {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+  
+  /* Mobile card improvements */
+  .card-standard {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  /* Mobile text readability */
+  body {
+    line-height: 1.6;
+  }
+  
+  p, span, div {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Modal mobile optimization */
+  .modal-content {
+    margin: 16px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
 }
 
 @media (min-width: 768px) {

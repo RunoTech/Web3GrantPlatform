@@ -77,9 +77,10 @@ export function useWallet() {
     try {
       // Step 1: Get nonce from server
       console.log("🔐 Requesting nonce for wallet:", walletAddress);
-      const nonceResponse = await apiRequest("POST", "/auth/nonce", {
+      const nonceRes = await apiRequest("POST", "/auth/nonce", {
         wallet: walletAddress
-      }) as any;
+      });
+      const nonceResponse = await nonceRes.json();
       console.log("✅ Nonce response:", nonceResponse);
       
       if (!nonceResponse.nonce || !nonceResponse.message) {
@@ -98,11 +99,12 @@ export function useWallet() {
       });
 
       // Step 3: Verify signature on server
-      const verifyResponse = await apiRequest("POST", "/auth/verify", {
+      const verifyRes = await apiRequest("POST", "/auth/verify", {
         wallet: walletAddress,
         signature: signature,
         nonce: nonceResponse.nonce
-      }) as any;
+      });
+      const verifyResponse = await verifyRes.json();
 
       if (!verifyResponse.success) {
         throw new Error("Authentication verification failed");

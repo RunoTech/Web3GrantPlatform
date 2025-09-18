@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useWallet } from "@/hooks/useWallet";
 import { Copy, Users, DollarSign, Gift, Share2, TrendingUp, ArrowLeft, Send, CheckCircle, Clock, XCircle } from "lucide-react";
 import { Link } from "wouter";
 import { formatDistanceToNow } from "date-fns";
@@ -66,83 +67,76 @@ interface DetailedAffiliateStats {
 }
 
 export default function AffiliatePage() {
-  const [userWallet, setUserWallet] = useState<string>("");
+  const { isConnected, address, isAuthenticated, connect, authenticate } = useWallet();
   const [referralLink, setReferralLink] = useState<string>("");
   const [applicationText, setApplicationText] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get connected wallet
+  // Generate referral link when wallet is connected and authenticated
   useEffect(() => {
-    const getWallet = async () => {
-      if (typeof window !== "undefined" && (window as any).ethereum) {
+    const generateReferralLink = async () => {
+      if (address && isAuthenticated) {
         try {
-          const accounts = await (window as any).ethereum.request({
-            method: "eth_accounts",
-          });
-          if (accounts.length > 0) {
-            setUserWallet(accounts[0]);
-            // Generate referral link when wallet is connected
-            const response = await apiRequest("GET", `/api/account/${accounts[0]}`);
-            const account = await response.json();
-            if (account && account.referralCode) {
-              setReferralLink(`${window.location.origin}?ref=${account.referralCode}`);
-            }
+          const response = await apiRequest("GET", `/api/account/${address}`);
+          const account = await response.json();
+          if (account && account.referralCode) {
+            setReferralLink(`${window.location.origin}?ref=${account.referralCode}`);
           }
         } catch (error) {
-          console.error("Error getting wallet:", error);
+          console.error("Error generating referral link:", error);
         }
       }
     };
 
-    getWallet();
-  }, []);
+    generateReferralLink();
+  }, [address, isAuthenticated]);
 
   // Get account data
   const { data: account, isLoading: accountLoading } = useQuery<Account>({
-    queryKey: ["account", userWallet],
-    enabled: !!userWallet,
+    queryKey: ["account", address],
+    enabled: !!address,
   });
 
   // Get affiliate stats (basic)
   const { data: stats, isLoading: statsLoading } = useQuery<ReferralStats>({
-    queryKey: ["affiliate-stats", userWallet],
-    enabled: !!userWallet,
+    queryKey: ["affiliate-stats", address],
+    enabled: !!address,
   });
 
   // Get detailed affiliate analytics
   const { data: detailedStats, isLoading: detailedLoading } = useQuery<DetailedAffiliateStats>({
-    queryKey: ["affiliate", "detailed-stats", userWallet],
+    queryKey: ["affiliate", "detailed-stats", address],
     queryFn: async () => {
-      const res = await apiRequest("GET", `/api/affiliate/detailed-stats/${userWallet}`);
+      const res = await apiRequest("GET", `/api/affiliate/detailed-stats/${address}`);
       return res.json();
     },
-    enabled: !!userWallet,
+    enabled: !!address,
   });
 
   // Get unpaid rewards
   const { data: unpaidRewards, isLoading: unpaidLoading } = useQuery<AffiliateActivity[]>({
-    queryKey: ["affiliate", "unpaid-rewards", userWallet],
+    queryKey: ["affiliate", "unpaid-rewards", address],
     queryFn: async () => {
-      const res = await apiRequest("GET", `/api/affiliate/unpaid-rewards/${userWallet}`);
+      const res = await apiRequest("GET", `/api/affiliate/unpaid-rewards/${address}`);
       return res.json();
     },
-    enabled: !!userWallet,
+    enabled: !!address,
   });
 
   // Get affiliate application status
   const { data: applicationStatus } = useQuery({
-    queryKey: ["affiliate-application-status", userWallet],
+    queryKey: ["affiliate-application-status", address],
     queryFn: async () => {
-      const res = await apiRequest("GET", `/api/affiliate/application-status/${userWallet}`);
+      const res = await apiRequest("GET", `/api/affiliate/application-status/${address}`);
       return res.json();
     },
-    enabled: !!userWallet,
+    enabled: !!address,
   });
 
   // Submit affiliate application mutation
   const submitApplicationMutation = useMutation({
-    mutationFn: async (data: { wallet: string; applicationText: string }) => {
+    mutationFn: async (data: { applicationText: string }) => {
       const res = await apiRequest("POST", "/api/affiliate/apply", data);
       return res.json();
     },
@@ -195,7 +189,7 @@ export default function AffiliatePage() {
     return type === 'donation' ? 'Made a Donation' : 'Created Campaign';
   };
 
-  if (!userWallet) {
+  if (!isConnected || !address) {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <Header currentPage="affiliate" />
@@ -238,11 +232,71 @@ export default function AffiliatePage() {
                 Please connect your wallet to access the affiliate dashboard.
               </p>
               <Button 
-                onClick={() => window.location.reload()}
+                onClick={() => connect()}
                 className="w-full btn-binance hover:transform hover:-translate-y-0.5 transition-all duration-200"
                 data-testid="button-connect-wallet"
               >
                 Connect Wallet
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Show authentication prompt if wallet is connected but not authenticated
+  if (isConnected && address && !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Header currentPage="affiliate" />
+        
+        {/* Hero Section */}
+        <section className="py-16 relative overflow-hidden bg-gray-50 dark:bg-gray-900">
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/10 to-primary/5 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-gradient-to-r from-primary/5 to-primary/10 rounded-full blur-3xl"></div>
+          </div>
+          
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center space-y-8">
+              <div className="w-24 h-24 bg-primary rounded-lg flex items-center justify-center mx-auto shadow-binance border border-yellow-300">
+                <Share2 className="w-12 h-12 text-black" />
+              </div>
+              
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 uppercase tracking-wider">
+                  Affiliate Dashboard
+                </h1>
+                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                  Track your referrals and earnings • Grow your network • Earn rewards from successful partnerships
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="container mx-auto px-4 py-8">
+          <Card className="max-w-md mx-auto bg-card text-card-foreground border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-foreground">
+                <Users className="w-5 h-5" />
+                Authentication Required
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Wallet connected: <span className="text-primary font-mono">{address}</span>
+              </p>
+              <p className="text-muted-foreground mb-4">
+                Please sign a message to authenticate your wallet and access the affiliate dashboard.
+              </p>
+              <Button 
+                onClick={() => address && authenticate(address)}
+                className="w-full btn-binance hover:transform hover:-translate-y-0.5 transition-all duration-200"
+                data-testid="button-authenticate"
+              >
+                Sign Message to Authenticate
               </Button>
             </CardContent>
           </Card>
@@ -459,7 +513,6 @@ export default function AffiliatePage() {
                     
                     <Button 
                       onClick={() => submitApplicationMutation.mutate({
-                        wallet: userWallet,
                         applicationText
                       })}
                       disabled={!applicationText.trim() || submitApplicationMutation.isPending}

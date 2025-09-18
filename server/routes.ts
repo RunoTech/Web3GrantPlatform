@@ -1836,7 +1836,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ 
         nonce: userNonce.nonce,
-        message: `Welcome to DUXXAN!\n\nPlease sign this message to authenticate your wallet.\n\nWallet: ${wallet.toLowerCase()}\nNonce: ${userNonce.nonce}\nTimestamp: ${new Date().toISOString()}\n\nThis request will not trigger a blockchain transaction or cost any gas fees.`
+        message: `Welcome to DUXXAN!\n\nPlease sign this message to authenticate your wallet.\n\nWallet: ${wallet.toLowerCase()}\nNonce: ${userNonce.nonce}\nTimestamp: ${userNonce.createdAt.toISOString()}\n\nThis request will not trigger a blockchain transaction or cost any gas fees.`
       });
     } catch (error) {
       console.error("Error generating nonce:", error);

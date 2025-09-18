@@ -78,9 +78,11 @@ export function useWallet() {
     setIsAuthenticating(true);
     try {
       // Step 1: Get nonce from server
+      console.log("🔐 Requesting nonce for wallet:", walletAddress);
       const nonceResponse = await apiRequest("POST", "/auth/nonce", {
         wallet: walletAddress
       }) as any;
+      console.log("✅ Nonce response:", nonceResponse);
       
       if (!nonceResponse.nonce || !nonceResponse.message) {
         throw new Error("Failed to get authentication nonce");

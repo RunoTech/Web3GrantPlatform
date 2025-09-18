@@ -49,7 +49,7 @@ async function validateCampaignOwnership(campaignId: number, userWallet: string)
   try {
     const campaign = await storage.getCampaign(campaignId);
     if (!campaign) return false;
-    return campaign.creatorWallet.toLowerCase() === userWallet.toLowerCase();
+    return campaign.ownerWallet.toLowerCase() === userWallet.toLowerCase();
   } catch (error) {
     console.error('Campaign ownership validation error:', error);
     return false;
@@ -863,6 +863,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error registering with referral:", error);
       res.status(500).json({ error: "Failed to register with referral" });
+    }
+  });
+  
+  // ===== USER ANALYTICS DASHBOARD ROUTES =====
+  
+  // Get comprehensive user dashboard data
+  app.get("/api/analytics/dashboard/:wallet", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const { wallet } = req.params;
+      if (!ethers.isAddress(wallet)) {
+        return res.status(400).json({ error: "Invalid wallet address" });
+      }
+      
+      // Security: Ensure user can only access their own analytics
+      if (wallet.toLowerCase() !== req.userWallet.toLowerCase()) {
+        return res.status(403).json({ error: "Access denied: Can only view your own analytics" });
+      }
+      
+      // Get all analytics data for dashboard
+      const [donationStats, campaignAnalytics, timeAnalytics, recentDonations] = await Promise.all([
+        storage.getUserDonationStats(wallet),
+        storage.getUserCampaignAnalytics(wallet),
+        storage.getUserTimeAnalytics(wallet, '30d'),
+        storage.getUserDonationHistory(wallet, { limit: 10 })
+      ]);
+      
+      res.json({
+        donationStats,
+        campaignAnalytics,
+        timeAnalytics,
+        recentDonations
+      });
+    } catch (error) {
+      console.error("Get user dashboard data error:", error);
+      res.status(500).json({ error: "Failed to get dashboard data" });
+    }
+  });
+  
+  // Get user donation history with filtering
+  app.get("/api/analytics/donations/:wallet", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const { wallet } = req.params;
+      if (!ethers.isAddress(wallet)) {
+        return res.status(400).json({ error: "Invalid wallet address" });
+      }
+      
+      // Security: Ensure user can only access their own analytics
+      if (wallet.toLowerCase() !== req.userWallet.toLowerCase()) {
+        return res.status(403).json({ error: "Access denied: Can only view your own analytics" });
+      }
+      
+      const filters = {
+        startDate: req.query.startDate as string,
+        endDate: req.query.endDate as string,
+        minAmount: req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined,
+        campaignType: req.query.campaignType as string,
+        limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 100
+      };
+      
+      const donationHistory = await storage.getUserDonationHistory(wallet, filters);
+      res.json(donationHistory);
+    } catch (error) {
+      console.error("Get user donation history error:", error);
+      res.status(500).json({ error: "Failed to get donation history" });
+    }
+  });
+  
+  // Get analytics for all user's campaigns
+  app.get("/api/analytics/user-campaigns/:wallet", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const { wallet } = req.params;
+      if (!ethers.isAddress(wallet)) {
+        return res.status(400).json({ error: "Invalid wallet address" });
+      }
+      
+      // Security: Ensure user can only access their own analytics
+      if (wallet.toLowerCase() !== req.userWallet.toLowerCase()) {
+        return res.status(403).json({ error: "Access denied: Can only view your own analytics" });
+      }
+      
+      const userCampaignAnalytics = await storage.getUserCampaignAnalytics(wallet);
+      res.json(userCampaignAnalytics);
+    } catch (error) {
+      console.error("Get user campaign analytics error:", error);
+      res.status(500).json({ error: "Failed to get user campaign analytics" });
+    }
+  });
+  
+  // Get analytics for a specific campaign
+  app.get("/api/analytics/campaign/:id", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const campaignId = parseInt(req.params.id, 10);
+      if (isNaN(campaignId)) {
+        return res.status(400).json({ error: "Invalid campaign ID" });
+      }
+      
+      // Security: Verify campaign ownership
+      const campaign = await storage.getCampaign(campaignId);
+      if (!campaign) {
+        return res.status(404).json({ error: "Campaign not found" });
+      }
+      
+      if (campaign.ownerWallet.toLowerCase() !== req.userWallet.toLowerCase()) {
+        return res.status(403).json({ error: "Access denied: Can only view analytics for your own campaigns" });
+      }
+      
+      const campaignAnalytics = await storage.getCampaignAnalytics(campaignId);
+      res.json(campaignAnalytics);
+    } catch (error) {
+      console.error("Get campaign analytics error:", error);
+      if (error.message === 'Campaign not found') {
+        res.status(404).json({ error: "Campaign not found" });
+      } else {
+        res.status(500).json({ error: "Failed to get campaign analytics" });
+      }
+    }
+  });
+  
+  // Get time-based analytics for user
+  app.get("/api/analytics/time-analytics/:wallet", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const { wallet } = req.params;
+      if (!ethers.isAddress(wallet)) {
+        return res.status(400).json({ error: "Invalid wallet address" });
+      }
+      
+      // Security: Ensure user can only access their own analytics
+      if (wallet.toLowerCase() !== req.userWallet.toLowerCase()) {
+        return res.status(403).json({ error: "Access denied: Can only view your own analytics" });
+      }
+      
+      const timeRange = (req.query.range as string) || '30d';
+      const validRanges = ['7d', '30d', '90d', '1y'];
+      if (!validRanges.includes(timeRange)) {
+        return res.status(400).json({ error: "Invalid time range. Use: 7d, 30d, 90d, 1y" });
+      }
+      
+      const timeAnalytics = await storage.getUserTimeAnalytics(wallet, timeRange);
+      res.json(timeAnalytics);
+    } catch (error) {
+      console.error("Get user time analytics error:", error);
+      res.status(500).json({ error: "Failed to get time-based analytics" });
     }
   });
 

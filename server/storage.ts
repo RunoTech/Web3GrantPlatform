@@ -204,6 +204,13 @@ export interface IStorage {
   closeDailyReward(id: number): Promise<void>;
   openDailyReward(id: number): Promise<void>;
   
+  // User Analytics Dashboard
+  getUserDonationHistory(wallet: string, filters?: any): Promise<any[]>;
+  getUserDonationStats(wallet: string): Promise<any>;
+  getCampaignAnalytics(campaignId: number): Promise<any>;
+  getUserCampaignAnalytics(wallet: string): Promise<any>;
+  getUserTimeAnalytics(wallet: string, timeRange: string): Promise<any>;
+  
   // Enhanced Campaigns Management
   getAdminCampaigns(filters: any, page: number, limit: number): Promise<Campaign[]>;
   rejectCampaign(id: number, adminId: number): Promise<void>;
@@ -1447,6 +1454,290 @@ export class DatabaseStorage implements IStorage {
     const [transaction] = await db.select().from(usedTransactions)
       .where(eq(usedTransactions.txHash, txHash));
     return transaction || undefined;
+  }
+  
+  // ===== USER ANALYTICS DASHBOARD =====
+  
+  // Get user donation history with filtering
+  async getUserDonationHistory(wallet: string, filters?: any): Promise<any[]> {
+    const conditions = [eq(donations.donorWallet, wallet)];
+    
+    // Build conditions array to avoid overwriting filters
+    if (filters?.startDate) {
+      conditions.push(gte(donations.createdAt, new Date(filters.startDate)));
+    }
+    
+    if (filters?.endDate) {
+      conditions.push(lte(donations.createdAt, new Date(filters.endDate)));
+    }
+    
+    if (filters?.minAmount) {
+      conditions.push(gte(donations.amount, filters.minAmount.toString()));
+    }
+    
+    if (filters?.campaignType) {
+      conditions.push(eq(campaigns.campaignType, filters.campaignType));
+    }
+    
+    const query = db.select({
+      id: donations.id,
+      amount: donations.amount,
+      txHash: donations.txHash,
+      network: donations.network,
+      createdAt: donations.createdAt,
+      campaignId: donations.campaignId,
+      campaignTitle: campaigns.title,
+      campaignType: campaigns.campaignType,
+      campaignOwner: campaigns.ownerWallet
+    })
+    .from(donations)
+    .innerJoin(campaigns, eq(donations.campaignId, campaigns.id))
+    .where(and(...conditions));
+    
+    return await query.orderBy(desc(donations.createdAt)).limit(filters?.limit || 100);
+  }
+  
+  // Get comprehensive user donation statistics
+  async getUserDonationStats(wallet: string): Promise<any> {
+    const [donationStats] = await db.select({
+      totalDonated: sql<string>`COALESCE(SUM(${donations.amount}), 0)`,
+      donationCount: sql<number>`COUNT(*)`,
+      avgDonation: sql<string>`COALESCE(AVG(${donations.amount}), 0)`,
+      firstDonation: sql<Date>`MIN(${donations.createdAt})`,
+      lastDonation: sql<Date>`MAX(${donations.createdAt})`
+    })
+    .from(donations)
+    .where(eq(donations.donorWallet, wallet));
+    
+    // Get donations by campaign type
+    const donationsByType = await db.select({
+      campaignType: campaigns.campaignType,
+      count: sql<number>`COUNT(*)`,
+      total: sql<string>`SUM(${donations.amount})`
+    })
+    .from(donations)
+    .innerJoin(campaigns, eq(donations.campaignId, campaigns.id))
+    .where(eq(donations.donorWallet, wallet))
+    .groupBy(campaigns.campaignType);
+    
+    // Get donations by network
+    const donationsByNetwork = await db.select({
+      network: donations.network,
+      count: sql<number>`COUNT(*)`,
+      total: sql<string>`SUM(${donations.amount})`
+    })
+    .from(donations)
+    .where(eq(donations.donorWallet, wallet))
+    .groupBy(donations.network);
+    
+    return {
+      overview: donationStats,
+      byType: donationsByType,
+      byNetwork: donationsByNetwork
+    };
+  }
+  
+  // Get analytics for a specific campaign
+  async getCampaignAnalytics(campaignId: number): Promise<any> {
+    const [campaign] = await db.select().from(campaigns).where(eq(campaigns.id, campaignId));
+    if (!campaign) throw new Error('Campaign not found');
+    
+    // Get daily donation trends (last 30 days)
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const dailyTrends = await db.select({
+      date: sql<string>`DATE(${donations.createdAt}) as date`,
+      donationCount: sql<number>`COUNT(*)`,
+      totalAmount: sql<string>`SUM(${donations.amount})`
+    })
+    .from(donations)
+    .where(and(
+      eq(donations.campaignId, campaignId),
+      gte(donations.createdAt, thirtyDaysAgo)
+    ))
+    .groupBy(sql`DATE(${donations.createdAt})`)
+    .orderBy(sql`DATE(${donations.createdAt})`);
+    
+    // Get top donors
+    const topDonors = await db.select({
+      donorWallet: donations.donorWallet,
+      totalDonated: sql<string>`SUM(${donations.amount})`,
+      donationCount: sql<number>`COUNT(*)`
+    })
+    .from(donations)
+    .where(eq(donations.campaignId, campaignId))
+    .groupBy(donations.donorWallet)
+    .orderBy(desc(sql<string>`SUM(${donations.amount})`))
+    .limit(10);
+    
+    // Calculate progress percentage
+    const progress = campaign.targetAmount ? 
+      (parseFloat(campaign.totalDonations || '0') / parseFloat(campaign.targetAmount)) * 100 : 0;
+    
+    return {
+      campaign: {
+        ...campaign,
+        progress: Math.min(progress, 100)
+      },
+      dailyTrends,
+      topDonors,
+      performance: {
+        averageDonation: topDonors.length > 0 ? 
+          parseFloat(campaign.totalDonations || '0') / (campaign.donationCount || 1) : 0,
+        conversionRate: 100 // This would need view tracking to calculate properly
+      }
+    };
+  }
+  
+  // Get analytics for all user's campaigns
+  async getUserCampaignAnalytics(wallet: string): Promise<any> {
+    const userCampaigns = await db.select().from(campaigns)
+      .where(eq(campaigns.ownerWallet, wallet))
+      .orderBy(desc(campaigns.createdAt));
+    
+    if (userCampaigns.length === 0) {
+      return {
+        overview: {
+          totalCampaigns: 0,
+          totalRaised: '0',
+          totalDonors: 0,
+          avgCampaignAmount: '0',
+          successRate: 0
+        },
+        campaigns: [],
+        monthlyTrends: []
+      };
+    }
+    
+    // Calculate overview stats
+    const totalRaised = userCampaigns.reduce((sum, c) => 
+      sum + parseFloat(c.totalDonations || '0'), 0);
+    const totalDonors = userCampaigns.reduce((sum, c) => 
+      sum + (c.donationCount || 0), 0);
+    const successfulCampaigns = userCampaigns.filter(c => {
+      if (!c.targetAmount || !c.totalDonations) return false;
+      return parseFloat(c.totalDonations) >= parseFloat(c.targetAmount);
+    }).length;
+    
+    // Get monthly campaign creation trends (last 6 months)
+    const monthlyTrends = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const nextMonth = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+      const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+      
+      const monthCampaigns = userCampaigns.filter(c => {
+        const createdAt = new Date(c.createdAt!);
+        return createdAt >= date && createdAt < nextMonth;
+      });
+      
+      const monthlyRaised = monthCampaigns.reduce((sum, c) => 
+        sum + parseFloat(c.totalDonations || '0'), 0);
+      
+      monthlyTrends.push({
+        month: monthKey,
+        campaignsCreated: monthCampaigns.length,
+        totalRaised: monthlyRaised.toString(),
+        avgPerCampaign: monthCampaigns.length > 0 ? 
+          (monthlyRaised / monthCampaigns.length).toString() : '0'
+      });
+    }
+    
+    return {
+      overview: {
+        totalCampaigns: userCampaigns.length,
+        totalRaised: totalRaised.toString(),
+        totalDonors,
+        avgCampaignAmount: userCampaigns.length > 0 ? 
+          (totalRaised / userCampaigns.length).toString() : '0',
+        successRate: userCampaigns.length > 0 ? 
+          (successfulCampaigns / userCampaigns.length) * 100 : 0
+      },
+      campaigns: userCampaigns.map(c => ({
+        ...c,
+        progress: c.targetAmount ? 
+          Math.min((parseFloat(c.totalDonations || '0') / parseFloat(c.targetAmount)) * 100, 100) : 0
+      })),
+      monthlyTrends
+    };
+  }
+  
+  // Get time-based analytics for user
+  async getUserTimeAnalytics(wallet: string, timeRange: string): Promise<any> {
+    let startDate: Date;
+    const now = new Date();
+    
+    switch (timeRange) {
+      case '7d':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case '30d':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case '90d':
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        break;
+      case '1y':
+        startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    }
+    
+    // Get donation activity for time range
+    const donationActivity = await db.select({
+      date: sql<string>`DATE(${donations.createdAt})`,
+      count: sql<number>`COUNT(*)`,
+      amount: sql<string>`SUM(${donations.amount})`
+    })
+    .from(donations)
+    .where(and(
+      eq(donations.donorWallet, wallet),
+      gte(donations.createdAt, startDate)
+    ))
+    .groupBy(sql`DATE(${donations.createdAt})`)
+    .orderBy(sql`DATE(${donations.createdAt})`);
+    
+    // Get campaign creation activity for time range
+    const campaignActivity = await db.select({
+      date: sql<string>`DATE(${campaigns.createdAt})`,
+      count: sql<number>`COUNT(*)`
+    })
+    .from(campaigns)
+    .where(and(
+      eq(campaigns.ownerWallet, wallet),
+      gte(campaigns.createdAt, startDate)
+    ))
+    .groupBy(sql`DATE(${campaigns.createdAt})`)
+    .orderBy(sql`DATE(${campaigns.createdAt})`);
+    
+    // Get daily reward participation for time range
+    const rewardActivity = await db.select({
+      date: dailyEntries.date,
+      count: sql<number>`COUNT(*)`
+    })
+    .from(dailyEntries)
+    .where(and(
+      eq(dailyEntries.wallet, wallet),
+      gte(sql`STR_TO_DATE(${dailyEntries.date}, '%Y-%m-%d')`, startDate)
+    ))
+    .groupBy(dailyEntries.date)
+    .orderBy(dailyEntries.date);
+    
+    return {
+      timeRange,
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: now.toISOString().split('T')[0],
+      donations: donationActivity,
+      campaigns: campaignActivity,
+      dailyRewards: rewardActivity,
+      summary: {
+        totalDonations: donationActivity.reduce((sum, d) => sum + parseInt(d.count.toString()), 0),
+        totalDonated: donationActivity.reduce((sum, d) => sum + parseFloat(d.amount), 0).toString(),
+        totalCampaigns: campaignActivity.reduce((sum, c) => sum + parseInt(c.count.toString()), 0),
+        totalRewardDays: rewardActivity.reduce((sum, r) => sum + parseInt(r.count.toString()), 0)
+      }
+    };
   }
 }
 

@@ -35,6 +35,8 @@ import {
   Share2
 } from "lucide-react";
 import type { Campaign } from "@shared/schema";
+import UserDashboardAnalytics from "@/components/analytics/UserDashboardAnalytics";
+import DonationHistoryTable from "@/components/analytics/DonationHistoryTable";
 
 export default function ProfilePage() {
   const { isConnected, address } = useWallet();
@@ -227,13 +229,27 @@ export default function ProfilePage() {
 
         {/* Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 surface-secondary shadow-binance">
+          <TabsList className="grid w-full grid-cols-6 surface-secondary shadow-binance">
             <TabsTrigger 
               value="overview" 
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center"
             >
               <BarChart3 className="w-4 h-4 mr-2" />
               Overview
+            </TabsTrigger>
+            <TabsTrigger 
+              value="analytics" 
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center"
+            >
+              <Activity className="w-4 h-4 mr-2" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger 
+              value="donations" 
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center"
+            >
+              <DollarSign className="w-4 h-4 mr-2" />
+              Donations
             </TabsTrigger>
             <TabsTrigger 
               value="campaigns" 
@@ -258,6 +274,14 @@ export default function ProfilePage() {
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="analytics" className="space-y-6 mt-6">
+            <UserDashboardAnalytics />
+          </TabsContent>
+          
+          <TabsContent value="donations" className="space-y-6 mt-6">
+            <DonationHistoryTable />
+          </TabsContent>
+          
           <TabsContent value="overview" className="space-y-6 mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="card-standard">

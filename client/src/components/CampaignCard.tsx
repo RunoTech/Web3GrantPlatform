@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Users, Target, CreditCard } from "lucide-react";
+import { Heart, Target, CreditCard } from "lucide-react";
 import ShareButton from "@/components/ShareButton";
 import { generateCampaignShareLink } from "@/utils/share";
 import ProgressiveImage from "@/components/enhanced/ProgressiveImage";
@@ -118,30 +118,23 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
             </div>
           </div>
           
-          {/* Bottom Info - Supporters & Creator */}
-          <div className="flex items-center justify-between pt-4 border-t border-border mt-auto">
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                {campaign.donationCount || 0} supporters
-              </span>
-            </div>
-            
+          {/* Bottom Info - Creator & Share */}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-border mt-auto">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 bg-primary rounded-full flex-shrink-0"></div>
               <span className="text-xs text-muted-foreground font-mono">
                 {campaign.ownerWallet.slice(0, 6)}...{campaign.ownerWallet.slice(-4)}
               </span>
-              <div onClick={(e) => e.preventDefault()}>
-                <ShareButton 
-                  shareData={generateCampaignShareLink(campaign.id, campaign.title)}
-                  variant="ghost"
-                  size="sm"
-                  showText={false}
-                  className="h-8 w-8 p-0 hover:bg-accent"
-                  data-testid={`share-campaign-${campaign.id}`}
-                />
-              </div>
+            </div>
+            <div onClick={(e) => e.preventDefault()}>
+              <ShareButton 
+                shareData={generateCampaignShareLink(campaign.id, campaign.title)}
+                variant="ghost"
+                size="sm"
+                showText={false}
+                className="h-8 w-8 p-0 hover:bg-accent"
+                data-testid={`share-campaign-${campaign.id}`}
+              />
             </div>
           </div>
         </div>

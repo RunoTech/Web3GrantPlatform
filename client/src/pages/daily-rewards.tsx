@@ -108,7 +108,7 @@ export default function DailyRewardsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-white 
       <Header currentPage="daily-rewards" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -120,7 +120,7 @@ export default function DailyRewardsPage() {
         </Button>
 
         {/* Daily Rewards Header Section */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-12 mb-12 shadow-lg">
+        <div className="bg-white  border border-gray-200  rounded-2xl p-12 mb-12 shadow-lg">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center space-x-3 mb-6">
               <Gift className="w-16 h-16 text-yellow-500" />
@@ -128,13 +128,13 @@ export default function DailyRewardsPage() {
                 Daily Rewards
               </h1>
             </div>
-            <p className="text-2xl text-gray-600 dark:text-gray-400 mb-8 max-w-4xl mx-auto">
+            <p className="text-2xl text-gray-600  mb-8 max-w-4xl mx-auto">
               Join free daily rewards! Your chance to win {rewardAmount} USDT every day.
             </p>
           </div>
 
           {/* Daily Reward Participation Section */}
-          <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 max-w-2xl mx-auto">
+          <div className="bg-gray-50  rounded-2xl border border-gray-200  p-8 max-w-2xl mx-auto">
             <div className="text-center space-y-6">
               <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center mx-auto shadow-binance">
                 <Coins className="w-12 h-12 text-black" />
@@ -144,22 +144,22 @@ export default function DailyRewardsPage() {
                 Join Daily Draw
               </h2>
               
-              <p className="text-lg text-gray-600 dark:text-gray-400">
+              <p className="text-lg text-gray-600 
                 You can participate in the draw for free every day. Winner receives {rewardAmount} USDT daily!
               </p>
 
               {/* Today's Stats */}
-              <div className="flex items-center justify-center space-x-8 text-lg bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+              <div className="flex items-center justify-center space-x-8 text-lg bg-gray-50  rounded-xl p-4">
                 <div className="flex items-center space-x-2">
                   <Users className="w-6 h-6 text-blue-500" />
-                  <span className="text-gray-700 dark:text-gray-300">
-                    Today's Participants: <span className="font-bold text-blue-600 dark:text-blue-400">{stats?.participants || 0}</span>
+                  <span className="text-gray-700 
+                    Today's Participants: <span className="font-bold text-blue-600  || 0}</span>
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-6 h-6 text-green-500" />
-                  <span className="text-gray-700 dark:text-gray-300">
-                    Date: <span className="font-bold text-green-600 dark:text-green-400">{new Date().toLocaleDateString('en-US')}</span>
+                  <span className="text-gray-700 
+                    Date: <span className="font-bold text-green-600  Date().toLocaleDateString('en-US')}</span>
                   </span>
                 </div>
               </div>
@@ -167,14 +167,14 @@ export default function DailyRewardsPage() {
               {/* Wallet Connection and Join Button */}
               {!isConnected ? (
                 <div className="space-y-4">
-                  <p className="text-yellow-600 dark:text-yellow-400 font-medium">
+                  <p className="text-yellow-600  font-medium">
                     Connect your wallet to join the draw
                   </p>
                   <WalletConnectButton />
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <p className="text-green-600 dark:text-green-400 font-medium">
+                  <p className="text-green-600  font-medium">
                     Wallet connected: {address?.slice(0, 6)}...{address?.slice(-4)}
                   </p>
                   <Button 
@@ -193,7 +193,7 @@ export default function DailyRewardsPage() {
                   </Button>
                   
                   {hasJoinedToday && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-gray-500 
                       Results will be announced at the end of the day. Good luck!
                     </p>
                   )}
@@ -201,7 +201,7 @@ export default function DailyRewardsPage() {
               )}
 
               {/* Reward Rules */}
-              <div className="text-left space-y-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
+              <div className="text-left space-y-2 text-sm text-gray-600  bg-gray-100  rounded-lg p-4">
                 <h3 className="font-semibold text-foreground mb-2">📋 Draw Rules:</h3>
                 <ul className="space-y-1">
                   <li>• You can only participate once per day</li>
@@ -220,16 +220,16 @@ export default function DailyRewardsPage() {
           <div className="mb-12">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-foreground mb-2">📢 Daily Reward Announcements</h2>
-              <p className="text-gray-600 dark:text-gray-400">Important updates and information</p>
+              <p className="text-gray-600  updates and information</p>
             </div>
             
             <div className="space-y-4">
               {announcements.map((announcement) => (
                 <Card key={announcement.id} className={`p-4 border-l-4 ${
-                  announcement.type === 'success' ? 'border-l-green-500 bg-green-50 dark:bg-green-900/30' :
-                  announcement.type === 'warning' ? 'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-900/30' :
-                  announcement.type === 'error' ? 'border-l-red-500 bg-red-50 dark:bg-red-900/30' :
-                  'border-l-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                  announcement.type === 'success' ? 'border-l-green-500 bg-green-50  :
+                  announcement.type === 'warning' ? 'border-l-yellow-500 bg-yellow-50  :
+                  announcement.type === 'error' ? 'border-l-red-500 bg-red-50  :
+                  'border-l-blue-500 bg-blue-50 
                 }`} data-testid={`announcement-${announcement.id}`}>
                   <div className="flex items-start space-x-3">
                     <div className={`p-1 rounded-full ${
@@ -249,8 +249,8 @@ export default function DailyRewardsPage() {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-foreground mb-1">{announcement.title}</h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm whitespace-pre-wrap">{announcement.content}</p>
-                      <div className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                      <p className="text-gray-600  text-sm whitespace-pre-wrap">{announcement.content}</p>
+                      <div className="text-xs text-gray-500  mt-2">
                         {announcement.createdAt ? new Date(announcement.createdAt).toLocaleDateString('en-US', {
                           day: '2-digit',
                           month: 'short',
@@ -275,7 +275,7 @@ export default function DailyRewardsPage() {
               Recent Winners
             </h2>
           </div>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
+          <p className="text-lg text-gray-600 
             Lucky winners from past days
           </p>
         </div>
@@ -287,9 +287,9 @@ export default function DailyRewardsPage() {
               {[1, 2, 3].map((i) => (
                 <Card key={i} className="p-6 animate-pulse">
                   <div className="space-y-4">
-                    <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mx-auto"></div>
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mx-auto"></div>
+                    <div className="w-12 h-12 bg-gray-200  rounded-full mx-auto"></div>
+                    <div className="h-4 bg-gray-200  rounded w-3/4 mx-auto"></div>
+                    <div className="h-3 bg-gray-200  rounded w-1/2 mx-auto"></div>
                   </div>
                 </Card>
               ))}
@@ -297,7 +297,7 @@ export default function DailyRewardsPage() {
           ) : lastWinners.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {lastWinners.map((winner, index) => (
-                <Card key={winner.id} className="p-6 hover:transform hover:-translate-y-1 transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-binance">
+                <Card key={winner.id} className="p-6 hover:transform hover:-translate-y-1 transition-all duration-300 bg-white  border border-gray-200  shadow-sm hover:shadow-binance">
                   <div className="text-center space-y-4">
                     <div className="relative">
                       <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center shadow-lg ${
@@ -307,9 +307,9 @@ export default function DailyRewardsPage() {
                         'bg-blue-500'
                       }`}>
                         {index < 3 ? (
-                          <Trophy className="w-8 h-8 text-white dark:text-white" />
+                          <Trophy className="w-8 h-8 text-white  />
                         ) : (
-                          <Star className="w-8 h-8 text-white dark:text-white" />
+                          <Star className="w-8 h-8 text-white  />
                         )}
                       </div>
                       <Badge 
@@ -326,7 +326,7 @@ export default function DailyRewardsPage() {
                     
                     <div className="space-y-2">
                       <div className="flex items-center justify-center space-x-2">
-                        <span className="text-sm font-mono text-gray-600 dark:text-gray-400">
+                        <span className="text-sm font-mono text-gray-600 
                           {winner.wallet.slice(0, 6)}...{winner.wallet.slice(-4)}
                         </span>
                         <Button
@@ -342,11 +342,11 @@ export default function DailyRewardsPage() {
                       <div className="space-y-1">
                         <div className="flex items-center justify-center space-x-2">
                           <DollarSign className="w-4 h-4 text-green-500" />
-                          <span className="font-bold text-green-600 dark:text-green-400">
+                          <span className="font-bold text-green-600 
                             {winner.amount} USDT
                           </span>
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                        <div className="text-xs text-gray-500 
                           {formatDate(winner.date)}
                         </div>
                       </div>
@@ -357,13 +357,13 @@ export default function DailyRewardsPage() {
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="w-32 h-32 bg-gray-100 dark:bg-gray-800 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <div className="w-32 h-32 bg-gray-100  rounded-3xl flex items-center justify-center mx-auto mb-6">
                 <Trophy className="w-16 h-16 text-gray-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
+              <h3 className="text-xl font-semibold text-gray-600  mb-2">
                 No winners yet
               </h3>
-              <p className="text-gray-500 dark:text-gray-500 mb-8">
+              <p className="text-gray-500  mb-8">
                 Be the first to participate and try your luck to win {rewardAmount} USDT!
               </p>
               {!isConnected && <WalletConnectButton />}

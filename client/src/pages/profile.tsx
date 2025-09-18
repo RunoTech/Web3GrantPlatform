@@ -11,7 +11,6 @@ import CampaignCard from "@/components/CampaignCard";
 import Header from "@/components/Header";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useTheme } from "@/contexts/ThemeContext";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -65,7 +64,6 @@ import DonationHistoryTable from "@/components/analytics/DonationHistoryTable";
 export default function ProfilePage() {
   const { isConnected, address } = useWallet();
   const { t, language, setLanguage } = useLanguage();
-  const { theme, toggleTheme } = useTheme();
   const { toast } = useToast();
   
   // Campaign Management State
@@ -93,8 +91,7 @@ export default function ProfilePage() {
     analyticsData: z.boolean(),
     marketingCommunications: z.boolean(),
     thirdPartySharing: z.boolean(),
-    // Theme & Language
-    themePreference: z.enum(["light", "dark", "system"]),
+    // Language
     languagePreference: z.enum(["en", "tr", "es", "fr", "de", "ja"])
   });
   
@@ -117,7 +114,6 @@ export default function ProfilePage() {
       analyticsData: true,
       marketingCommunications: false,
       thirdPartySharing: false,
-      themePreference: theme === 'light' ? 'light' : theme === 'dark' ? 'dark' : 'system',
       languagePreference: language as any
     };
     
@@ -137,8 +133,7 @@ export default function ProfilePage() {
     defaultValues: getStoredSettings()
   });
   
-  // Watch theme and language changes to apply immediately
-  const watchedTheme = settingsForm.watch('themePreference');
+  // Watch language changes to apply immediately
   const watchedLanguage = settingsForm.watch('languagePreference');
   const [location] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
@@ -214,26 +209,6 @@ export default function ProfilePage() {
     setShowBulkActions(selectedCampaigns.length > 0);
   }, [selectedCampaigns]);
   
-  // Apply theme changes immediately
-  useEffect(() => {
-    if (watchedTheme === 'light' && theme !== 'light') {
-      // Apply light theme
-      document.documentElement.classList.remove('dark');
-      document.documentElement.classList.add('light');
-      localStorage.setItem('theme', 'light');
-    } else if (watchedTheme === 'dark' && theme !== 'dark') {
-      // Apply dark theme
-      document.documentElement.classList.remove('light');
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else if (watchedTheme === 'system') {
-      // Apply system theme
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      document.documentElement.classList.remove('light', 'dark');
-      document.documentElement.classList.add(systemTheme);
-      localStorage.setItem('theme', systemTheme);
-    }
-  }, [watchedTheme, theme]);
   
   // Apply language changes immediately
   useEffect(() => {
@@ -244,7 +219,7 @@ export default function ProfilePage() {
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+      <div className="min-h-screen bg-gray-50 
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center space-y-8 max-w-lg mx-auto p-8">
             <div className="w-32 h-32 bg-binance-yellow rounded-2xl flex items-center justify-center mx-auto shadow-binance">
@@ -252,7 +227,7 @@ export default function ProfilePage() {
             </div>
             <div className="space-y-4">
               <h1 className="text-3xl font-bold text-foreground">{t('profile.access_title')}</h1>
-              <p className="text-lg text-slate-600 dark:text-slate-300">
+              <p className="text-lg text-slate-600 
                 {t('profile.connect_wallet_message')}
               </p>
             </div>
@@ -414,14 +389,14 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border-green-200">
+                    <Badge className="bg-green-100 text-green-800   border-green-200">
                       <Wallet className="w-3 h-3 mr-1" />
                       {t('profile.connected')}
                     </Badge>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg font-mono bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg text-foreground">
+                      <span className="text-lg font-mono bg-slate-100  px-3 py-1 rounded-lg text-foreground">
                         {address?.slice(0, 8)}...{address?.slice(-6)}
                       </span>
                       <Button 
@@ -522,7 +497,7 @@ export default function ProfilePage() {
                   <span>{t('profile.active')}: {activeCampaigns}</span>
                   <span>{activeCampaigns > 0 ? Math.round((activeCampaigns / userCampaigns.length) * 100) : 0}%</span>
                 </div>
-                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                <div className="w-full bg-slate-200  rounded-full h-2">
                   <div 
                     className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-500"
                     style={{ width: `${userCampaigns.length > 0 ? (activeCampaigns / userCampaigns.length) * 100 : 0}%` }}
@@ -574,7 +549,7 @@ export default function ProfilePage() {
                     <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
                     <span className="text-green-500 text-sm font-medium">{t('profile.view_analytics')}</span>
                   </div>
-                  <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                  <Badge variant="secondary" className="text-xs bg-green-100 text-green-800  
                     📈 {t('profile.growing')}
                   </Badge>
                 </div>
@@ -601,11 +576,11 @@ export default function ProfilePage() {
               {/* Supporter engagement metrics */}
               <div className="mb-3">
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-2 text-center">
+                  <div className="bg-slate-50  rounded-lg p-2 text-center">
                     <div className="font-semibold text-foreground">{totalSupporters}</div>
                     <div className="text-muted-foreground">{t('profile.unique_donors')}</div>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-2 text-center">
+                  <div className="bg-slate-50  rounded-lg p-2 text-center">
                     <div className="font-semibold text-foreground">{userCampaigns.length}</div>
                     <div className="text-muted-foreground">{t('profile.campaigns')}</div>
                   </div>
@@ -644,7 +619,7 @@ export default function ProfilePage() {
               <div className="mb-3">
                 <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
                   <span>{t('profile.participation_streak')}</span>
-                  <span className="font-semibold text-yellow-600 dark:text-yellow-400">
+                  <span className="font-semibold text-yellow-600 
                     {dailyParticipationCount > 0 ? `${dailyParticipationCount} ${t('profile.days')}` : t('profile.no_streak')}
                   </span>
                 </div>
@@ -656,7 +631,7 @@ export default function ProfilePage() {
                       className={`w-4 h-2 rounded-full ${
                         i < Math.min(dailyParticipationCount, 7) 
                           ? 'bg-gradient-to-r from-yellow-400 to-orange-500' 
-                          : 'bg-slate-200 dark:bg-slate-700'
+                          : 'bg-slate-200 
                       }`}
                     />
                   ))}
@@ -701,7 +676,7 @@ export default function ProfilePage() {
                       transition-all duration-300
                       ${isActive 
                         ? 'bg-gradient-to-br ' + tab.color + ' text-white shadow-lg transform -translate-y-1' 
-                        : 'bg-white dark:bg-slate-800 border border-border hover:border-primary/50 hover:shadow-md'
+                        : 'bg-white  border border-border hover:border-primary/50 hover:shadow-md'
                       }
                     `}
                     data-testid={`mobile-tab-${tab.id}`}
@@ -752,7 +727,7 @@ export default function ProfilePage() {
 
           {/* Desktop Tab Navigation - Clean Fixed Layout */}
           <div className="hidden md:block">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 lg:grid-cols-6 gap-2 p-2 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-border rounded-xl shadow-sm">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 lg:grid-cols-6 gap-2 p-2 bg-gradient-to-r from-slate-50 to-slate-100   border border-border rounded-xl shadow-sm">
               {[
                 { id: 'overview', icon: BarChart3, label: t('profile.overview'), color: 'blue' },
                 { id: 'analytics', icon: Activity, label: t('profile.analytics'), color: 'purple' },
@@ -880,7 +855,7 @@ export default function ProfilePage() {
                       <TrendingUp className="w-5 h-5 mr-2 text-primary" />
                       {t('profile.performance_metrics')}
                     </div>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                    <Badge variant="secondary" className="bg-green-100 text-green-800  
                       📈 {t('profile.trending')}
                     </Badge>
                   </CardTitle>
@@ -894,7 +869,7 @@ export default function ProfilePage() {
                         {userCampaigns.length > 0 ? Math.round((activeCampaigns / userCampaigns.length) * 100) : 0}%
                       </span>
                     </div>
-                    <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3">
+                    <div className="w-full bg-slate-200  rounded-full h-3">
                       <div 
                         className="bg-gradient-to-r from-green-500 to-emerald-600 h-3 rounded-full transition-all duration-1000"
                         style={{ width: `${userCampaigns.length > 0 ? (activeCampaigns / userCampaigns.length) * 100 : 0}%` }}
@@ -918,15 +893,15 @@ export default function ProfilePage() {
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-4 text-center">
-                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
+                      <div className="bg-slate-50  rounded-lg p-3">
                         <div className="text-lg font-bold text-foreground">{totalSupporters}</div>
                         <div className="text-xs text-muted-foreground">{t('profile.supporters')}</div>
                       </div>
-                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
+                      <div className="bg-slate-50  rounded-lg p-3">
                         <div className="text-lg font-bold text-foreground">{totalDonationsReceived.toFixed(2)}</div>
                         <div className="text-xs text-muted-foreground">{t('profile.total_raised')}</div>
                       </div>
-                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
+                      <div className="bg-slate-50  rounded-lg p-3">
                         <div className="text-lg font-bold text-foreground">{userCampaigns.length}</div>
                         <div className="text-xs text-muted-foreground">{t('profile.campaigns')}</div>
                       </div>
@@ -950,7 +925,7 @@ export default function ProfilePage() {
                           className={`w-2 h-6 rounded-full ${
                             i < Math.min(dailyParticipationCount, 30) 
                               ? 'bg-gradient-to-t from-yellow-400 to-orange-500' 
-                              : 'bg-slate-200 dark:bg-slate-700'
+                              : 'bg-slate-200 
                           }`}
                         />
                       ))}
@@ -980,7 +955,7 @@ export default function ProfilePage() {
                       <span className="text-muted-foreground">{t('profile.campaign_goal')}</span>
                       <span className="font-medium">{userCampaigns.length}/5</span>
                     </div>
-                    <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                    <div className="w-full bg-slate-200  rounded-full h-2">
                       <div 
                         className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full"
                         style={{ width: `${Math.min((userCampaigns.length / 5) * 100, 100)}%` }}
@@ -994,7 +969,7 @@ export default function ProfilePage() {
                       <span className="text-muted-foreground">{t('profile.fundraising_goal')}</span>
                       <span className="font-medium">{totalDonationsReceived.toFixed(0)}/1000 USDT</span>
                     </div>
-                    <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                    <div className="w-full bg-slate-200  rounded-full h-2">
                       <div 
                         className="bg-gradient-to-r from-green-500 to-emerald-600 h-2 rounded-full"
                         style={{ width: `${Math.min((totalDonationsReceived / 1000) * 100, 100)}%` }}
@@ -1008,7 +983,7 @@ export default function ProfilePage() {
                       <span className="text-muted-foreground">{t('profile.supporter_goal')}</span>
                       <span className="font-medium">{totalSupporters}/100</span>
                     </div>
-                    <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                    <div className="w-full bg-slate-200  rounded-full h-2">
                       <div 
                         className="bg-gradient-to-r from-purple-500 to-violet-600 h-2 rounded-full"
                         style={{ width: `${Math.min((totalSupporters / 100) * 100, 100)}%` }}
@@ -1094,7 +1069,7 @@ export default function ProfilePage() {
                               </div>
                               {campaign.targetAmount && (
                                 <div className="mt-3">
-                                  <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                                  <div className="w-full bg-slate-200  rounded-full h-2">
                                     <div 
                                       className={`h-2 rounded-full transition-all duration-500 ${
                                         campaign.active 
@@ -1114,7 +1089,7 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-20 h-20 bg-slate-100  rounded-full flex items-center justify-center mx-auto mb-4">
                       <Target className="w-10 h-10 text-muted-foreground" />
                     </div>
                     <h3 className="text-lg font-semibold text-foreground mb-2">{t('profile.no_campaigns')}</h3>
@@ -1229,8 +1204,8 @@ export default function ProfilePage() {
                     
                     return (
                       <Card key={campaign.id} className={`card-standard hover:shadow-lg transition-all duration-300 ${
-                        campaign.active ? 'border-green-200 dark:border-green-800' : 
-                        isCompleted ? 'border-blue-200 dark:border-blue-800' : ''
+                        campaign.active ? 'border-green-200  : 
+                        isCompleted ? 'border-blue-200  : ''
                       }`}>
                         <CardContent className="p-6">
                           <div className="flex items-start gap-4">
@@ -1266,9 +1241,9 @@ export default function ProfilePage() {
                                     <Badge 
                                       variant={campaign.active ? 'default' : isCompleted ? 'secondary' : 'outline'}
                                       className={`${
-                                        campaign.active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
-                                        isCompleted ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
-                                        'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'
+                                        campaign.active ? 'bg-green-100 text-green-800   :
+                                        isCompleted ? 'bg-blue-100 text-blue-800   :
+                                        'bg-slate-100 text-slate-800  
                                       }`}
                                     >
                                       {campaign.active ? '🟢 ' + t('profile.active') : 
@@ -1282,19 +1257,19 @@ export default function ProfilePage() {
                                   
                                   {/* Campaign Metrics Grid */}
                                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                    <div className="text-center p-3 bg-slate-50  rounded-lg">
                                       <div className="text-lg font-bold text-foreground">{campaign.totalDonations || '0'}</div>
                                       <div className="text-xs text-muted-foreground">{t('profile.usdt_raised')}</div>
                                     </div>
-                                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                    <div className="text-center p-3 bg-slate-50  rounded-lg">
                                       <div className="text-lg font-bold text-foreground">{campaign.targetAmount || 'N/A'}</div>
                                       <div className="text-xs text-muted-foreground">{t('profile.target_amount')}</div>
                                     </div>
-                                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                    <div className="text-center p-3 bg-slate-50  rounded-lg">
                                       <div className="text-lg font-bold text-foreground">{campaign.donationCount || 0}</div>
                                       <div className="text-xs text-muted-foreground">{t('profile.supporters')}</div>
                                     </div>
-                                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                    <div className="text-center p-3 bg-slate-50  rounded-lg">
                                       <div className="text-lg font-bold text-foreground">{progress.toFixed(0)}%</div>
                                       <div className="text-xs text-muted-foreground">{t('profile.progress')}</div>
                                     </div>
@@ -1307,7 +1282,7 @@ export default function ProfilePage() {
                                         <span>{t('profile.progress')}</span>
                                         <span>{progress.toFixed(1)}%</span>
                                       </div>
-                                      <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3">
+                                      <div className="w-full bg-slate-200  rounded-full h-3">
                                         <div 
                                           className={`h-3 rounded-full transition-all duration-500 ${
                                             campaign.active 
@@ -1485,7 +1460,7 @@ export default function ProfilePage() {
                           <h4 className="font-medium text-foreground">{t('profile.wallet_address')}</h4>
                           <p className="text-sm text-muted-foreground font-mono">{address?.slice(0, 16)}...{address?.slice(-8)}</p>
                         </div>
-                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                        <Badge className="bg-green-100 text-green-800  
                           <Wallet className="w-3 h-3 mr-1" />
                           {t('profile.connected')}
                         </Badge>
@@ -1495,7 +1470,7 @@ export default function ProfilePage() {
                           <h4 className="font-medium text-foreground">{t('profile.account_status')}</h4>
                           <p className="text-sm text-muted-foreground">{t('profile.verified_and_active')}</p>
                         </div>
-                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                        <Badge className="bg-green-100 text-green-800  
                           <Shield className="w-3 h-3 mr-1" />
                           {t('profile.verified')}
                         </Badge>
@@ -1540,21 +1515,21 @@ export default function ProfilePage() {
                         <h4 className="font-medium text-foreground">{t('profile.email_notifications')}</h4>
                       </div>
                       <div className="space-y-3">
-                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100  transition-colors">
                           <div>
                             <span className="text-sm font-medium text-foreground">{t('profile.campaign_updates')}</span>
                             <p className="text-xs text-muted-foreground">{t('profile.campaign_updates_desc')}</p>
                           </div>
                           <input type="checkbox" {...settingsForm.register('emailCampaignUpdates')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="email-campaign-updates" />
                         </label>
-                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100  transition-colors">
                           <div>
                             <span className="text-sm font-medium text-foreground">{t('profile.new_donations')}</span>
                             <p className="text-xs text-muted-foreground">{t('profile.new_donations_desc')}</p>
                           </div>
                           <input type="checkbox" {...settingsForm.register('emailNewDonations')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="email-donations" />
                         </label>
-                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100  transition-colors">
                           <div>
                             <span className="text-sm font-medium text-foreground">{t('profile.daily_rewards')}</span>
                             <p className="text-xs text-muted-foreground">{t('profile.daily_rewards_desc')}</p>
@@ -1571,21 +1546,21 @@ export default function ProfilePage() {
                         <h4 className="font-medium text-foreground">{t('profile.push_notifications')}</h4>
                       </div>
                       <div className="space-y-3">
-                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100  transition-colors">
                           <div>
                             <span className="text-sm font-medium text-foreground">{t('profile.instant_donations')}</span>
                             <p className="text-xs text-muted-foreground">{t('profile.instant_donations_desc')}</p>
                           </div>
                           <input type="checkbox" {...settingsForm.register('pushInstantDonations')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="push-donations" />
                         </label>
-                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100  transition-colors">
                           <div>
                             <span className="text-sm font-medium text-foreground">{t('profile.goal_milestones')}</span>
                             <p className="text-xs text-muted-foreground">{t('profile.goal_milestones_desc')}</p>
                           </div>
                           <input type="checkbox" {...settingsForm.register('pushGoalMilestones')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="push-milestones" />
                         </label>
-                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100  transition-colors">
                           <div>
                             <span className="text-sm font-medium text-foreground">{t('profile.security_alerts')}</span>
                             <p className="text-xs text-muted-foreground">{t('profile.security_alerts_desc')}</p>
@@ -1602,21 +1577,21 @@ export default function ProfilePage() {
                         <h4 className="font-medium text-foreground">{t('profile.in_app_notifications')}</h4>
                       </div>
                       <div className="space-y-3">
-                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100  transition-colors">
                           <div>
                             <span className="text-sm font-medium text-foreground">{t('profile.activity_feed')}</span>
                             <p className="text-xs text-muted-foreground">{t('profile.activity_feed_desc')}</p>
                           </div>
                           <input type="checkbox" {...settingsForm.register('inAppActivityFeed')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="inapp-activity" />
                         </label>
-                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100  transition-colors">
                           <div>
                             <span className="text-sm font-medium text-foreground">{t('profile.popup_notifications')}</span>
                             <p className="text-xs text-muted-foreground">{t('profile.popup_notifications_desc')}</p>
                           </div>
                           <input type="checkbox" {...settingsForm.register('inAppPopupNotifications')} className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary" data-testid="inapp-popups" />
                         </label>
-                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        <label className="flex items-center justify-between p-3 surface-secondary rounded-lg cursor-pointer hover:bg-slate-100  transition-colors">
                           <div>
                             <span className="text-sm font-medium text-foreground">{t('profile.sound_notifications')}</span>
                             <p className="text-xs text-muted-foreground">{t('profile.sound_notifications_desc')}</p>
@@ -1750,12 +1725,12 @@ export default function ProfilePage() {
                           <option value="ja">🇯🇵 日本語</option>
                         </select>
                         
-                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                        <div className="p-4 bg-blue-50  border border-blue-200  rounded-lg">
                           <div className="flex items-start gap-3">
                             <Globe className="w-5 h-5 text-blue-600 mt-0.5" />
                             <div>
-                              <h5 className="font-medium text-blue-900 dark:text-blue-100 mb-1">{t('profile.language_note_title')}</h5>
-                              <p className="text-sm text-blue-700 dark:text-blue-300">{t('profile.language_note_desc')}</p>
+                              <h5 className="font-medium text-blue-900  mb-1">{t('profile.language_note_title')}</h5>
+                              <p className="text-sm text-blue-700 
                             </div>
                           </div>
                         </div>

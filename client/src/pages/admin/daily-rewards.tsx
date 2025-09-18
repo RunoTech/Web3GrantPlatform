@@ -120,7 +120,7 @@ export default function AdminDailyRewardsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-white 
       <Header currentPage="admin" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -136,11 +136,11 @@ export default function AdminDailyRewardsPage() {
           <div className="text-center space-y-4">
             <div className="flex items-center justify-center space-x-3">
               <Gift className="w-12 h-12 text-yellow-500" />
-              <h1 className="text-4xl font-bold text-black dark:text-white">
+              <h1 className="text-4xl font-bold text-black 
                 Daily Rewards Management
               </h1>
             </div>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
+            <p className="text-lg text-gray-600 
               Manage daily reward entries and select winners
             </p>
           </div>
@@ -151,11 +151,11 @@ export default function AdminDailyRewardsPage() {
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                    <div className="w-12 h-12 bg-blue-100  rounded-lg flex items-center justify-center">
                       <Users className="w-6 h-6 text-blue-600" />
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-black dark:text-white">
+                      <div className="text-2xl font-bold text-black 
                         {dailyStats.totalEntries || 0}
                       </div>
                       <div className="text-sm text-gray-500">Total Entries</div>
@@ -167,11 +167,11 @@ export default function AdminDailyRewardsPage() {
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                    <div className="w-12 h-12 bg-green-100  rounded-lg flex items-center justify-center">
                       <Trophy className="w-6 h-6 text-green-600" />
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-black dark:text-white">
+                      <div className="text-2xl font-bold text-black 
                         {dailyStats.totalWinners || 0}
                       </div>
                       <div className="text-sm text-gray-500">Total Winners</div>
@@ -183,11 +183,11 @@ export default function AdminDailyRewardsPage() {
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center">
+                    <div className="w-12 h-12 bg-yellow-100  rounded-lg flex items-center justify-center">
                       <DollarSign className="w-6 h-6 text-yellow-600" />
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-black dark:text-white">
+                      <div className="text-2xl font-bold text-black 
                         {dailyStats.totalRewards || 0}
                       </div>
                       <div className="text-sm text-gray-500">Total Rewards (USDT)</div>
@@ -199,11 +199,11 @@ export default function AdminDailyRewardsPage() {
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
+                    <div className="w-12 h-12 bg-purple-100  rounded-lg flex items-center justify-center">
                       <Calendar className="w-6 h-6 text-purple-600" />
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-black dark:text-white">
+                      <div className="text-2xl font-bold text-black 
                         {dailyStats.activeDays || 0}
                       </div>
                       <div className="text-sm text-gray-500">Active Days</div>
@@ -253,18 +253,18 @@ export default function AdminDailyRewardsPage() {
 
                 {/* Today's Winner Status */}
                 {todayWinner ? (
-                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                  <div className="bg-green-50  border border-green-200  rounded-lg p-4">
                     <div className="flex items-center space-x-2 mb-2">
                       <CheckCircle className="w-5 h-5 text-green-600" />
-                      <span className="font-medium text-green-800 dark:text-green-200">
+                      <span className="font-medium text-green-800 
                         Winner Already Selected
                       </span>
                     </div>
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Winner:</span>
+                        <span className="text-gray-600 
                         <div className="flex items-center space-x-2">
-                          <span className="font-mono text-green-700 dark:text-green-300">
+                          <span className="font-mono text-green-700 
                             {todayWinner.wallet.slice(0, 8)}...{todayWinner.wallet.slice(-6)}
                           </span>
                           <Button
@@ -278,18 +278,18 @@ export default function AdminDailyRewardsPage() {
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Amount:</span>
-                        <span className="font-bold text-green-700 dark:text-green-300">
+                        <span className="text-gray-600 
+                        <span className="font-bold text-green-700 
                           {todayWinner.amount} USDT
                         </span>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                  <div className="bg-yellow-50  border border-yellow-200  rounded-lg p-4">
                     <div className="flex items-center space-x-2">
                       <AlertCircle className="w-5 h-5 text-yellow-600" />
-                      <span className="font-medium text-yellow-800 dark:text-yellow-200">
+                      <span className="font-medium text-yellow-800 
                         No Winner Selected Yet
                       </span>
                     </div>
@@ -358,7 +358,7 @@ export default function AdminDailyRewardsPage() {
                   <div className="space-y-3">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="animate-pulse">
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                        <div className="h-4 bg-gray-200  rounded w-3/4"></div>
                       </div>
                     ))}
                   </div>
@@ -367,13 +367,13 @@ export default function AdminDailyRewardsPage() {
                     {todayEntries.map((entry: any, index: number) => (
                       <div
                         key={entry.id}
-                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                        className="flex items-center justify-between p-3 bg-gray-50  rounded-lg"
                       >
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center text-sm font-bold text-blue-600 dark:text-blue-400">
+                          <div className="w-8 h-8 bg-blue-100  rounded-full flex items-center justify-center text-sm font-bold text-blue-600 
                             #{index + 1}
                           </div>
-                          <span className="font-mono text-sm text-gray-700 dark:text-gray-300">
+                          <span className="font-mono text-sm text-gray-700 
                             {entry.wallet.slice(0, 8)}...{entry.wallet.slice(-6)}
                           </span>
                         </div>
@@ -396,7 +396,7 @@ export default function AdminDailyRewardsPage() {
                 ) : (
                   <div className="text-center py-8">
                     <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <div className="text-gray-500 dark:text-gray-400">
+                    <div className="text-gray-500 
                       No entries for this date
                     </div>
                   </div>

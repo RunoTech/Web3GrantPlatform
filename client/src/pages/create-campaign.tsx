@@ -304,13 +304,13 @@ export default function CreateCampaignPage() {
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-white  flex items-center justify-center">
         <div className="text-center space-y-6 max-w-md mx-auto p-8">
           <div className="w-24 h-24 bg-primary rounded-3xl flex items-center justify-center mx-auto">
             <Lock className="w-12 h-12 text-black" />
           </div>
-          <h1 className="text-3xl font-bold text-black dark:text-white">Connect Wallet</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <h1 className="text-3xl font-bold text-black  Wallet</h1>
+          <p className="text-gray-600 
             You need to connect your wallet first to create a campaign.
           </p>
           <WalletConnectButton />
@@ -320,14 +320,14 @@ export default function CreateCampaignPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-white 
       <Header currentPage="create-campaign" />
 
       {/* Campaign Creation Form */}
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-black dark:text-white mb-4">Create Campaign</h1>
-          <p className="text-gray-600 dark:text-gray-400">What type of campaign would you like to create?</p>
+          <h1 className="text-3xl font-bold text-black  mb-4">Create Campaign</h1>
+          <p className="text-gray-600  type of campaign would you like to create?</p>
         </div>
 
         {/* Campaign Type Selection - Only show if not locked */}
@@ -347,12 +347,12 @@ export default function CreateCampaignPage() {
             >
               <div className="flex items-center space-x-3 mb-4">
                 <Building className="w-8 h-8 text-primary" />
-                <h3 className="text-xl font-bold text-black dark:text-white">FUND Campaign</h3>
+                <h3 className="text-xl font-bold text-black  Campaign</h3>
               </div>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <p className="text-gray-600  mb-4">
                 Unlimited funding campaign for companies
               </p>
-              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <ul className="space-y-2 text-sm text-gray-600 
                 <li className="flex items-center space-x-2">
                   <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>Only companies can create</span>
@@ -382,12 +382,12 @@ export default function CreateCampaignPage() {
             >
               <div className="flex items-center space-x-3 mb-4">
                 <Users className="w-8 h-8 text-primary" />
-                <h3 className="text-xl font-bold text-black dark:text-white">DONATE Campaign</h3>
+                <h3 className="text-xl font-bold text-black  Campaign</h3>
               </div>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <p className="text-gray-600  mb-4">
                 Time-limited donation campaign for individuals and organizations
               </p>
-              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <ul className="space-y-2 text-sm text-gray-600 
                 <li className="flex items-center space-x-2">
                   <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>Individuals, associations, foundations</span>
@@ -414,20 +414,20 @@ export default function CreateCampaignPage() {
               ) : (
                 <Users className="w-8 h-8 text-primary" />
               )}
-              <h3 className="text-xl font-bold text-black dark:text-white">
+              <h3 className="text-xl font-bold text-black 
                 Creating {campaignType} Campaign
               </h3>
               {isLocked && (
                 <Lock className="w-5 h-5 text-gray-500" />
               )}
             </div>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-gray-600  mb-4">
               {campaignType === "FUND" 
                 ? "Unlimited funding campaign for companies"
                 : "Time-limited donation campaign for individuals and organizations"
               }
             </p>
-            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+            <ul className="space-y-2 text-sm text-gray-600 
               {campaignType === "FUND" ? (
                 <>
                   <li className="flex items-center space-x-2">
@@ -470,13 +470,13 @@ export default function CreateCampaignPage() {
               
               {/* Creator Type Selection */}
               <div className="space-y-2">
-                <label className="text-black dark:text-white font-medium">Organization Type</label>
+                <label className="text-black  font-medium">Organization Type</label>
                 <Select 
                   value={creatorType} 
                   onValueChange={(value: any) => setCreatorType(value)}
                   disabled={campaignType === "FUND"}
                 >
-                  <SelectTrigger className="border-gray-300 dark:border-gray-600">
+                  <SelectTrigger className="border-gray-300 
                     <SelectValue placeholder="Select organization type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -495,12 +495,12 @@ export default function CreateCampaignPage() {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-black dark:text-white">Campaign Title</FormLabel>
+                    <FormLabel className="text-black  Title</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="Enter your campaign title" 
                         {...field} 
-                        className="border-gray-300 dark:border-gray-600"
+                        className="border-gray-300 
                       />
                     </FormControl>
                     <FormMessage />
@@ -514,12 +514,12 @@ export default function CreateCampaignPage() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-black dark:text-white">Campaign Description</FormLabel>
+                    <FormLabel className="text-black  Description</FormLabel>
                     <FormControl>
                       <Textarea 
                         placeholder="Detailed description of your campaign" 
                         {...field} 
-                        className="border-gray-300 dark:border-gray-600 min-h-[120px]"
+                        className="border-gray-300  min-h-[120px]"
                       />
                     </FormControl>
                     <FormMessage />
@@ -533,12 +533,12 @@ export default function CreateCampaignPage() {
                 name="imageUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-black dark:text-white">Campaign Image URL</FormLabel>
+                    <FormLabel className="text-black  Image URL</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="https://example.com/image.jpg" 
                         {...field} 
-                        className="border-gray-300 dark:border-gray-600"
+                        className="border-gray-300 
                       />
                     </FormControl>
                     <FormMessage />
@@ -552,13 +552,13 @@ export default function CreateCampaignPage() {
                 name="targetAmount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-black dark:text-white">Target Amount (USDT)</FormLabel>
+                    <FormLabel className="text-black  Amount (USDT)</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
                         placeholder="0" 
                         {...field} 
-                        className="border-gray-300 dark:border-gray-600"
+                        className="border-gray-300 
                       />
                     </FormControl>
                     <FormMessage />
@@ -572,12 +572,12 @@ export default function CreateCampaignPage() {
                 name="referralCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-black dark:text-white">Referral Code (Optional)</FormLabel>
+                    <FormLabel className="text-black  Code (Optional)</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="Enter referral code from an affiliate" 
                         {...field} 
-                        className="border-gray-300 dark:border-gray-600"
+                        className="border-gray-300 
                       />
                     </FormControl>
                     <p className="text-sm text-muted-foreground">
@@ -593,7 +593,7 @@ export default function CreateCampaignPage() {
                 <div className="space-y-6 p-6 surface-secondary rounded-lg border border-border">
                   <div className="flex items-center space-x-3 mb-4">
                     <Building className="w-6 h-6 text-blue-600" />
-                    <h3 className="text-lg font-bold text-black dark:text-white">Company Information</h3>
+                    <h3 className="text-lg font-bold text-black  Information</h3>
                   </div>
                   
                   <div className="grid md:grid-cols-2 gap-4">
@@ -602,12 +602,12 @@ export default function CreateCampaignPage() {
                       name="companyName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-black dark:text-white">Company Name *</FormLabel>
+                          <FormLabel className="text-black  Name *</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="ABC Technologies Inc." 
                               {...field} 
-                              className="border-gray-300 dark:border-gray-600"
+                              className="border-gray-300 
                               required
                             />
                           </FormControl>
@@ -621,12 +621,12 @@ export default function CreateCampaignPage() {
                       name="companyRegistrationNumber"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-black dark:text-white">Registration Number *</FormLabel>
+                          <FormLabel className="text-black  Number *</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="123456789" 
                               {...field} 
-                              className="border-gray-300 dark:border-gray-600"
+                              className="border-gray-300 
                               required
                             />
                           </FormControl>
@@ -641,12 +641,12 @@ export default function CreateCampaignPage() {
                     name="companyAddress"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-black dark:text-white">Company Address *</FormLabel>
+                        <FormLabel className="text-black  Address *</FormLabel>
                         <FormControl>
                           <Textarea 
                             placeholder="123 Business Street, City, State, Country" 
                             {...field} 
-                            className="border-gray-300 dark:border-gray-600"
+                            className="border-gray-300 
                             required
                           />
                         </FormControl>
@@ -661,12 +661,12 @@ export default function CreateCampaignPage() {
                       name="companyWebsite"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-black dark:text-white">Company Website</FormLabel>
+                          <FormLabel className="text-black  Website</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="https://www.company.com" 
                               {...field} 
-                              className="border-gray-300 dark:border-gray-600"
+                              className="border-gray-300 
                             />
                           </FormControl>
                           <FormMessage />
@@ -679,13 +679,13 @@ export default function CreateCampaignPage() {
                       name="companyEmail"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-black dark:text-white">Company Email *</FormLabel>
+                          <FormLabel className="text-black  Email *</FormLabel>
                           <FormControl>
                             <Input 
                               type="email"
                               placeholder="info@company.com" 
                               {...field} 
-                              className="border-gray-300 dark:border-gray-600"
+                              className="border-gray-300 
                               required
                             />
                           </FormControl>
@@ -701,12 +701,12 @@ export default function CreateCampaignPage() {
                       name="companyPhone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-black dark:text-white">Company Phone</FormLabel>
+                          <FormLabel className="text-black  Phone</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="+1 234 567 8900" 
                               {...field} 
-                              className="border-gray-300 dark:border-gray-600"
+                              className="border-gray-300 
                             />
                           </FormControl>
                           <FormMessage />
@@ -719,12 +719,12 @@ export default function CreateCampaignPage() {
                       name="companyCEO"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-black dark:text-white">CEO/Founder Name *</FormLabel>
+                          <FormLabel className="text-black  Name *</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="John Smith" 
                               {...field} 
-                              className="border-gray-300 dark:border-gray-600"
+                              className="border-gray-300 
                               required
                             />
                           </FormControl>
@@ -740,13 +740,13 @@ export default function CreateCampaignPage() {
                       name="companyFoundedYear"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-black dark:text-white">Founded Year</FormLabel>
+                          <FormLabel className="text-black  Year</FormLabel>
                           <FormControl>
                             <Input 
                               type="number"
                               placeholder="2020" 
                               {...field} 
-                              className="border-gray-300 dark:border-gray-600"
+                              className="border-gray-300 
                               min="1800"
                               max={new Date().getFullYear()}
                             />
@@ -761,12 +761,12 @@ export default function CreateCampaignPage() {
                       name="companyIndustry"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-black dark:text-white">Industry *</FormLabel>
+                          <FormLabel className="text-black  *</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="Technology, Healthcare, etc." 
                               {...field} 
-                              className="border-gray-300 dark:border-gray-600"
+                              className="border-gray-300 
                               required
                             />
                           </FormControl>
@@ -780,7 +780,7 @@ export default function CreateCampaignPage() {
                       name="companyEmployeeCount"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-black dark:text-white">Employee Count</FormLabel>
+                          <FormLabel className="text-black  Count</FormLabel>
                           <Select value={field.value} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
@@ -812,12 +812,12 @@ export default function CreateCampaignPage() {
                     name="startDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-black dark:text-white">Start Date</FormLabel>
+                        <FormLabel className="text-black  Date</FormLabel>
                         <FormControl>
                           <Input 
                             type="date" 
                             {...field} 
-                            className="border-gray-300 dark:border-gray-600"
+                            className="border-gray-300 
                           />
                         </FormControl>
                         <FormMessage />
@@ -830,12 +830,12 @@ export default function CreateCampaignPage() {
                     name="endDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-black dark:text-white">End Date</FormLabel>
+                        <FormLabel className="text-black  Date</FormLabel>
                         <FormControl>
                           <Input 
                             type="date" 
                             {...field} 
-                            className="border-gray-300 dark:border-gray-600"
+                            className="border-gray-300 
                           />
                         </FormControl>
                         <FormMessage />
@@ -846,10 +846,10 @@ export default function CreateCampaignPage() {
               )}
 
               {/* Credit Card Payment Section */}
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+              <div className="border-t border-gray-200  pt-6">
                 <div className="flex items-center space-x-3 mb-4">
                   <CreditCard className="w-6 h-6 text-primary" />
-                  <h3 className="text-lg font-semibold text-black dark:text-white">Credit Card Payment Option</h3>
+                  <h3 className="text-lg font-semibold text-black  Card Payment Option</h3>
                 </div>
                 
                 <div className="surface-primary border border-primary/20 rounded-lg p-4 mb-4">
@@ -878,7 +878,7 @@ export default function CreateCampaignPage() {
                       className="w-4 h-4 text-primary border-border rounded focus:ring-primary/50"
                       data-testid="checkbox-credit-card-enabled"
                     />
-                    <label htmlFor="creditCardEnabled" className="text-black dark:text-white font-medium cursor-pointer">
+                    <label htmlFor="creditCardEnabled" className="text-black  font-medium cursor-pointer">
                       Enable credit card payments for this campaign
                     </label>
                   </div>
@@ -888,7 +888,7 @@ export default function CreateCampaignPage() {
                     <div className="surface-secondary border border-border rounded-lg p-4 space-y-4">
                       <div className="flex items-center space-x-2">
                         <DollarSign className="w-5 h-5 text-green-600" />
-                        <h4 className="font-medium text-black dark:text-white">Collateral Payment Required</h4>
+                        <h4 className="font-medium text-black  Payment Required</h4>
                       </div>
                       
                       <FormField
@@ -896,7 +896,7 @@ export default function CreateCampaignPage() {
                         name="collateralAmount"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-black dark:text-white">Collateral Amount (USDT)</FormLabel>
+                            <FormLabel className="text-black  Amount (USDT)</FormLabel>
                             <FormControl>
                               <Input 
                                 type="number"
@@ -904,11 +904,11 @@ export default function CreateCampaignPage() {
                                 step="1"
                                 placeholder="2" 
                                 {...field} 
-                                className="border-gray-300 dark:border-gray-600"
+                                className="border-gray-300 
                                 data-testid="input-collateral-amount"
                               />
                             </FormControl>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Required: {collateralInfo.collateralAmount} {collateralInfo.collateralToken} to platform wallet</p>
+                            <p className="text-xs text-gray-500  {collateralInfo.collateralAmount} {collateralInfo.collateralToken} to platform wallet</p>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -926,12 +926,12 @@ export default function CreateCampaignPage() {
                       )}
 
                       {collateralPaid && (
-                        <div className="surface-primary border border-emerald-200 dark:border-emerald-800 rounded-lg p-3">
+                        <div className="surface-primary border border-emerald-200  rounded-lg p-3">
                           <div className="flex items-center space-x-2">
                             <CheckCircle className="w-5 h-5 text-green-600" />
-                            <span className="text-green-800 dark:text-green-200 font-medium">Collateral Paid Successfully ({collateralInfo.collateralAmount} {collateralInfo.collateralToken})</span>
+                            <span className="text-green-800  font-medium">Collateral Paid Successfully ({collateralInfo.collateralAmount} {collateralInfo.collateralToken})</span>
                           </div>
-                          <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+                          <p className="text-xs text-green-700  mt-1">
                             TX: {form.watch("collateralTxHash")?.slice(0, 20)}...
                           </p>
                         </div>
@@ -958,10 +958,10 @@ export default function CreateCampaignPage() {
         {/* Campaign Type Info - Only show when not locked */}
         {!isLocked && (
           <div className="mt-8 p-4 surface-secondary rounded-lg">
-            <h3 className="font-semibold text-black dark:text-white mb-2">
+            <h3 className="font-semibold text-black  mb-2">
               {campaignType === "FUND" ? "FUND Campaign" : "DONATE Campaign"} Information:
             </h3>
-            <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+            <ul className="space-y-1 text-sm text-gray-600 
               {campaignType === "FUND" ? (
                 <>
                   <li>• Can only be created by companies</li>

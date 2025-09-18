@@ -1,7 +1,6 @@
 import { Link } from "wouter";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import LanguageSelector from "@/components/LanguageSelector";
-import ThemeToggle from "@/components/ThemeToggle";
 import CryptoOnramp from "@/components/CryptoOnramp";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useWallet } from "@/hooks/useWallet";
@@ -91,7 +90,6 @@ export default function Header({ currentPage }: HeaderProps) {
 
           <div className="flex items-center gap-4 flex-shrink-0">
             <CryptoOnramp />
-            <ThemeToggle />
             <LanguageSelector />
             {isConnected && (
               <DropdownMenu>
@@ -224,7 +222,7 @@ export default function Header({ currentPage }: HeaderProps) {
                   </Link>
                   <Button
                     variant="ghost"
-                    className="w-full justify-start py-2 px-3 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 font-semibold"
+                    className="w-full justify-start py-2 px-3 text-red-600 hover:text-red-700 hover:bg-red-50  font-semibold"
                     onClick={() => {
                       disconnect();
                       setMobileMenuOpen(false);

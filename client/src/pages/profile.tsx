@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,15 @@ import {
   ArrowDown,
   Eye,
   DollarSign,
-  Share2
+  Share2,
+  Plus,
+  Search,
+  LayoutGrid,
+  Edit3,
+  Pause,
+  Play,
+  MoreHorizontal,
+  Trash2
 } from "lucide-react";
 import type { Campaign } from "@shared/schema";
 import UserDashboardAnalytics from "@/components/analytics/UserDashboardAnalytics";
@@ -43,6 +51,14 @@ export default function ProfilePage() {
   const { isConnected, address } = useWallet();
   const { t } = useLanguage();
   const { toast } = useToast();
+  
+  // Campaign Management State
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("recent");
+  const [viewMode, setViewMode] = useState("grid");
+  const [selectedCampaigns, setSelectedCampaigns] = useState<number[]>([]);
+  const [showBulkActions, setShowBulkActions] = useState(false);
   const [location] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -97,6 +113,89 @@ export default function ProfilePage() {
   const totalSupporters = userCampaigns.reduce((sum: number, c: Campaign) => sum + (c.donationCount || 0), 0);
   const activeCampaigns = userCampaigns.filter((c: Campaign) => c.active).length;
   const dailyParticipationCount = Array.isArray(dailyEntries) ? dailyEntries.length : 0;
+
+  // Campaign Management Logic
+  const filteredAndSortedCampaigns = useMemo(() => {
+    let filtered = userCampaigns;
+    
+    // Apply search filter
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(campaign => 
+        campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (campaign.description || '').toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(campaign => {
+        const progress = campaign.targetAmount ? (parseFloat(campaign.totalDonations || '0') / parseFloat(campaign.targetAmount)) * 100 : 0;
+        if (statusFilter === 'active') return campaign.active;
+        if (statusFilter === 'draft') return !campaign.active;
+        if (statusFilter === 'completed') return progress >= 100;
+        return true;
+      });
+    }
+    
+    // Apply sorting
+    return filtered.sort((a, b) => {
+      if (sortBy === 'recent') return b.id - a.id;
+      if (sortBy === 'amount') return parseFloat(b.totalDonations || '0') - parseFloat(a.totalDonations || '0');
+      if (sortBy === 'progress') {
+        const aProgress = a.targetAmount ? (parseFloat(a.totalDonations || '0') / parseFloat(a.targetAmount)) * 100 : 0;
+        const bProgress = b.targetAmount ? (parseFloat(b.totalDonations || '0') / parseFloat(b.targetAmount)) * 100 : 0;
+        return bProgress - aProgress;
+      }
+      if (sortBy === 'supporters') return (b.donationCount || 0) - (a.donationCount || 0);
+      return 0;
+    });
+  }, [userCampaigns, searchTerm, statusFilter, sortBy]);
+
+  // Campaign Management Actions
+  const handleToggleSelection = (campaignId: number) => {
+    setSelectedCampaigns(prev => 
+      prev.includes(campaignId) 
+        ? prev.filter(id => id !== campaignId)
+        : [...prev, campaignId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    setSelectedCampaigns(filteredAndSortedCampaigns.map(c => c.id));
+  };
+
+  const handleClearSelection = () => {
+    setSelectedCampaigns([]);
+  };
+
+  const handleBulkActivate = () => {
+    toast({
+      title: t('profile.bulk_activate_success'),
+      description: `${selectedCampaigns.length} campaigns activated`
+    });
+    setSelectedCampaigns([]);
+  };
+
+  const handleBulkPause = () => {
+    toast({
+      title: t('profile.bulk_pause_success'), 
+      description: `${selectedCampaigns.length} campaigns paused`
+    });
+    setSelectedCampaigns([]);
+  };
+
+  const handleBulkDelete = () => {
+    toast({
+      title: t('profile.bulk_delete_success'),
+      description: `${selectedCampaigns.length} campaigns deleted`
+    });
+    setSelectedCampaigns([]);
+  };
+
+  // Update bulk actions visibility
+  useEffect(() => {
+    setShowBulkActions(selectedCampaigns.length > 0);
+  }, [selectedCampaigns]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -806,25 +905,283 @@ export default function ProfilePage() {
 
           <TabsContent value="campaigns" className="space-y-6 mt-6">
             {userCampaigns.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {userCampaigns.map((campaign: Campaign) => (
-                  <CampaignCard key={campaign.id} campaign={campaign} />
-                ))}
+              <div className="space-y-6">
+                {/* Campaign Management Header */}
+                <Card className="bg-gradient-to-r from-primary/5 to-blue-500/10 border-primary/20">
+                  <CardHeader>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div>
+                        <CardTitle className="flex items-center">
+                          <Target className="w-5 h-5 mr-2 text-primary" />
+                          {t('profile.campaign_management')}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {userCampaigns.length} {t('profile.total_campaigns')} • {activeCampaigns} {t('profile.active')}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button asChild variant="outline" size="sm" data-testid="create-new-campaign">
+                          <Link href="/create-campaign">
+                            <Plus className="w-4 h-4 mr-1" />
+                            {t('profile.new_campaign')}
+                          </Link>
+                        </Button>
+                        <Button variant="outline" size="sm" className="px-3" data-testid="toggle-view">
+                          <LayoutGrid className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {/* Search and Filter Controls */}
+                    <div className="flex flex-col md:flex-row gap-4">
+                      <div className="flex-1">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder={t('profile.search_campaigns')}
+                            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
+                            data-testid="search-campaigns"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <select 
+                          value={statusFilter}
+                          onChange={(e) => setStatusFilter(e.target.value)}
+                          className="px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary" 
+                          data-testid="filter-status"
+                        >
+                          <option value="all">{t('profile.all_status')}</option>
+                          <option value="active">{t('profile.active')}</option>
+                          <option value="draft">{t('profile.draft')}</option>
+                          <option value="completed">{t('profile.completed')}</option>
+                        </select>
+                        <select
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value)}
+                          className="px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary" 
+                          data-testid="sort-campaigns"
+                        >
+                          <option value="recent">{t('profile.sort_recent')}</option>
+                          <option value="amount">{t('profile.sort_amount')}</option>
+                          <option value="progress">{t('profile.sort_progress')}</option>
+                          <option value="supporters">{t('profile.sort_supporters')}</option>
+                        </select>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Campaign Management Grid */}
+                <div className="grid grid-cols-1 gap-6">
+                  {filteredAndSortedCampaigns.map((campaign: Campaign, index: number) => {
+                    const progress = campaign.targetAmount ? (parseFloat(campaign.totalDonations || '0') / parseFloat(campaign.targetAmount)) * 100 : 0;
+                    const isCompleted = progress >= 100;
+                    const statusColor = campaign.active ? 'green' : isCompleted ? 'blue' : 'gray';
+                    
+                    return (
+                      <Card key={campaign.id} className={`card-standard hover:shadow-lg transition-all duration-300 ${
+                        campaign.active ? 'border-green-200 dark:border-green-800' : 
+                        isCompleted ? 'border-blue-200 dark:border-blue-800' : ''
+                      }`}>
+                        <CardContent className="p-6">
+                          <div className="flex items-start gap-4">
+                            {/* Bulk Selection Checkbox */}
+                            <div className="pt-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedCampaigns.includes(campaign.id)}
+                                onChange={() => handleToggleSelection(campaign.id)}
+                                className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
+                                data-testid={`select-campaign-${campaign.id}`}
+                              />
+                            </div>
+                            
+                            <div className="flex flex-col lg:flex-row gap-6 flex-1">
+                            {/* Campaign Image/Icon */}
+                            <div className={`w-24 h-24 lg:w-32 lg:h-32 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                              campaign.active 
+                                ? 'bg-gradient-to-br from-green-500 to-emerald-600' 
+                                : isCompleted 
+                                  ? 'bg-gradient-to-br from-blue-500 to-indigo-600'
+                                  : 'bg-gradient-to-br from-slate-400 to-slate-500'
+                            }`}>
+                              <Target className="w-12 h-12 lg:w-16 lg:h-16 text-white" />
+                            </div>
+                            
+                            {/* Campaign Info */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <h3 className="text-xl font-bold text-foreground truncate">{campaign.title}</h3>
+                                    <Badge 
+                                      variant={campaign.active ? 'default' : isCompleted ? 'secondary' : 'outline'}
+                                      className={`${
+                                        campaign.active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
+                                        isCompleted ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
+                                        'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'
+                                      }`}
+                                    >
+                                      {campaign.active ? '🟢 ' + t('profile.active') : 
+                                       isCompleted ? '🔵 ' + t('profile.completed') : 
+                                       '⚪ ' + t('profile.draft')}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-muted-foreground mb-3 line-clamp-2">
+                                    {campaign.description || t('profile.no_description')}
+                                  </p>
+                                  
+                                  {/* Campaign Metrics Grid */}
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                      <div className="text-lg font-bold text-foreground">{campaign.totalDonations || '0'}</div>
+                                      <div className="text-xs text-muted-foreground">{t('profile.usdt_raised')}</div>
+                                    </div>
+                                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                      <div className="text-lg font-bold text-foreground">{campaign.targetAmount || 'N/A'}</div>
+                                      <div className="text-xs text-muted-foreground">{t('profile.target_amount')}</div>
+                                    </div>
+                                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                      <div className="text-lg font-bold text-foreground">{campaign.donationCount || 0}</div>
+                                      <div className="text-xs text-muted-foreground">{t('profile.supporters')}</div>
+                                    </div>
+                                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                      <div className="text-lg font-bold text-foreground">{progress.toFixed(0)}%</div>
+                                      <div className="text-xs text-muted-foreground">{t('profile.progress')}</div>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Progress Bar */}
+                                  {campaign.targetAmount && (
+                                    <div className="mb-4">
+                                      <div className="flex justify-between text-sm text-muted-foreground mb-1">
+                                        <span>{t('profile.progress')}</span>
+                                        <span>{progress.toFixed(1)}%</span>
+                                      </div>
+                                      <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3">
+                                        <div 
+                                          className={`h-3 rounded-full transition-all duration-500 ${
+                                            campaign.active 
+                                              ? 'bg-gradient-to-r from-green-500 to-emerald-600'
+                                              : isCompleted 
+                                                ? 'bg-gradient-to-r from-blue-500 to-indigo-600'
+                                                : 'bg-gradient-to-r from-slate-400 to-slate-500'
+                                          }`}
+                                          style={{ width: `${Math.min(progress, 100)}%` }}
+                                        ></div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              {/* Action Buttons */}
+                              <div className="flex flex-wrap gap-2">
+                                <Button variant="outline" size="sm" className="flex-1 sm:flex-none" data-testid={`edit-campaign-${campaign.id}`}>
+                                  <Edit3 className="w-4 h-4 mr-1" />
+                                  {t('profile.edit')}
+                                </Button>
+                                <Button variant="outline" size="sm" className="flex-1 sm:flex-none" data-testid={`view-campaign-${campaign.id}`}>
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  {t('profile.view')}
+                                </Button>
+                                <Button variant="outline" size="sm" className="flex-1 sm:flex-none" data-testid={`share-campaign-${campaign.id}`}>
+                                  <Share2 className="w-4 h-4 mr-1" />
+                                  {t('profile.share')}
+                                </Button>
+                                <Button 
+                                  variant={campaign.active ? "destructive" : "secondary"} 
+                                  size="sm" 
+                                  className="flex-1 sm:flex-none" 
+                                  data-testid={`toggle-status-${campaign.id}`}
+                                >
+                                  {campaign.active ? (
+                                    <>
+                                      <Pause className="w-4 h-4 mr-1" />
+                                      {t('profile.pause')}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Play className="w-4 h-4 mr-1" />
+                                      {t('profile.activate')}
+                                    </>
+                                  )}
+                                </Button>
+                                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" data-testid={`more-options-${campaign.id}`}>
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+                
+                {/* Bulk Actions Bar - Shows when campaigns are selected */}
+                {showBulkActions && (
+                <Card className="card-standard border-primary/20 bg-primary/5" data-testid="bulk-actions">
+                  <CardContent className="py-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm font-medium text-foreground">{selectedCampaigns.length} {t('profile.campaigns_selected')}</span>
+                        <Button onClick={handleSelectAll} variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" data-testid="bulk-select-all">
+                          {t('profile.select_all')}
+                        </Button>
+                        <Button onClick={handleClearSelection} variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" data-testid="bulk-clear-selection">
+                          {t('profile.clear_selection')}
+                        </Button>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button onClick={handleBulkActivate} variant="outline" size="sm" data-testid="bulk-activate">
+                          <Play className="w-4 h-4 mr-1" />
+                          {t('profile.activate_selected')}
+                        </Button>
+                        <Button onClick={handleBulkPause} variant="outline" size="sm" data-testid="bulk-pause">
+                          <Pause className="w-4 h-4 mr-1" />
+                          {t('profile.pause_selected')}
+                        </Button>
+                        <Button onClick={handleBulkDelete} variant="destructive" size="sm" data-testid="bulk-delete">
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          {t('profile.delete_selected')}
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                )}
               </div>
             ) : (
               <Card className="card-standard">
-                <CardContent className="py-12 text-center">
-                  <Target className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">No campaigns yet</h3>
-                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                    Create your first campaign to start raising funds for your cause.
+                <CardContent className="py-16 text-center">
+                  <div className="w-24 h-24 bg-gradient-to-br from-primary/20 to-binance-yellow/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Target className="w-12 h-12 text-primary" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-foreground mb-3">{t('profile.no_campaigns_title')}</h3>
+                  <p className="text-muted-foreground mb-8 max-w-md mx-auto text-lg">
+                    {t('profile.no_campaigns_description')}
                   </p>
-                  <Button asChild className="btn-binance btn-md hover:transform hover:-translate-y-0.5">
-                    <Link href="/create-campaign">
-                      <Target className="w-4 h-4 mr-2" />
-                      Create Campaign
-                    </Link>
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Button asChild className="btn-binance btn-lg hover:transform hover:-translate-y-1 transition-all" data-testid="create-first-campaign">
+                      <Link href="/create-campaign">
+                        <Target className="w-5 h-5 mr-2" />
+                        {t('profile.create_first_campaign')}
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" className="btn-lg" data-testid="browse-campaigns">
+                      <Link href="/donations">
+                        <Eye className="w-5 h-5 mr-2" />
+                        {t('profile.browse_campaigns')}
+                      </Link>
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             )}

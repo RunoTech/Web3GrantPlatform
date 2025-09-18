@@ -73,30 +73,22 @@ export default function AffiliatePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Generate referral link when wallet is connected and authenticated
-  useEffect(() => {
-    const generateReferralLink = async () => {
-      if (address && isAuthenticated) {
-        try {
-          const response = await apiRequest("GET", `/api/account/${address}`);
-          const account = await response.json();
-          if (account && account.referralCode) {
-            setReferralLink(`${window.location.origin}?ref=${account.referralCode}`);
-          }
-        } catch (error) {
-          console.error("Error generating referral link:", error);
-        }
-      }
-    };
-
-    generateReferralLink();
-  }, [address, isAuthenticated]);
-
   // Get account data
   const { data: account, isLoading: accountLoading } = useQuery<Account>({
     queryKey: ["account", address],
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/account/${address}`);
+      return res.json();
+    },
     enabled: !!address,
   });
+
+  // Generate referral link when account data is available
+  useEffect(() => {
+    if (account && account.referralCode) {
+      setReferralLink(`${window.location.origin}?ref=${account.referralCode}`);
+    }
+  }, [account]);
 
   // Get affiliate stats (basic)
   const { data: stats, isLoading: statsLoading } = useQuery<ReferralStats>({

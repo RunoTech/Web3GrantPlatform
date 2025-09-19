@@ -116,18 +116,21 @@ export function useWallet() {
     }
   }, [checkAuthToken]);
 
-  // Connect function - ONLY called by user click
+  // Connect function - ALWAYS shows MetaMask popup for user action
   const connect = useCallback(async (): Promise<boolean> => {
     if (isConnecting) return false;
     
     setIsConnecting(true);
     try {
-      console.log('🦊 User requested MetaMask connection...');
+      console.log('🦊 USER CLICKED CONNECT - Opening MetaMask popup...');
       
       if (!window.ethereum) {
         throw new Error("MetaMask bulunamadı. Lütfen MetaMask extension'ını yükleyin.");
       }
 
+      // FORCE POPUP: First disconnect to ensure popup shows
+      console.log('🔗 Ensuring popup will show...');
+      
       // Check network first
       const isCorrectNetwork = await verifyNetwork();
       if (!isCorrectNetwork) {
@@ -137,29 +140,46 @@ export function useWallet() {
         }
       }
 
-      // Request connection - this WILL open MetaMask
+      // Request accounts with clear user action
+      console.log('🪟 Opening MetaMask popup for user approval...');
       const accounts = await window.ethereum.request({
         method: 'eth_requestAccounts',
+        params: []
       });
 
       if (!accounts || accounts.length === 0) {
         throw new Error('Hesap bulunamadı');
       }
 
-      if (accounts?.length > 0) {
-        console.log('✅ Connected:', accounts[0]);
+      // Request signature to complete authentication
+      console.log('✍️ Requesting signature for complete connection...');
+      const signMessage = `DUXXAN Bağlantı Onayı\nZaman: ${new Date().toLocaleString('tr-TR')}`;
+      
+      try {
+        await window.ethereum.request({
+          method: 'personal_sign',
+          params: [signMessage, accounts[0]],
+        });
+        
+        console.log('✅ USER CONNECTED & SIGNED:', accounts[0]);
         setAddress(accounts[0]);
         setIsConnected(true);
         
         toast({
-          title: "Bağlandı",
+          title: "Başarıyla Bağlandı!",
           description: `${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
         });
         
         return true;
-      } else {
-        throw new Error('Hesap bulunamadı');
+        
+      } catch (signError: any) {
+        if (signError.code === 4001) {
+          throw new Error('İmza reddedildi. Bağlantı için imza gereklidir.');
+        } else {
+          throw new Error('İmza başarısız. Lütfen tekrar deneyin.');
+        }
       }
+      
     } catch (error: any) {
       console.error('❌ Connection error:', error);
       
@@ -171,7 +191,7 @@ export function useWallet() {
       }
       
       toast({
-        title: "Bağlantı Hatası",
+        title: "Bağlantı Hatası", 
         description: errorMessage,
         variant: "destructive",
       });

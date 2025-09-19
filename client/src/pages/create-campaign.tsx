@@ -900,9 +900,9 @@ export default function CreateCampaignPage() {
                             <FormControl>
                               <Input 
                                 type="number"
-                                min="2"
+                                min={collateralInfo.collateralAmount?.toString() || "1"}
                                 step="1"
-                                placeholder="2" 
+                                placeholder={collateralInfo.collateralAmount?.toString() || "1"} 
                                 {...field} 
                                 className="border-gray-300 dark:border-gray-600"
                                 data-testid="input-collateral-amount"

@@ -65,7 +65,7 @@ export function useWallet() {
       console.log("✅ WALLET AUTO-CONNECTED:", accounts[0]);
       setAddress(accounts[0]);
       setIsConnected(true);
-      setIsAuthenticated(true);
+      // Don't auto-authenticate - only authenticate on explicit user action
       await checkAuthToken();
       
     } catch (error: any) {

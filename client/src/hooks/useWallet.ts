@@ -132,12 +132,24 @@ export function useWallet() {
         setAddress(accounts[0]);
         setIsConnected(true);
         
-        toast({
-          title: "Başarıyla Bağlandı!",
-          description: `${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
-        });
+        // AUTOMATIC AUTHENTICATION: Do the full auth flow now
+        console.log('🔐 Starting automatic authentication...');
+        const authSuccess = await authenticate(accounts[0]);
         
-        return true;
+        if (authSuccess) {
+          toast({
+            title: "Başarıyla Bağlandı ve Doğrulandı!",
+            description: `${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
+          });
+        } else {
+          toast({
+            title: "Bağlandı ama Doğrulama Başarısız!",
+            description: "Lütfen sayfayı yenileyip tekrar deneyin.",
+            variant: "destructive",
+          });
+        }
+        
+        return authSuccess;
         
       } catch (signError: any) {
         if (signError.code === 4001) {

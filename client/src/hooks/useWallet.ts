@@ -31,59 +31,51 @@ export function useWallet() {
 
   const checkConnection = useCallback(async () => {
     try {
-      console.log("🔍 Checking real-time MetaMask connection...");
+      console.log("🔍 MetaMask connection check başlatılıyor...");
       
-      // Always check fresh - no cache
+      // Reset state first
+      setAddress(null);
+      setIsConnected(false);
+      setIsAuthenticated(false);
+      
       if (!window.ethereum) {
-        console.log("❌ MetaMask extension not found");
-        setAddress(null);
-        setIsConnected(false);
-        setIsAuthenticated(false);
+        console.log("❌ MetaMask extension bulunamadı");
         setIsInitialized(true);
         return;
       }
 
+      // GERÇEK ZAMANLI TEST: Force user to unlock if locked
       try {
-        // Force fresh connection check - this will fail if MetaMask is locked/closed
+        console.log("🔓 MetaMask'in gerçekten açık olup olmadığını kontrol ediyorum...");
+        
+        // Bu çağrı MetaMask kilitliyse popup açar, değilse mevcut hesapları döner
         const accounts = await window.ethereum.request({ 
-          method: 'eth_accounts'
+          method: 'eth_requestAccounts'  // Bu GERÇEK test - kullanıcıdan izin ister
         });
         
-        console.log("🔍 MetaMask accounts check:", accounts);
+        console.log("🔍 Gerçek zamanlı hesap kontrolü:", accounts);
         
         if (accounts && accounts.length > 0) {
-          // Verify MetaMask is actually responsive
-          try {
-            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-            console.log("✅ MetaMask responsive, chain:", chainId, "account:", accounts[0]);
-            
-            setAddress(accounts[0]);
-            setIsConnected(true);
-            // Check authentication status
-            await checkAuthToken();
-          } catch (responseError) {
-            console.log("❌ MetaMask not responsive:", responseError);
-            setAddress(null);
-            setIsConnected(false);
-            setIsAuthenticated(false);
-          }
+          console.log("✅ MetaMask gerçekten açık ve hesap mevcut:", accounts[0]);
+          setAddress(accounts[0]);
+          setIsConnected(true);
+          await checkAuthToken();
         } else {
-          console.log("❌ No accounts found - MetaMask locked or not connected");
-          setAddress(null);
-          setIsConnected(false);
-          setIsAuthenticated(false);
+          console.log("❌ Hesap bulunamadı");
         }
-      } catch (accountError) {
-        console.log("❌ MetaMask account check failed:", accountError);
-        setAddress(null);
-        setIsConnected(false);
-        setIsAuthenticated(false);
+      } catch (error: any) {
+        console.log("❌ MetaMask bağlantı hatası:", error);
+        
+        if (error.code === 4001) {
+          console.log("❌ Kullanıcı bağlantıyı reddetti");
+        } else if (error.code === -32002) {
+          console.log("❌ MetaMask zaten açık bir request bekliyor");
+        } else {
+          console.log("❌ MetaMask locked, kapalı veya yanıt vermiyor");
+        }
       }
     } catch (error) {
-      console.error('❌ Error checking MetaMask connection:', error);
-      setAddress(null);
-      setIsConnected(false);
-      setIsAuthenticated(false);
+      console.error('❌ Connection check error:', error);
     } finally {
       setIsInitialized(true);
     }
@@ -362,29 +354,45 @@ export function useWallet() {
 
   const disconnect = useCallback(async () => {
     try {
-      // Clear local state
+      console.log('🚫 FORCE disconnect başlatılıyor...');
+      
+      // STEP 1: Server session'ını temizle
+      try {
+        await logout();
+        console.log('✅ Server session temizlendi');
+      } catch (error) {
+        console.log('⚠️ Server logout error (devam ediyor):', error);
+      }
+      
+      // STEP 2: Local state'leri tamamen temizle
       setAddress(null);
       setIsConnected(false);
       setIsAuthenticated(false);
       
-      console.log('🚫 MetaMask disconnected');
+      // STEP 3: LocalStorage temizle
+      localStorage.removeItem('referralCode');
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('walletConnect');
+      
+      console.log('🚫 FORCE disconnect tamamlandı - tüm state temizlendi');
       
       toast({
-        title: "Disconnected",
-        description: "Wallet connection has been closed",
+        title: "Bağlantı Kesildi",
+        description: "Cüzdan bağlantısı tamamen kesildi ve temizlendi",
       });
     } catch (error) {
-      // Even if disconnect fails, clear local state
+      console.error('Disconnect error:', error);
+      // Force state clear even if error
       setAddress(null);
       setIsConnected(false);
       setIsAuthenticated(false);
       
       toast({
-        title: "Disconnected",
-        description: "Wallet connection cleared locally",
+        title: "Bağlantı Kesildi",
+        description: "Local state zorla temizlendi",
       });
     }
-  }, [toast]);
+  }, [logout, toast]);
 
   // Initial connection check - only on mount
   useEffect(() => {

@@ -44,10 +44,10 @@ export function useWallet() {
       localStorage.removeItem('walletconnect');
       localStorage.removeItem('WEB3_CONNECT_CACHED_PROVIDER');
       
-      // Step 2: Use eth_requestAccounts - this WILL test real connectivity
-      console.log("🧪 Testing real wallet access with eth_requestAccounts...");
+      // Step 2: Check existing accounts WITHOUT requesting permission
+      console.log("🧪 Checking existing accounts without popup...");
       const accounts = await window.ethereum.request({ 
-        method: 'eth_requestAccounts'
+        method: 'eth_accounts'
       });
       
       console.log("🔍 Real accounts result:", accounts);

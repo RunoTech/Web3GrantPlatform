@@ -67,7 +67,7 @@ interface DetailedAffiliateStats {
 }
 
 export default function AffiliatePage() {
-  const { isConnected, address, isAuthenticated, connect, authenticate } = useWallet();
+  const { isConnected, address, isAuthenticated, isAuthenticating, connect, authenticate } = useWallet();
   const [referralLink, setReferralLink] = useState<string>("");
   const [applicationText, setApplicationText] = useState("");
   const { toast } = useToast();
@@ -285,10 +285,18 @@ export default function AffiliatePage() {
               </p>
               <Button 
                 onClick={() => address && authenticate(address)}
+                disabled={isAuthenticating}
                 className="w-full btn-binance hover:transform hover:-translate-y-0.5 transition-all duration-200"
                 data-testid="button-authenticate"
               >
-                Sign Message to Authenticate
+                {isAuthenticating ? (
+                  <>
+                    <div className="animate-spin w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                    Signing Message...
+                  </>
+                ) : (
+                  "Sign Message to Authenticate"
+                )}
               </Button>
             </CardContent>
           </Card>

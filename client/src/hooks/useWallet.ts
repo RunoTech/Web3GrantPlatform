@@ -94,11 +94,23 @@ export function useWallet() {
       }
 
       console.log("🖊️ Requesting signature from MetaMask...");
-      const signature = await provider.request({
-        method: 'personal_sign',
-        params: [nonceResponse.message, walletAddress],
-      });
-      console.log("✅ Signature received:", signature);
+      let signature;
+      try {
+        signature = await provider.request({
+          method: 'personal_sign',
+          params: [nonceResponse.message, walletAddress],
+        });
+        console.log("✅ Signature received:", signature);
+      } catch (signError: any) {
+        console.error("❌ MetaMask signature error:", signError);
+        if (signError.code === 4001) {
+          throw new Error("User rejected the signature request. Please try again and approve the signature to authenticate.");
+        } else if (signError.code === -32603) {
+          throw new Error("MetaMask internal error. Please refresh the page and try again.");
+        } else {
+          throw new Error(`MetaMask signature failed: ${signError.message || 'Unknown error'}`);
+        }
+      }
 
       // Step 3: Verify signature on server
       console.log("🔍 Sending signature to verify endpoint...");

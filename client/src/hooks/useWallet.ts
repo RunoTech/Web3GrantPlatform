@@ -95,40 +95,45 @@ export function useWallet() {
 
       console.log("🖊️ Requesting signature from MetaMask...");
       
-      // Check if MetaMask is actually available and active
-      try {
-        const connected = await window.ethereum.isConnected();
-        if (!connected) {
-          throw new Error("MetaMask is not connected. Please ensure MetaMask is unlocked and try again.");
-        }
-      } catch (connectionError) {
-        console.warn("⚠️ Could not check MetaMask connection status, proceeding anyway...");
-      }
-
+      // Ensure we have a proper wallet address format
+      const checksumAddress = walletAddress.toLowerCase();
+      
       let signature;
       try {
-        // Add timeout to detect if MetaMask popup doesn't open
-        const signaturePromise = provider.request({
+        // Direct MetaMask request - no complex Promise.race
+        console.log("📝 Calling personal_sign with:", {
+          message: nonceResponse.message,
+          address: checksumAddress
+        });
+        
+        signature = await provider.request({
           method: 'personal_sign',
-          params: [nonceResponse.message, walletAddress],
+          params: [nonceResponse.message, checksumAddress],
         });
-
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error("MetaMask popup timeout - Please ensure popup blockers are disabled and MetaMask is unlocked")), 30000);
-        });
-
-        signature = await Promise.race([signaturePromise, timeoutPromise]);
+        
         console.log("✅ Signature received:", signature);
+        
+        if (!signature) {
+          throw new Error("MetaMask returned empty signature");
+        }
+        
       } catch (signError: any) {
         console.error("❌ MetaMask signature error:", signError);
-        if (signError.code === 4001) {
-          throw new Error("User rejected the signature request. Please try again and approve the signature to authenticate.");
-        } else if (signError.code === -32603) {
-          throw new Error("MetaMask internal error. Please refresh the page and try again.");
-        } else if (signError.message && signError.message.includes("timeout")) {
-          throw new Error("MetaMask popup did not open. Please check if popup blockers are disabled and MetaMask extension is working properly.");
+        console.error("❌ Error details:", JSON.stringify(signError, null, 2));
+        console.error("❌ Error code:", signError?.code);
+        console.error("❌ Error message:", signError?.message);
+        
+        // Handle specific MetaMask error codes
+        if (signError?.code === 4001) {
+          throw new Error("İmzayı reddettiniz. Lütfen tekrar deneyin ve imzayı onaylayın.");
+        } else if (signError?.code === -32603) {
+          throw new Error("MetaMask internal error. Sayfayı yenileyin ve tekrar deneyin.");
+        } else if (signError?.code === -32002) {
+          throw new Error("MetaMask'te bekleyen işlem var. Lütfen MetaMask'i açın ve işlemi tamamlayın.");
+        } else if (!signError || Object.keys(signError).length === 0) {
+          throw new Error("MetaMask yanıt vermedi. Extension'ın açık ve çalışır durumda olduğundan emin olun.");
         } else {
-          throw new Error(`MetaMask signature failed: ${signError.message || 'Unknown error'}`);
+          throw new Error(`MetaMask hatası: ${signError?.message || signError?.toString() || 'Bilinmeyen hata'}`);
         }
       }
 

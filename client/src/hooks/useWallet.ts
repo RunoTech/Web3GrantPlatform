@@ -31,7 +31,7 @@ export function useWallet() {
 
   const checkConnection = useCallback(async () => {
     try {
-      console.log("🔍 Silent MetaMask state check başlatılıyor...");
+      console.log("🔍 AGGRESSIVE MetaMask state check başlatılıyor...");
       
       // Reset state first
       setAddress(null);
@@ -45,31 +45,60 @@ export function useWallet() {
       }
 
       try {
-        // SAFE METHOD 1: Check if MetaMask is unlocked (MetaMask-specific API)
-        const isUnlocked = await (window.ethereum as any)._metamask?.isUnlocked?.().catch(() => false);
-        console.log("🔓 MetaMask unlocked durumu:", isUnlocked);
-        
-        // SAFE METHOD 2: Get accounts without triggering popup (silent check)
+        // METHOD 1: Get accounts (silent check)
         const accounts = await window.ethereum.request({ 
-          method: 'eth_accounts'  // SILENT - popup açmaz, sadece mevcut izinleri kontrol eder
+          method: 'eth_accounts'
         });
         console.log("🔍 Silent account check:", accounts);
         
-        // BOTH conditions must be true for real connection
-        if (isUnlocked && accounts && accounts.length > 0) {
-          console.log("✅ MetaMask açık VE hesap mevcut:", accounts[0]);
+        if (!accounts || accounts.length === 0) {
+          console.log("❌ Hesap bulunamadı - izin verilmemiş");
+          setIsInitialized(true);
+          return;
+        }
+
+        // METHOD 2: REAL TEST - Try a signature request with immediate timeout
+        console.log("🧪 GERÇEK TEST: MetaMask responsiveness test...");
+        try {
+          const testMessage = "Test message for unlock check";
+          
+          // Create race between signature and very short timeout
+          const signPromise = window.ethereum.request({
+            method: 'personal_sign',
+            params: [testMessage, accounts[0]],
+          });
+          
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('LOCKED_TEST_TIMEOUT')), 1000) // 1 second timeout
+          );
+          
+          await Promise.race([signPromise, timeoutPromise]);
+          
+          // If we get here, MetaMask is really unlocked and responsive
+          console.log("✅ MetaMask GERÇEKTEN açık ve responsive:", accounts[0]);
           setAddress(accounts[0]);
           setIsConnected(true);
           await checkAuthToken();
-        } else {
-          if (!isUnlocked) {
-            console.log("❌ MetaMask kilitli - kullanıcı şifre girmeli");
+          
+        } catch (testError: any) {
+          console.log("❌ Responsiveness test FAILED:", testError.message);
+          
+          if (testError.message === 'LOCKED_TEST_TIMEOUT') {
+            console.log("❌ MetaMask LOCKED - popup açılmadı veya yanıt alamadık");
+          } else if (testError.code === 4001) {
+            console.log("❌ User rejected test signature (probably locked)");
           } else {
-            console.log("❌ MetaMask açık ama hesap izni yok");
+            console.log("❌ MetaMask error:", testError);
           }
+          
+          // MetaMask is locked or unresponsive
+          setAddress(null);
+          setIsConnected(false);
+          setIsAuthenticated(false);
         }
+        
       } catch (error: any) {
-        console.log("❌ Silent check error:", error);
+        console.log("❌ Account check error:", error);
       }
     } catch (error) {
       console.error('❌ Connection check error:', error);

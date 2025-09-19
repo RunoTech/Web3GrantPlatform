@@ -57,44 +57,49 @@ export function useWallet() {
           return;
         }
 
-        // METHOD 2: REAL TEST - Try a signature request with immediate timeout
-        console.log("🧪 GERÇEK TEST: MetaMask responsiveness test...");
+        // METHOD 2: SMART TEST - Use MetaMask's internal API if available
+        console.log("🧪 SMART TEST: MetaMask unlock status check...");
         try {
-          const testMessage = "Test message for unlock check";
+          // First try the MetaMask internal API
+          const isUnlocked = await (window.ethereum as any)._metamask?.isUnlocked?.().catch(() => null);
+          console.log("🔓 MetaMask internal unlock status:", isUnlocked);
           
-          // Create race between signature and very short timeout
-          const signPromise = window.ethereum.request({
-            method: 'personal_sign',
-            params: [testMessage, accounts[0]],
-          });
+          if (isUnlocked === true) {
+            // MetaMask says it's unlocked, trust it
+            console.log("✅ MetaMask unlocked via internal API:", accounts[0]);
+            setAddress(accounts[0]);
+            setIsConnected(true);
+            await checkAuthToken();
+          } else if (isUnlocked === false) {
+            // MetaMask says it's locked
+            console.log("❌ MetaMask LOCKED via internal API");
+            setAddress(null);
+            setIsConnected(false);
+            setIsAuthenticated(false);
+          } else {
+            // Internal API not available, do a VERY light test
+            console.log("🧪 Internal API not available, trying light test...");
+            try {
+              // Just try to get chain ID - this is lighter than signature
+              const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+              console.log("✅ MetaMask responsive, chain:", chainId);
+              setAddress(accounts[0]);
+              setIsConnected(true);
+              await checkAuthToken();
+            } catch (lightError: any) {
+              console.log("❌ Light test failed:", lightError.message);
+              setAddress(null);
+              setIsConnected(false);
+              setIsAuthenticated(false);
+            }
+          }
           
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('LOCKED_TEST_TIMEOUT')), 1000) // 1 second timeout
-          );
-          
-          await Promise.race([signPromise, timeoutPromise]);
-          
-          // If we get here, MetaMask is really unlocked and responsive
-          console.log("✅ MetaMask GERÇEKTEN açık ve responsive:", accounts[0]);
+        } catch (testError: any) {
+          console.log("❌ Smart test error:", testError.message);
+          // Fallback to basic connection
           setAddress(accounts[0]);
           setIsConnected(true);
           await checkAuthToken();
-          
-        } catch (testError: any) {
-          console.log("❌ Responsiveness test FAILED:", testError.message);
-          
-          if (testError.message === 'LOCKED_TEST_TIMEOUT') {
-            console.log("❌ MetaMask LOCKED - popup açılmadı veya yanıt alamadık");
-          } else if (testError.code === 4001) {
-            console.log("❌ User rejected test signature (probably locked)");
-          } else {
-            console.log("❌ MetaMask error:", testError);
-          }
-          
-          // MetaMask is locked or unresponsive
-          setAddress(null);
-          setIsConnected(false);
-          setIsAuthenticated(false);
         }
         
       } catch (error: any) {

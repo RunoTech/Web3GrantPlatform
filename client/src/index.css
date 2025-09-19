@@ -38,6 +38,28 @@
   --danger-red: #F84960;
 }
 
+.dark {
+  /* Binance-style Dark Theme - Black/Yellow */
+  --background: hsl(210 11% 7%); /* #0B0E11 */
+  --foreground: hsl(0 0% 95%);
+  --card: hsl(210 11% 9%);
+  --card-foreground: hsl(0 0% 95%);
+  --popover: hsl(210 11% 9%);
+  --popover-foreground: hsl(0 0% 95%);
+  --primary: hsl(43 94% 49%); /* Enhanced Binance Yellow */
+  --primary-foreground: hsl(210 11% 7%);
+  --secondary: hsl(210 11% 12%);
+  --secondary-foreground: hsl(0 0% 95%);
+  --muted: hsl(210 11% 12%);
+  --muted-foreground: hsl(0 0% 55%);
+  --accent: hsl(45 100% 51%);
+  --accent-foreground: hsl(210 11% 7%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --border: hsl(210 11% 15%);
+  --input: hsl(210 11% 12%);
+  --ring: hsl(45 100% 51%);
+}
 
 * {
   border-color: hsl(var(--border));
@@ -162,6 +184,14 @@ h6 { font-size: 1rem; line-height: 1.4; }      /* 16px - Button text (16-18px) *
   box-shadow: 0 4px 12px rgba(240, 185, 11, 0.3);
 }
 
+.dark .btn-binance {
+  background: #F0B90B;
+  color: #000000;
+}
+
+.dark .btn-binance:hover {
+  background: #E6A500;
+}
 
 .text-xs { font-size: 0.625rem; } /* 10px */
 .text-sm { font-size: 0.75rem; }  /* 12px */
@@ -235,6 +265,9 @@ h6 { font-size: 1rem; line-height: 1.4; }      /* 16px - Button text (16-18px) *
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.dark .shadow-binance {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
 
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
@@ -393,10 +426,16 @@ div.card-standard:hover,
 }
 
 /* Dark theme card styling with yellow border */
+.dark .card-standard,
+.dark div.card-standard,
+.dark [class*="card-standard"] {
   border: 2px solid #F0B90B !important; /* Direct yellow border in dark mode */
   box-shadow: 0 2px 8px rgba(240, 185, 11, 0.2) !important; /* Stronger yellow shadow in dark */
 }
 
+.dark .card-standard:hover,
+.dark div.card-standard:hover,
+.dark [class*="card-standard"]:hover {
   border-color: #F3C52B !important; /* Brighter yellow on hover in dark */
   box-shadow: 0 4px 16px rgba(240, 185, 11, 0.3) !important; /* Enhanced yellow shadow in dark */
 }
@@ -654,6 +693,7 @@ div.card-standard:hover,
   transform: translateY(-2px) !important;
 }
 
+.dark .btn-cyber {
   color: hsl(210 11% 7%) !important;
 }
 
@@ -691,11 +731,11 @@ div.card-standard:hover,
 
 /* Enhanced visibility icons */
 .icon-visible {
-  @apply text-gray-800 
+  @apply text-gray-800 dark:text-gray-100;
 }
 
 .icon-contrast {
-  @apply text-gray-900 
+  @apply text-gray-900 dark:text-gray-50;
 }
 
 /* Force visibility for critical icons */
@@ -703,6 +743,7 @@ div.card-standard:hover,
   color: #1a1a1a !important;
 }
 
+.dark .icon-force-dark {
   color: #f5f5f5 !important;
 }
 
@@ -722,6 +763,7 @@ div.card-standard:hover,
 }
 
 /* Enhanced icon visibility for dark theme */
+.dark .text-black {
   color: #ffffff !important;
 }
 
@@ -740,6 +782,8 @@ div.card-standard:hover,
   color: #000000 !important;
 }
 
+.dark .btn-primary .icon-on-primary,
+.dark .bg-primary .icon-on-primary {
   color: #000000 !important;
 }
 

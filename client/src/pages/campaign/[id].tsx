@@ -264,18 +264,18 @@ export default function CampaignDetailPage() {
                 
                 {/* Virtual POS Credit Card Payment Option */}
                 {campaign.creditCardEnabled && (
-                  <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200">
+                  <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-700">
                     <div className="text-center">
-                      <div className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-100 rounded-full border border-blue-300 mb-4">
-                        <CreditCard className="w-4 h-4 text-blue-600" />
-                        <span className="text-sm font-semibold text-blue-700">
+                      <div className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-100 dark:bg-blue-800 rounded-full border border-blue-300 dark:border-blue-600 mb-4">
+                        <CreditCard className="w-4 h-4 text-blue-600 dark:text-blue-300" />
+                        <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
                           Virtual POS
                         </span>
                       </div>
-                      <h4 className="text-xl font-bold text-blue-900 mb-2">
+                      <h4 className="text-xl font-bold text-blue-900 dark:text-blue-100 mb-2">
                         Kredi Kartıyla Öde
                       </h4>
-                      <p className="text-blue-700 text-sm mb-4">
+                      <p className="text-blue-700 dark:text-blue-300 text-sm mb-4">
                         Visa, Mastercard, American Express ve diğer kredi kartlarını kabul ediyoruz
                       </p>
                       <Button 
@@ -288,8 +288,8 @@ export default function CampaignDetailPage() {
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                       <div className="mt-3 flex items-center justify-center space-x-2">
-                        <Shield className="w-4 h-4 text-blue-600" />
-                        <span className="text-xs text-blue-600">
+                        <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        <span className="text-xs text-blue-600 dark:text-blue-400">
                           Secure doğrulama ile güvenli ödeme
                         </span>
                       </div>

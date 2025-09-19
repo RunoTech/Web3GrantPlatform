@@ -93,18 +93,23 @@ export function useWallet() {
         throw new Error("Wallet provider not available");
       }
 
+      console.log("🖊️ Requesting signature from MetaMask...");
       const signature = await provider.request({
         method: 'personal_sign',
         params: [nonceResponse.message, walletAddress],
       });
+      console.log("✅ Signature received:", signature);
 
       // Step 3: Verify signature on server
+      console.log("🔍 Sending signature to verify endpoint...");
       const verifyRes = await apiRequest("POST", "/auth/verify", {
         wallet: walletAddress,
         signature: signature,
         nonce: nonceResponse.nonce
       });
+      console.log("✅ Verify response status:", verifyRes.status);
       const verifyResponse = await verifyRes.json();
+      console.log("✅ Verify response data:", verifyResponse);
 
       if (!verifyResponse.success) {
         throw new Error("Authentication verification failed");

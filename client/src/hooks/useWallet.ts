@@ -31,26 +31,56 @@ export function useWallet() {
 
   const checkConnection = useCallback(async () => {
     try {
-      // Direct MetaMask connection check
-      if (window.ethereum) {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      console.log("🔍 Checking real-time MetaMask connection...");
+      
+      // Always check fresh - no cache
+      if (!window.ethereum) {
+        console.log("❌ MetaMask extension not found");
+        setAddress(null);
+        setIsConnected(false);
+        setIsAuthenticated(false);
+        setIsInitialized(true);
+        return;
+      }
+
+      try {
+        // Force fresh connection check - this will fail if MetaMask is locked/closed
+        const accounts = await window.ethereum.request({ 
+          method: 'eth_accounts'
+        });
+        
+        console.log("🔍 MetaMask accounts check:", accounts);
+        
         if (accounts && accounts.length > 0) {
-          setAddress(accounts[0]);
-          setIsConnected(true);
-          // Check authentication status
-          await checkAuthToken();
+          // Verify MetaMask is actually responsive
+          try {
+            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+            console.log("✅ MetaMask responsive, chain:", chainId, "account:", accounts[0]);
+            
+            setAddress(accounts[0]);
+            setIsConnected(true);
+            // Check authentication status
+            await checkAuthToken();
+          } catch (responseError) {
+            console.log("❌ MetaMask not responsive:", responseError);
+            setAddress(null);
+            setIsConnected(false);
+            setIsAuthenticated(false);
+          }
         } else {
+          console.log("❌ No accounts found - MetaMask locked or not connected");
           setAddress(null);
           setIsConnected(false);
           setIsAuthenticated(false);
         }
-      } else {
+      } catch (accountError) {
+        console.log("❌ MetaMask account check failed:", accountError);
         setAddress(null);
         setIsConnected(false);
         setIsAuthenticated(false);
       }
     } catch (error) {
-      console.error('Error checking MetaMask connection:', error);
+      console.error('❌ Error checking MetaMask connection:', error);
       setAddress(null);
       setIsConnected(false);
       setIsAuthenticated(false);
@@ -69,10 +99,24 @@ export function useWallet() {
     return null;
   }, []);
 
-  // SIWE Authentication Flow - User Gesture Preserved
+  // SIWE Authentication Flow - Simplified and Fixed
   const authenticate = useCallback(async (walletAddress: string): Promise<boolean> => {
     if (isAuthenticating) return false;
     
+    console.log("🔐 Starting authentication for wallet:", walletAddress);
+    
+    // First, force refresh MetaMask connection to make sure it's really available
+    await checkConnection();
+    
+    if (!isConnected || !address) {
+      toast({
+        title: "MetaMask Not Connected",
+        description: "Please connect your MetaMask wallet first",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     setIsAuthenticating(true);
     
     const provider = getProvider();
@@ -80,113 +124,81 @@ export function useWallet() {
       setIsAuthenticating(false);
       toast({
         title: "MetaMask Not Found",
-        description: "Please install MetaMask extension",
+        description: "Please install and unlock MetaMask extension",
         variant: "destructive",
       });
       return false;
     }
 
     try {
-      console.log("🔐 Starting authentication for wallet:", walletAddress);
-      
       const checksumAddress = walletAddress.toLowerCase();
       
-      // Step 1: Get nonce from server FIRST
-      console.log("📝 Getting nonce from server...");
+      // Step 1: Get nonce from server
+      console.log("📝 Getting authentication nonce...");
       const nonceRes = await apiRequest("POST", "/auth/nonce", {
         wallet: checksumAddress
       });
-      const nonceResponse = await nonceRes.json();
-      console.log("✅ Nonce response:", nonceResponse);
+      const nonceData = await nonceRes.json();
+      console.log("✅ Nonce received:", nonceData);
       
-      if (!nonceResponse.nonce || !nonceResponse.message) {
-        throw new Error("Failed to get authentication nonce");
+      if (!nonceData.nonce || !nonceData.message) {
+        throw new Error("Failed to get authentication nonce from server");
       }
 
-      // Step 2: IMMEDIATELY request signature to preserve user gesture
+      // Step 2: Sign message with MetaMask (user gesture must be preserved)
       console.log("🖊️ Requesting signature from MetaMask...");
-      console.log("📝 Calling personal_sign with:", {
-        message: nonceResponse.message,
-        address: checksumAddress
+      
+      // Use window.ethereum directly to preserve user gesture
+      const signature = await window.ethereum.request({
+        method: 'personal_sign',
+        params: [nonceData.message, checksumAddress],
       });
       
-      // Try to force MetaMask popup with timeout
-      let signature;
-      const timeoutMs = 60000; // 60 seconds timeout
-      
-      try {
-        // Create promise that times out after 60 seconds
-        const signPromise = provider.request({
-          method: 'personal_sign',
-          params: [nonceResponse.message, checksumAddress],
-        });
-        
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('TIMEOUT_ERROR')), timeoutMs)
-        );
-        
-        signature = await Promise.race([signPromise, timeoutPromise]);
-        console.log("✅ Signature received:", signature);
-        
-      } catch (signError: any) {
-        console.error("❌ MetaMask signature error:", signError);
-        
-        if (signError.message === 'TIMEOUT_ERROR') {
-          throw new Error("MetaMask popup açılmadı veya 60 saniye içinde yanıt alamadık. Lütfen MetaMask extension'ını kontrol edin ve tekrar deneyin.");
-        }
-        
-        // Re-throw the original error for other cases
-        throw signError;
-      }
+      console.log("✅ Signature received from MetaMask");
       
       if (!signature) {
-        throw new Error("MetaMask returned empty signature");
+        throw new Error("MetaMask signature is empty");
       }
 
       // Step 3: Verify signature on server
-      console.log("🔍 Sending signature to verify endpoint...");
+      console.log("🔍 Verifying signature with server...");
       const verifyRes = await apiRequest("POST", "/auth/verify", {
         wallet: checksumAddress,
         signature: signature,
-        nonce: nonceResponse.nonce
+        nonce: nonceData.nonce
       });
       
-      console.log("✅ Verify response status:", verifyRes.status);
-      const verifyResponse = await verifyRes.json();
-      console.log("✅ Verify response data:", verifyResponse);
+      const verifyData = await verifyRes.json();
+      console.log("✅ Authentication verification:", verifyData);
 
-      if (!verifyResponse.success) {
-        throw new Error("Authentication verification failed");
+      if (!verifyData.success) {
+        throw new Error(verifyData.error || "Authentication verification failed");
       }
 
-      // SECURITY FIX: No JWT token storage needed - httpOnly cookies handle authentication
-      // Server sets httpOnly cookie automatically in /auth/verify endpoint
+      // Success - update state
       setIsAuthenticated(true);
 
       toast({
-        title: "Authenticated Successfully",
-        description: "Wallet signature verified - you're now authenticated",
+        title: "Authentication Successful",
+        description: "You are now authenticated with your wallet",
       });
 
       return true;
       
     } catch (error: any) {
       console.error('❌ Authentication error:', error);
-      console.error('❌ Error details:', JSON.stringify(error, null, 2));
-      console.error('❌ Error code:', error?.code);
-      console.error('❌ Error message:', error?.message);
       
-      let errorMessage = "Failed to authenticate wallet";
+      let errorMessage = "Authentication failed";
       
-      // Handle specific MetaMask error codes
+      // Handle MetaMask specific errors
       if (error?.code === 4001) {
-        errorMessage = "İmzayı reddettiniz. Lütfen tekrar deneyin ve imzayı onaylayın.";
-      } else if (error?.code === -32603) {
-        errorMessage = "MetaMask internal error. Sayfayı yenileyin ve tekrar deneyin.";
+        errorMessage = "İmzayı reddettiniz. Lütfen tekrar deneyin.";
       } else if (error?.code === -32002) {
-        errorMessage = "MetaMask'te bekleyen işlem var. Lütfen MetaMask'i açın ve işlemi tamamlayın.";
-      } else if (!error || Object.keys(error).length === 0) {
-        errorMessage = "MetaMask yanıt vermedi. Extension'ın açık ve çalışır durumda olduğundan emin olun.";
+        errorMessage = "MetaMask'te bekleyen bir işlem var. Lütfen MetaMask'i açın ve işlemi tamamlayın.";
+      } else if (error?.code === -32603) {
+        errorMessage = "MetaMask hatası. Lütfen extension'ı yenileyin ve tekrar deneyin.";
+      } else if (error?.message?.includes("User rejected")) {
+        errorMessage = "İmzayı reddettiniz. Kimlik doğrulaması için imzalamanız gerekiyor.";
       } else if (error?.message) {
         errorMessage = error.message;
       }
@@ -196,11 +208,12 @@ export function useWallet() {
         description: errorMessage,
         variant: "destructive",
       });
+      
       return false;
     } finally {
       setIsAuthenticating(false);
     }
-  }, [isAuthenticating, getProvider, toast]);
+  }, [isAuthenticating, isConnected, address, getProvider, checkConnection, toast]);
 
   // Logout function
   const logout = useCallback(async () => {

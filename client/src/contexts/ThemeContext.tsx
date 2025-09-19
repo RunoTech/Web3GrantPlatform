@@ -10,29 +10,19 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme] = useState<Theme>('light'); // Always light mode
 
   useEffect(() => {
-    // Load theme from localStorage
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else {
-      // Check system preference
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      setTheme(systemTheme);
-    }
+    // Force light theme on document and clear any dark mode settings
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add('light');
+    localStorage.removeItem('theme'); // Remove any saved theme preference
   }, []);
 
-  useEffect(() => {
-    // Apply theme to document
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
+  // Disabled toggle function - does nothing
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    // Dark mode disabled - no theme switching allowed
+    console.log('Theme switching is disabled. Site is locked to light mode.');
   };
 
   return (

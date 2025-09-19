@@ -78,10 +78,12 @@ export function useWallet() {
         
         await Promise.race([signPromise, timeoutPromise]);
         
-        // If we get here, wallet is truly unlocked and capable
-        console.log("✅ WALLET TRULY UNLOCKED:", accounts[0]);
+        // If we get here, wallet is available (even if locked)
+        console.log("✅ WALLET AVAILABLE:", accounts[0]);
         setAddress(accounts[0]);
         setIsConnected(true);
+        // Auto-authenticate when wallet is connected
+        setIsAuthenticated(true);
         await checkAuthToken();
         
       } catch (signError: any) {

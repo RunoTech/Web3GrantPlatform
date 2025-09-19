@@ -61,47 +61,12 @@ export function useWallet() {
         return;
       }
 
-      // Step 3: Test signature capability to verify wallet is really unlocked
-      console.log("🧪 Testing signature capability...");
-      try {
-        const testMessage = `DUXXAN Authentication Test - ${Date.now()}`;
-        
-        // Create a race: signature vs short timeout
-        const signPromise = window.ethereum.request({
-          method: 'personal_sign',
-          params: [testMessage, accounts[0]],
-        });
-        
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('WALLET_LOCKED_TIMEOUT')), 2000)
-        );
-        
-        await Promise.race([signPromise, timeoutPromise]);
-        
-        // If we get here, wallet is available (even if locked)
-        console.log("✅ WALLET AVAILABLE:", accounts[0]);
-        setAddress(accounts[0]);
-        setIsConnected(true);
-        // Auto-authenticate when wallet is connected
-        setIsAuthenticated(true);
-        await checkAuthToken();
-        
-      } catch (signError: any) {
-        console.log("❌ Signature test failed:", signError.message);
-        
-        if (signError.message === 'WALLET_LOCKED_TIMEOUT') {
-          console.log("❌ WALLET IS LOCKED - no signature capability");
-        } else if (signError.code === 4001) {
-          console.log("❌ User rejected signature - probably locked");
-        } else {
-          console.log("❌ Other signature error - wallet issues");
-        }
-        
-        // Wallet exists but can't sign = locked or broken
-        setAddress(null);
-        setIsConnected(false);
-        setIsAuthenticated(false);
-      }
+      // Step 3: Auto-connect when accounts available (no signature test)
+      console.log("✅ WALLET AUTO-CONNECTED:", accounts[0]);
+      setAddress(accounts[0]);
+      setIsConnected(true);
+      setIsAuthenticated(true);
+      await checkAuthToken();
       
     } catch (error: any) {
       console.log("❌ Connection check error:", error.message);

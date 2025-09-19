@@ -283,21 +283,30 @@ export default function AffiliatePage() {
               <p className="text-muted-foreground mb-4">
                 Please sign a message to authenticate your wallet and access the affiliate dashboard.
               </p>
-              <Button 
-                onClick={() => address && authenticate(address)}
-                disabled={isAuthenticating}
-                className="w-full btn-binance hover:transform hover:-translate-y-0.5 transition-all duration-200"
-                data-testid="button-authenticate"
-              >
-                {isAuthenticating ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
-                    Signing Message...
-                  </>
-                ) : (
-                  "Sign Message to Authenticate"
-                )}
-              </Button>
+              <div className="space-y-3">
+                <Button 
+                  onClick={() => address && authenticate(address)}
+                  disabled={isAuthenticating}
+                  className="w-full btn-binance hover:transform hover:-translate-y-0.5 transition-all duration-200"
+                  data-testid="button-authenticate"
+                >
+                  {isAuthenticating ? (
+                    <>
+                      <div className="animate-spin w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                      Signing Message...
+                    </>
+                  ) : (
+                    "Sign Message to Authenticate"
+                  )}
+                </Button>
+                
+                <div className="text-xs text-muted-foreground text-center">
+                  <p>❓ MetaMask popup açılmıyor mu?</p>
+                  <p>• MetaMask extension'ını yenileyin</p>
+                  <p>• Popup blocker'ı kapatın</p>
+                  <p>• Tarayıcıyı yenileyin (Ctrl+F5)</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

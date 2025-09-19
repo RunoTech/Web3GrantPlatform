@@ -110,12 +110,34 @@ export function useWallet() {
         address: checksumAddress
       });
       
-      const signature = await provider.request({
-        method: 'personal_sign',
-        params: [nonceResponse.message, checksumAddress],
-      });
+      // Try to force MetaMask popup with timeout
+      let signature;
+      const timeoutMs = 60000; // 60 seconds timeout
       
-      console.log("✅ Signature received:", signature);
+      try {
+        // Create promise that times out after 60 seconds
+        const signPromise = provider.request({
+          method: 'personal_sign',
+          params: [nonceResponse.message, checksumAddress],
+        });
+        
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('TIMEOUT_ERROR')), timeoutMs)
+        );
+        
+        signature = await Promise.race([signPromise, timeoutPromise]);
+        console.log("✅ Signature received:", signature);
+        
+      } catch (signError: any) {
+        console.error("❌ MetaMask signature error:", signError);
+        
+        if (signError.message === 'TIMEOUT_ERROR') {
+          throw new Error("MetaMask popup açılmadı veya 60 saniye içinde yanıt alamadık. Lütfen MetaMask extension'ını kontrol edin ve tekrar deneyin.");
+        }
+        
+        // Re-throw the original error for other cases
+        throw signError;
+      }
       
       if (!signature) {
         throw new Error("MetaMask returned empty signature");

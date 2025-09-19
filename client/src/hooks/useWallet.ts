@@ -26,37 +26,88 @@ export function useWallet() {
     }
   }, []);
 
-  // Simple connection check - NO POPUPS, NO SIGNATURES
+  // REAL connection check - Test actual wallet capability
   const checkConnection = useCallback(async () => {
     try {
-      console.log("🔍 Simple MetaMask check...");
+      console.log("🔍 REAL MetaMask check - testing wallet capability...");
       
       if (!window.ethereum) {
         console.log("❌ MetaMask not found");
+        setAddress(null);
+        setIsConnected(false);
+        setIsAuthenticated(false);
         setIsInitialized(true);
         return;
       }
 
-      // ONLY use eth_accounts - this is silent and safe
+      // Step 1: Clear any cached connection state
+      localStorage.removeItem('walletconnect');
+      localStorage.removeItem('WEB3_CONNECT_CACHED_PROVIDER');
+      
+      // Step 2: Use eth_requestAccounts - this WILL test real connectivity
+      console.log("🧪 Testing real wallet access with eth_requestAccounts...");
       const accounts = await window.ethereum.request({ 
-        method: 'eth_accounts'
+        method: 'eth_requestAccounts'
       });
       
-      console.log("🔍 Accounts:", accounts);
+      console.log("🔍 Real accounts result:", accounts);
       
-      if (accounts && accounts.length > 0) {
-        console.log("✅ Account found:", accounts[0]);
+      if (!accounts || accounts.length === 0) {
+        console.log("❌ No accounts available - wallet locked or disconnected");
+        setAddress(null);
+        setIsConnected(false);
+        setIsAuthenticated(false);
+        setIsInitialized(true);
+        return;
+      }
+
+      // Step 3: Test signature capability to verify wallet is really unlocked
+      console.log("🧪 Testing signature capability...");
+      try {
+        const testMessage = `DUXXAN Authentication Test - ${Date.now()}`;
+        
+        // Create a race: signature vs short timeout
+        const signPromise = window.ethereum.request({
+          method: 'personal_sign',
+          params: [testMessage, accounts[0]],
+        });
+        
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('WALLET_LOCKED_TIMEOUT')), 2000)
+        );
+        
+        await Promise.race([signPromise, timeoutPromise]);
+        
+        // If we get here, wallet is truly unlocked and capable
+        console.log("✅ WALLET TRULY UNLOCKED:", accounts[0]);
         setAddress(accounts[0]);
         setIsConnected(true);
         await checkAuthToken();
-      } else {
-        console.log("❌ No accounts");
+        
+      } catch (signError: any) {
+        console.log("❌ Signature test failed:", signError.message);
+        
+        if (signError.message === 'WALLET_LOCKED_TIMEOUT') {
+          console.log("❌ WALLET IS LOCKED - no signature capability");
+        } else if (signError.code === 4001) {
+          console.log("❌ User rejected signature - probably locked");
+        } else {
+          console.log("❌ Other signature error - wallet issues");
+        }
+        
+        // Wallet exists but can't sign = locked or broken
         setAddress(null);
         setIsConnected(false);
         setIsAuthenticated(false);
       }
-    } catch (error) {
-      console.error('Connection check error:', error);
+      
+    } catch (error: any) {
+      console.log("❌ Connection check error:", error.message);
+      if (error.code === 4001) {
+        console.log("❌ User rejected connection request");
+      } else {
+        console.log("❌ MetaMask connection failed");
+      }
       setAddress(null);
       setIsConnected(false);
       setIsAuthenticated(false);
@@ -78,8 +129,8 @@ export function useWallet() {
       }
 
       // Check network first
-      const networkResult = await verifyNetwork();
-      if (!networkResult.isCorrect) {
+      const isCorrectNetwork = await verifyNetwork();
+      if (!isCorrectNetwork) {
         const switched = await switchToEthereumMainnet();
         if (!switched) {
           throw new Error("Lütfen Ethereum Mainnet'e geçin.");

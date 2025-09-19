@@ -207,12 +207,13 @@ export function useWallet() {
     try {
       await apiRequest("POST", "/auth/logout", {});
     } catch (error) {
-      console.error('Logout error:', error);
+      // Silent logout error - don't spam console
+      console.log('🔓 Logout completed (server error ignored)');
     }
     
     setIsAuthenticated(false);
     toast({
-      title: "Çıkış Yapıldı",
+      title: "Çıkış Yapıldı", 
       description: "Kimlik doğrulama sonlandırıldı",
     });
   }, [toast]);

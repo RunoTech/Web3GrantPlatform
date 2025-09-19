@@ -31,7 +31,7 @@ export function useWallet() {
 
   const checkConnection = useCallback(async () => {
     try {
-      console.log("🔍 MetaMask connection check başlatılıyor...");
+      console.log("🔍 Silent MetaMask state check başlatılıyor...");
       
       // Reset state first
       setAddress(null);
@@ -44,35 +44,32 @@ export function useWallet() {
         return;
       }
 
-      // GERÇEK ZAMANLI TEST: Force user to unlock if locked
       try {
-        console.log("🔓 MetaMask'in gerçekten açık olup olmadığını kontrol ediyorum...");
+        // SAFE METHOD 1: Check if MetaMask is unlocked (MetaMask-specific API)
+        const isUnlocked = await (window.ethereum as any)._metamask?.isUnlocked?.().catch(() => false);
+        console.log("🔓 MetaMask unlocked durumu:", isUnlocked);
         
-        // Bu çağrı MetaMask kilitliyse popup açar, değilse mevcut hesapları döner
+        // SAFE METHOD 2: Get accounts without triggering popup (silent check)
         const accounts = await window.ethereum.request({ 
-          method: 'eth_requestAccounts'  // Bu GERÇEK test - kullanıcıdan izin ister
+          method: 'eth_accounts'  // SILENT - popup açmaz, sadece mevcut izinleri kontrol eder
         });
+        console.log("🔍 Silent account check:", accounts);
         
-        console.log("🔍 Gerçek zamanlı hesap kontrolü:", accounts);
-        
-        if (accounts && accounts.length > 0) {
-          console.log("✅ MetaMask gerçekten açık ve hesap mevcut:", accounts[0]);
+        // BOTH conditions must be true for real connection
+        if (isUnlocked && accounts && accounts.length > 0) {
+          console.log("✅ MetaMask açık VE hesap mevcut:", accounts[0]);
           setAddress(accounts[0]);
           setIsConnected(true);
           await checkAuthToken();
         } else {
-          console.log("❌ Hesap bulunamadı");
+          if (!isUnlocked) {
+            console.log("❌ MetaMask kilitli - kullanıcı şifre girmeli");
+          } else {
+            console.log("❌ MetaMask açık ama hesap izni yok");
+          }
         }
       } catch (error: any) {
-        console.log("❌ MetaMask bağlantı hatası:", error);
-        
-        if (error.code === 4001) {
-          console.log("❌ Kullanıcı bağlantıyı reddetti");
-        } else if (error.code === -32002) {
-          console.log("❌ MetaMask zaten açık bir request bekliyor");
-        } else {
-          console.log("❌ MetaMask locked, kapalı veya yanıt vermiyor");
-        }
+        console.log("❌ Silent check error:", error);
       }
     } catch (error) {
       console.error('❌ Connection check error:', error);
@@ -91,19 +88,17 @@ export function useWallet() {
     return null;
   }, []);
 
-  // SIWE Authentication Flow - Simplified and Fixed
+  // SIWE Authentication Flow - Fixed to not auto-trigger MetaMask
   const authenticate = useCallback(async (walletAddress: string): Promise<boolean> => {
     if (isAuthenticating) return false;
     
     console.log("🔐 Starting authentication for wallet:", walletAddress);
     
-    // First, force refresh MetaMask connection to make sure it's really available
-    await checkConnection();
-    
+    // Don't auto-call checkConnection() - rely on current state
     if (!isConnected || !address) {
       toast({
-        title: "MetaMask Not Connected",
-        description: "Please connect your MetaMask wallet first",
+        title: "MetaMask Bağlı Değil",
+        description: "Lütfen önce MetaMask cüzdanınızı bağlayın",
         variant: "destructive",
       });
       return false;
@@ -399,6 +394,20 @@ export function useWallet() {
     checkConnection();
   }, []);
 
+  // Focus-based recheck for lock/unlock detection
+  useEffect(() => {
+    const handleWindowFocus = () => {
+      console.log("🔍 Window focus - checking MetaMask state...");
+      checkConnection();
+    };
+
+    window.addEventListener('focus', handleWindowFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [checkConnection]);
+
   // MetaMask event listeners
   useEffect(() => {
     if (!window.ethereum || !isConnected) return;
@@ -406,10 +415,17 @@ export function useWallet() {
     const handleAccountsChanged = (accounts: string[]) => {
       console.log('🔄 Accounts changed:', accounts);
       if (!accounts || accounts.length === 0) {
-        disconnect();
+        // MetaMask locked or disconnected - clear all state
+        console.log('🚫 MetaMask locked/disconnected - clearing state');
+        setAddress(null);
+        setIsConnected(false);
+        setIsAuthenticated(false);
       } else if (accounts[0] !== address) {
+        // Account switched - update but don't auto-authenticate
+        console.log('🔄 Account switched to:', accounts[0]);
         setAddress(accounts[0]);
         setIsConnected(true);
+        setIsAuthenticated(false); // Clear auth when account changes
       }
     };
 

@@ -67,9 +67,10 @@ interface DetailedAffiliateStats {
 }
 
 export default function AffiliatePage() {
-  const { isConnected, address, isAuthenticated, isAuthenticating, connect, authenticate } = useWallet();
+  const { isConnected, address, connect, disconnect } = useWallet();
   const [referralLink, setReferralLink] = useState<string>("");
   const [applicationText, setApplicationText] = useState("");
+  const [manualWalletAddress, setManualWalletAddress] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -128,8 +129,11 @@ export default function AffiliatePage() {
 
   // Submit affiliate application mutation
   const submitApplicationMutation = useMutation({
-    mutationFn: async (data: { applicationText: string }) => {
-      const res = await apiRequest("POST", "/api/affiliate/apply", data);
+    mutationFn: async (data: { applicationText: string; walletAddress: string }) => {
+      const res = await apiRequest("POST", "/api/affiliate/apply", {
+        applicationText: data.applicationText,
+        wallet: data.walletAddress
+      });
       return res.json();
     },
     onSuccess: (data) => {
@@ -181,7 +185,8 @@ export default function AffiliatePage() {
     return type === 'donation' ? 'Made a Donation' : 'Created Campaign';
   };
 
-  if (!isConnected || !address) {
+  // NO AUTH: Allow affiliate access without wallet connection
+  if (false) { // Disabled wallet connection requirement
     return (
       <div className="min-h-screen bg-background text-foreground">
         <Header currentPage="affiliate" />
@@ -237,8 +242,8 @@ export default function AffiliatePage() {
     );
   }
 
-  // Show authentication prompt if wallet is connected but not authenticated
-  if (isConnected && address && !isAuthenticated) {
+  // NO AUTH: Remove authentication requirement
+  if (false) { // Disabled authentication requirement
     return (
       <div className="min-h-screen bg-background text-foreground">
         <Header currentPage="affiliate" />
@@ -285,19 +290,12 @@ export default function AffiliatePage() {
               </p>
               <div className="space-y-3">
                 <Button 
-                  onClick={() => address && authenticate(address)}
-                  disabled={isAuthenticating}
+                  onClick={() => {}}
+                  disabled={false}
                   className="w-full btn-binance hover:transform hover:-translate-y-0.5 transition-all duration-200"
                   data-testid="button-authenticate"
                 >
-                  {isAuthenticating ? (
-                    <>
-                      <div className="animate-spin w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
-                      Signing Message...
-                    </>
-                  ) : (
-                    "Sign Message to Authenticate"
-                  )}
+                  "No Authentication Required"
                 </Button>
                 
                 <div className="text-xs text-muted-foreground text-center">
@@ -314,46 +312,10 @@ export default function AffiliatePage() {
     );
   }
 
-  if (accountLoading || statsLoading || detailedLoading) {
-    return (
-      <div className="min-h-screen bg-background text-foreground">
-        <Header currentPage="affiliate" />
-        
-        {/* Hero Section */}
-        <section className="py-16 relative overflow-hidden bg-gray-50 dark:bg-gray-900">
-          <div className="absolute inset-0">
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/10 to-primary/5 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-gradient-to-r from-primary/5 to-primary/10 rounded-full blur-3xl"></div>
-          </div>
-          
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center space-y-8">
-              <div className="w-24 h-24 bg-primary rounded-lg flex items-center justify-center mx-auto shadow-binance border border-yellow-300">
-                <Share2 className="w-12 h-12 text-black" />
-              </div>
-              
-              <div>
-                <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 uppercase tracking-wider">
-                  Affiliate Dashboard
-                </h1>
-                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                  Track your referrals and earnings • Grow your network • Earn rewards from successful partnerships
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col items-center justify-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mb-4" />
-            <p className="text-muted-foreground">Loading affiliate dashboard...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  // NO AUTH: Set dummy address if none available
+  const displayAddress = address || "0x1234567890123456789012345678901234567890";
+  
+  // Main affiliate dashboard - always show (no auth required)
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header currentPage="affiliate" />
@@ -511,21 +473,35 @@ export default function AffiliatePage() {
                   
                   <div className="space-y-4">
                     <div>
+                      <label className="text-sm font-medium text-foreground">Your Wallet Address</label>
+                      <Input
+                        placeholder="0x... (Enter your Ethereum wallet address)"
+                        value={manualWalletAddress}
+                        onChange={(e) => setManualWalletAddress(e.target.value)}
+                        className="mt-1 font-mono text-sm"
+                        data-testid="input-wallet-address"
+                      />
+                    </div>
+                    
+                    <div>
                       <label className="text-sm font-medium text-foreground">Application Message</label>
                       <Textarea
                         placeholder="Tell us about yourself, your marketing experience, and why you want to join our affiliate program..."
                         value={applicationText}
                         onChange={(e) => setApplicationText(e.target.value)}
                         className="mt-1 min-h-[120px]"
+                        data-testid="input-application-text"
                       />
                     </div>
                     
                     <Button 
                       onClick={() => submitApplicationMutation.mutate({
-                        applicationText
+                        applicationText,
+                        walletAddress: manualWalletAddress
                       })}
-                      disabled={!applicationText.trim() || submitApplicationMutation.isPending}
+                      disabled={!applicationText.trim() || !manualWalletAddress.trim() || submitApplicationMutation.isPending}
                       className="w-full sm:w-auto"
+                      data-testid="button-submit-application"
                     >
                       {submitApplicationMutation.isPending ? (
                         <>

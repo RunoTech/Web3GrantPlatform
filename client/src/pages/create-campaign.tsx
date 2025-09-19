@@ -69,6 +69,8 @@ export default function CreateCampaignPage() {
       targetAmount: "0",
       startDate: "",
       endDate: "",
+      // Wallet information - auto-populate if available
+      ownerWallet: address || "",
       // Affiliate referral code
       referralCode: "",
       // Company information fields
@@ -96,7 +98,8 @@ export default function CreateCampaignPage() {
         ...data,
         campaignType,
         creatorType,
-        ownerWallet: address,
+        // Use form value instead of address from useWallet
+        ownerWallet: data.ownerWallet,
       }),
     onSuccess: (data) => {
       toast({
@@ -302,22 +305,8 @@ export default function CreateCampaignPage() {
     });
   };
 
-  if (!isConnected) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
-        <div className="text-center space-y-6 max-w-md mx-auto p-8">
-          <div className="w-24 h-24 bg-primary rounded-3xl flex items-center justify-center mx-auto">
-            <Lock className="w-12 h-12 text-black" />
-          </div>
-          <h1 className="text-3xl font-bold text-black dark:text-white">Connect Wallet</h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            You need to connect your wallet first to create a campaign.
-          </p>
-          <WalletConnectButton />
-        </div>
-      </div>
-    );
-  }
+  // NO AUTH: Allow campaign creation without wallet connection requirement
+  // Auto-populate wallet if available, otherwise allow manual input
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">
@@ -523,6 +512,29 @@ export default function CreateCampaignPage() {
                       />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Owner Wallet Address */}
+              <FormField
+                control={form.control}
+                name="ownerWallet"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-black dark:text-white">Wallet Address</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="0x... (Enter your wallet address)" 
+                        {...field} 
+                        className="border-gray-300 dark:border-gray-600"
+                        data-testid="input-owner-wallet"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {address ? "Auto-filled from connected wallet" : "Enter your wallet address manually"}
+                    </p>
                   </FormItem>
                 )}
               />

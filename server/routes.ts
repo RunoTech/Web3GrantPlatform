@@ -393,7 +393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     timestamp: z.number().optional()
   });
   
-  app.post("/api/auto-daily-entry", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+  app.post("/api/auto-daily-entry", async (req, res) => {
     try {
       const validation = autoDailyEntrySchema.safeParse(req.body);
       if (!validation.success) {
@@ -402,14 +402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { wallet } = validation.data;
       
-      // Security: Verify wallet ownership - only authenticated user can participate for their own wallet
-      if (wallet.toLowerCase() !== req.userWallet.toLowerCase()) {
-        return res.status(403).json({ 
-          error: "Daily participation can only be done for your authenticated wallet address",
-          expected: req.userWallet,
-          provided: wallet 
-        });
-      }
+      // NO AUTH: Allow anyone to participate for any wallet
 
       const today = new Date().toISOString().split('T')[0];
       const canParticipate = await storage.canParticipateDaily(wallet, today);
@@ -456,12 +449,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create account (protected - requires authentication)
-  app.post("/api/create-account", accountRateLimit, authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+  // Create account (public - NO AUTH REQUIRED)
+  app.post("/api/create-account", accountRateLimit, async (req, res) => {
     try {
-      // Security: Use authenticated wallet instead of trusting client data
+      // NO AUTH: Use wallet from request body
       const accountData = {
-        wallet: req.userWallet, // Use authenticated wallet address
+        wallet: req.body.wallet, // Use wallet from request body
         active: req.body.active || false, // Allow other fields from body
         referredBy: req.body.referredBy || null
       };
@@ -484,13 +477,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Activate account with payment verification (protected - requires authentication)
-  app.post("/api/activate-account", accountRateLimit, authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+  // Activate account with payment verification (public - NO AUTH REQUIRED)
+  app.post("/api/activate-account", accountRateLimit, async (req, res) => {
     try {
-      const { txHash } = req.body;
+      const { txHash, wallet } = req.body;
       
-      // Security: Use authenticated wallet instead of trusting client data
-      const wallet = req.userWallet;
+      // NO AUTH: Use wallet from request body
+      const walletAddress = wallet;
       
       if (!txHash) {
         return res.status(400).json({ error: "Transaction hash is required" });
@@ -511,7 +504,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if account exists
-      const account = await storage.getAccount(wallet);
+      const account = await storage.getAccount(walletAddress);
       if (!account) {
         return res.status(404).json({ error: "Account not found" });
       }
@@ -558,14 +551,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         txHash,
         network: NETWORK,
         purpose: 'account_activation',
-        wallet,
+        wallet: walletAddress,
         amount: verification.amount || "0",
         tokenAddress: networkFee.tokenAddress,
         blockNumber: verification.blockNumber
       });
 
       // Activate account
-      await storage.updateAccount(wallet, {
+      await storage.updateAccount(walletAddress, {
         active: true,
         activationTxHash: txHash,
         activationDate: new Date(),
@@ -604,13 +597,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Affiliate Application endpoints
   
-  // Submit affiliate application (protected - requires authentication)
-  app.post("/api/affiliate/apply", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+  // Submit affiliate application (public - NO AUTH REQUIRED)
+  app.post("/api/affiliate/apply", async (req, res) => {
     try {
-      const { applicationText } = req.body;
+      const { applicationText, wallet } = req.body;
       
-      // Security: Use authenticated wallet instead of trusting client data
-      const wallet = req.userWallet;
+      // NO AUTH: Use wallet from request body
+      const walletAddress = wallet;
 
       if (!applicationText) {
         return res.status(400).json({ 
@@ -620,7 +613,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if user already has an application
-      const existingApplication = await storage.getAffiliateApplication(wallet);
+      const existingApplication = await storage.getAffiliateApplication(walletAddress);
       if (existingApplication) {
         return res.status(400).json({ 
           success: false, 
@@ -630,7 +623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create affiliate application
       const application = await storage.createAffiliateApplication({
-        wallet,
+        wallet: walletAddress,
         applicationText,
         status: "pending"
       });
@@ -1116,8 +1109,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create campaign (public - but requires active account)
-  app.post("/api/create-campaign", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+  // Create campaign (public - NO AUTH REQUIRED)
+  app.post("/api/create-campaign", async (req, res) => {
     try {
       const campaignData = req.body;
       
@@ -1135,14 +1128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         campaignData.companyCEO = sanitizeHtml(campaignData.companyCEO);
       }
       
-      // Security: Verify wallet ownership - only authenticated user can create campaigns for their own wallet
-      if (!campaignData.ownerWallet || campaignData.ownerWallet.toLowerCase() !== req.userWallet.toLowerCase()) {
-        return res.status(403).json({ 
-          error: "Campaign can only be created for your authenticated wallet address",
-          expected: req.userWallet,
-          provided: campaignData.ownerWallet 
-        });
-      }
+      // NO AUTH: Allow anyone to create campaigns for any wallet
       
       // Validate FUND/DONATE rules
       if (campaignData.campaignType === "FUND" && campaignData.creatorType !== "company") {
@@ -1226,7 +1212,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             txHash: campaignData.collateralTxHash,
             network: NETWORK,
             purpose: 'campaign_collateral',
-            wallet: req.userWallet,
+            wallet: campaignData.ownerWallet,
             amount: verification.amount || requiredCollateral.toString(),
             tokenAddress: usdtContract,
             blockNumber: verification.blockNumber

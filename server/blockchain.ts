@@ -237,10 +237,12 @@ export async function verifyPayment(
     }
 
     // Security: Validate chainId to prevent cross-chain attacks
-    if (tx.chainId !== 1) {
+    // Convert to number for proper comparison (ethers may return BigInt or string)
+    const chainId = Number(tx.chainId);
+    if (chainId !== 1) {
       return { 
         success: false, 
-        error: `Invalid chainId. Expected Ethereum mainnet (1), got ${tx.chainId}` 
+        error: `Invalid chainId. Expected Ethereum mainnet (1), got ${chainId}` 
       };
     }
 

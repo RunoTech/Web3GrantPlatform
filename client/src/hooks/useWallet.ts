@@ -146,24 +146,8 @@ export function useWallet() {
         throw new Error('Hesap bulunamadı');
       }
 
-      // CRITICAL: Test signature capability to ensure wallet is truly unlocked
-      console.log('🧪 CONNECT: Testing wallet unlock status...');
-      try {
-        const testMessage = `DUXXAN Connect Test - ${Date.now()}`;
-        
-        const signPromise = window.ethereum.request({
-          method: 'personal_sign',
-          params: [testMessage, accounts[0]],
-        });
-        
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('CONNECT_LOCKED_TIMEOUT')), 3000)
-        );
-        
-        await Promise.race([signPromise, timeoutPromise]);
-        
-        // If we get here, wallet is truly unlocked
-        console.log('✅ CONNECT: Wallet truly unlocked and connected:', accounts[0]);
+      if (accounts?.length > 0) {
+        console.log('✅ Connected:', accounts[0]);
         setAddress(accounts[0]);
         setIsConnected(true);
         
@@ -173,17 +157,8 @@ export function useWallet() {
         });
         
         return true;
-        
-      } catch (signError: any) {
-        console.log('❌ CONNECT: Signature test failed:', signError.message);
-        
-        if (signError.message === 'CONNECT_LOCKED_TIMEOUT') {
-          throw new Error('Cüzdan kilitli! Lütfen MetaMask\'i açın ve tekrar deneyin.');
-        } else if (signError.code === 4001) {
-          throw new Error('İmzayı reddettiniz. Bağlantı için imza gereklidir.');
-        } else {
-          throw new Error('Cüzdan doğrulaması başarısız. Lütfen tekrar deneyin.');
-        }
+      } else {
+        throw new Error('Hesap bulunamadı');
       }
     } catch (error: any) {
       console.error('❌ Connection error:', error);

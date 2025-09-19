@@ -69,16 +69,32 @@ export function useWallet() {
     return null;
   }, []);
 
-  // SIWE Authentication Flow
+  // SIWE Authentication Flow - User Gesture Preserved
   const authenticate = useCallback(async (walletAddress: string): Promise<boolean> => {
     if (isAuthenticating) return false;
     
     setIsAuthenticating(true);
+    
+    const provider = getProvider();
+    if (!provider) {
+      setIsAuthenticating(false);
+      toast({
+        title: "MetaMask Not Found",
+        description: "Please install MetaMask extension",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     try {
-      // Step 1: Get nonce from server
-      console.log("🔐 Requesting nonce for wallet:", walletAddress);
+      console.log("🔐 Starting authentication for wallet:", walletAddress);
+      
+      const checksumAddress = walletAddress.toLowerCase();
+      
+      // Step 1: Get nonce from server FIRST
+      console.log("📝 Getting nonce from server...");
       const nonceRes = await apiRequest("POST", "/auth/nonce", {
-        wallet: walletAddress
+        wallet: checksumAddress
       });
       const nonceResponse = await nonceRes.json();
       console.log("✅ Nonce response:", nonceResponse);
@@ -87,63 +103,32 @@ export function useWallet() {
         throw new Error("Failed to get authentication nonce");
       }
 
-      // Step 2: Sign the message with MetaMask
-      const provider = getProvider();
-      if (!provider) {
-        throw new Error("Wallet provider not available");
-      }
-
+      // Step 2: IMMEDIATELY request signature to preserve user gesture
       console.log("🖊️ Requesting signature from MetaMask...");
+      console.log("📝 Calling personal_sign with:", {
+        message: nonceResponse.message,
+        address: checksumAddress
+      });
       
-      // Ensure we have a proper wallet address format
-      const checksumAddress = walletAddress.toLowerCase();
+      const signature = await provider.request({
+        method: 'personal_sign',
+        params: [nonceResponse.message, checksumAddress],
+      });
       
-      let signature;
-      try {
-        // Direct MetaMask request - no complex Promise.race
-        console.log("📝 Calling personal_sign with:", {
-          message: nonceResponse.message,
-          address: checksumAddress
-        });
-        
-        signature = await provider.request({
-          method: 'personal_sign',
-          params: [nonceResponse.message, checksumAddress],
-        });
-        
-        console.log("✅ Signature received:", signature);
-        
-        if (!signature) {
-          throw new Error("MetaMask returned empty signature");
-        }
-        
-      } catch (signError: any) {
-        console.error("❌ MetaMask signature error:", signError);
-        console.error("❌ Error details:", JSON.stringify(signError, null, 2));
-        console.error("❌ Error code:", signError?.code);
-        console.error("❌ Error message:", signError?.message);
-        
-        // Handle specific MetaMask error codes
-        if (signError?.code === 4001) {
-          throw new Error("İmzayı reddettiniz. Lütfen tekrar deneyin ve imzayı onaylayın.");
-        } else if (signError?.code === -32603) {
-          throw new Error("MetaMask internal error. Sayfayı yenileyin ve tekrar deneyin.");
-        } else if (signError?.code === -32002) {
-          throw new Error("MetaMask'te bekleyen işlem var. Lütfen MetaMask'i açın ve işlemi tamamlayın.");
-        } else if (!signError || Object.keys(signError).length === 0) {
-          throw new Error("MetaMask yanıt vermedi. Extension'ın açık ve çalışır durumda olduğundan emin olun.");
-        } else {
-          throw new Error(`MetaMask hatası: ${signError?.message || signError?.toString() || 'Bilinmeyen hata'}`);
-        }
+      console.log("✅ Signature received:", signature);
+      
+      if (!signature) {
+        throw new Error("MetaMask returned empty signature");
       }
 
       // Step 3: Verify signature on server
       console.log("🔍 Sending signature to verify endpoint...");
       const verifyRes = await apiRequest("POST", "/auth/verify", {
-        wallet: walletAddress,
+        wallet: checksumAddress,
         signature: signature,
         nonce: nonceResponse.nonce
       });
+      
       console.log("✅ Verify response status:", verifyRes.status);
       const verifyResponse = await verifyRes.json();
       console.log("✅ Verify response data:", verifyResponse);
@@ -162,11 +147,31 @@ export function useWallet() {
       });
 
       return true;
+      
     } catch (error: any) {
-      console.error('Authentication error:', error);
+      console.error('❌ Authentication error:', error);
+      console.error('❌ Error details:', JSON.stringify(error, null, 2));
+      console.error('❌ Error code:', error?.code);
+      console.error('❌ Error message:', error?.message);
+      
+      let errorMessage = "Failed to authenticate wallet";
+      
+      // Handle specific MetaMask error codes
+      if (error?.code === 4001) {
+        errorMessage = "İmzayı reddettiniz. Lütfen tekrar deneyin ve imzayı onaylayın.";
+      } else if (error?.code === -32603) {
+        errorMessage = "MetaMask internal error. Sayfayı yenileyin ve tekrar deneyin.";
+      } else if (error?.code === -32002) {
+        errorMessage = "MetaMask'te bekleyen işlem var. Lütfen MetaMask'i açın ve işlemi tamamlayın.";
+      } else if (!error || Object.keys(error).length === 0) {
+        errorMessage = "MetaMask yanıt vermedi. Extension'ın açık ve çalışır durumda olduğundan emin olun.";
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Authentication Failed",
-        description: error.message || "Failed to authenticate wallet",
+        description: errorMessage,
         variant: "destructive",
       });
       return false;

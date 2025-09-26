@@ -578,11 +578,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get account with affiliate data (public)
+  // Get account (public)
   app.get("/api/account/:wallet", async (req, res) => {
     try {
       const { wallet } = req.params;
-      const account = await storage.getAccountWithAffiliateData(wallet);
+      const account = await storage.getAccount(wallet);
       
       if (!account) {
         return res.status(404).json({ error: "Account not found" });
@@ -595,269 +595,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Affiliate Application endpoints
-  
-  // Submit affiliate application (public - NO AUTH REQUIRED)
-  app.post("/api/affiliate/apply", async (req, res) => {
-    try {
-      const { applicationText, wallet } = req.body;
-      
-      // NO AUTH: Use wallet from request body
-      const walletAddress = wallet;
 
-      if (!applicationText) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Application text is required" 
-        });
-      }
 
-      // Check if user already has an application
-      const existingApplication = await storage.getAffiliateApplication(walletAddress);
-      if (existingApplication) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "You have already submitted an affiliate application" 
-        });
-      }
 
-      // Create affiliate application
-      const application = await storage.createAffiliateApplication({
-        wallet: walletAddress,
-        applicationText,
-        status: "pending"
-      });
 
-      res.json({ 
-        success: true, 
-        message: "Affiliate application submitted successfully",
-        application: {
-          id: application.id,
-          status: application.status,
-          appliedAt: application.appliedAt
-        }
-      });
 
-    } catch (error) {
-      console.error("Error creating affiliate application:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to submit application" 
-      });
-    }
-  });
 
-  // Get user's affiliate application status
-  app.get("/api/affiliate/application-status/:wallet", async (req, res) => {
-    try {
-      const { wallet } = req.params;
-      const application = await storage.getAffiliateApplication(wallet);
-      
-      if (!application) {
-        return res.json({ 
-          success: true, 
-          hasApplication: false 
-        });
-      }
 
-      res.json({ 
-        success: true, 
-        hasApplication: true,
-        application: {
-          id: application.id,
-          status: application.status,
-          appliedAt: application.appliedAt,
-          reviewedAt: application.reviewedAt,
-          reviewNotes: application.reviewNotes
-        }
-      });
 
-    } catch (error) {
-      console.error("Error fetching affiliate application:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to fetch application status" 
-      });
-    }
-  });
 
-  // Admin: Get all affiliate applications
-  app.get("/api/youhonor/affiliate/applications", authenticateAdmin, async (req, res) => {
-    try {
-      const { status } = req.query;
-      const applications = await storage.getAllAffiliateApplications(status as string);
-      
-      res.json({ 
-        success: true, 
-        applications 
-      });
-
-    } catch (error) {
-      console.error("Error fetching affiliate applications:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to fetch applications" 
-      });
-    }
-  });
-
-  // Admin: Update affiliate application status
-  app.put("/api/youhonor/affiliate/applications/:id", authenticateAdmin, async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { status, reviewNotes } = req.body;
-      const adminId = req.admin?.id;
-
-      if (!["approved", "rejected"].includes(status)) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Status must be 'approved' or 'rejected'" 
-        });
-      }
-
-      await storage.updateAffiliateApplicationStatus(
-        parseInt(id), 
-        status, 
-        adminId, 
-        reviewNotes
-      );
-
-      // If approved, activate affiliate system for the user
-      if (status === "approved") {
-        // Get application to get wallet address
-        const applications = await storage.getAllAffiliateApplications();
-        const application = applications.find(app => app.id === parseInt(id));
-        
-        if (application) {
-          await storage.activateAffiliateSystem(application.wallet, 'campaign_creation');
-        }
-      }
-
-      res.json({ 
-        success: true, 
-        message: `Application ${status} successfully` 
-      });
-
-    } catch (error) {
-      console.error("Error updating affiliate application:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to update application" 
-      });
-    }
-  });
-
-  // Get affiliate referral stats (public)
-  app.get("/api/affiliate/stats/:wallet", async (req, res) => {
-    try {
-      const { wallet } = req.params;
-      const stats = await storage.getReferralStats(wallet);
-      res.json(stats);
-    } catch (error) {
-      console.error("Error fetching affiliate stats:", error);
-      res.status(500).json({ error: "Failed to fetch affiliate stats" });
-    }
-  });
-
-  // Activate affiliate system (public)
-  app.post("/api/affiliate/activate", async (req, res) => {
-    try {
-      const { wallet, activityType, relatedId } = req.body;
-      
-      if (!wallet || !activityType) {
-        return res.status(400).json({ error: "Wallet and activity type are required" });
-      }
-      
-      await storage.activateAffiliateSystem(wallet, activityType, relatedId);
-      res.json({ success: true, message: "Affiliate system activated" });
-    } catch (error) {
-      console.error("Error activating affiliate system:", error);
-      res.status(500).json({ error: "Failed to activate affiliate system" });
-    }
-  });
-
-  // 🎯 NEW: Detailed affiliate analytics (public)
-  app.get("/api/affiliate/detailed-stats/:wallet", async (req, res) => {
-    try {
-      const { wallet } = req.params;
-      const detailedStats = await storage.getDetailedAffiliateStats(wallet);
-      res.json(detailedStats);
-    } catch (error) {
-      console.error("Error fetching detailed affiliate stats:", error);
-      res.status(500).json({ error: "Failed to fetch detailed affiliate stats" });
-    }
-  });
-
-  // 🎯 NEW: Unpaid rewards tracking (public)
-  app.get("/api/affiliate/unpaid-rewards/:wallet", async (req, res) => {
-    try {
-      const { wallet } = req.params;
-      const unpaidRewards = await storage.getUnpaidRewards(wallet);
-      res.json(unpaidRewards);
-    } catch (error) {
-      console.error("Error fetching unpaid rewards:", error);
-      res.status(500).json({ error: "Failed to fetch unpaid rewards" });
-    }
-  });
-
-  // 🎯 NEW: Affiliate leaderboard (public)
-  app.get("/api/affiliate/leaderboard", validatePaginationParams, async (req, res) => {
-    try {
-      const limit = req.query.limit as number;
-      const leaderboard = await storage.getAffiliateLeaderboard(limit);
-      res.json(leaderboard);
-    } catch (error) {
-      console.error("Error fetching affiliate leaderboard:", error);
-      res.status(500).json({ error: "Failed to fetch affiliate leaderboard" });
-    }
-  });
-
-  // Register with referral code (protected - requires authentication)
-  app.post("/api/register-with-referral", accountRateLimit, authenticateUser, async (req: UserAuthenticatedRequest, res) => {
-    try {
-      const { referralCode } = req.body;
-      
-      // Security: Use authenticated wallet instead of trusting client data
-      const wallet = req.userWallet;
-
-      // Check if account already exists
-      const existingAccount = await storage.getAccount(wallet);
-      if (existingAccount) {
-        return res.status(409).json({ error: "Account already exists" });
-      }
-
-      let referredBy = null;
-      
-      // If referral code provided, validate it
-      if (referralCode) {
-        const allAccounts = await storage.getAllAccounts();
-        const referrer = allAccounts.find(acc => acc.referralCode === referralCode);
-        
-        if (!referrer) {
-          return res.status(400).json({ error: "Invalid referral code" });
-        }
-        
-        // Security: Prevent self-referral
-        if (referrer.wallet.toLowerCase() === wallet.toLowerCase()) {
-          return res.status(400).json({ error: "Cannot refer yourself" });
-        }
-        
-        referredBy = referrer.wallet;
-      }
-
-      // Create account with referral info
-      const account = await storage.createAccount({
-        wallet,
-        active: false,
-        referredBy,
-      });
-
-      res.json(account);
-    } catch (error) {
-      console.error("Error registering with referral:", error);
-      res.status(500).json({ error: "Failed to register with referral" });
-    }
-  });
   
   // ===== USER ANALYTICS DASHBOARD ROUTES =====
   
@@ -1238,13 +984,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const campaign = await storage.createCampaign(campaignData);
       
-      // Activate affiliate system for campaign creator (if first donation/campaign)
-      try {
-        await storage.activateAffiliateSystem(campaignData.ownerWallet, 'campaign_creation', campaign.id);
-      } catch (error) {
-        console.error("Error activating affiliate system for campaign:", error);
-        // Don't fail the campaign creation if affiliate activation fails
-      }
       
       res.json(campaign);
     } catch (error) {
@@ -1329,13 +1068,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const donation = await storage.createDonation(donationData);
       
-      // Activate affiliate system for donor (if first donation/campaign)
-      try {
-        await storage.activateAffiliateSystem(donationData.donorWallet, 'donation', donation.id);
-      } catch (error) {
-        console.error("Error activating affiliate system for donation:", error);
-        // Don't fail the donation if affiliate activation fails
-      }
       
       res.json(donation);
     } catch (error) {
@@ -2932,60 +2664,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Affiliates Management
-  app.get("/api/youhonor/affiliates", authenticateAdmin, async (req, res) => {
-    try {
-      const { status, page = 1, limit = 20 } = req.query;
-      const filters = { status };
-      const affiliates = await storage.getAffiliateApplications(filters, parseInt(page as string), parseInt(limit as string));
-      res.json(affiliates);
-    } catch (error) {
-      console.error("Error fetching affiliate applications:", error);
-      res.status(500).json({ error: "Failed to fetch affiliate applications" });
-    }
-  });
 
-  app.post("/api/youhonor/affiliates/:id/approve", authenticateAdmin, async (req: any, res) => {
-    try {
-      const { id } = req.params;
-      const { reviewNotes } = req.body;
-      await storage.approveAffiliateApplication(parseInt(id), req.admin.id, reviewNotes);
-      
-      await storage.createAdminLog({
-        adminId: req.admin.id,
-        action: "approve_affiliate",
-        details: `Approved affiliate application ID ${id}`,
-        ipAddress: req.ip,
-        userAgent: req.get('User-Agent')
-      });
 
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error approving affiliate application:", error);
-      res.status(500).json({ error: "Failed to approve affiliate application" });
-    }
-  });
-
-  app.post("/api/youhonor/affiliates/:id/reject", authenticateAdmin, async (req: any, res) => {
-    try {
-      const { id } = req.params;
-      const { reviewNotes } = req.body;
-      await storage.rejectAffiliateApplication(parseInt(id), req.admin.id, reviewNotes);
-      
-      await storage.createAdminLog({
-        adminId: req.admin.id,
-        action: "reject_affiliate",
-        details: `Rejected affiliate application ID ${id}`,
-        ipAddress: req.ip,
-        userAgent: req.get('User-Agent')
-      });
-
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error rejecting affiliate application:", error);
-      res.status(500).json({ error: "Failed to reject affiliate application" });
-    }
-  });
 
   // Activity Logs
   app.get("/api/youhonor/logs", authenticateAdmin, async (req, res) => {

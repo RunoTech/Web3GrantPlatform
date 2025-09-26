@@ -21,6 +21,46 @@ export function useWallet() {
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
 
+  // Target chain configuration
+  const TARGET_CHAIN_ID = import.meta.env.VITE_TARGET_CHAIN_ID || '0x1'; // Ethereum Mainnet
+
+  // Centralized network verification
+  const verifyAndSwitchNetwork = useCallback(async (): Promise<boolean> => {
+    if (!window.ethereum) return false;
+
+    try {
+      const chainId = await window.ethereum.request({
+        method: 'eth_chainId'
+      });
+
+      if (chainId === TARGET_CHAIN_ID) {
+        return true;
+      }
+
+      // Attempt to switch to target network
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: TARGET_CHAIN_ID }],
+        });
+        return true;
+      } catch (switchError: any) {
+        // User rejected switch
+        toast({
+          title: "Ağ Hatası",
+          description: "Lütfen Ethereum Mainnet'e geçin",
+          variant: "destructive"
+        });
+        return false;
+      }
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Network verification error:', error);
+      }
+      return false;
+    }
+  }, [toast, TARGET_CHAIN_ID]);
+
   // Check if we have existing accounts (auto-connect)
   const checkExistingConnection = useCallback(async () => {
     if (!window.ethereum) return;
@@ -31,13 +71,21 @@ export function useWallet() {
       });
 
       if (accounts && accounts.length > 0) {
-        setAddress(accounts[0]);
-        setIsConnected(true);
+        // Verify network before setting connected state
+        const networkOk = await verifyAndSwitchNetwork();
+        if (networkOk) {
+          setAddress(accounts[0]);
+          setIsConnected(true);
+        } else {
+          // Wrong network and user rejected switch
+          setAddress(null);
+          setIsConnected(false);
+        }
       }
     } catch (error) {
       // No existing connection - this is normal
     }
-  }, []);
+  }, [verifyAndSwitchNetwork]);
 
   // Simple, reliable connect function
   const connect = useCallback(async (): Promise<boolean> => {
@@ -65,25 +113,10 @@ export function useWallet() {
         throw new Error('Hesap bulunamadı');
       }
 
-      // Check we're on Ethereum mainnet
-      const chainId = await window.ethereum.request({
-        method: 'eth_chainId'
-      });
-
-      if (chainId !== '0x1') {
-        try {
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x1' }],
-          });
-        } catch (switchError) {
-          toast({
-            title: "Ağ Hatası",
-            description: "Lütfen Ethereum Mainnet'e geçin",
-            variant: "destructive"
-          });
-          return false;
-        }
+      // Verify and switch network if needed
+      const networkOk = await verifyAndSwitchNetwork();
+      if (!networkOk) {
+        return false;
       }
 
       // Success! Set connection state
@@ -120,7 +153,7 @@ export function useWallet() {
     } finally {
       setIsConnecting(false);
     }
-  }, [isConnecting, toast]);
+  }, [isConnecting, toast, verifyAndSwitchNetwork]);
 
   // Simple disconnect
   const disconnect = useCallback(() => {
@@ -137,18 +170,38 @@ export function useWallet() {
   useEffect(() => {
     if (!window.ethereum) return;
 
-    const handleAccountsChanged = (accounts: string[]) => {
+    const handleAccountsChanged = async (accounts: string[]) => {
       if (!accounts || accounts.length === 0) {
         disconnect();
       } else {
-        setAddress(accounts[0]);
-        setIsConnected(true);
+        // Verify network before setting connected state
+        const networkOk = await verifyAndSwitchNetwork();
+        if (networkOk) {
+          setAddress(accounts[0]);
+          setIsConnected(true);
+        } else {
+          // Wrong network and user rejected switch
+          setAddress(null);
+          setIsConnected(false);
+        }
       }
     };
 
-    const handleChainChanged = () => {
-      // Reload page to reset everything on chain change
-      window.location.reload();
+    const handleChainChanged = async () => {
+      // Re-verify network instead of full page reload
+      if (isConnected) {
+        const networkOk = await verifyAndSwitchNetwork();
+        if (!networkOk) {
+          // Wrong network and user rejected switch - disconnect
+          setAddress(null);
+          setIsConnected(false);
+          toast({
+            title: "Ağ Değiştirildi",
+            description: "Lütfen Ethereum Mainnet'e geçin",
+            variant: "destructive"
+          });
+        }
+      }
     };
 
     window.ethereum.on('accountsChanged', handleAccountsChanged);
@@ -160,7 +213,7 @@ export function useWallet() {
         window.ethereum.removeListener('chainChanged', handleChainChanged);
       }
     };
-  }, [disconnect]);
+  }, [disconnect, isConnected, verifyAndSwitchNetwork, toast]);
 
   // Check for existing connection on mount
   useEffect(() => {

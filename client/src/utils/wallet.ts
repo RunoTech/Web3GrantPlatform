@@ -1,8 +1,4 @@
-declare global {
-  interface Window {
-    ethereum?: any;
-  }
-}
+// Use EthereumProvider interface from useWallet hook to avoid type conflicts
 
 export interface WalletProvider {
   request: (args: { method: string; params?: any[] }) => Promise<any>;
@@ -16,11 +12,17 @@ const ETHEREUM_MAINNET_CHAIN_ID = '0x1'; // Chain ID 1
 // Get MetaMask provider only
 export function getWalletProvider(): any {
   if (typeof window !== 'undefined' && window.ethereum) {
-    console.log('🦊 MetaMask detected');
+    // Log only in development
+    if (import.meta.env.DEV) {
+      console.log('🦊 MetaMask detected');
+    }
     return window.ethereum;
   }
   
-  console.warn('⚠️ MetaMask not detected');
+  // Log only in development
+  if (import.meta.env.DEV) {
+    console.warn('⚠️ MetaMask not detected');
+  }
   return null;
 }
 
@@ -72,7 +74,10 @@ function normalizeChainId(value: any): string | null {
     }
     return null;
   } catch (error) {
-    console.error('ChainId normalization error:', error);
+    // Log error only in development
+    if (import.meta.env.DEV) {
+      console.error('ChainId normalization error:', error);
+    }
     return null;
   }
 }
@@ -80,7 +85,10 @@ function normalizeChainId(value: any): string | null {
 export async function verifyNetwork(): Promise<boolean> {
   // Test environment bypass
   if (import.meta.env.VITE_BYPASS_NETWORK_CHECK === 'true') {
-    console.log('🧪 Network verification bypassed for testing');
+    // Log bypass only in development
+    if (import.meta.env.DEV) {
+      console.log('🧪 Network verification bypassed for testing');
+    }
     return true;
   }
 
@@ -95,11 +103,17 @@ export async function verifyNetwork(): Promise<boolean> {
     });
     
     const normalizedChainId = normalizeChainId(rawChainId);
-    console.log('🔗 Network verification:', { raw: rawChainId, normalized: normalizedChainId, expected: ETHEREUM_MAINNET_CHAIN_ID });
+    // Log network verification only in development
+    if (import.meta.env.DEV) {
+      console.log('🔗 Network verification:', { raw: rawChainId, normalized: normalizedChainId, expected: ETHEREUM_MAINNET_CHAIN_ID });
+    }
     
     return normalizedChainId === ETHEREUM_MAINNET_CHAIN_ID;
   } catch (error) {
-    console.error('Network verification error:', error);
+    // Log error only in development
+    if (import.meta.env.DEV) {
+      console.error('Network verification error:', error);
+    }
     return false;
   }
 }
@@ -117,7 +131,10 @@ export async function switchToEthereumMainnet(): Promise<boolean> {
     });
     return true;
   } catch (error: any) {
-    console.error('Network switch error:', error);
+    // Log error only in development
+    if (import.meta.env.DEV) {
+      console.error('Network switch error:', error);
+    }
     return false;
   }
 }
@@ -171,7 +188,10 @@ export async function connectWallet(): Promise<string | null> {
 
     return address;
   } catch (error: any) {
-    console.error('Wallet connection error:', error);
+    // Log error only in development
+    if (import.meta.env.DEV) {
+      console.error('Wallet connection error:', error);
+    }
     throw new Error(error.message || 'Error occurred while connecting wallet');
   }
 }
@@ -188,7 +208,10 @@ export async function getAccounts(): Promise<string[]> {
     });
     return Array.isArray(accounts) ? accounts : [];
   } catch (error) {
-    console.error('Error getting accounts:', error);
+    // Log error only in development
+    if (import.meta.env.DEV) {
+      console.error('Error getting accounts:', error);
+    }
     return [];
   }
 }

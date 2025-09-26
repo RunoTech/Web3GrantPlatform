@@ -145,8 +145,6 @@ const translations = {
     // Common translations
     'common.copied': 'COPIED!',
     'common.back_to_home': 'Back to Home',
-    'crypto.buy_crypto': 'BUY CRYPTO',
-    'crypto.buy_crypto_with_card': 'Buy Crypto with Card',
     'step1ConnectWallet': 'Connect your wallet to the platform',
     'step2SelectNetwork': 'Select Ethereum network for transactions',
     'step3SendTokens': 'Send the exact amount of USDT/BUSD to our platform wallet',
@@ -572,8 +570,6 @@ const translations = {
     // Common
     'common.home': 'Ana Sayfa',
     'common.back_to_home': 'Ana Sayfaya Dön',
-    'crypto.buy_crypto': 'KRİPTO SATIN AL',
-    'crypto.buy_crypto_with_card': 'Kartla Kripto Satın Al',
 
     // Footer
     'footer.platform': 'PLATFORM',

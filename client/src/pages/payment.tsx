@@ -8,7 +8,6 @@ import AutoPayment from "@/components/AutoPayment";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import LanguageSelector from "@/components/LanguageSelector";
 import Header from "@/components/Header";
-import CryptoOnramp from "@/components/CryptoOnramp";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
@@ -208,23 +207,9 @@ export default function PaymentPage() {
                     ÖNERİLEN
                   </Badge>
                   <div>
-                    <CryptoOnramp 
-                      targetAmount={75}
-                      targetCurrency="USDT"
-                      onSuccess={(txHash) => {
-                        toast({
-                          title: "Kripto Satın Alındı!",
-                          description: "Şimdi hesap aktivasyonu yapabilirsiniz.",
-                        });
-                      }}
-                      onError={(error) => {
-                        toast({
-                          title: "Hata",
-                          description: error,
-                          variant: "destructive",
-                        });
-                      }}
-                    />
+                    <p className="text-sm text-muted-foreground">
+                      Kripto satın alma özelliği kaldırılmıştır.
+                    </p>
                   </div>
                 </div>
 

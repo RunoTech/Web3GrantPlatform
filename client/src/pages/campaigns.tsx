@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import CampaignCard from "@/components/CampaignCard";
-import CryptoOnramp from "@/components/CryptoOnramp";
 import LanguageSelector from "@/components/LanguageSelector";
 import Header from "@/components/Header";
 import { useLanguage } from "@/contexts/LanguageContext";

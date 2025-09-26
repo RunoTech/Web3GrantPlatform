@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { validateCard, formatCardNumber, formatExpiryDate, getBinInfo, type CardBrand } from '@/lib/payments';
 import { Link, useLocation } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
@@ -487,6 +488,7 @@ export default function VirtualPosPage() {
 
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

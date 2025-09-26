@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import ShareButton from "@/components/ShareButton";
 import { Heart, ArrowLeft, ExternalLink, Users, Target, Activity, CheckCircle, Clock, Building, TrendingUp, Shield, Zap, CreditCard, ArrowRight, Settings, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -367,6 +368,7 @@ export default function CampaignDetailPage() {
         campaignId={campaign.id}
         defaultAmount={5000}
       />
+      <Footer />
     </div>
   );
 }

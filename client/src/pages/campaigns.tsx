@@ -10,6 +10,7 @@ import WalletConnectButton from "@/components/WalletConnectButton";
 import CampaignCard from "@/components/CampaignCard";
 import LanguageSelector from "@/components/LanguageSelector";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Heart, Search, ArrowLeft, CreditCard, Filter, X, SlidersHorizontal } from "lucide-react";
@@ -332,6 +333,7 @@ export default function CampaignsPage() {
           )}
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

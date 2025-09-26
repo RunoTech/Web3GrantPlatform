@@ -17,6 +17,7 @@ import { Heart, ArrowLeft, Building, Users, Calendar, CheckCircle, Lock, CreditC
 
 // Add Header component import
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 export default function CreateCampaignPage() {
   const { t } = useLanguage();
@@ -968,6 +969,7 @@ export default function CreateCampaignPage() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

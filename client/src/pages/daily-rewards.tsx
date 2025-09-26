@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -371,6 +372,7 @@ export default function DailyRewardsPage() {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

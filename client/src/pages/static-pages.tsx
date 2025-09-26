@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Link } from 'wouter';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { 
   Heart, 
   Shield, 
@@ -827,6 +828,7 @@ export function StaticPage({ pageKey, icon: Icon }: StaticPageProps) {
           </div>
         </section>
       </main>
+      <Footer />
     </div>
   );
 }

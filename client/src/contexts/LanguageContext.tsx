@@ -367,13 +367,52 @@ const translations = {
 
     // Footer
     'footer.platform': 'PLATFORM',
+    'footer.company': 'COMPANY',
     'footer.support': 'SUPPORT',
-    'footer.connection': 'CONNECTION',
-    'footer.how_it_works': 'HOW IT WORKS',
-    'footer.security': 'SECURITY',
-    'footer.faq': 'FAQ',
+    'footer.legal': 'LEGAL',
+    'footer.community': 'COMMUNITY',
     'footer.rights': 'ALL RIGHTS RESERVED',
-    'footer.description': 'Secure and transparent donation platform with futuristic blockchain technology',
+    'footer.description': 'Next-generation blockchain donation platform. Secure, transparent, and commission-free donations powered by Ethereum technology.',
+    
+    // Platform Footer Links
+    'footer.how_it_works': 'How It Works',
+    'footer.campaigns': 'Browse Campaigns',
+    'footer.create_campaign': 'Create Campaign',
+    'footer.daily_rewards': 'Daily Rewards',
+    'footer.donation_center': 'Donation Center',
+    'footer.funds': 'Fundraising',
+    
+    // Company Footer Links
+    'footer.about_us': 'About DUXXAN',
+    'footer.our_mission': 'Our Mission',
+    'footer.blockchain_technology': 'Blockchain Technology',
+    'footer.careers': 'Careers',
+    'footer.press_kit': 'Press Kit',
+    'footer.news': 'News & Updates',
+    
+    // Support Footer Links
+    'footer.help_center': 'Help Center',
+    'footer.faq': 'FAQ',
+    'footer.contact_us': 'Contact Us',
+    'footer.documentation': 'Documentation',
+    'footer.api_docs': 'API Documentation',
+    'footer.security': 'Security',
+    
+    // Legal Footer Links
+    'footer.terms_of_service': 'Terms of Service',
+    'footer.privacy_policy': 'Privacy Policy',
+    'footer.cookie_policy': 'Cookie Policy',
+    'footer.compliance': 'Compliance',
+    'footer.aml_policy': 'AML Policy',
+    'footer.risk_disclosure': 'Risk Disclosure',
+    
+    // Community Footer Links
+    'footer.twitter': 'Twitter',
+    'footer.telegram': 'Telegram',
+    'footer.discord': 'Discord',
+    'footer.linkedin': 'LinkedIn',
+    'footer.medium': 'Medium',
+    'footer.github': 'GitHub',
   },
   tr: {
     // Header & Navigation
@@ -572,13 +611,52 @@ const translations = {
 
     // Footer
     'footer.platform': 'PLATFORM',
+    'footer.company': 'ŞİRKET',
     'footer.support': 'DESTEK',
-    'footer.connection': 'BAĞLANTI',
-    'footer.how_it_works': 'NASIL ÇALIŞIR',
-    'footer.security': 'GÜVENLİK',
-    'footer.faq': 'SSS',
+    'footer.legal': 'HUKUKI',
+    'footer.community': 'TOPLULUK',
     'footer.rights': 'TÜM HAKLARI SAKLIDIR',
-    'footer.description': 'Futuristik blockchain teknolojisi ile güvenli ve şeffaf bağış platformu',
+    'footer.description': 'Yeni nesil blockchain bağış platformu. Ethereum teknolojisiyle güçlendirilmiş güvenli, şeffaf ve komisyonsuz bağışlar.',
+    
+    // Platform Footer Links
+    'footer.how_it_works': 'Nasıl Çalışır',
+    'footer.campaigns': 'Kampanyalara Göz At',
+    'footer.create_campaign': 'Kampanya Oluştur',
+    'footer.daily_rewards': 'Günlük Ödüller',
+    'footer.donation_center': 'Bağış Merkezi',
+    'footer.funds': 'Fon Toplama',
+    
+    // Company Footer Links
+    'footer.about_us': 'DUXXAN Hakkında',
+    'footer.our_mission': 'Misyonumuz',
+    'footer.blockchain_technology': 'Blockchain Teknolojisi',
+    'footer.careers': 'Kariyer',
+    'footer.press_kit': 'Basın Kiti',
+    'footer.news': 'Haberler ve Güncellemeler',
+    
+    // Support Footer Links
+    'footer.help_center': 'Yardım Merkezi',
+    'footer.faq': 'Sıkça Sorulan Sorular',
+    'footer.contact_us': 'İletişim',
+    'footer.documentation': 'Dokümantasyon',
+    'footer.api_docs': 'API Dokümantasyonu',
+    'footer.security': 'Güvenlik',
+    
+    // Legal Footer Links
+    'footer.terms_of_service': 'Hizmet Koşulları',
+    'footer.privacy_policy': 'Gizlilik Politikası',
+    'footer.cookie_policy': 'Çerez Politikası',
+    'footer.compliance': 'Uyumluluk',
+    'footer.aml_policy': 'AML Politikası',
+    'footer.risk_disclosure': 'Risk Bildirimi',
+    
+    // Community Footer Links
+    'footer.twitter': 'Twitter',
+    'footer.telegram': 'Telegram',
+    'footer.discord': 'Discord',
+    'footer.linkedin': 'LinkedIn',
+    'footer.medium': 'Medium',
+    'footer.github': 'GitHub',
   },
   es: {
     // Header & Navigation

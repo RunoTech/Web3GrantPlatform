@@ -572,7 +572,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="surface-secondary border-t border-border section-spacing">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center border border-border">
@@ -594,10 +594,30 @@ export default function HomePage() {
                     <li key={link.id}>
                       <Link 
                         href={link.url} 
-                        className="hover:text-primary transition-colors uppercase tracking-wide"
+                        className="hover:text-primary transition-colors text-sm"
                         data-testid={`footer-platform-${link.id}`}
                       >
-                        {link.title}
+                        {t(`footer.${link.title.toLowerCase()}`)}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {/* Dynamic Company Section */}
+            {groupedFooterLinks.company && (
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.company')}</h4>
+                <ul className="space-y-2 text-muted-foreground">
+                  {groupedFooterLinks.company.map((link: any) => (
+                    <li key={link.id}>
+                      <Link 
+                        href={link.url} 
+                        className="hover:text-primary transition-colors text-sm"
+                        data-testid={`footer-company-${link.id}`}
+                      >
+                        {t(`footer.${link.title.toLowerCase()}`)}
                       </Link>
                     </li>
                   ))}
@@ -614,10 +634,10 @@ export default function HomePage() {
                     <li key={link.id}>
                       <Link 
                         href={link.url} 
-                        className="hover:text-primary transition-colors uppercase tracking-wide"
+                        className="hover:text-primary transition-colors text-sm"
                         data-testid={`footer-support-${link.id}`}
                       >
-                        {link.title}
+                        {t(`footer.${link.title.toLowerCase()}`)}
                       </Link>
                     </li>
                   ))}
@@ -625,19 +645,41 @@ export default function HomePage() {
               </div>
             )}
             
-            {/* Dynamic Connection Section */}
-            {groupedFooterLinks.connection && (
+            {/* Dynamic Legal Section */}
+            {groupedFooterLinks.legal && (
               <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.connection')}</h4>
-                <div className="flex items-center gap-4">
-                  {groupedFooterLinks.connection.map((link: any) => (
+                <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.legal')}</h4>
+                <ul className="space-y-2 text-muted-foreground">
+                  {groupedFooterLinks.legal.map((link: any) => (
+                    <li key={link.id}>
+                      <Link 
+                        href={link.url} 
+                        className="hover:text-primary transition-colors text-sm"
+                        data-testid={`footer-legal-${link.id}`}
+                      >
+                        {t(`footer.${link.title.toLowerCase()}`)}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {/* Dynamic Community Section */}
+            {groupedFooterLinks.community && (
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-foreground uppercase tracking-wide">{t('footer.community')}</h4>
+                <div className="flex flex-wrap gap-3">
+                  {groupedFooterLinks.community.map((link: any) => (
                     <Link 
                       key={link.id}
                       href={link.url} 
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:border-primary border border-border transition-colors hover:bg-primary/10"
-                      data-testid={`footer-connection-${link.id}`}
+                      data-testid={`footer-community-${link.id}`}
                     >
-                      <span className="text-xs font-semibold text-primary">{link.title}</span>
+                      <span className="text-xs font-semibold text-primary">{link.title.charAt(0)}</span>
                     </Link>
                   ))}
                 </div>

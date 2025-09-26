@@ -35,7 +35,7 @@ export function useWallet() {
         setIsConnected(true);
       }
     } catch (error) {
-      console.log('No existing connection found');
+      // No existing connection - this is normal
     }
   }, []);
 
@@ -98,7 +98,10 @@ export function useWallet() {
       return true;
 
     } catch (error: any) {
-      console.error('Connection error:', error);
+      // Log error for debugging in development only
+      if (import.meta.env.DEV) {
+        console.error('Connection error:', error);
+      }
       
       let message = "Bağlantı başarısız";
       if (error.code === 4001) {

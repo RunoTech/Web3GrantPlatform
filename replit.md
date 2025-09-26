@@ -1,12 +1,22 @@
 # Overview
 
-DUXXAN is a professional Web3 donation platform built for Ethereum Mainnet and BSC Mainnet networks. The platform features a corporate Binance-style design with white/yellow light theme and black/yellow dark theme, ensuring a clean and professional user experience. The platform enables commission-free donations where funds go directly to campaign creators. Revenue is generated through one-time account activation fees paid in USDT/BUSD. The system includes campaign management, daily reward mechanisms, and admin controls for fee management and winner selection.
+DUXXAN is a professional Web3 donation platform built for Ethereum Mainnet and BSC Mainnet networks. The platform features a corporate Binance-style design with white/yellow light theme and black/yellow dark theme, ensuring a clean and professional user experience. The platform enables commission-free donations where funds go directly to campaign creators. Revenue is generated through one-time account activation fees paid in USDT/BUSD. The system includes campaign management, daily reward mechanisms, and admin controls for fee management and winner selection. **The platform has been simplified by completely removing the affiliate/referral system to focus exclusively on core donation and campaign functionality.**
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+
+### Complete Affiliate System Removal (September 26, 2025)
+- **MAJOR SIMPLIFICATION**: Completely removed affiliate/referral system from entire platform
+- Removed affiliate database schema including tables: affiliateActivities, affiliateApplications
+- Removed all affiliate-related fields from accounts table (referralCode, referredBy, totalReferrals, etc.)
+- Removed all affiliate API endpoints from server/routes.ts (/api/affiliate/*, /api/youhonor/affiliate/*)
+- Removed all affiliate storage functions from server/storage.ts (activateAffiliateSystem, getReferralStats, etc.)
+- Removed affiliate system platform setting from admin seed configuration
+- Platform now focuses exclusively on core donation and campaign functionality without affiliate complexity
+- System successfully compiles and runs without affiliate dependencies
 
 ### SEO and Social Sharing Improvements (September 16, 2025)
 - **CRITICAL FIX**: Resolved link sharing display issues when opened from external sources

@@ -18,6 +18,8 @@ const translations = {
     'profile': 'PROFILE',
     'connect_wallet': 'CONNECT WALLET',
     'disconnect': 'DISCONNECT',
+    'disconnect_short': 'DISC.',
+    'connecting': 'CONNECTING...',
     
     // Hero Section
     'hero.title': 'NEXT-GEN BLOCKCHAIN DONATION PLATFORM',
@@ -423,6 +425,8 @@ const translations = {
     'profile': 'PROFİL',
     'connect_wallet': 'CÜZDAN BAĞLA',
     'disconnect': 'BAĞLANTI KES',
+    'disconnect_short': 'KES',
+    'connecting': 'BAĞLANIYOR...',
     
     // Hero Section
     'hero.title': 'YENİ NESİL BLOCKCHAIN BAĞIŞ PLATFORMU',
@@ -667,6 +671,8 @@ const translations = {
     'profile': 'PERFIL',
     'connect_wallet': 'CONECTAR BILLETERA',
     'disconnect': 'DESCONECTAR',
+    'disconnect_short': 'DESC.',
+    'connecting': 'CONECTANDO...',
     
     // Hero Section
     'hero.title': 'PLATAFORMA DE DONACIONES BLOCKCHAIN DE NUEVA GENERACIÓN',
@@ -767,6 +773,8 @@ const translations = {
     'profile': 'PROFIL',
     'connect_wallet': 'CONNECTER PORTEFEUILLE',
     'disconnect': 'DÉCONNECTER',
+    'disconnect_short': 'DÉCO.',
+    'connecting': 'CONNEXION...',
     
     // Hero Section
     'hero.title': 'PLATEFORME DE DONATION BLOCKCHAIN NOUVELLE GÉNÉRATION',
@@ -867,6 +875,8 @@ const translations = {
     'profile': 'PROFIL',
     'connect_wallet': 'WALLET VERBINDEN',
     'disconnect': 'TRENNEN',
+    'disconnect_short': 'TRENN.',
+    'connecting': 'VERBINDE...',
     
     // Hero Section
     'hero.title': 'NEXT-GEN BLOCKCHAIN SPENDEN PLATTFORM',

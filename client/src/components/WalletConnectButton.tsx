@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useWallet } from "@/hooks/useWallet";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Wallet } from "lucide-react";
 
 export default function WalletConnectButton() {
   const { isConnected, address, isConnecting, connect, disconnect } = useWallet();
+  const { t } = useLanguage();
   
   if (isConnected && address) {
     return (
@@ -27,8 +29,8 @@ export default function WalletConnectButton() {
           className="hover:text-red-600 border-muted-foreground/20 transition-all duration-200 h-11 px-3 sm:h-11 sm:px-4 touch-manipulation text-xs sm:text-sm min-h-11"
           data-testid="button-disconnect-wallet"
         >
-          <span className="hidden sm:inline">Disconnect</span>
-          <span className="sm:hidden">Disc.</span>
+          <span className="hidden sm:inline">{t('disconnect')}</span>
+          <span className="sm:hidden">{t('disconnect_short')}</span>
         </Button>
       </div>
     );
@@ -42,7 +44,7 @@ export default function WalletConnectButton() {
       data-testid="button-connect-wallet"
     >
       <Wallet className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
-      {isConnecting ? "Connecting..." : "Connect MetaMask"}
+      {isConnecting ? t('connecting') : t('connect_wallet')}
       <div className="text-xs text-primary-foreground/70 ml-1.5 sm:ml-2 hidden sm:block">
         🦊
       </div>

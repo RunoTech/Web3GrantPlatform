@@ -4,12 +4,7 @@ import { useWallet } from "@/hooks/useWallet";
 import { Wallet } from "lucide-react";
 
 export default function WalletConnectButton() {
-  const { isConnected, address, isConnecting, isInitialized, connect, disconnect } = useWallet();
-
-  // Don't show anything until wallet state is initialized
-  if (!isInitialized) {
-    return null;
-  }
+  const { isConnected, address, isConnecting, connect, disconnect } = useWallet();
   
   if (isConnected && address) {
     return (

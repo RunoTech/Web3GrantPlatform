@@ -114,13 +114,6 @@ async function seedPlatformSettings() {
         description: "Enable daily reward system",
         updatedBy: 1,
       },
-      {
-        key: "affiliate_system_enabled",
-        value: "true",
-        category: "features",
-        description: "Enable affiliate referral system",
-        updatedBy: 1,
-      },
     ];
 
     await db.insert(platformSettings).values(defaultSettings);

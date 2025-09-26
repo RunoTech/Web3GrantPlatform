@@ -12,8 +12,6 @@ import {
   type FooterLink, type InsertFooterLink,
   type Announcement, type InsertAnnouncement,
   type AdminLog, type InsertAdminLog,
-  type AffiliateActivity, type InsertAffiliateActivity,
-  type AffiliateApplication, type InsertAffiliateApplication,
   type Wallet, type InsertWallet,
   type Transaction, type InsertTransaction,
   type DailyReward, type InsertDailyReward,
@@ -33,8 +31,6 @@ import {
   footerLinks,
   announcements,
   adminLogs,
-  affiliateActivities,
-  affiliateApplications,
   wallets,
   transactions,
   dailyRewards,
@@ -171,20 +167,6 @@ export interface IStorage {
   deleteRecord(tableName: string, id: string): Promise<void>;
   exportTableData(tableName: string): Promise<any[]>;
 
-  // Affiliate System
-  generateReferralCode(wallet: string): Promise<string>;
-  getAccountWithAffiliateData(wallet: string): Promise<Account | undefined>;
-  updateAccountAffiliateData(wallet: string, updates: Partial<Account>): Promise<void>;
-  activateAffiliateSystem(wallet: string, activityType: 'donation' | 'campaign_creation', relatedId?: number): Promise<void>;
-  getReferralStats(wallet: string): Promise<{ totalReferrals: number; totalEarnings: string; activities: AffiliateActivity[] }>;
-  createAffiliateActivity(activity: InsertAffiliateActivity): Promise<AffiliateActivity>;
-  getAffiliateActivities(wallet: string): Promise<AffiliateActivity[]>;
-
-  // Affiliate Applications
-  createAffiliateApplication(application: InsertAffiliateApplication): Promise<AffiliateApplication>;
-  getAffiliateApplication(wallet: string): Promise<AffiliateApplication | undefined>;
-  getAllAffiliateApplications(status?: string): Promise<AffiliateApplication[]>;
-  updateAffiliateApplicationStatus(id: number, status: string, reviewedBy: number, reviewNotes?: string): Promise<void>;
 
   // ===== NEW ADMIN ENDPOINTS METHODS =====
   
@@ -216,10 +198,6 @@ export interface IStorage {
   rejectCampaign(id: number, adminId: number): Promise<void>;
   toggleCampaignCompanyVisibility(id: number): Promise<void>;
   
-  // Enhanced Affiliates Management
-  getAffiliateApplications(filters: any, page: number, limit: number): Promise<AffiliateApplication[]>;
-  approveAffiliateApplication(id: number, reviewedBy: number, reviewNotes?: string): Promise<void>;
-  rejectAffiliateApplication(id: number, reviewedBy: number, reviewNotes?: string): Promise<void>;
   
   // Enhanced Admin Logs
   getAdminLogs(filters: any, page: number, limit: number): Promise<AdminLog[]>;
@@ -870,268 +848,14 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(table);
   }
 
-  // Affiliate System Implementation
-  async generateReferralCode(wallet: string): Promise<string> {
-    // Generate a unique referral code based on wallet address and timestamp
-    const timestamp = Date.now().toString(36);
-    const walletPart = wallet.slice(-6).toUpperCase();
-    const referralCode = `${walletPart}${timestamp}`.slice(0, 20);
-    
-    // Check if code already exists (though unlikely)
-    const existing = await db.select().from(accounts).where(eq(accounts.referralCode, referralCode));
-    if (existing.length > 0) {
-      // If collision, add random suffix
-      const randomSuffix = Math.random().toString(36).substring(2, 5).toUpperCase();
-      return `${referralCode.slice(0, 17)}${randomSuffix}`;
-    }
-    
-    return referralCode;
-  }
 
-  async getAccountWithAffiliateData(wallet: string): Promise<Account | undefined> {
-    const [account] = await db.select().from(accounts).where(eq(accounts.wallet, wallet));
-    return account || undefined;
-  }
 
-  async updateAccountAffiliateData(wallet: string, updates: Partial<Account>): Promise<void> {
-    await db.update(accounts).set(updates).where(eq(accounts.wallet, wallet));
-  }
 
-  async activateAffiliateSystem(wallet: string, activityType: 'donation' | 'campaign_creation', relatedId?: number): Promise<void> {
-    const account = await this.getAccount(wallet);
-    if (!account) throw new Error('Account not found');
 
-    // If affiliate not already activated, activate it
-    if (!account.affiliateActivated) {
-      // Generate referral code if not exists
-      let referralCode = account.referralCode;
-      if (!referralCode) {
-        referralCode = await this.generateReferralCode(wallet);
-      }
 
-      await this.updateAccountAffiliateData(wallet, {
-        referralCode,
-        affiliateActivated: true,
-        affiliateActivationDate: new Date(),
-      });
 
-      // If this user was referred by someone, create affiliate activity
-      if (account.referredBy) {
-        await this.createAffiliateActivity({
-          referrerWallet: account.referredBy,
-          referredWallet: wallet,
-          activityType,
-          relatedId,
-          rewardAmount: "0", // Reward system can be configured later
-        });
 
-        // Update referrer's total referrals
-        await db.update(accounts)
-          .set({
-            totalReferrals: sql`${accounts.totalReferrals} + 1`,
-            updatedAt: new Date(),
-          })
-          .where(eq(accounts.wallet, account.referredBy));
-      }
-    }
-  }
 
-  async getReferralStats(wallet: string): Promise<{ totalReferrals: number; totalEarnings: string; activities: AffiliateActivity[] }> {
-    const account = await this.getAccount(wallet);
-    const activities = await this.getAffiliateActivities(wallet);
-
-    return {
-      totalReferrals: account?.totalReferrals || 0,
-      totalEarnings: account?.totalAffiliateEarnings || "0",
-      activities,
-    };
-  }
-
-  // Detailed affiliate analytics
-  async getDetailedAffiliateStats(wallet: string): Promise<{
-    overview: {
-      totalReferrals: number;
-      totalEarnings: string;
-      unpaidRewards: string;
-      paidRewards: string;
-      conversionRate: number;
-    };
-    breakdown: {
-      donations: { count: number; totalReward: string };
-      campaigns: { count: number; totalReward: string };
-    };
-    monthlyStats: Array<{
-      month: string;
-      referrals: number;
-      earnings: string;
-    }>;
-    recentActivity: AffiliateActivity[];
-  }> {
-    const account = await this.getAccount(wallet);
-    const activities = await this.getAffiliateActivities(wallet);
-
-    // Calculate unpaid vs paid rewards
-    const unpaidRewards = activities
-      .filter(a => !a.rewardPaid)
-      .reduce((sum, a) => sum + parseFloat(a.rewardAmount || "0"), 0);
-    
-    const paidRewards = activities
-      .filter(a => a.rewardPaid)
-      .reduce((sum, a) => sum + parseFloat(a.rewardAmount || "0"), 0);
-
-    // Breakdown by activity type
-    const donationActivities = activities.filter(a => a.activityType === 'donation');
-    const campaignActivities = activities.filter(a => a.activityType === 'campaign_creation');
-
-    // Monthly stats (last 6 months)
-    const monthlyStats = [];
-    const now = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-      
-      const monthActivities = activities.filter(a => {
-        if (!a.createdAt) return false;
-        const dateStr = typeof a.createdAt === 'string' ? a.createdAt : a.createdAt.toISOString();
-        return dateStr.startsWith(monthKey);
-      });
-      const monthEarnings = monthActivities.reduce((sum, a) => sum + parseFloat(a.rewardAmount || "0"), 0);
-      
-      monthlyStats.push({
-        month: monthKey,
-        referrals: monthActivities.length,
-        earnings: monthEarnings.toString()
-      });
-    }
-
-    return {
-      overview: {
-        totalReferrals: account?.totalReferrals || 0,
-        totalEarnings: account?.totalAffiliateEarnings || "0",
-        unpaidRewards: unpaidRewards.toString(),
-        paidRewards: paidRewards.toString(),
-        conversionRate: activities.length > 0 ? (account?.totalReferrals || 0) / activities.length * 100 : 0
-      },
-      breakdown: {
-        donations: {
-          count: donationActivities.length,
-          totalReward: donationActivities.reduce((sum, a) => sum + parseFloat(a.rewardAmount || "0"), 0).toString()
-        },
-        campaigns: {
-          count: campaignActivities.length,
-          totalReward: campaignActivities.reduce((sum, a) => sum + parseFloat(a.rewardAmount || "0"), 0).toString()
-        }
-      },
-      monthlyStats,
-      recentActivity: activities.slice(0, 10) // Last 10 activities
-    };
-  }
-
-  // Get unpaid rewards
-  async getUnpaidRewards(wallet: string): Promise<AffiliateActivity[]> {
-    return await db
-      .select()
-      .from(affiliateActivities)
-      .where(
-        and(
-          eq(affiliateActivities.referrerWallet, wallet),
-          eq(affiliateActivities.rewardPaid, false)
-        )
-      )
-      .orderBy(desc(affiliateActivities.createdAt));
-  }
-
-  // Get affiliate leaderboard (top performers)
-  async getAffiliateLeaderboard(limit: number = 10): Promise<Array<{
-    wallet: string;
-    totalReferrals: number;
-    totalEarnings: string;
-    rank: number;
-  }>> {
-    const topAffiliates = await db
-      .select({
-        wallet: accounts.wallet,
-        totalReferrals: accounts.totalReferrals,
-        totalEarnings: accounts.totalAffiliateEarnings
-      })
-      .from(accounts)
-      .where(
-        and(
-          eq(accounts.affiliateActivated, true),
-          gt(accounts.totalReferrals, 0)
-        )
-      )
-      .orderBy(desc(accounts.totalReferrals), desc(accounts.totalAffiliateEarnings))
-      .limit(limit);
-
-    return topAffiliates.map((affiliate, index) => ({
-      wallet: affiliate.wallet,
-      totalReferrals: affiliate.totalReferrals || 0,
-      totalEarnings: affiliate.totalEarnings || "0",
-      rank: index + 1
-    }));
-  }
-
-  async createAffiliateActivity(activity: InsertAffiliateActivity): Promise<AffiliateActivity> {
-    const [result] = await db.insert(affiliateActivities).values(activity).returning();
-    return result;
-  }
-
-  async getAffiliateActivities(wallet: string): Promise<AffiliateActivity[]> {
-    return await db.select().from(affiliateActivities)
-      .where(eq(affiliateActivities.referrerWallet, wallet))
-      .orderBy(desc(affiliateActivities.createdAt));
-  }
-
-  // Affiliate Application Implementation
-  async createAffiliateApplication(application: InsertAffiliateApplication): Promise<AffiliateApplication> {
-    const [created] = await db
-      .insert(affiliateApplications)
-      .values({
-        ...application,
-        appliedAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .returning();
-    return created;
-  }
-
-  async getAffiliateApplication(wallet: string): Promise<AffiliateApplication | undefined> {
-    const [application] = await db
-      .select()
-      .from(affiliateApplications)
-      .where(eq(affiliateApplications.wallet, wallet));
-    return application || undefined;
-  }
-
-  async getAllAffiliateApplications(status?: string): Promise<AffiliateApplication[]> {
-    const query = db.select().from(affiliateApplications);
-    
-    if (status) {
-      return await query.where(eq(affiliateApplications.status, status)).orderBy(desc(affiliateApplications.appliedAt));
-    }
-    
-    return await query.orderBy(desc(affiliateApplications.appliedAt));
-  }
-
-  async updateAffiliateApplicationStatus(
-    id: number,
-    status: string,
-    reviewedBy: number,
-    reviewNotes?: string
-  ): Promise<void> {
-    await db
-      .update(affiliateApplications)
-      .set({
-        status,
-        reviewedBy,
-        reviewNotes,
-        reviewedAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(affiliateApplications.id, id));
-  }
 
   // ===== NEW ADMIN ENDPOINTS IMPLEMENTATIONS =====
   
@@ -1287,29 +1011,6 @@ export class DatabaseStorage implements IStorage {
     }
   }
   
-  // Enhanced Affiliates Management
-  async getAffiliateApplications(filters: any, page: number, limit: number): Promise<AffiliateApplication[]> {
-    const offset = (page - 1) * limit;
-    let query = db.select().from(affiliateApplications);
-    
-    // Apply filters if provided
-    if (filters.status) {
-      query = query.where(eq(affiliateApplications.status, filters.status));
-    }
-    
-    return await query
-      .orderBy(desc(affiliateApplications.appliedAt))
-      .limit(limit)
-      .offset(offset);
-  }
-
-  async approveAffiliateApplication(id: number, reviewedBy: number, reviewNotes?: string): Promise<void> {
-    await this.updateAffiliateApplicationStatus(id, 'approved', reviewedBy, reviewNotes);
-  }
-
-  async rejectAffiliateApplication(id: number, reviewedBy: number, reviewNotes?: string): Promise<void> {
-    await this.updateAffiliateApplicationStatus(id, 'rejected', reviewedBy, reviewNotes);
-  }
   
   // Enhanced Admin Logs
   async getAdminLogs(filters: any, page: number, limit: number): Promise<AdminLog[]> {

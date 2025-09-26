@@ -77,16 +77,6 @@ export default function Header({ currentPage }: HeaderProps) {
             >
               Daily Rewards
             </Link>
-            <Link 
-              href="/affiliate" 
-              className={`nav-item text-sm font-medium transition-colors duration-200 uppercase tracking-wide whitespace-nowrap ${
-                currentPage === 'affiliate' 
-                  ? 'text-primary border-b-2 border-primary' 
-                  : 'text-muted-foreground hover:text-primary'
-              }`}
-            >
-              Affiliate
-            </Link>
           </nav>
 
           <div className="flex items-center gap-4 flex-shrink-0">
@@ -125,12 +115,6 @@ export default function Header({ currentPage }: HeaderProps) {
                     <Link href="/profile?tab=rewards" className="flex items-center w-full">
                       <Trophy className="w-4 h-4 mr-2" />
                       Daily Rewards
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/affiliate" className="flex items-center w-full">
-                      <Users className="w-4 h-4 mr-2" />
-                      Affiliate Program
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -191,17 +175,6 @@ export default function Header({ currentPage }: HeaderProps) {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Daily Rewards
-              </Link>
-              <Link 
-                href="/affiliate" 
-                className={`block py-2 px-3 rounded-lg font-semibold transition-colors duration-200 uppercase tracking-wide ${
-                  currentPage === 'affiliate' 
-                    ? 'text-primary bg-primary/10' 
-                    : 'text-muted-foreground hover:text-primary hover:bg-surface'
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Affiliate
               </Link>
               
               {isConnected && (

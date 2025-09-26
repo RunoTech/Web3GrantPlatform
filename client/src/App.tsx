@@ -22,6 +22,28 @@ import AdminSettingsPage from "@/pages/admin/settings";
 import AdminDailyRewardsPage from "@/pages/admin/daily-rewards";
 import AdminDatabasePage from "@/pages/admin/database";
 
+// Static Pages
+import {
+  AboutPage,
+  MissionPage,
+  TechnologyPage,
+  CareersPage,
+  PressPage,
+  NewsPage,
+  HelpPage,
+  FaqPage,
+  ContactPage,
+  DocsPage,
+  ApiDocsPage,
+  SecurityPage,
+  TermsPage,
+  PrivacyPage,
+  CookiesPage,
+  CompliancePage,
+  AmlPage,
+  RiskPage
+} from "@/pages/static-pages";
+
 function Router() {
   return (
     <Switch>
@@ -35,6 +57,31 @@ function Router() {
       <Route path="/profile" component={ProfilePage} />
       <Route path="/campaign/:id" component={CampaignDetailPage} />
       <Route path="/create-campaign" component={CreateCampaignPage} />
+      
+      {/* Static Pages */}
+      {/* Company */}
+      <Route path="/about" component={AboutPage} />
+      <Route path="/mission" component={MissionPage} />
+      <Route path="/technology" component={TechnologyPage} />
+      <Route path="/careers" component={CareersPage} />
+      <Route path="/press" component={PressPage} />
+      <Route path="/news" component={NewsPage} />
+      
+      {/* Support */}
+      <Route path="/help" component={HelpPage} />
+      <Route path="/faq" component={FaqPage} />
+      <Route path="/contact" component={ContactPage} />
+      <Route path="/docs" component={DocsPage} />
+      <Route path="/api-docs" component={ApiDocsPage} />
+      <Route path="/security" component={SecurityPage} />
+      
+      {/* Legal */}
+      <Route path="/terms" component={TermsPage} />
+      <Route path="/privacy" component={PrivacyPage} />
+      <Route path="/cookies" component={CookiesPage} />
+      <Route path="/compliance" component={CompliancePage} />
+      <Route path="/aml" component={AmlPage} />
+      <Route path="/risk" component={RiskPage} />
       
       {/* Admin Routes */}
       <Route path="/youhonor/login" component={AdminLoginPage} />

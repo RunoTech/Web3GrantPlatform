@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Link } from 'wouter';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Header } from '@/components/Header';
+import Header from '@/components/Header';
 import { 
   Heart, 
   Shield, 

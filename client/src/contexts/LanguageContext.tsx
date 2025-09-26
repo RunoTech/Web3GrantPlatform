@@ -13,7 +13,7 @@ const translations = {
     // Header & Navigation
     'duxxan': 'DUXXAN',
     'campaigns': 'CAMPAIGNS',
-    'funds': 'FUNDS',
+    'funds': 'FUNDRAISE',
     'donations': 'DONATIONS',
     'profile': 'PROFILE',
     'connect_wallet': 'CONNECT WALLET',

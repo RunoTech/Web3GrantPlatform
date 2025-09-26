@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 // Wallet types for window.ethereum
@@ -21,8 +21,8 @@ export function useWallet() {
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
 
-  // Target chain configuration
-  const TARGET_CHAIN_ID = import.meta.env.VITE_TARGET_CHAIN_ID || '0x1'; // Ethereum Mainnet
+  // Target chain configuration (constant to prevent hook order changes)
+  const TARGET_CHAIN_ID = useMemo(() => import.meta.env.VITE_TARGET_CHAIN_ID || '0x1', []); // Ethereum Mainnet
 
   // Centralized network verification
   const verifyAndSwitchNetwork = useCallback(async (): Promise<boolean> => {

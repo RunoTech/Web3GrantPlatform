@@ -817,10 +817,10 @@ export function StaticPage({ pageKey, icon: Icon }: StaticPageProps) {
             <div className="mt-12 text-center">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
                 <Button asChild variant="default" data-testid="cta-campaigns">
-                  <Link href="/campaigns">{t('nav.campaigns')}</Link>
+                  <Link href="/campaigns">{t('campaigns')}</Link>
                 </Button>
                 <Button asChild variant="outline" data-testid="cta-create">
-                  <Link href="/create-campaign">{t('nav.create_campaign')}</Link>
+                  <Link href="/create-campaign">{t('hero.create_campaign')}</Link>
                 </Button>
               </div>
             </div>

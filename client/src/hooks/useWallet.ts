@@ -1,301 +1,150 @@
 import { useState, useEffect, useCallback } from 'react';
-import { verifyNetwork, switchToEthereumMainnet } from '@/utils/wallet';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
+
+// Wallet types for window.ethereum
+interface EthereumProvider {
+  isMetaMask?: boolean;
+  request: (args: { method: string; params?: any[] }) => Promise<any>;
+  on: (event: string, handler: (...args: any[]) => void) => void;
+  removeListener: (event: string, handler: (...args: any[]) => void) => void;
+}
+
+declare global {
+  interface Window {
+    ethereum?: EthereumProvider;
+  }
+}
 
 export function useWallet() {
   const [isConnected, setIsConnected] = useState(false);
   const [address, setAddress] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const { toast } = useToast();
 
-  // Check authentication status
-  const checkAuthToken = useCallback(async () => {
+  // Check if we have existing accounts (auto-connect)
+  const checkExistingConnection = useCallback(async () => {
+    if (!window.ethereum) return;
+
     try {
-      const data = await apiRequest("GET", "/auth/status") as any;
-      if (data?.authenticated) {
-        setIsAuthenticated(true);
-      } else {
-        setIsAuthenticated(false);
+      const accounts = await window.ethereum.request({
+        method: 'eth_accounts'
+      });
+
+      if (accounts && accounts.length > 0) {
+        setAddress(accounts[0]);
+        setIsConnected(true);
       }
     } catch (error) {
-      setIsAuthenticated(false);
+      console.log('No existing connection found');
     }
   }, []);
 
-  // REAL connection check - Test actual wallet capability
-  const checkConnection = useCallback(async () => {
-    try {
-      console.log("🔍 REAL MetaMask check - testing wallet capability...");
-      
-      if (!window.ethereum) {
-        console.log("❌ MetaMask not found");
-        setAddress(null);
-        setIsConnected(false);
-        setIsAuthenticated(false);
-        setIsInitialized(true);
-        return;
-      }
-
-      // Step 1: Clear any cached connection state
-      localStorage.removeItem('walletconnect');
-      localStorage.removeItem('WEB3_CONNECT_CACHED_PROVIDER');
-      
-      // Step 2: Check existing accounts WITHOUT requesting permission
-      console.log("🧪 Checking existing accounts without popup...");
-      const accounts = await window.ethereum.request({ 
-        method: 'eth_accounts'
-      });
-      
-      console.log("🔍 Real accounts result:", accounts);
-      
-      if (!accounts || accounts.length === 0) {
-        console.log("❌ No accounts available - wallet locked or disconnected");
-        setAddress(null);
-        setIsConnected(false);
-        setIsAuthenticated(false);
-        setIsInitialized(true);
-        return;
-      }
-
-      // Step 3: Auto-connect when accounts available (no signature test)
-      console.log("✅ WALLET AUTO-CONNECTED:", accounts[0]);
-      setAddress(accounts[0]);
-      setIsConnected(true);
-      // Don't auto-authenticate - only authenticate on explicit user action
-      await checkAuthToken();
-      
-    } catch (error: any) {
-      console.log("❌ Connection check error:", error.message);
-      if (error.code === 4001) {
-        console.log("❌ User rejected connection request");
-      } else {
-        console.log("❌ MetaMask connection failed");
-      }
-      setAddress(null);
-      setIsConnected(false);
-      setIsAuthenticated(false);
-    } finally {
-      setIsInitialized(true);
-    }
-  }, [checkAuthToken]);
-
-  // Connect function - ALWAYS shows MetaMask popup for user action
+  // Simple, reliable connect function
   const connect = useCallback(async (): Promise<boolean> => {
     if (isConnecting) return false;
     
     setIsConnecting(true);
+    
     try {
-      console.log('🦊 USER CLICKED CONNECT - Opening MetaMask popup...');
-      
+      // Check if MetaMask exists
       if (!window.ethereum) {
-        throw new Error("MetaMask bulunamadı. Lütfen MetaMask extension'ını yükleyin.");
+        toast({
+          title: "MetaMask Bulunamadı",
+          description: "Lütfen MetaMask uzantısını yükleyin",
+          variant: "destructive"
+        });
+        return false;
       }
 
-      // FORCE POPUP: First disconnect to ensure popup shows
-      console.log('🔗 Ensuring popup will show...');
-      
-      // Check network first
-      const isCorrectNetwork = await verifyNetwork();
-      if (!isCorrectNetwork) {
-        const switched = await switchToEthereumMainnet();
-        if (!switched) {
-          throw new Error("Lütfen Ethereum Mainnet'e geçin.");
-        }
-      }
-
-      // Request accounts with clear user action
-      console.log('🪟 Opening MetaMask popup for user approval...');
+      // Request account access
       const accounts = await window.ethereum.request({
-        method: 'eth_requestAccounts',
-        params: []
+        method: 'eth_requestAccounts'
       });
 
       if (!accounts || accounts.length === 0) {
         throw new Error('Hesap bulunamadı');
       }
 
-      console.log('✅ USER CONNECTED:', accounts[0]);
+      // Check we're on Ethereum mainnet
+      const chainId = await window.ethereum.request({
+        method: 'eth_chainId'
+      });
+
+      if (chainId !== '0x1') {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x1' }],
+          });
+        } catch (switchError) {
+          toast({
+            title: "Ağ Hatası",
+            description: "Lütfen Ethereum Mainnet'e geçin",
+            variant: "destructive"
+          });
+          return false;
+        }
+      }
+
+      // Success! Set connection state
       setAddress(accounts[0]);
       setIsConnected(true);
       
-      // AUTOMATIC AUTHENTICATION: Do the full auth flow now
-      console.log('🔐 Starting automatic authentication...');
-      const authSuccess = await authenticate(accounts[0]);
-      
-      if (authSuccess) {
-        toast({
-          title: "Başarıyla Bağlandı ve Doğrulandı!",
-          description: `${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
-        });
-      } else {
-        toast({
-          title: "Bağlandı ama Doğrulama Başarısız!",
-          description: "Lütfen sayfayı yenileyip tekrar deneyin.",
-          variant: "destructive",
-        });
-      }
-      
-      return authSuccess;
-      
-    } catch (error: any) {
-      console.error('❌ Connection error:', error);
-      
-      let errorMessage = "Bağlantı başarısız";
-      if (error?.code === 4001) {
-        errorMessage = "Bağlantı reddedildi";
-      } else if (error?.message) {
-        errorMessage = error.message;
-      }
-      
       toast({
-        title: "Bağlantı Hatası", 
-        description: errorMessage,
-        variant: "destructive",
+        title: "Başarılı Bağlantı!",
+        description: `${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)} bağlandı`,
       });
+
+      return true;
+
+    } catch (error: any) {
+      console.error('Connection error:', error);
+      
+      let message = "Bağlantı başarısız";
+      if (error.code === 4001) {
+        message = "Kullanıcı bağlantıyı reddetti";
+      } else if (error.message) {
+        message = error.message;
+      }
+
+      toast({
+        title: "Bağlantı Hatası",
+        description: message,
+        variant: "destructive"
+      });
+
       return false;
     } finally {
       setIsConnecting(false);
     }
   }, [isConnecting, toast]);
 
-  // Simple authentication
-  const authenticate = useCallback(async (walletAddress: string): Promise<boolean> => {
-    if (isAuthenticating) return false;
-    
-    setIsAuthenticating(true);
-    try {
-      console.log("🔐 Authentication starting...");
-      
-      if (!isConnected || !address) {
-        throw new Error("Lütfen önce MetaMask'i bağlayın");
-      }
-
-      // Step 1: Get nonce
-      const nonceRes = await apiRequest("POST", "/auth/nonce", {
-        wallet: walletAddress.toLowerCase()
-      });
-      const nonceData = await nonceRes.json();
-      
-      if (!nonceData.nonce || !nonceData.message) {
-        throw new Error("Nonce alınamadı");
-      }
-
-      // Step 2: Sign message
-      console.log("🖊️ Signature request...");
-      const signature = await window.ethereum.request({
-        method: 'personal_sign',
-        params: [nonceData.message, walletAddress.toLowerCase()],
-      });
-
-      if (!signature) {
-        throw new Error("İmza alınamadı");
-      }
-
-      // Step 3: Verify
-      const verifyRes = await apiRequest("POST", "/auth/verify", {
-        wallet: walletAddress.toLowerCase(),
-        signature: signature,
-        nonce: nonceData.nonce
-      });
-      
-      const verifyData = await verifyRes.json();
-      
-      if (!verifyData.success) {
-        throw new Error("Kimlik doğrulama başarısız");
-      }
-
-      setIsAuthenticated(true);
-      toast({
-        title: "Kimlik Doğrulandı",
-        description: "Başarıyla giriş yaptınız",
-      });
-
-      return true;
-      
-    } catch (error: any) {
-      console.error('Authentication error:', error);
-      
-      let errorMessage = "Kimlik doğrulama başarısız";
-      if (error?.code === 4001) {
-        errorMessage = "İmzayı reddettiniz";
-      } else if (error?.message) {
-        errorMessage = error.message;
-      }
-      
-      toast({
-        title: "Kimlik Doğrulama Hatası",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      
-      return false;
-    } finally {
-      setIsAuthenticating(false);
-    }
-  }, [isAuthenticating, isConnected, address, toast]);
-
-  // Logout
-  const logout = useCallback(async () => {
-    try {
-      await apiRequest("POST", "/auth/logout", {});
-    } catch (error) {
-      // Silent logout error - don't spam console
-      console.log('🔓 Logout completed (server error ignored)');
-    }
-    
-    setIsAuthenticated(false);
-    toast({
-      title: "Çıkış Yapıldı", 
-      description: "Kimlik doğrulama sonlandırıldı",
-    });
-  }, [toast]);
-
-  // Disconnect
-  const disconnect = useCallback(async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.log('Logout error during disconnect:', error);
-    }
-    
+  // Simple disconnect
+  const disconnect = useCallback(() => {
     setAddress(null);
     setIsConnected(false);
-    setIsAuthenticated(false);
     
     toast({
       title: "Bağlantı Kesildi",
-      description: "MetaMask bağlantısı sonlandırıldı",
+      description: "Cüzdan bağlantısı sonlandırıldı"
     });
-  }, [logout, toast]);
+  }, [toast]);
 
-  // Initialize on mount
-  useEffect(() => {
-    checkConnection();
-  }, []);
-
-  // MetaMask event listeners
+  // Handle MetaMask events
   useEffect(() => {
     if (!window.ethereum) return;
 
     const handleAccountsChanged = (accounts: string[]) => {
-      console.log('🔄 Accounts changed:', accounts);
       if (!accounts || accounts.length === 0) {
-        setAddress(null);
-        setIsConnected(false);
-        setIsAuthenticated(false);
-      } else if (accounts[0] !== address) {
+        disconnect();
+      } else {
         setAddress(accounts[0]);
         setIsConnected(true);
-        setIsAuthenticated(false);
       }
     };
 
     const handleChainChanged = () => {
-      console.log('🔗 Chain changed - reloading...');
+      // Reload page to reset everything on chain change
       window.location.reload();
     };
 
@@ -308,20 +157,18 @@ export function useWallet() {
         window.ethereum.removeListener('chainChanged', handleChainChanged);
       }
     };
-  }, [address]);
+  }, [disconnect]);
+
+  // Check for existing connection on mount
+  useEffect(() => {
+    checkExistingConnection();
+  }, [checkExistingConnection]);
 
   return {
     isConnected,
     address,
     isConnecting,
-    isInitialized,
-    isAuthenticated,
-    isAuthenticating,
     connect,
-    disconnect,
-    authenticate,
-    logout,
-    checkConnection,
-    checkAuthToken
+    disconnect
   };
 }

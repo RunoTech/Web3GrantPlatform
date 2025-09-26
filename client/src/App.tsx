@@ -21,7 +21,6 @@ import AdminDashboardPage from "@/pages/admin/index";
 import AdminSettingsPage from "@/pages/admin/settings";
 import AdminDailyRewardsPage from "@/pages/admin/daily-rewards";
 import AdminDatabasePage from "@/pages/admin/database";
-import AdminAffiliatesPage from "@/pages/admin/affiliates";
 
 function Router() {
   return (
@@ -43,7 +42,6 @@ function Router() {
       <Route path="/youhonor/settings" component={AdminSettingsPage} />
       <Route path="/youhonor/daily-rewards" component={AdminDailyRewardsPage} />
       <Route path="/youhonor/database" component={AdminDatabasePage} />
-      <Route path="/youhonor/affiliates" component={AdminAffiliatesPage} />
       
       <Route component={NotFound} />
     </Switch>

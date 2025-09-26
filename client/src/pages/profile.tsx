@@ -462,12 +462,6 @@ export default function ProfilePage() {
                   </Link>
                 </Button>
                 <div className="flex gap-2">
-                  <Button asChild variant="outline" className="btn-secondary hover:border-primary hover:shadow-md" data-testid="button-affiliate">
-                    <Link href="/affiliate">
-                      <Share2 className="w-4 h-4 mr-2" />
-                      {t('profile.affiliate')}
-                    </Link>
-                  </Button>
                   <Button asChild variant="outline" className="btn-secondary hover:border-primary hover:shadow-md" data-testid="button-daily-rewards">
                     <Link href="/daily-rewards">
                       <Gift className="w-4 h-4 mr-2" />
@@ -854,12 +848,6 @@ export default function ProfilePage() {
                     <Link href="/daily-rewards">
                       <Gift className="w-6 h-6 text-yellow-600" />
                       <span className="text-sm font-medium">{t('profile.daily_rewards')}</span>
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline" className="h-20 flex-col gap-2 hover:border-primary hover:shadow-md transition-all" data-testid="quick-action-affiliate">
-                    <Link href="/affiliate">
-                      <Share2 className="w-6 h-6 text-blue-600" />
-                      <span className="text-sm font-medium">{t('profile.affiliate')}</span>
                     </Link>
                   </Button>
                   <Button onClick={() => setActiveTab('analytics')} variant="outline" className="h-20 flex-col gap-2 hover:border-primary hover:shadow-md transition-all" data-testid="quick-action-analytics">

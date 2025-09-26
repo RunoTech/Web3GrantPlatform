@@ -130,13 +130,6 @@ export const accounts = pgTable("accounts", {
   lastDailyEntryDate: varchar("last_daily_entry_date", { length: 10 }), // Last daily reward entry date (YYYY-MM-DD)
   totalDailyEntries: integer("total_daily_entries").default(0), // Total daily entries count
   
-  // Affiliate system fields
-  referralCode: varchar("referral_code", { length: 20 }).unique(), // Unique referral code for this user
-  referredBy: varchar("referred_by", { length: 42 }), // Wallet address of the user who referred this account
-  affiliateActivated: boolean("affiliate_activated").default(false), // Whether affiliate benefits are activated
-  affiliateActivationDate: timestamp("affiliate_activation_date"), // When affiliate system was activated for this user
-  totalReferrals: integer("total_referrals").default(0), // Number of successful referrals
-  totalAffiliateEarnings: decimal("total_affiliate_earnings", { precision: 18, scale: 8 }).default("0"), // Total earnings from affiliates
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -261,31 +254,6 @@ export const adminLogs = pgTable("admin_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Affiliate tracking and rewards
-export const affiliateActivities = pgTable("affiliate_activities", {
-  id: serial("id").primaryKey(),
-  referrerWallet: varchar("referrer_wallet", { length: 42 }).notNull(), // Who gets the reward
-  referredWallet: varchar("referred_wallet", { length: 42 }).notNull(), // Who was referred
-  activityType: varchar("activity_type", { length: 20 }).notNull(), // "donation", "campaign_creation"
-  relatedId: integer("related_id"), // Campaign or donation ID
-  rewardAmount: decimal("reward_amount", { precision: 18, scale: 8 }).default("0"), // Potential reward amount
-  rewardPaid: boolean("reward_paid").default(false), // Whether reward has been paid
-  txHash: varchar("tx_hash", { length: 66 }), // Transaction hash if reward was paid
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const affiliateApplications = pgTable("affiliate_applications", {
-  id: serial("id").primaryKey(),
-  wallet: varchar("wallet", { length: 42 }).notNull().unique(), // Applicant wallet address
-  applicationText: text("application_text").notNull(), // Application description/reason
-  status: varchar("status", { length: 20 }).default("pending").notNull(), // "pending", "approved", "rejected"
-  appliedAt: timestamp("applied_at").defaultNow(),
-  reviewedAt: timestamp("reviewed_at"),
-  reviewedBy: integer("reviewed_by"), // Admin ID who reviewed
-  reviewNotes: text("review_notes"), // Admin notes about the decision
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
 // Wallets table for tracking wallet information
 export const wallets = pgTable("wallets", {
@@ -413,27 +381,6 @@ export const adminLogsRelations = relations(adminLogs, ({ one }) => ({
   }),
 }));
 
-export const affiliateActivitiesRelations = relations(affiliateActivities, ({ one }) => ({
-  referrer: one(accounts, {
-    fields: [affiliateActivities.referrerWallet],
-    references: [accounts.wallet],
-  }),
-  referred: one(accounts, {
-    fields: [affiliateActivities.referredWallet],
-    references: [accounts.wallet],
-  }),
-}));
-
-export const affiliateApplicationsRelations = relations(affiliateApplications, ({ one }) => ({
-  applicant: one(accounts, {
-    fields: [affiliateApplications.wallet],
-    references: [accounts.wallet],
-  }),
-  reviewer: one(admins, {
-    fields: [affiliateApplications.reviewedBy],
-    references: [admins.id],
-  }),
-}));
 
 export const walletsRelations = relations(wallets, ({ one }) => ({
   // Add relations as needed based on ownerType
@@ -544,10 +491,6 @@ export const insertAdminLogSchema = createInsertSchema(adminLogs).omit({
   createdAt: true 
 });
 
-export const insertAffiliateActivitySchema = createInsertSchema(affiliateActivities).omit({ 
-  id: true, 
-  createdAt: true 
-});
 
 export const insertWalletSchema = createInsertSchema(wallets).omit({ 
   id: true, 
@@ -569,11 +512,6 @@ export const insertDailyParticipantSchema = createInsertSchema(dailyParticipants
   joinedAt: true 
 });
 
-export const insertAffiliateApplicationSchema = createInsertSchema(affiliateApplications).omit({ 
-  id: true, 
-  createdAt: true, 
-  updatedAt: true 
-});
 
 export const insertPaymentAttemptSchema = createInsertSchema(paymentAttempts).omit({
   id: true,
@@ -620,10 +558,6 @@ export type Announcement = typeof announcements.$inferSelect;
 export type InsertAnnouncement = z.infer<typeof insertAnnouncementSchema>;
 export type AdminLog = typeof adminLogs.$inferSelect;
 export type InsertAdminLog = z.infer<typeof insertAdminLogSchema>;
-export type AffiliateActivity = typeof affiliateActivities.$inferSelect;
-export type InsertAffiliateActivity = z.infer<typeof insertAffiliateActivitySchema>;
-export type AffiliateApplication = typeof affiliateApplications.$inferSelect;
-export type InsertAffiliateApplication = z.infer<typeof insertAffiliateApplicationSchema>;
 export type Wallet = typeof wallets.$inferSelect;
 export type InsertWallet = z.infer<typeof insertWalletSchema>;
 export type Transaction = typeof transactions.$inferSelect;

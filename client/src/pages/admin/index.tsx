@@ -238,15 +238,6 @@ export default function AdminDashboardPage() {
                 <span>Transactions</span>
               </Button>
 
-              <Button
-                variant="outline"
-                className="h-20 flex-col space-y-2"
-                onClick={() => setLocation("/youhonor/affiliates")}
-                data-testid="button-admin-affiliates"
-              >
-                <TrendingUp className="h-6 w-6" />
-                <span>Affiliate System</span>
-              </Button>
             </div>
           </CardContent>
         </Card>

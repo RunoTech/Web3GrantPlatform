@@ -40,19 +40,6 @@ export function generateDonationShareLink(campaignId: number | string, donationA
   };
 }
 
-// Generate affiliate share link
-export function generateAffiliateShareLink(referralCode?: string): ShareData {
-  const url = referralCode ? `${BASE_URL}?ref=${referralCode}` : BASE_URL;
-  const title = 'Join DUXXAN - Next-Gen Blockchain Donation Platform';
-  const description = 'Discover commission-free donations with futuristic technology. Direct wallet-to-wallet transfers on Ethereum network. Join the revolution!';
-  
-  return {
-    title,
-    description,
-    url,
-    hashtags: ['DUXXAN', 'Blockchain', 'Crypto', 'DeFi', 'Ethereum', 'Web3', 'Innovation']
-  };
-}
 
 // Generate fund/investment share link
 export function generateFundShareLink(campaignId: number | string, companyName?: string): ShareData {

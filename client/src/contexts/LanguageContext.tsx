@@ -191,7 +191,6 @@ const translations = {
     'profile.address_copied_desc': 'Wallet address copied to clipboard',
     'profile.copy_address': 'Copy wallet address',
     'profile.create_campaign': 'Create Campaign',
-    'profile.affiliate': 'Affiliate',
     'profile.rewards': 'Rewards',
     'profile.dashboard': 'Dashboard',
     'profile.total_campaigns': 'Total Campaigns',

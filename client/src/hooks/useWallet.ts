@@ -118,46 +118,28 @@ export function useWallet() {
         throw new Error('Hesap bulunamadı');
       }
 
-      // Request signature to complete authentication
-      console.log('✍️ Requesting signature for complete connection...');
-      const signMessage = `DUXXAN Bağlantı Onayı\nZaman: ${new Date().toLocaleString('tr-TR')}`;
+      console.log('✅ USER CONNECTED:', accounts[0]);
+      setAddress(accounts[0]);
+      setIsConnected(true);
       
-      try {
-        await window.ethereum.request({
-          method: 'personal_sign',
-          params: [signMessage, accounts[0]],
+      // AUTOMATIC AUTHENTICATION: Do the full auth flow now
+      console.log('🔐 Starting automatic authentication...');
+      const authSuccess = await authenticate(accounts[0]);
+      
+      if (authSuccess) {
+        toast({
+          title: "Başarıyla Bağlandı ve Doğrulandı!",
+          description: `${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
         });
-        
-        console.log('✅ USER CONNECTED & SIGNED:', accounts[0]);
-        setAddress(accounts[0]);
-        setIsConnected(true);
-        
-        // AUTOMATIC AUTHENTICATION: Do the full auth flow now
-        console.log('🔐 Starting automatic authentication...');
-        const authSuccess = await authenticate(accounts[0]);
-        
-        if (authSuccess) {
-          toast({
-            title: "Başarıyla Bağlandı ve Doğrulandı!",
-            description: `${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
-          });
-        } else {
-          toast({
-            title: "Bağlandı ama Doğrulama Başarısız!",
-            description: "Lütfen sayfayı yenileyip tekrar deneyin.",
-            variant: "destructive",
-          });
-        }
-        
-        return authSuccess;
-        
-      } catch (signError: any) {
-        if (signError.code === 4001) {
-          throw new Error('İmza reddedildi. Bağlantı için imza gereklidir.');
-        } else {
-          throw new Error('İmza başarısız. Lütfen tekrar deneyin.');
-        }
+      } else {
+        toast({
+          title: "Bağlandı ama Doğrulama Başarısız!",
+          description: "Lütfen sayfayı yenileyip tekrar deneyin.",
+          variant: "destructive",
+        });
       }
+      
+      return authSuccess;
       
     } catch (error: any) {
       console.error('❌ Connection error:', error);

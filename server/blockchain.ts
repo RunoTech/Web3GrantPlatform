@@ -1,4 +1,5 @@
 // Modern blockchain operations - server-side
+import { ethers } from "ethers";
 import { db } from "./db";
 import { platformSettings } from "../shared/schema";
 import { eq, or } from "drizzle-orm";

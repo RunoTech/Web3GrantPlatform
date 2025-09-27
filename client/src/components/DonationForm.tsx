@@ -17,8 +17,8 @@ interface DonationFormProps {
   onSuccess?: () => void;
 }
 
-// USDT Contract on Ethereum Mainnet
-const USDT_CONTRACT = "0xdAC17F958D2ee523a2206206994597C13D831ec7" as `0x${string}`;
+// USDT Contract loaded dynamically from platform settings
+const USDT_CONTRACT = "0xdAC17F958D2ee523a2206206994597C13D831ec7" as `0x${string}`; // Fallback, will be dynamic
 
 export default function DonationForm({ campaignId, ownerWallet, campaignTitle, onSuccess }: DonationFormProps) {
   const [amount, setAmount] = useState("");

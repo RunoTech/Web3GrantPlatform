@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useWallet } from "@/hooks/useWallet";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { parseUnits, formatUnits } from "viem";
+import { erc20Abi } from "viem";
 // Modern wallet integration with Wagmi
 import { 
   CreditCard, 
@@ -27,11 +30,7 @@ interface SimplePayButtonProps {
   onPaymentSuccess?: (txHash: string, network: string) => void;
 }
 
-const ERC20_ABI = [
-  "function transfer(address to, uint256 amount) returns (bool)",
-  "function balanceOf(address owner) view returns (uint256)",
-  "function decimals() view returns (uint8)"
-];
+// Using standard ERC20 ABI from viem
 
 export default function SimplePayButton({ onPaymentSuccess }: SimplePayButtonProps) {
   const { t } = useLanguage();
@@ -40,6 +39,12 @@ export default function SimplePayButton({ onPaymentSuccess }: SimplePayButtonPro
   const [selectedNetwork, setSelectedNetwork] = useState<string>("ethereum");
   const [isProcessing, setIsProcessing] = useState(false);
   const [step, setStep] = useState(1); // 1: select, 2: processing, 3: success
+  
+  // Wagmi hooks for contract interaction
+  const { writeContract, data: txHash, error: writeError } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash: txHash,
+  });
 
   const { data: fees = [] } = useQuery<NetworkFee[]>({
     queryKey: ["/api/get-fees"],
@@ -51,6 +56,80 @@ export default function SimplePayButton({ onPaymentSuccess }: SimplePayButtonPro
 
   const selectedFee = fees.find(fee => fee.network === selectedNetwork);
   const platformWallet = wallets[selectedNetwork];
+
+  // Handle transaction confirmation
+  React.useEffect(() => {
+    if (isConfirmed && txHash) {
+      const fee = fees.find(f => f.network === selectedNetwork);
+      if (fee) {
+        // Auto-activate account with direct activation API
+        const activateAccount = async () => {
+          try {
+            const activationResponse = await fetch("/api/direct-activate", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                wallet: address,
+                network: selectedNetwork,
+                txHash: txHash,
+              }),
+            });
+            
+            const activationResult = await activationResponse.json();
+            
+            if (activationResult.success) {
+              setStep(3);
+              toast({
+                title: "Hesap Aktif Edildi!",
+                description: `${fee.amount} ${fee.tokenSymbol} ödeme başarılı`,
+              });
+              
+              onPaymentSuccess?.(txHash, selectedNetwork);
+            } else {
+              throw new Error(activationResult.error || "Aktivasyon başarısız");
+            }
+          } catch (activationError) {
+            console.error("Activation error:", activationError);
+            // Still show success for payment but indicate activation issue
+            setStep(3);
+            toast({
+              title: "Ödeme Tamamlandı",
+              description: "Aktivasyon işlemi için lütfen sayfayı yenileyin",
+              variant: "destructive"
+            });
+            
+            onPaymentSuccess?.(txHash, selectedNetwork);
+          } finally {
+            setIsProcessing(false);
+          }
+        };
+        
+        activateAccount();
+      }
+    }
+  }, [isConfirmed, txHash, fees, selectedNetwork, address, onPaymentSuccess, toast]);
+
+  // Handle write errors
+  React.useEffect(() => {
+    if (writeError) {
+      console.error("Write error:", writeError);
+      let errorMessage = "İşlem başarısız";
+      
+      if (writeError.message?.includes('User rejected')) {
+        errorMessage = "İşlem kullanıcı tarafından iptal edildi";
+      } else if (writeError.message?.includes('insufficient')) {
+        errorMessage = "Gas ücreti için yetersiz bakiye";
+      }
+      
+      toast({
+        title: "Hata",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      setStep(1);
+      setIsProcessing(false);
+    }
+  }, [writeError, toast]);
 
   const handlePayment = async (network: string) => {
     if (!isConnected || !address) {
@@ -79,110 +158,25 @@ export default function SimplePayButton({ onPaymentSuccess }: SimplePayButtonPro
     setStep(2);
 
     try {
-      if (typeof window.ethereum === 'undefined') {
-        throw new Error("MetaMask bulunamadı. Lütfen MetaMask yükleyin.");
-      }
-
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-
-      // Switch to correct network
-      const networkChainId = network === 'ethereum' ? '0x1' : '0x38';
-      try {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: networkChainId }],
-        });
-      } catch (switchError: any) {
-        if (switchError.code === 4902 && network === 'bsc') {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: '0x38',
-              chainName: 'BSC Mainnet',
-              nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-              rpcUrls: ['https://bsc-dataseed1.binance.org'],
-              blockExplorerUrls: ['https://bscscan.com'],
-            }],
-          });
-        }
-      }
-
-      const tokenContract = new ethers.Contract(fee.tokenAddress, ERC20_ABI, signer);
-      const balance = await tokenContract.balanceOf(address);
-      const requiredAmount = ethers.parseUnits(fee.amount, fee.decimals);
+      // Convert amount to contract units
+      const requiredAmount = parseUnits(fee.amount, fee.decimals);
       
-      if (balance < requiredAmount) {
-        throw new Error(`Yetersiz ${fee.tokenSymbol} bakiyesi`);
-      }
-
-      const tx = await tokenContract.transfer(wallet, requiredAmount);
-      const receipt = await tx.wait();
-      
-      if (receipt.status === 1) {
-        // Auto-activate account with direct activation API
-        try {
-          const activationResponse = await fetch("/api/direct-activate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              wallet: address,
-              network: network,
-              txHash: tx.hash,
-            }),
-          });
-          
-          const activationResult = await activationResponse.json();
-          
-          if (activationResult.success) {
-            setStep(3);
-            toast({
-              title: "Hesap Aktif Edildi!",
-              description: `${fee.amount} ${fee.tokenSymbol} ödeme başarılı`,
-            });
-            
-            onPaymentSuccess?.(tx.hash, network);
-          } else {
-            throw new Error(activationResult.error || "Aktivasyon başarısız");
-          }
-        } catch (activationError) {
-          console.error("Activation error:", activationError);
-          // Still show success for payment but indicate activation issue
-          setStep(3);
-          toast({
-            title: "Ödeme Tamamlandı",
-            description: "Aktivasyon işlemi için lütfen sayfayı yenileyin",
-            variant: "destructive"
-          });
-          
-          onPaymentSuccess?.(tx.hash, network);
-        }
-      } else {
-        throw new Error("İşlem başarısız");
-      }
+      // Execute transfer using Wagmi
+      await writeContract({
+        address: fee.tokenAddress as `0x${string}`,
+        abi: erc20Abi,
+        functionName: 'transfer',
+        args: [wallet as `0x${string}`, requiredAmount],
+      });
 
     } catch (error: any) {
       console.error("Payment error:", error);
-      
-      let errorMessage = "İşlem başarısız";
-      if (error.code === 'ACTION_REJECTED') {
-        errorMessage = "İşlem kullanıcı tarafından iptal edildi";
-      } else if (error.message?.includes('insufficient funds')) {
-        errorMessage = "Gas ücreti için yetersiz bakiye";
-      } else if (error.message?.includes('Yetersiz')) {
-        errorMessage = error.message;
-      } else if (error.message?.includes('MetaMask')) {
-        errorMessage = error.message;
-      }
-      
       toast({
         title: "Hata",
-        description: errorMessage,
+        description: error.message || "İşlem başarısız",
         variant: "destructive",
       });
-      
       setStep(1);
-    } finally {
       setIsProcessing(false);
     }
   };

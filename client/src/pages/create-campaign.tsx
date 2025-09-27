@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -13,6 +13,9 @@ import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { api } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { parseUnits, formatUnits } from "viem";
+import { erc20Abi } from "viem";
 import { Heart, ArrowLeft, Building, Users, Calendar, CheckCircle, Lock, CreditCard, Shield, DollarSign } from "lucide-react";
 
 // Add Header component import
@@ -25,6 +28,12 @@ export default function CreateCampaignPage() {
   const { isConnected, address } = useWallet();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Wagmi hooks for contract interaction
+  const { writeContract, data: txHash, error: writeError } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash: txHash,
+  });
   
   // Get URL parameters to determine campaign type
   const urlParams = new URLSearchParams(window.location.search);
@@ -136,7 +145,39 @@ export default function CreateCampaignPage() {
     }
   }, [creditCardInfoData, form]);
 
-  // Real collateral payment function using blockchain
+  // Handle transaction confirmation
+  React.useEffect(() => {
+    if (isConfirmed && txHash) {
+      setCollateralPaid(true);
+      form.setValue("collateralTxHash", txHash);
+      form.setValue("collateralPaid", true);
+      
+      toast({
+        title: "Payment Successful!",
+        description: "Collateral paid successfully. Creating campaign...",
+      });
+
+      // Automatically create campaign after successful collateral payment
+      setTimeout(() => {
+        const formData = form.getValues();
+        onSubmit(formData);
+      }, 1000); // Small delay to show success message first
+    }
+  }, [isConfirmed, txHash, form, toast]);
+
+  // Handle write errors
+  React.useEffect(() => {
+    if (writeError) {
+      console.error("Collateral payment error:", writeError);
+      toast({
+        title: "Payment Failed",
+        description: writeError.message || "Failed to process collateral payment",
+        variant: "destructive",
+      });
+    }
+  }, [writeError, toast]);
+
+  // Wagmi-based collateral payment function
   const handleCollateralPayment = async () => {
     if (!isConnected || !address) {
       toast({
@@ -159,93 +200,27 @@ export default function CreateCampaignPage() {
     }
 
     try {
-      // Check if MetaMask is available
-      if (typeof window.ethereum === 'undefined') {
-        toast({
-          title: "Error",
-          description: "MetaMask not detected. Please install MetaMask.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // TODO: Replace with Wagmi hooks for token transfers
-      console.log("Collateral payment temporarily disabled - migrating to Wagmi");
-
-      // Switch to Ethereum Mainnet
-      try {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x1' }], // Ethereum Mainnet
-        });
-      } catch (switchError: any) {
-        toast({
-          title: "Error",
-          description: "Please switch to Ethereum Mainnet",
-          variant: "destructive",
-        });
-        return;
-      }
-
       // USDT contract details
       const USDT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
-      const ERC20_ABI = [
-        "function transfer(address to, uint256 amount) returns (bool)",
-        "function balanceOf(address owner) view returns (uint256)",
-        "function decimals() view returns (uint8)"
-      ];
-
-      // Create contract instance
-      const tokenContract = new ethers.Contract(USDT_ADDRESS, ERC20_ABI, signer);
-
-      // Check balance
-      const balance = await tokenContract.balanceOf(address);
-      const requiredAmount = ethers.parseUnits(collateralAmount, 6); // USDT has 6 decimals
-      
-      if (balance < requiredAmount) {
-        toast({
-          title: "Insufficient Balance",
-          description: `You need at least ${collateralAmount} USDT to pay collateral`,
-          variant: "destructive",
-        });
-        return;
-      }
+      const requiredAmount = parseUnits(collateralAmount, 6); // USDT has 6 decimals
 
       toast({
         title: "Processing...",
-        description: "Please confirm the transaction in MetaMask",
+        description: "Please confirm the transaction in your wallet",
       });
 
-      // Execute real USDT transfer
-      const tx = await tokenContract.transfer(collateralInfo.platformWallet, requiredAmount);
+      // Execute USDT transfer using Wagmi
+      await writeContract({
+        address: USDT_ADDRESS as `0x${string}`,
+        abi: erc20Abi,
+        functionName: 'transfer',
+        args: [collateralInfo.platformWallet as `0x${string}`, requiredAmount],
+      });
       
       toast({
         title: "Transaction Sent",
         description: "Waiting for blockchain confirmation...",
       });
-
-      // Wait for confirmation
-      const receipt = await tx.wait();
-
-      if (receipt.status === 1) {
-        setCollateralPaid(true);
-        form.setValue("collateralTxHash", tx.hash);
-        form.setValue("collateralPaid", true);
-        
-        toast({
-          title: "Payment Successful!",
-          description: "Collateral paid successfully. Creating campaign...",
-        });
-
-        // Automatically create campaign after successful collateral payment
-        setTimeout(() => {
-          const formData = form.getValues();
-          onSubmit(formData);
-        }, 1000); // Small delay to show success message first
-
-      } else {
-        throw new Error("Transaction failed");
-      }
 
     } catch (error: any) {
       console.error("Collateral payment error:", error);

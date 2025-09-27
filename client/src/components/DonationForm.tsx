@@ -1,10 +1,13 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { useWallet } from "@/hooks/useWallet";
 import { useToast } from "@/hooks/use-toast";
 import { Heart, Wallet, Send, CheckCircle } from "lucide-react";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { parseUnits, formatUnits } from "viem";
+import { erc20Abi } from "viem";
 // Modern wallet integration with Wagmi
 
 interface DonationFormProps {
@@ -15,19 +18,19 @@ interface DonationFormProps {
 }
 
 // USDT Contract on Ethereum Mainnet
-const USDT_CONTRACT = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
-const ERC20_ABI = [
-  "function transfer(address to, uint256 amount) returns (bool)",
-  "function balanceOf(address account) view returns (uint256)",
-  "function decimals() view returns (uint8)",
-  "function symbol() view returns (string)",
-];
+const USDT_CONTRACT = "0xdAC17F958D2ee523a2206206994597C13D831ec7" as `0x${string}`;
 
 export default function DonationForm({ campaignId, ownerWallet, campaignTitle, onSuccess }: DonationFormProps) {
   const [amount, setAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const { isConnected, address, connect, getProvider, checkNetwork, switchToMainnet } = useWallet();
+  const { isConnected, address, connect } = useWallet();
   const { toast } = useToast();
+  
+  // Wagmi hooks for contract interaction
+  const { writeContract, data: txHash, error: writeError } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash: txHash,
+  });
 
   const handleConnect = async () => {
     try {
@@ -40,6 +43,32 @@ export default function DonationForm({ campaignId, ownerWallet, campaignTitle, o
       });
     }
   };
+
+  // Handle transaction confirmation
+  React.useEffect(() => {
+    if (isConfirmed && txHash) {
+      toast({
+        title: "Bağış Başarılı! 🎉",
+        description: `${amount} USDT başarıyla gönderildi. Sistem otomatik kaydedecek.`,
+      });
+      setAmount("");
+      setIsProcessing(false);
+      onSuccess?.();
+    }
+  }, [isConfirmed, txHash, amount, onSuccess, toast]);
+
+  // Handle write errors
+  React.useEffect(() => {
+    if (writeError) {
+      console.error("Write error:", writeError);
+      toast({
+        title: "İşlem Başarısız",
+        description: writeError.message || "Bağış işlemi başarısız",
+        variant: "destructive",
+      });
+      setIsProcessing(false);
+    }
+  }, [writeError, toast]);
 
   const handleDonate = async () => {
     if (!amount || !isConnected || !address) {
@@ -64,90 +93,32 @@ export default function DonationForm({ campaignId, ownerWallet, campaignTitle, o
     setIsProcessing(true);
 
     try {
-      // Get provider from wallet hook (supports both MetaMask and WalletConnect)
-      const walletProvider = getProvider();
-      if (!walletProvider) {
-        throw new Error('Wallet provider not found. Please connect your wallet.');
-      }
-
-      // Check if we're on Ethereum mainnet
-      const isCorrectNetwork = await checkNetwork();
-      if (!isCorrectNetwork) {
-        toast({
-          title: "Wrong Network",
-          description: "Switching to Ethereum Mainnet...",
-        });
-        
-        const switched = await switchToMainnet();
-        if (!switched) {
-          throw new Error('Please switch to Ethereum Mainnet to continue.');
-        }
-        
-        // Wait a moment for network switch to complete
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-
-      const provider = new ethers.BrowserProvider(walletProvider);
-      const signer = await provider.getSigner();
-      
-      // Create USDT contract instance
-      const usdtContract = new ethers.Contract(USDT_CONTRACT, ERC20_ABI, signer);
-      
-      // Check balance first
-      const balance = await usdtContract.balanceOf(address);
-      const formattedBalance = ethers.formatUnits(balance, 6); // USDT has 6 decimals
-      
-      if (parseFloat(formattedBalance) < donationAmount) {
-        toast({
-          title: "Yetersiz Bakiye",
-          description: `USDT bakiyeniz: ${formattedBalance} USDT`,
-          variant: "destructive",
-        });
-        setIsProcessing(false);
-        return;
-      }
-
       // Convert amount to contract units (6 decimals for USDT)
-      const transferAmount = ethers.parseUnits(amount, 6);
+      const transferAmount = parseUnits(amount, 6);
 
       toast({
         title: "İşlem Başlatılıyor",
         description: "Cüzdanınızda işlemi onaylayın...",
       });
 
-      // Execute transfer
-      const tx = await usdtContract.transfer(ownerWallet, transferAmount);
-
-      toast({
-        title: "İşlem Gönderildi",
-        description: `Transaction Hash: ${tx.hash.slice(0, 10)}...`,
+      // Execute transfer using Wagmi
+      await writeContract({
+        address: USDT_CONTRACT,
+        abi: erc20Abi,
+        functionName: 'transfer',
+        args: [ownerWallet as `0x${string}`, transferAmount],
       });
-
-      // Wait for confirmation
-      const receipt = await tx.wait();
-
-      if (receipt && receipt.status === 1) {
-        toast({
-          title: "Bağış Başarılı! 🎉",
-          description: `${amount} USDT başarıyla gönderildi. Sistem otomatik kaydedecek.`,
-        });
-        
-        setAmount("");
-        onSuccess?.();
-      } else {
-        throw new Error("Transaction failed");
-      }
 
     } catch (error: any) {
       console.error("Donation error:", error);
       
       let errorMessage = "Bağış işlemi başarısız";
       
-      if (error.code === 4001) {
+      if (error.message?.includes("User rejected")) {
         errorMessage = "İşlem kullanıcı tarafından iptal edildi";
-      } else if (error.message.includes("insufficient funds")) {
+      } else if (error.message?.includes("insufficient")) {
         errorMessage = "Yetersiz bakiye veya gas ücreti";
-      } else if (error.message.includes("network")) {
+      } else if (error.message?.includes("network")) {
         errorMessage = "Ağ bağlantısı sorunu. Ethereum Mainnet'te olduğunuzdan emin olun";
       }
       
@@ -156,9 +127,8 @@ export default function DonationForm({ campaignId, ownerWallet, campaignTitle, o
         description: errorMessage,
         variant: "destructive",
       });
+      setIsProcessing(false);
     }
-
-    setIsProcessing(false);
   };
 
   return (

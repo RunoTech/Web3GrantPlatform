@@ -72,6 +72,15 @@ export function useWallet() {
       console.log('🔍 SECURITY: Checking existing wallet connection...');
     }
     
+    // CRITICAL: Check if user explicitly disconnected
+    const userDisconnected = localStorage.getItem('wallet_user_disconnected');
+    if (userDisconnected === 'true') {
+      if (import.meta.env.DEV) {
+        console.log('🚫 SECURITY: User explicitly disconnected - skipping auto-connect');
+      }
+      return;
+    }
+    
     if (!window.ethereum) {
       if (import.meta.env.DEV) {
         console.log('❌ SECURITY: No MetaMask detected - skipping auto-connect');
@@ -166,6 +175,13 @@ export function useWallet() {
       setAddress(accounts[0]);
       setIsConnected(true);
       
+      // CRITICAL: Clear the user disconnect flag on successful manual connection
+      localStorage.removeItem('wallet_user_disconnected');
+      
+      if (import.meta.env.DEV) {
+        console.log('✅ SECURITY: User manually connected - clearing disconnect flag');
+      }
+      
       toast({
         title: "Başarılı Bağlantı!",
         description: `${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)} bağlandı`,
@@ -202,6 +218,13 @@ export function useWallet() {
   const disconnect = useCallback(() => {
     setAddress(null);
     setIsConnected(false);
+    
+    // CRITICAL: Set flag to prevent auto-reconnect until user manually connects again
+    localStorage.setItem('wallet_user_disconnected', 'true');
+    
+    if (import.meta.env.DEV) {
+      console.log('🔌 SECURITY: User manually disconnected - setting disconnect flag');
+    }
     
     toast({
       title: "Bağlantı Kesildi",

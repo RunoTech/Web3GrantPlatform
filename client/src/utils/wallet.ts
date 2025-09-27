@@ -51,6 +51,47 @@ export function isValidEthereumAddress(address: string): boolean {
   return !invalidAddresses.includes(address.toLowerCase());
 }
 
+// SECURITY: Check if wallet is actually unlocked and accessible
+export async function isWalletUnlockedAndAccessible(): Promise<boolean> {
+  const provider = getWalletProvider();
+  if (!provider) {
+    if (import.meta.env.DEV) {
+      console.log('🔒 Wallet accessibility check: FAILED (no provider)');
+    }
+    return false;
+  }
+
+  try {
+    // First check if this is MetaMask and use its native unlock check
+    if (provider.isMetaMask && provider._metamask?.isUnlocked) {
+      const isUnlocked = await provider._metamask.isUnlocked();
+      if (import.meta.env.DEV) {
+        console.log(`🔒🔓 MetaMask unlock check: ${isUnlocked ? 'UNLOCKED' : 'LOCKED'}`);
+      }
+      return isUnlocked;
+    }
+
+    // Fallback: Check if wallet has accessible accounts (for non-MetaMask providers)
+    const accounts = await provider.request({
+      method: 'eth_accounts'
+    });
+    
+    const hasAccounts = Array.isArray(accounts) && accounts.length > 0;
+    
+    if (import.meta.env.DEV) {
+      console.log(`🔑 Fallback unlock check: ${hasAccounts ? 'HAS ACCOUNTS' : 'NO ACCOUNTS'}`);
+    }
+    
+    return hasAccounts;
+  } catch (error) {
+    // Wallet is locked or not accessible
+    if (import.meta.env.DEV) {
+      console.log('🔒 Wallet accessibility check: FAILED (error during check)', error);
+    }
+    return false;
+  }
+}
+
 // Normalize chainId to handle different provider formats
 function normalizeChainId(value: any): string | null {
   try {

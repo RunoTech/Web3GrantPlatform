@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { isWalletUnlockedAndAccessible } from '@/utils/wallet';
 
 // Wallet types for window.ethereum
 interface EthereumProvider {
@@ -7,6 +8,10 @@ interface EthereumProvider {
   request: (args: { method: string; params?: any[] }) => Promise<any>;
   on: (event: string, handler: (...args: any[]) => void) => void;
   removeListener: (event: string, handler: (...args: any[]) => void) => void;
+  // MetaMask-specific properties
+  _metamask?: {
+    isUnlocked: () => Promise<boolean>;
+  };
 }
 
 declare global {
@@ -61,29 +66,67 @@ export function useWallet() {
     }
   }, [toast, TARGET_CHAIN_ID]);
 
-  // Check if we have existing accounts (auto-connect)
+  // Check if wallet is actually unlocked and accessible (secure check)
   const checkExistingConnection = useCallback(async () => {
-    if (!window.ethereum) return;
+    if (import.meta.env.DEV) {
+      console.log('🔍 SECURITY: Checking existing wallet connection...');
+    }
+    
+    if (!window.ethereum) {
+      if (import.meta.env.DEV) {
+        console.log('❌ SECURITY: No MetaMask detected - skipping auto-connect');
+      }
+      return;
+    }
 
     try {
+      // First check if we have accounts
       const accounts = await window.ethereum.request({
         method: 'eth_accounts'
       });
 
       if (accounts && accounts.length > 0) {
-        // Verify network before setting connected state
-        const networkOk = await verifyAndSwitchNetwork();
-        if (networkOk) {
-          setAddress(accounts[0]);
-          setIsConnected(true);
+        if (import.meta.env.DEV) {
+          console.log('📋 SECURITY: Found existing accounts, checking wallet accessibility...');
+        }
+        
+        // CRITICAL: Just having accounts doesn't mean wallet is unlocked!
+        // Use centralized accessibility check to verify wallet is truly accessible
+        const isAccessible = await isWalletUnlockedAndAccessible();
+        
+        if (isAccessible) {
+          // Wallet is unlocked and accessible - now verify network
+          const networkOk = await verifyAndSwitchNetwork();
+          if (networkOk) {
+            setAddress(accounts[0]);
+            setIsConnected(true);
+            
+            if (import.meta.env.DEV) {
+              console.log('🔓 SECURITY: Wallet auto-connected (unlocked and accessible)');
+            }
+          } else {
+            // Wrong network and user rejected switch
+            setAddress(null);
+            setIsConnected(false);
+          }
         } else {
-          // Wrong network and user rejected switch
+          // Wallet is locked or not accessible - don't auto-connect
+          if (import.meta.env.DEV) {
+            console.log('🔒 SECURITY: Wallet is locked or not accessible - skipping auto-connect');
+          }
           setAddress(null);
           setIsConnected(false);
+        }
+      } else {
+        if (import.meta.env.DEV) {
+          console.log('📭 SECURITY: No existing accounts found - wallet not previously connected');
         }
       }
     } catch (error) {
       // No existing connection - this is normal
+      if (import.meta.env.DEV) {
+        console.log('👋 SECURITY: No existing wallet connection found');
+      }
     }
   }, [verifyAndSwitchNetwork]);
 
@@ -174,13 +217,29 @@ export function useWallet() {
       if (!accounts || accounts.length === 0) {
         disconnect();
       } else {
-        // Verify network before setting connected state
-        const networkOk = await verifyAndSwitchNetwork();
-        if (networkOk) {
-          setAddress(accounts[0]);
-          setIsConnected(true);
+        // SECURITY: Check wallet accessibility before considering it connected
+        const isAccessible = await isWalletUnlockedAndAccessible();
+        
+        if (isAccessible) {
+          // Wallet is accessible - verify network before setting connected state
+          const networkOk = await verifyAndSwitchNetwork();
+          if (networkOk) {
+            setAddress(accounts[0]);
+            setIsConnected(true);
+            
+            if (import.meta.env.DEV) {
+              console.log('🔄 Account change: wallet accessible and connected');
+            }
+          } else {
+            // Wrong network and user rejected switch
+            setAddress(null);
+            setIsConnected(false);
+          }
         } else {
-          // Wrong network and user rejected switch
+          // Wallet is locked or not accessible - disconnect
+          if (import.meta.env.DEV) {
+            console.log('🔒 Account change: wallet not accessible - disconnecting');
+          }
           setAddress(null);
           setIsConnected(false);
         }

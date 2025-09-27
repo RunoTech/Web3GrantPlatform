@@ -17,6 +17,7 @@ import {
   insertPaymentAttemptSchema,
   insertUserNonceSchema,
   insertUserSessionSchema,
+  insertPendingPaymentSchema,
   type Admin,
   type UserNonce,
   type UserSession,
@@ -2775,6 +2776,230 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error auto-selecting daily winner:", error);
       res.status(500).json({ error: "Failed to select daily winner" });
+    }
+  });
+
+  // ===== PENDING PAYMENTS ROUTES (AUTO CAMPAIGN CREATION) =====
+  
+  // Add pending payment (public - for frontend timeout handling)
+  app.post("/api/pending-payments", async (req, res) => {
+    try {
+      const paymentData = insertPendingPaymentSchema.parse(req.body);
+      
+      // Security: Validate transaction hash format
+      if (paymentData.txHash && !/^0x[a-fA-F0-9]{64}$/.test(paymentData.txHash)) {
+        return res.status(400).json({ error: "Invalid transaction hash format" });
+      }
+      
+      // Check for duplicates
+      if (paymentData.txHash) {
+        const existing = await storage.getPendingByTxHash(paymentData.txHash);
+        if (existing) {
+          return res.status(409).json({ error: "Pending payment already exists for this transaction" });
+        }
+      }
+      
+      const pendingPayment = await storage.addPendingPayment(paymentData);
+      res.json(pendingPayment);
+    } catch (error) {
+      console.error("Error adding pending payment:", error);
+      res.status(500).json({ error: "Failed to add pending payment" });
+    }
+  });
+
+  // Get pending payments (admin only - for monitoring)
+  app.get("/api/youhonor/pending-payments", authenticateAdmin, async (req: any, res) => {
+    try {
+      const status = req.query.status as string;
+      const payments = await storage.getPendingPayments(status);
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching pending payments:", error);
+      res.status(500).json({ error: "Failed to fetch pending payments" });
+    }
+  });
+
+  // Update pending payment status (admin only)
+  app.put("/api/youhonor/pending-payments/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const paymentId = parseInt(req.params.id);
+      if (isNaN(paymentId)) {
+        return res.status(400).json({ error: "Invalid payment ID" });
+      }
+      
+      const updates = req.body;
+      await storage.updatePendingPayment(paymentId, updates);
+      
+      // Log the action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "update_pending_payment",
+        details: { paymentId, updates },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating pending payment:", error);
+      res.status(500).json({ error: "Failed to update pending payment" });
+    }
+  });
+
+  // Check pending payment by transaction hash (public - for frontend polling)
+  app.get("/api/pending-payments/check/:txHash", async (req, res) => {
+    try {
+      const { txHash } = req.params;
+      
+      // Security: Validate transaction hash format
+      if (!/^0x[a-fA-F0-9]{64}$/.test(txHash)) {
+        return res.status(400).json({ error: "Invalid transaction hash format" });
+      }
+      
+      const payment = await storage.getPendingByTxHash(txHash);
+      if (!payment) {
+        return res.status(404).json({ error: "Pending payment not found" });
+      }
+      
+      res.json(payment);
+    } catch (error) {
+      console.error("Error checking pending payment:", error);
+      res.status(500).json({ error: "Failed to check pending payment" });
+    }
+  });
+
+  // Reconcile specific failed transaction (public - for failed tx recovery with security)
+  app.post("/api/pending-payments/reconcile/:txHash", async (req, res) => {
+    try {
+      const { txHash } = req.params;
+      
+      // Security: Validate transaction hash format
+      if (!/^0x[a-fA-F0-9]{64}$/.test(txHash)) {
+        return res.status(400).json({ error: "Invalid transaction hash format" });
+      }
+      
+      console.log(`🔧 Reconciling failed transaction: ${txHash}`);
+      
+      // SECURITY: Check if transaction was already processed to prevent replay attacks
+      const existingCampaign = await storage.getCampaignByTxHash(txHash);
+      if (existingCampaign) {
+        console.log(`⚠️ Transaction already processed - campaign exists: ${existingCampaign.id}`);
+        return res.status(409).json({ 
+          error: "Transaction already processed", 
+          campaignId: existingCampaign.id,
+          status: 'already_processed'
+        });
+      }
+      
+      // Import blockchain utilities
+      const { checkPendingPayment, processPendingPayment, verifyPayment } = await import("./blockchain");
+      
+      // First check if PendingPayment exists for this txHash
+      let pendingPayment = await storage.getPendingByTxHash(txHash);
+      
+      if (!pendingPayment) {
+        console.log(`⚠️ No pending payment found for tx: ${txHash}, creating from request...`);
+        
+        // Create PendingPayment from request body if it doesn't exist
+        const { ownerWallet, expectedAmount, chainId, platformWallet, formData } = req.body;
+        
+        if (!ownerWallet || !expectedAmount || !formData) {
+          return res.status(400).json({ 
+            error: "Missing required fields: ownerWallet, expectedAmount, formData" 
+          });
+        }
+        
+        // SECURITY: Validate wallet ownership by verifying the transaction on-chain
+        const verification = await verifyPayment(txHash, {
+          fromAddress: ownerWallet,
+          toAddress: platformWallet || '0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8',
+          expectedAmount: expectedAmount.toString(),
+          tokenAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT
+          chainId: chainId || 1
+        });
+        
+        if (!verification.success) {
+          console.log(`❌ Transaction verification failed: ${verification.error}`);
+          return res.status(400).json({ 
+            error: "Transaction verification failed", 
+            details: verification.error 
+          });
+        }
+        
+        if (!verification.confirmed) {
+          console.log(`❌ Transaction not confirmed: ${txHash}`);
+          return res.status(400).json({ 
+            error: "Transaction not confirmed on blockchain" 
+          });
+        }
+        
+        pendingPayment = await storage.addPendingPayment({
+          ownerWallet,
+          expectedAmount: expectedAmount.toString(),
+          chainId: chainId || 1,
+          platformWallet: platformWallet || '0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8',
+          tokenAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT
+          txHash,
+          status: 'pending',
+          formData
+        });
+        
+        console.log(`✅ Created PendingPayment for reconciliation: ${pendingPayment.id}`);
+      } else {
+        // SECURITY: Verify wallet ownership for existing PendingPayment
+        const { ownerWallet } = req.body;
+        if (ownerWallet && pendingPayment.ownerWallet !== ownerWallet) {
+          console.log(`❌ Wallet ownership mismatch: ${ownerWallet} vs ${pendingPayment.ownerWallet}`);
+          return res.status(403).json({ 
+            error: "Wallet ownership verification failed" 
+          });
+        }
+        
+        // SECURITY: Only allow reconciliation of pending/failed payments
+        if (pendingPayment.status === 'completed') {
+          console.log(`⚠️ Payment already completed: ${txHash}`);
+          return res.status(409).json({ 
+            error: "Payment already completed", 
+            status: 'already_completed'
+          });
+        }
+      }
+      
+      // Verify and process the payment
+      const checkResult = await checkPendingPayment(pendingPayment);
+      
+      if (checkResult.success && checkResult.confirmed) {
+        console.log(`✅ Transaction confirmed during reconciliation: ${txHash}`);
+        
+        const processResult = await processPendingPayment(pendingPayment, checkResult.verificationResult);
+        
+        if (processResult.success) {
+          res.json({
+            success: true,
+            status: 'confirmed',
+            campaignId: processResult.campaignId,
+            message: 'Transaction successfully reconciled and campaign created'
+          });
+        } else {
+          res.status(500).json({
+            success: false,
+            status: 'processing_failed',
+            error: processResult.error
+          });
+        }
+      } else {
+        console.log(`❌ Transaction not confirmed during reconciliation: ${txHash}`);
+        res.json({
+          success: false,
+          status: 'not_confirmed',
+          error: checkResult.verificationResult?.error || 'Transaction not yet confirmed on blockchain',
+          message: 'Transaction found but not yet confirmed. Please wait for more confirmations.'
+        });
+      }
+      
+    } catch (error) {
+      console.error("Error reconciling transaction:", error);
+      res.status(500).json({ error: "Failed to reconcile transaction" });
     }
   });
 

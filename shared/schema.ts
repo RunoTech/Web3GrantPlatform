@@ -135,6 +135,27 @@ export const accounts = pgTable("accounts", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Pending payments tracking for automatic campaign creation
+export const pendingPayments = pgTable("pending_payments", {
+  id: serial("id").primaryKey(),
+  ownerWallet: varchar("owner_wallet", { length: 42 }).notNull(),
+  expectedAmount: decimal("expected_amount", { precision: 18, scale: 8 }).notNull(),
+  chainId: integer("chain_id").notNull().default(1), // Ethereum mainnet
+  platformWallet: varchar("platform_wallet", { length: 42 }).notNull(),
+  tokenAddress: varchar("token_address", { length: 42 }).notNull().default('0xdAC17F958D2ee523a2206206994597C13D831ec7'), // USDT
+  txHash: varchar("tx_hash", { length: 66 }), // nullable until transaction is sent
+  status: varchar("status", { length: 20 }).notNull().default('pending'), // pending, confirmed, failed
+  formData: jsonb("form_data").notNull(), // Campaign form data
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_pending_payments_owner").on(table.ownerWallet),
+  index("idx_pending_payments_tx_hash").on(table.txHash),
+  index("idx_pending_payments_status").on(table.status),
+  index("idx_pending_payments_created").on(table.createdAt),
+  uniqueIndex("idx_pending_payments_tx_hash_unique").on(table.txHash), // Prevent duplicate processing
+]);
+
 // Campaign type and creator type enums
 export const campaignTypeEnum = pgEnum("campaign_type", ["FUND", "DONATE"]);
 export const creatorTypeEnum = pgEnum("creator_type", ["company", "citizen", "association", "foundation"]);
@@ -534,6 +555,12 @@ export const insertUsedTransactionSchema = createInsertSchema(usedTransactions).
   createdAt: true,
 });
 
+export const insertPendingPaymentSchema = createInsertSchema(pendingPayments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type Admin = typeof admins.$inferSelect;
 export type InsertAdmin = z.infer<typeof insertAdminSchema>;
@@ -573,3 +600,5 @@ export type UserSession = typeof userSessions.$inferSelect;
 export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
 export type UsedTransaction = typeof usedTransactions.$inferSelect;
 export type InsertUsedTransaction = z.infer<typeof insertUsedTransactionSchema>;
+export type PendingPayment = typeof pendingPayments.$inferSelect;
+export type InsertPendingPayment = z.infer<typeof insertPendingPaymentSchema>;

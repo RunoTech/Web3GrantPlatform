@@ -629,3 +629,223 @@ export function getCampaignListenersStatus() {
     listeners: activeListeners
   };
 }
+
+// ===== PENDING PAYMENT POLLING UTILITIES =====
+
+/**
+ * Check a single pending payment for confirmation
+ */
+export async function checkPendingPayment(pendingPayment: any): Promise<{
+  success: boolean;
+  confirmed?: boolean;
+  error?: string;
+  verificationResult?: any;
+}> {
+  try {
+    console.log(`🔍 Checking pending payment ${pendingPayment.id} for tx: ${pendingPayment.txHash}`);
+    
+    if (!pendingPayment.txHash) {
+      return { success: false, error: "No transaction hash provided" };
+    }
+    
+    // Verify the payment using existing verification function
+    const tokenAddresses = await getTokenAddresses();
+    const defaultUsdtAddress = tokenAddresses.ethereum?.USDT || '';
+    
+    const verificationResult = await verifyPayment(
+      pendingPayment.chainId === 1 ? 'ethereum' : 'unknown',
+      pendingPayment.txHash,
+      pendingPayment.expectedAmount,
+      pendingPayment.tokenAddress || defaultUsdtAddress,
+      pendingPayment.platformWallet
+    );
+    
+    if (verificationResult.success) {
+      console.log(`✅ Payment confirmed: ${pendingPayment.id} - ${verificationResult.amount} tokens`);
+      return {
+        success: true,
+        confirmed: true,
+        verificationResult
+      };
+    } else {
+      console.log(`⏳ Payment not yet confirmed: ${pendingPayment.id} - ${verificationResult.error}`);
+      return {
+        success: true,
+        confirmed: false,
+        verificationResult
+      };
+    }
+    
+  } catch (error) {
+    console.error(`❌ Error checking pending payment ${pendingPayment.id}:`, error);
+    return { success: false, error: String(error) };
+  }
+}
+
+/**
+ * Poll all pending payments and process confirmed ones
+ */
+export async function pollPendingPayments(): Promise<{
+  success: boolean;
+  processed: number;
+  errors: number;
+  results: any[];
+}> {
+  try {
+    // Import storage here to avoid circular dependency
+    const { storage } = await import("./storage");
+    
+    console.log(`🔄 Starting pending payments poll...`);
+    
+    // Get all pending payments
+    const pendingPayments = await storage.getPendingPayments('pending');
+    
+    if (pendingPayments.length === 0) {
+      console.log(`📭 No pending payments to process`);
+      return { success: true, processed: 0, errors: 0, results: [] };
+    }
+    
+    console.log(`📋 Found ${pendingPayments.length} pending payments to check`);
+    
+    const results = [];
+    let processed = 0;
+    let errors = 0;
+    
+    for (const payment of pendingPayments) {
+      try {
+        const checkResult = await checkPendingPayment(payment);
+        
+        if (checkResult.success && checkResult.confirmed) {
+          // Process confirmed payment
+          const processResult = await processPendingPayment(payment, checkResult.verificationResult);
+          
+          if (processResult.success) {
+            processed++;
+            console.log(`✅ Successfully processed payment ${payment.id}`);
+          } else {
+            errors++;
+            console.error(`❌ Failed to process confirmed payment ${payment.id}:`, processResult.error);
+          }
+          
+          results.push({ paymentId: payment.id, ...processResult });
+        } else if (!checkResult.success) {
+          errors++;
+          console.error(`❌ Failed to check payment ${payment.id}:`, checkResult.error);
+          results.push({ paymentId: payment.id, success: false, error: checkResult.error });
+        } else {
+          // Payment not yet confirmed, keep as pending
+          console.log(`⏳ Payment ${payment.id} still pending confirmation`);
+          results.push({ paymentId: payment.id, success: true, status: 'still_pending' });
+        }
+        
+      } catch (error) {
+        errors++;
+        console.error(`❌ Error processing payment ${payment.id}:`, error);
+        results.push({ paymentId: payment.id, success: false, error: String(error) });
+      }
+    }
+    
+    console.log(`📊 Pending payments poll completed: ${processed} processed, ${errors} errors`);
+    
+    return {
+      success: true,
+      processed,
+      errors,
+      results
+    };
+    
+  } catch (error) {
+    console.error(`❌ Failed to poll pending payments:`, error);
+    return { success: false, processed: 0, errors: 1, results: [] };
+  }
+}
+
+/**
+ * Process a confirmed pending payment - create campaign and mark as complete
+ */
+export async function processPendingPayment(pendingPayment: any, verificationResult: any): Promise<{
+  success: boolean;
+  campaignId?: number;
+  error?: string;
+}> {
+  try {
+    // Import storage here to avoid circular dependency
+    const { storage } = await import("./storage");
+    
+    console.log(`🏗️ Processing confirmed payment ${pendingPayment.id} - creating campaign...`);
+    
+    // Check if campaign already exists for this payment
+    if (pendingPayment.status === 'confirmed' || pendingPayment.campaignId) {
+      console.log(`⚠️ Payment ${pendingPayment.id} already processed`);
+      return { success: true, campaignId: pendingPayment.campaignId };
+    }
+    
+    // Parse campaign data from pending payment
+    let campaignData;
+    try {
+      campaignData = JSON.parse(pendingPayment.campaignData);
+    } catch (error) {
+      console.error(`❌ Failed to parse campaign data for payment ${pendingPayment.id}:`, error);
+      return { success: false, error: "Invalid campaign data format" };
+    }
+    
+    // Create the campaign with verified payment info
+    const campaign = await storage.createCampaign({
+      ...campaignData,
+      ownerWallet: pendingPayment.ownerWallet,
+      status: 'active',
+      activationTxHash: pendingPayment.txHash,
+      activationAmount: verificationResult.amount,
+      activationNetwork: pendingPayment.chainId === 1 ? 'ethereum' : 'unknown'
+    });
+    
+    console.log(`🎉 Campaign created successfully: #${campaign.id} for payment ${pendingPayment.id}`);
+    
+    // Mark pending payment as confirmed
+    await storage.updatePendingPayment(pendingPayment.id, {
+      status: 'confirmed',
+      campaignId: campaign.id,
+      processedAt: new Date()
+    });
+    
+    // Mark transaction as used to prevent reuse
+    await storage.createUsedTransaction({
+      txHash: pendingPayment.txHash,
+      purpose: 'campaign_activation',
+      amount: verificationResult.amount,
+      walletAddress: pendingPayment.ownerWallet,
+      processedAt: new Date()
+    });
+    
+    console.log(`✅ Payment ${pendingPayment.id} fully processed - Campaign #${campaign.id} active`);
+    
+    return {
+      success: true,
+      campaignId: campaign.id
+    };
+    
+  } catch (error) {
+    console.error(`❌ Failed to process pending payment ${pendingPayment.id}:`, error);
+    
+    // Mark payment as failed for manual review
+    try {
+      const { storage } = await import("./storage");
+      await storage.updatePendingPayment(pendingPayment.id, {
+        status: 'failed',
+        errorMessage: String(error)
+      });
+    } catch (updateError) {
+      console.error(`❌ Failed to mark payment as failed:`, updateError);
+    }
+    
+    return { success: false, error: String(error) };
+  }
+}
+
+/**
+ * Get token address for network and symbol
+ */
+async function getTokenAddress(network: string, symbol: string): Promise<string> {
+  const tokenAddresses = await getTokenAddresses();
+  return tokenAddresses[network]?.[symbol] || '';
+}

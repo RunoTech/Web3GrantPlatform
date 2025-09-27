@@ -20,6 +20,7 @@ import {
   type UserNonce, type InsertUserNonce,
   type UserSession, type InsertUserSession,
   type UsedTransaction, type InsertUsedTransaction,
+  type PendingPayment, type InsertPendingPayment,
   admins,
   platformSettings,
   networkFees,
@@ -39,6 +40,7 @@ import {
   userNonces,
   userSessions,
   usedTransactions,
+  pendingPayments,
 } from "../shared/schema";
 
 export interface IStorage {
@@ -67,6 +69,15 @@ export interface IStorage {
   createUsedTransaction(transaction: InsertUsedTransaction): Promise<UsedTransaction>;
   isTransactionUsed(txHash: string): Promise<boolean>;
   getUsedTransaction(txHash: string): Promise<UsedTransaction | undefined>;
+
+  // Pending Payments (Auto Campaign Creation)
+  addPendingPayment(payment: InsertPendingPayment): Promise<PendingPayment>;
+  getPendingPayments(status?: string): Promise<PendingPayment[]>;
+  updatePendingPayment(id: number, updates: Partial<PendingPayment>): Promise<void>;
+  getPendingByTxHash(txHash: string): Promise<PendingPayment | undefined>;
+  markPendingConfirmed(id: number): Promise<void>;
+  findDuplicatesByTxHash(txHash: string): Promise<PendingPayment[]>;
+  findByOwnerAmountRecent(ownerWallet: string, amount: string, hours: number): Promise<PendingPayment[]>;
 
   // Platform Settings
   getPlatformSettings(category?: string): Promise<PlatformSetting[]>;
@@ -106,6 +117,7 @@ export interface IStorage {
     }
   ): Promise<Campaign[]>;
   getCampaign(id: number): Promise<Campaign | undefined>;
+  getCampaignByTxHash(txHash: string): Promise<Campaign | undefined>;
   createCampaign(campaign: InsertCampaign): Promise<Campaign>;
   updateCampaign(id: number, updates: Partial<Campaign>): Promise<void>;
   getPopularCampaigns(limit: number): Promise<Campaign[]>;
@@ -458,6 +470,11 @@ export class DatabaseStorage implements IStorage {
 
   async getCampaign(id: number): Promise<Campaign | undefined> {
     const [campaign] = await db.select().from(campaigns).where(eq(campaigns.id, id));
+    return campaign || undefined;
+  }
+
+  async getCampaignByTxHash(txHash: string): Promise<Campaign | undefined> {
+    const [campaign] = await db.select().from(campaigns).where(eq(campaigns.collateralTxHash, txHash));
     return campaign || undefined;
   }
 
@@ -1439,6 +1456,46 @@ export class DatabaseStorage implements IStorage {
         totalRewardDays: rewardActivity.reduce((sum, r) => sum + parseInt(r.count.toString()), 0)
       }
     };
+  }
+
+  // Pending Payments (Auto Campaign Creation)
+  async addPendingPayment(payment: InsertPendingPayment): Promise<PendingPayment> {
+    const [result] = await db.insert(pendingPayments).values(payment).returning();
+    return result;
+  }
+
+  async getPendingPayments(status?: string): Promise<PendingPayment[]> {
+    if (status) {
+      return await db.select().from(pendingPayments).where(eq(pendingPayments.status, status));
+    }
+    return await db.select().from(pendingPayments);
+  }
+
+  async updatePendingPayment(id: number, updates: Partial<PendingPayment>): Promise<void> {
+    await db.update(pendingPayments).set(updates).where(eq(pendingPayments.id, id));
+  }
+
+  async getPendingByTxHash(txHash: string): Promise<PendingPayment | undefined> {
+    const [result] = await db.select().from(pendingPayments).where(eq(pendingPayments.txHash, txHash));
+    return result;
+  }
+
+  async markPendingConfirmed(id: number): Promise<void> {
+    await db.update(pendingPayments).set({ status: 'confirmed' }).where(eq(pendingPayments.id, id));
+  }
+
+  async findDuplicatesByTxHash(txHash: string): Promise<PendingPayment[]> {
+    return await db.select().from(pendingPayments).where(eq(pendingPayments.txHash, txHash));
+  }
+
+  async findByOwnerAmountRecent(ownerWallet: string, amount: string, hours: number): Promise<PendingPayment[]> {
+    const hoursAgo = new Date(Date.now() - hours * 60 * 60 * 1000);
+    return await db.select().from(pendingPayments)
+      .where(and(
+        eq(pendingPayments.ownerWallet, ownerWallet),
+        eq(pendingPayments.expectedAmount, amount),
+        gte(pendingPayments.createdAt, hoursAgo)
+      ));
   }
 }
 

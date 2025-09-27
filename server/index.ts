@@ -196,5 +196,58 @@ app.use((req, res, next) => {
       console.error("Failed to initialize blockchain monitoring:", error);
       console.log("📊 Server ready - blockchain monitoring FAILED");
     }
+
+    // Initialize pending payment poller for automatic campaign creation
+    try {
+      console.log("🔄 Starting pending payment poller for automatic campaign creation...");
+      
+      const { pollPendingPayments } = await import("./blockchain");
+      
+      // Start immediate polling
+      pollPendingPayments().then((result) => {
+        console.log(`🔍 Initial pending payment poll: ${result.processed} processed, ${result.errors} errors`);
+      }).catch((error) => {
+        console.error("❌ Initial pending payment poll failed:", error);
+      });
+      
+      // Set up recurring polling every 30 seconds with mutex to prevent overlapping
+      let pollingInProgress = false;
+      
+      const pollingInterval = setInterval(async () => {
+        if (pollingInProgress) {
+          console.log('⏭️ Skipping poll - previous poll still in progress');
+          return;
+        }
+        
+        pollingInProgress = true;
+        try {
+          const result = await pollPendingPayments();
+          if (result.processed > 0 || result.errors > 0) {
+            console.log(`🔄 Pending payment poll: ${result.processed} processed, ${result.errors} errors`);
+          }
+        } catch (error) {
+          console.error("❌ Pending payment poll error:", error);
+        } finally {
+          pollingInProgress = false;
+        }
+      }, 30000); // 30 seconds
+      
+      console.log("✅ Pending payment poller started - checking every 30 seconds");
+      
+      // Graceful shutdown handling
+      process.on('SIGTERM', () => {
+        console.log("🛑 Stopping pending payment poller...");
+        clearInterval(pollingInterval);
+      });
+      
+      process.on('SIGINT', () => {
+        console.log("🛑 Stopping pending payment poller...");
+        clearInterval(pollingInterval);
+      });
+      
+    } catch (error) {
+      console.error("Failed to initialize pending payment poller:", error);
+      console.log("📊 Server ready - pending payment polling FAILED");
+    }
   });
 })();

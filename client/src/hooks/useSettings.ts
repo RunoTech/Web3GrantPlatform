@@ -53,17 +53,17 @@ export function useSettings() {
     discordUrl: getSetting('social_discord', ''),
     
     // Daily Rewards Settings
-    dailyRewardAmount: getNumberSetting('daily_reward_amount', 100),
-    dailyTotalPrize: getNumberSetting('daily_total_prize', 1500),
-    drawsPerDay: getNumberSetting('draws_per_day', 3),
-    winnersPerDraw: getNumberSetting('winners_per_draw', 7),
-    totalDailyWinners: getNumberSetting('total_daily_winners', 21),
-    morningDrawTime: getSetting('morning_draw_time', '09:00'),
-    afternoonDrawTime: getSetting('afternoon_draw_time', '15:00'),
-    eveningDrawTime: getSetting('evening_draw_time', '21:00'),
-    morningDrawPrize: getNumberSetting('morning_draw_prize', 500),
-    afternoonDrawPrize: getNumberSetting('afternoon_draw_prize', 500),
-    eveningDrawPrize: getNumberSetting('evening_draw_prize', 500),
+    dailyRewardAmount: getNumberSetting('daily_reward_amount', 0),
+    dailyTotalPrize: getNumberSetting('daily_total_prize', 0),
+    drawsPerDay: getNumberSetting('draws_per_day', 0),
+    winnersPerDraw: getNumberSetting('winners_per_draw', 0),
+    totalDailyWinners: getNumberSetting('total_daily_winners', 0),
+    morningDrawTime: getSetting('morning_draw_time', ''),
+    afternoonDrawTime: getSetting('afternoon_draw_time', ''),
+    eveningDrawTime: getSetting('evening_draw_time', ''),
+    morningDrawPrize: getNumberSetting('morning_draw_prize', 0),
+    afternoonDrawPrize: getNumberSetting('afternoon_draw_prize', 0),
+    eveningDrawPrize: getNumberSetting('evening_draw_prize', 0),
   };
 }
 

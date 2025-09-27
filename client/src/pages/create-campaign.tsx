@@ -822,7 +822,7 @@ export default function CreateCampaignPage() {
                     <div>
                       <h4 className="font-medium text-primary mb-1">Enable Credit Card Donations</h4>
                       <p className="text-sm text-muted-foreground">
-                        Allow donors to contribute using credit cards. Requires a {collateralInfo.collateralAmount} {collateralInfo.collateralToken} collateral payment to activate this feature.
+                        Allow donors to contribute using credit cards. Requires a {collateralInfo.collateralAmount} {collateralInfo.collateralToken} collateral payment to activate this feature. Your campaign will be created automatically after payment confirmation.
                       </p>
                     </div>
                   </div>
@@ -885,7 +885,8 @@ export default function CreateCampaignPage() {
                           className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors"
                           data-testid="button-pay-collateral"
                         >
-                          Pay Collateral ({form.watch("collateralAmount") || collateralInfo.collateralAmount} {collateralInfo.collateralToken})
+                          <DollarSign className="w-4 h-4 mr-2" />
+                          Pay Collateral & Create Campaign ({form.watch("collateralAmount") || collateralInfo.collateralAmount} {collateralInfo.collateralToken})
                         </Button>
                       )}
 
@@ -905,15 +906,26 @@ export default function CreateCampaignPage() {
                 </div>
               </div>
 
-              {/* Submit Button */}
-              <Button 
-                type="submit" 
-                className="w-full btn-binance font-bold text-lg h-12 transition-all duration-200 hover:transform hover:-translate-y-0.5 hover:shadow-lg"
-                disabled={createCampaignMutation.isPending}
-                data-testid="button-create-campaign"
-              >
-                {createCampaignMutation.isPending ? "Creating..." : "Create Campaign"}
-              </Button>
+              {/* Submit Button - Only show when credit card is disabled OR collateral is paid */}
+              {(!creditCardEnabled || collateralPaid) && (
+                <Button 
+                  type="submit" 
+                  className="w-full btn-binance font-bold text-lg h-12 transition-all duration-200 hover:transform hover:-translate-y-0.5 hover:shadow-lg"
+                  disabled={createCampaignMutation.isPending}
+                  data-testid="button-create-campaign"
+                >
+                  {createCampaignMutation.isPending ? "Creating..." : "Create Campaign"}
+                </Button>
+              )}
+              
+              {/* Payment Required Message */}
+              {creditCardEnabled && !collateralPaid && (
+                <div className="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <p className="text-yellow-800 dark:text-yellow-200 font-medium">
+                    Please complete the collateral payment above to create your campaign with credit card support.
+                  </p>
+                </div>
+              )}
 
             </form>
           </Form>

@@ -74,6 +74,11 @@ export function useWallet() {
     
     // CRITICAL: Check if user explicitly disconnected
     const userDisconnected = localStorage.getItem('wallet_user_disconnected');
+    
+    if (import.meta.env.DEV) {
+      console.log('🔍 SECURITY: Checking localStorage disconnect flag:', userDisconnected);
+    }
+    
     if (userDisconnected === 'true') {
       if (import.meta.env.DEV) {
         console.log('🚫 SECURITY: User explicitly disconnected - skipping auto-connect');

@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useWallet } from "@/hooks/useWallet";
-import { ethers } from "ethers";
+// Modern wallet integration with Wagmi
 import { 
   Copy, 
   Zap, 

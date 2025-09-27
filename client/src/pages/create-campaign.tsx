@@ -169,9 +169,8 @@ export default function CreateCampaignPage() {
         return;
       }
 
-      const { ethers } = await import("ethers");
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
+      // TODO: Replace with Wagmi hooks for token transfers
+      console.log("Collateral payment temporarily disabled - migrating to Wagmi");
 
       // Switch to Ethereum Mainnet
       try {

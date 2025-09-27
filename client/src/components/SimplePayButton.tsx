@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useWallet } from "@/hooks/useWallet";
-import { ethers } from "ethers";
+// Modern wallet integration with Wagmi
 import { 
   CreditCard, 
   Zap, 

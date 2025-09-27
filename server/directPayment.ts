@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+// Modern blockchain operations - server-side
 import { getNetworkConfig, getTokenAddresses } from "./blockchain";
 
 // ERC-20 ABI for token operations

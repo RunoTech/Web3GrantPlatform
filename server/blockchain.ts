@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+// Modern blockchain operations - server-side
 import { db } from "./db";
 import { platformSettings } from "../shared/schema";
 import { eq, or } from "drizzle-orm";

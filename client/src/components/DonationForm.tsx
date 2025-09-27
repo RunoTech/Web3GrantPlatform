@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useWallet } from "@/hooks/useWallet";
 import { useToast } from "@/hooks/use-toast";
 import { Heart, Wallet, Send, CheckCircle } from "lucide-react";
-import { ethers } from "ethers";
+// Modern wallet integration with Wagmi
 
 interface DonationFormProps {
   campaignId: number;

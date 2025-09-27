@@ -29,12 +29,23 @@ export default function CreateCampaignPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Wagmi hooks for contract interaction
+  // Wagmi hooks for contract interaction with DEBUG
   const { writeContract, data: txHash, error: writeError } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming, isSuccess: isConfirmed, error: receiptError } = useWaitForTransactionReceipt({
     hash: txHash,
     chainId: 1, // Explicit Ethereum Mainnet
+    timeout: 120000, // 2 minute timeout
   });
+  
+  // Debug receipt status
+  React.useEffect(() => {
+    if (txHash) {
+      console.log('⏳ Waiting for transaction receipt...', txHash);
+    }
+    if (receiptError) {
+      console.error('❌ Receipt error:', receiptError);
+    }
+  }, [txHash, receiptError]);
   
   // Get URL parameters to determine campaign type
   const urlParams = new URLSearchParams(window.location.search);
@@ -147,9 +158,17 @@ export default function CreateCampaignPage() {
     }
   }, [creditCardInfoData, form]);
 
-  // Handle transaction confirmation
+  // Handle transaction confirmation with DEBUG
   React.useEffect(() => {
+    console.log('🔍 Transaction status:', { 
+      isConfirmed, 
+      txHash, 
+      validatedFormData: !!validatedFormData,
+      isConfirming
+    });
+    
     if (isConfirmed && txHash && validatedFormData) {
+      console.log('✅ Payment confirmed! Creating campaign...', txHash);
       setCollateralPaid(true);
       
       toast({
@@ -159,6 +178,15 @@ export default function CreateCampaignPage() {
 
       // Automatically create campaign with validated data + payment info
       setTimeout(() => {
+        console.log('🚀 Sending campaign creation request...', {
+          ...validatedFormData,
+          campaignType,
+          creatorType,
+          creditCardEnabled: true,
+          collateralPaid: true,
+          collateralTxHash: txHash,
+        });
+        
         createCampaignMutation.mutate({
           ...validatedFormData,
           campaignType,
@@ -169,12 +197,13 @@ export default function CreateCampaignPage() {
         });
       }, 1000);
     }
-  }, [isConfirmed, txHash, validatedFormData, createCampaignMutation, campaignType, creatorType, toast]);
+  }, [isConfirmed, txHash, validatedFormData, createCampaignMutation, campaignType, creatorType, toast, isConfirming]);
 
-  // Handle write errors
+  // Handle write errors with DEBUG
   React.useEffect(() => {
     if (writeError) {
-      console.error("Collateral payment error:", writeError);
+      console.error("❌ Collateral payment error:", writeError);
+      setValidatedFormData(null); // Clear validated data on error
       toast({
         title: "Payment Failed",
         description: writeError.message || "Failed to process collateral payment",
@@ -289,6 +318,12 @@ export default function CreateCampaignPage() {
       });
 
       // Execute USDT transfer with explicit chainId
+      console.log('💰 Sending payment transaction...', {
+        to: collateralInfo.platformWallet,
+        amount: collateralAmount,
+        chainId: 1
+      });
+      
       await writeContract({
         address: USDT_ADDRESS as `0x${string}`,
         abi: erc20Abi,
@@ -296,6 +331,8 @@ export default function CreateCampaignPage() {
         args: [collateralInfo.platformWallet as `0x${string}`, requiredAmount],
         chainId: 1, // Ethereum Mainnet
       });
+      
+      console.log('📤 Transaction sent, waiting for confirmation...');
       
       toast({
         title: "Transaction Sent",

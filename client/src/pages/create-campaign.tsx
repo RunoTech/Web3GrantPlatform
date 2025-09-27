@@ -13,10 +13,10 @@ import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { api } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt, usePublicClient } from "wagmi";
 import { parseUnits, formatUnits } from "viem";
 import { erc20Abi } from "viem";
-import { Heart, ArrowLeft, Building, Users, Calendar, CheckCircle, Lock, CreditCard, Shield, DollarSign } from "lucide-react";
+import { Heart, ArrowLeft, Building, Users, Calendar, CheckCircle, Lock, CreditCard, Shield, DollarSign, RefreshCw } from "lucide-react";
 
 // Add Header component import
 import Header from "@/components/Header";
@@ -36,6 +36,9 @@ export default function CreateCampaignPage() {
     chainId: 1, // Explicit Ethereum Mainnet
     timeout: 600000, // 10 minute timeout - increased for Ethereum network delays
   });
+  
+  // Public client for manual transaction verification
+  const publicClient = usePublicClient({ chainId: 1 });
   
   // Debug receipt status
   React.useEffect(() => {
@@ -71,6 +74,10 @@ export default function CreateCampaignPage() {
     enabled: true,
     platformWallet: '0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8'
   });
+  
+  // Manual verification state
+  const [isManualVerifying, setIsManualVerifying] = useState(false);
+  const [manualTxHash, setManualTxHash] = useState("");
 
   // Creator type options based on campaign type
   const getCreatorTypeOptions = () => {
@@ -138,6 +145,100 @@ export default function CreateCampaignPage() {
       });
     },
   });
+
+  // Manual transaction verification function
+  const verifyTransactionManually = async (hashToVerify: string) => {
+    if (!publicClient || !hashToVerify) {
+      toast({
+        title: "Error",
+        description: "Transaction hash required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsManualVerifying(true);
+    
+    try {
+      console.log('🔍 Manual verification starting for:', hashToVerify);
+      
+      // Get transaction receipt
+      const receipt = await publicClient.getTransactionReceipt({
+        hash: hashToVerify as `0x${string}`,
+      });
+      
+      console.log('📄 Transaction receipt:', receipt);
+      
+      if (receipt && receipt.status === 'success') {
+        console.log('✅ Transaction confirmed on blockchain!');
+        
+        // Get transaction details
+        const transaction = await publicClient.getTransaction({
+          hash: hashToVerify as `0x${string}`,
+        });
+        
+        console.log('💰 Transaction details:', transaction);
+        
+        // Verify payment to platform wallet
+        const platformWallet = collateralInfo.platformWallet.toLowerCase();
+        const transactionTo = transaction.to?.toLowerCase();
+        
+        if (transactionTo === platformWallet) {
+          console.log('✅ Payment verified to platform wallet!');
+          
+          toast({
+            title: "Payment Verified!",
+            description: "Transaction confirmed on blockchain. Creating campaign manually...",
+          });
+          
+          // Use current form data for manual campaign creation
+          const currentFormData = form.getValues();
+          
+          setTimeout(() => {
+            console.log('🚀 Manual campaign creation with verified payment:', {
+              ...currentFormData,
+              campaignType,
+              creatorType,
+              creditCardEnabled: true,
+              collateralPaid: true,
+              collateralTxHash: hashToVerify,
+            });
+            
+            createCampaignMutation.mutate({
+              ...currentFormData,
+              campaignType,
+              creatorType,
+              creditCardEnabled: true,
+              collateralPaid: true,
+              collateralTxHash: hashToVerify,
+            });
+          }, 1000);
+          
+        } else {
+          toast({
+            title: "Payment Verification Failed",
+            description: `Transaction not sent to platform wallet. Expected: ${platformWallet}, Got: ${transactionTo}`,
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Transaction Not Confirmed",
+          description: "Transaction not yet confirmed on blockchain or failed",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error('❌ Manual verification error:', error);
+      toast({
+        title: "Verification Error",
+        description: error.message || "Failed to verify transaction",
+        variant: "destructive",
+      });
+    } finally {
+      setIsManualVerifying(false);
+    }
+  };
 
   // Fetch dynamic collateral info
   const { data: creditCardInfoData, isLoading: creditCardInfoLoading } = useQuery<{
@@ -1034,6 +1135,73 @@ export default function CreateCampaignPage() {
                   )}
                 </div>
               </div>
+
+              {/* Manual Transaction Verification Section */}
+              {(txHash && !isConfirmed) || (txHash && receiptError) && (
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <RefreshCw className="w-6 h-6 text-orange-600" />
+                    <h3 className="text-lg font-semibold text-black dark:text-white">Payment Recovery</h3>
+                  </div>
+                  
+                  <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4 mb-4">
+                    <div className="flex items-start space-x-3">
+                      <RefreshCw className="w-5 h-5 text-orange-600 mt-0.5" />
+                      <div>
+                        <h4 className="font-medium text-orange-800 dark:text-orange-200 mb-1">Transaction Verification Failed</h4>
+                        <p className="text-sm text-orange-700 dark:text-orange-300">
+                          Your payment may have been successful but the automatic verification failed. If your payment was confirmed on the blockchain, you can manually verify it below.
+                        </p>
+                        {txHash && (
+                          <p className="text-xs text-orange-600 dark:text-orange-400 mt-2 font-mono">
+                            TX: {txHash}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="manualTxHash" className="block text-sm font-medium text-black dark:text-white mb-2">
+                        Transaction Hash
+                      </label>
+                      <Input
+                        id="manualTxHash"
+                        type="text"
+                        placeholder="0x..."
+                        value={manualTxHash || txHash || ""}
+                        onChange={(e) => setManualTxHash(e.target.value)}
+                        className="font-mono text-sm"
+                        data-testid="input-manual-tx-hash"
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Enter the transaction hash of your payment to manually verify and create the campaign
+                      </p>
+                    </div>
+
+                    <Button
+                      type="button"
+                      onClick={() => verifyTransactionManually(manualTxHash || txHash || "")}
+                      disabled={isManualVerifying || (!manualTxHash && !txHash)}
+                      className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold transition-colors"
+                      data-testid="button-manual-verify"
+                    >
+                      {isManualVerifying ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Verifying Transaction...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Verify Payment & Create Campaign
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               {/* Submit Button - Only show when credit card is disabled OR collateral is paid */}
               {(!creditCardEnabled || collateralPaid) && (

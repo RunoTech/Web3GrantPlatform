@@ -33,6 +33,7 @@ export default function CreateCampaignPage() {
   const { writeContract, data: txHash, error: writeError } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash: txHash,
+    chainId: 1, // Explicit Ethereum Mainnet
   });
   
   // Get URL parameters to determine campaign type
@@ -52,6 +53,7 @@ export default function CreateCampaignPage() {
   // Credit card payment state
   const [creditCardEnabled, setCreditCardEnabled] = useState(false);
   const [collateralPaid, setCollateralPaid] = useState(false);
+  const [validatedFormData, setValidatedFormData] = useState<any>(null); // Store validated data
   const [collateralInfo, setCollateralInfo] = useState({ 
     collateralAmount: 100, 
     collateralToken: 'USDT', 
@@ -147,23 +149,27 @@ export default function CreateCampaignPage() {
 
   // Handle transaction confirmation
   React.useEffect(() => {
-    if (isConfirmed && txHash) {
+    if (isConfirmed && txHash && validatedFormData) {
       setCollateralPaid(true);
-      form.setValue("collateralTxHash", txHash);
-      form.setValue("collateralPaid", true);
       
       toast({
         title: "Payment Successful!",
         description: "Collateral paid successfully. Creating campaign...",
       });
 
-      // Automatically create campaign after successful collateral payment
+      // Automatically create campaign with validated data + payment info
       setTimeout(() => {
-        const formData = form.getValues();
-        onSubmit(formData);
-      }, 1000); // Small delay to show success message first
+        createCampaignMutation.mutate({
+          ...validatedFormData,
+          campaignType,
+          creatorType,
+          creditCardEnabled: true,
+          collateralPaid: true,
+          collateralTxHash: txHash,
+        });
+      }, 1000);
     }
-  }, [isConfirmed, txHash, form, toast]);
+  }, [isConfirmed, txHash, validatedFormData, createCampaignMutation, campaignType, creatorType, toast]);
 
   // Handle write errors
   React.useEffect(() => {
@@ -177,44 +183,118 @@ export default function CreateCampaignPage() {
     }
   }, [writeError, toast]);
 
-  // Wagmi-based collateral payment function
+  // Validate and pay collateral - FORM FIRST APPROACH
   const handleCollateralPayment = async () => {
-    if (!isConnected || !address) {
+    // STEP 1: Validate form FIRST (before wallet checks)
+    const formData = form.getValues();
+    
+    // Check required fields first
+    if (!formData.title?.trim()) {
       toast({
-        title: "Error",
-        description: "Please connect your wallet first",
+        title: "Validation Error",
+        description: "Campaign title is required",
         variant: "destructive",
       });
       return;
     }
 
-    const collateralAmount = form.getValues("collateralAmount");
+    if (!formData.description?.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Campaign description is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.ownerWallet?.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Wallet address is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.targetAmount || parseFloat(formData.targetAmount) <= 0) {
+      toast({
+        title: "Validation Error",
+        description: "Target amount must be greater than 0",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate FUND/DONATE business rules
+    if (campaignType === "FUND" && creatorType !== "company") {
+      toast({
+        title: "Validation Error",
+        description: "FUND campaigns can only be created by companies",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (campaignType === "DONATE" && creatorType === "company") {
+      toast({
+        title: "Validation Error", 
+        description: "DONATE campaigns cannot be created by companies",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (campaignType === "DONATE" && (!formData.startDate || !formData.endDate)) {
+      toast({
+        title: "Validation Error",
+        description: "Start and end dates are required for DONATE campaigns",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check collateral amount
+    const collateralAmount = formData.collateralAmount;
     const minAmount = collateralInfo.collateralAmount;
     if (!collateralAmount || parseFloat(collateralAmount) < minAmount) {
       toast({
-        title: "Error",
+        title: "Validation Error",
         description: `Minimum collateral amount is ${minAmount} ${collateralInfo.collateralToken}`,
         variant: "destructive",
       });
       return;
     }
 
+    // STEP 2: Check wallet connection AFTER form validation
+    if (!isConnected || !address) {
+      toast({
+        title: "Wallet Error",
+        description: "Please connect your wallet to proceed with payment",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // STEP 3: Store validated data
+    setValidatedFormData(formData);
+
+    // STEP 3: Execute payment
     try {
-      // USDT contract details
       const USDT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
-      const requiredAmount = parseUnits(collateralAmount, 6); // USDT has 6 decimals
+      const requiredAmount = parseUnits(collateralAmount, 6);
 
       toast({
         title: "Processing...",
         description: "Please confirm the transaction in your wallet",
       });
 
-      // Execute USDT transfer using Wagmi
+      // Execute USDT transfer with explicit chainId
       await writeContract({
         address: USDT_ADDRESS as `0x${string}`,
         abi: erc20Abi,
         functionName: 'transfer',
         args: [collateralInfo.platformWallet as `0x${string}`, requiredAmount],
+        chainId: 1, // Ethereum Mainnet
       });
       
       toast({
@@ -224,6 +304,7 @@ export default function CreateCampaignPage() {
 
     } catch (error: any) {
       console.error("Collateral payment error:", error);
+      setValidatedFormData(null); // Clear on error
       toast({
         title: "Payment Failed",
         description: error.message || "Failed to process collateral payment",

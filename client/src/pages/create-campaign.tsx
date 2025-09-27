@@ -34,7 +34,7 @@ export default function CreateCampaignPage() {
   const { isLoading: isConfirming, isSuccess: isConfirmed, error: receiptError } = useWaitForTransactionReceipt({
     hash: txHash,
     chainId: 1, // Explicit Ethereum Mainnet
-    timeout: 120000, // 2 minute timeout
+    timeout: 600000, // 10 minute timeout - increased for Ethereum network delays
   });
   
   // Debug receipt status

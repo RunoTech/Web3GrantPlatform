@@ -1,0 +1,37 @@
+[vite] connecting...
+[vite] connected.
+Sender: Failed to send batch 
+TypeError {}
+message: "Failed to fetch"
+stack: "TypeError: Failed to fetch↵ at fetchCallImpl (https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=pTaE0u5ECovvOF2222mJhRUVk-Ufl-0WEno3aIL9lOT3bCdeNfwP22sGUWWXfDFh5AI4H2xQOM3fHA-0c2veCf5EQKv3RWn5FZbJE5BJTkzlpfqjUJ4n5iY0_WjhviZjQAPeh2qPqCs2x4f_8sD2yA:4131:21)↵ at fetch (https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=pTaE0u5ECovvOF2222mJhRUVk-Ufl-0WEno3aIL9lOT3bCdeNfwP22sGUWWXfDFh5AI4H2xQOM3fHA-0c2veCf5EQKv3RWn5FZbJE5BJTkzlpfqjUJ4n5iY0_WjhviZjQAPeh2qPqCs2x4f_8sD2yA:4137:60)↵ at window.fetch (https://d845dc24-7297-4c05-8776-2b52a6c1a9b0-00-1h8l8tnalyc2o.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:218642)↵ at Object.apply (https://d845dc24-7297-4c05-8776-2b52a6c1a9b0-00-1h8l8tnalyc2o.spock.replit.dev/__replco/static/devtools/injected.js:278:39)↵ at coreFetch (https://d845dc24-7297-4c05-8776-2b52a6c1a9b0-00-1h8l8tnalyc2o.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/metamask-sdk-X6RQYVJT.js?v=3178a854:1168:30)↵ at Object.POST (https://d845dc24-7297-4c05-8776-2b52a6c1a9b0-00-1h8l8tnalyc2o.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/metamask-sdk-X6RQYVJT.js?v=3178a854:1254:18)↵ at Sender.sendFn (https://d845dc24-7297-4c05-8776-2b52a6c1a9b0-00-1h8l8tnalyc2o.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/metamask-sdk-X6RQYVJT.js?v=3178a854:1658:37)↵ at Sender.flush (https://d845dc24-7297-4c05-8776-2b52a6c1a9b0-00-1h8l8tnalyc2o.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/metamask-sdk-X6RQYVJT.js?v=3178a854:1636:22)↵ at https://d845dc24-7297-4c05-8776-2b52a6c1a9b0-00-1h8l8tnalyc2o.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/metamask-sdk-X6RQYVJT.js?v=3178a854:1624:18"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+Sender: Failed to send batch 
+TypeError {}
+
+at t.value (https://d845dc24-7297-4c05-8776-2b52a6c1a9b0-00-1h8l8tnalyc2o.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://d845dc24-7297-4c05-8776-2b52a6c1a9b0-00-1h8l8tnalyc2o.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://d845dc24-7297-4c05-8776-2b52a6c1a9b0-00-1h8l8tnalyc2o.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://d845dc24-7297-4c05-8776-2b52a6c1a9b0-00-1h8l8tnalyc2o.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Sender: Failed to send batch 
+TypeError {}
+
+Sender: Failed to send batch 
+TypeError {}
+
+Sender: Failed to send batch 
+TypeError {}
+
+Sender: Failed to send batch 
+TypeError {}
+
+Sender: Failed to send batch 
+TypeError {}
+
+Sender: Failed to send batch 
+TypeError {}
+
+Sender: Failed to send batch 
+TypeError {}

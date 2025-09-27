@@ -214,11 +214,15 @@ export default function CreateCampaignPage() {
 
   // Validate and pay collateral - FORM FIRST APPROACH
   const handleCollateralPayment = async () => {
+    console.log('🚀 Starting handleCollateralPayment function...');
+    
     // STEP 1: Validate form FIRST (before wallet checks)
     const formData = form.getValues();
+    console.log('📋 Form data retrieved:', formData);
     
     // Check required fields first
     if (!formData.title?.trim()) {
+      console.log('❌ Validation failed: Title missing');
       toast({
         title: "Validation Error",
         description: "Campaign title is required",
@@ -226,6 +230,7 @@ export default function CreateCampaignPage() {
       });
       return;
     }
+    console.log('✅ Title validation passed');
 
     if (!formData.description?.trim()) {
       toast({
@@ -295,7 +300,9 @@ export default function CreateCampaignPage() {
     }
 
     // STEP 2: Check wallet connection AFTER form validation
+    console.log('🔗 Checking wallet connection...', { isConnected, address });
     if (!isConnected || !address) {
+      console.log('❌ Wallet not connected');
       toast({
         title: "Wallet Error",
         description: "Please connect your wallet to proceed with payment",
@@ -303,11 +310,15 @@ export default function CreateCampaignPage() {
       });
       return;
     }
+    console.log('✅ Wallet connection verified');
 
     // STEP 3: Store validated data
+    console.log('💾 Storing validated form data...');
     setValidatedFormData(formData);
+    console.log('✅ Validated form data stored');
 
-    // STEP 3: Execute payment
+    // STEP 4: Execute payment
+    console.log('💰 Starting payment execution...');
     try {
       const USDT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
       const requiredAmount = parseUnits(collateralAmount, 6);

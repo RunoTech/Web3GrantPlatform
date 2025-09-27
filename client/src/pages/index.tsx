@@ -52,7 +52,17 @@ export default function HomePage() {
     heroTitle, 
     heroSubtitle, 
     getSetting,
-    siteTitle
+    siteTitle,
+    dailyTotalPrize,
+    drawsPerDay,
+    winnersPerDraw,
+    totalDailyWinners,
+    morningDrawTime,
+    afternoonDrawTime,
+    eveningDrawTime,
+    morningDrawPrize,
+    afternoonDrawPrize,
+    eveningDrawPrize
   } = useSettings();
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [showReferralBanner, setShowReferralBanner] = useState(false);
@@ -247,12 +257,12 @@ export default function HomePage() {
             <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center justify-center">
               <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary/10 to-success/10 px-6 py-3 rounded-full border border-primary/20">
                 <DollarSign className="w-5 h-5 text-primary" />
-                <span className="text-lg font-bold text-primary">1500 USDT</span>
+                <span className="text-lg font-bold text-primary">{dailyTotalPrize} USDT</span>
                 <span className="text-sm text-muted-foreground">daily total prize</span>
               </div>
               <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-accent/10 to-muted/10 px-4 py-2 rounded-full border border-accent/20">
                 <Clock className="w-4 h-4 text-accent" />
-                <span className="text-sm font-bold text-accent">3 DRAWS</span>
+                <span className="text-sm font-bold text-accent">{drawsPerDay} DRAWS</span>
                 <span className="text-xs text-muted-foreground">daily</span>
               </div>
             </div>
@@ -272,9 +282,9 @@ export default function HomePage() {
                   <Sun className="w-14 h-14 text-primary-foreground" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-primary mb-1">09:00 DRAW</h3>
-                  <p className="text-3xl font-bold text-foreground">500 USDT</p>
-                  <p className="text-sm text-muted-foreground">7 winners • Morning draw</p>
+                  <h3 className="text-xl font-bold text-primary mb-1">{morningDrawTime} DRAW</h3>
+                  <p className="text-3xl font-bold text-foreground">{morningDrawPrize} USDT</p>
+                  <p className="text-sm text-muted-foreground">{winnersPerDraw} winners • Morning draw</p>
                 </div>
               </div>
             </div>
@@ -291,9 +301,9 @@ export default function HomePage() {
                   <Sunset className="w-14 h-14 text-accent-foreground" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-accent mb-1">15:00 DRAW</h3>
-                  <p className="text-3xl font-bold text-foreground">500 USDT</p>
-                  <p className="text-sm text-muted-foreground">7 winners • Afternoon draw</p>
+                  <h3 className="text-xl font-bold text-accent mb-1">{afternoonDrawTime} DRAW</h3>
+                  <p className="text-3xl font-bold text-foreground">{afternoonDrawPrize} USDT</p>
+                  <p className="text-sm text-muted-foreground">{winnersPerDraw} winners • Afternoon draw</p>
                 </div>
               </div>
             </div>
@@ -310,9 +320,9 @@ export default function HomePage() {
                   <Moon className="w-14 h-14 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-success mb-1">21:00 DRAW</h3>
-                  <p className="text-3xl font-bold text-foreground">500 USDT</p>
-                  <p className="text-sm text-muted-foreground">7 winners • Evening draw</p>
+                  <h3 className="text-xl font-bold text-success mb-1">{eveningDrawTime} DRAW</h3>
+                  <p className="text-3xl font-bold text-foreground">{eveningDrawPrize} USDT</p>
+                  <p className="text-sm text-muted-foreground">{winnersPerDraw} winners • Evening draw</p>
                 </div>
               </div>
             </div>
@@ -468,7 +478,7 @@ export default function HomePage() {
               <div className="w-20 h-20 bg-primary rounded-xl flex items-center justify-center mx-auto mb-3 shadow-binance">
                 <Coins className="w-12 h-12 text-primary-foreground" />
               </div>
-              <div className="text-2xl font-bold text-primary mb-1">1500</div>
+              <div className="text-2xl font-bold text-primary mb-1">{dailyTotalPrize}</div>
               <div className="text-xs uppercase tracking-wide text-muted-foreground">DAILY TOTAL</div>
             </div>
             
@@ -476,7 +486,7 @@ export default function HomePage() {
               <div className="w-20 h-20 bg-accent rounded-xl flex items-center justify-center mx-auto mb-3 shadow-binance">
                 <Star className="w-12 h-12 text-accent-foreground" />
               </div>
-              <div className="text-2xl font-bold text-accent mb-1">21</div>
+              <div className="text-2xl font-bold text-accent mb-1">{totalDailyWinners}</div>
               <div className="text-xs uppercase tracking-wide text-muted-foreground">TOTAL WINNERS</div>
             </div>
             
@@ -484,7 +494,7 @@ export default function HomePage() {
               <div className="w-20 h-20 bg-success rounded-xl flex items-center justify-center mx-auto mb-3 shadow-binance">
                 <Clock className="w-12 h-12 text-white" />
               </div>
-              <div className="text-2xl font-bold text-success mb-1">3</div>
+              <div className="text-2xl font-bold text-success mb-1">{drawsPerDay}</div>
               <div className="text-xs uppercase tracking-wide text-muted-foreground">DRAW COUNT</div>
             </div>
             

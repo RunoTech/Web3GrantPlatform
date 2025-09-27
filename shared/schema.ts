@@ -526,7 +526,6 @@ export const insertUserNonceSchema = createInsertSchema(userNonces).omit({
 export const insertUserSessionSchema = createInsertSchema(userSessions).omit({
   id: true,
   createdAt: true,
-  lastUsedAt: true,
 });
 
 export const insertUsedTransactionSchema = createInsertSchema(usedTransactions).omit({

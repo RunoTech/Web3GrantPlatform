@@ -24,6 +24,7 @@ import {
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
+import { ethers } from "ethers";
 // Modern wallet integration - server-side blockchain operations
 
 // Security: HTML/XSS Sanitization utility

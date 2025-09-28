@@ -2,6 +2,7 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import multer from 'multer';
 import { storage } from "./storage";
 import { 
   insertNetworkFeeSchema,
@@ -3055,6 +3056,195 @@ export async function registerRoutes(app: Express): Promise<Server> {
           details: 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.',
         });
       }
+    }
+  });
+
+  // ===== KYB (Know Your Business) ENDPOINTS =====
+  
+  // Multer setup for document uploads
+  const upload = multer({
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype === 'application/pdf' || 
+          file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only PDF and image files are allowed'));
+      }
+    }
+  });
+  
+  // Create corporate verification
+  app.post("/api/kyb/create-verification", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const verificationData = {
+        ...req.body,
+        wallet: req.userWallet, // Use authenticated wallet
+      };
+      
+      // Basic validation
+      if (!verificationData.companyName || !verificationData.companyEmail) {
+        return res.status(400).json({ error: "Company name and email are required" });
+      }
+      
+      const verification = await storage.createCorporateVerification({
+        ...verificationData,
+        status: 'pending',
+        submittedAt: new Date(),
+      });
+      
+      console.log(`🏢 New corporate verification created: ${verification.id} for ${verification.companyName}`);
+      res.json(verification);
+    } catch (error) {
+      console.error("KYB verification creation error:", error);
+      res.status(500).json({ error: "Failed to create verification" });
+    }
+  });
+
+  // Upload document for verification
+  app.post("/api/kyb/upload-document", authenticateUser, upload.single('file'), async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const { documentType, verificationId } = req.body;
+      const file = req.file;
+      
+      if (!documentType || !verificationId || !file) {
+        return res.status(400).json({ error: "documentType, verificationId and file are required" });
+      }
+
+      // Verify the verification belongs to the authenticated user
+      const verification = await storage.getCorporateVerificationById(parseInt(verificationId));
+      if (!verification || verification.wallet !== req.userWallet) {
+        return res.status(403).json({ error: "Access denied to this verification" });
+      }
+
+      // Store document metadata (in production, file would be uploaded to cloud storage)
+      const document = await storage.uploadFundDocument({
+        verificationId: parseInt(verificationId),
+        documentType: documentType as any,
+        fileName: file.originalname,
+        fileUrl: `/uploads/kyb/${verificationId}/${documentType}_${Date.now()}_${file.originalname}`,
+        fileSize: file.size,
+        mimeType: file.mimetype,
+        uploadedBy: req.userWallet,
+      });
+
+      console.log(`📄 Document uploaded: ${document.fileName} for verification ${verificationId}`);
+      res.json(document);
+    } catch (error) {
+      console.error("Document upload error:", error);
+      res.status(500).json({ error: "Failed to upload document" });
+    }
+  });
+
+  // Create pending fund
+  app.post("/api/kyb/create-pending-fund", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const fundData = req.body;
+      
+      // Validate required fields
+      if (!fundData.verificationId || !fundData.title) {
+        return res.status(400).json({ error: "verificationId and title are required" });
+      }
+      
+      // Verify the verification belongs to the authenticated user
+      const verification = await storage.getCorporateVerificationById(fundData.verificationId);
+      if (!verification || verification.wallet !== req.userWallet) {
+        return res.status(403).json({ error: "Access denied to this verification" });
+      }
+      
+      // Get collateral amount from settings
+      const collateralSetting = await storage.getPlatformSetting('fund_collateral_amount');
+      const collateralAmount = collateralSetting?.value || "100";
+      
+      const pendingFund = await storage.createPendingFund({
+        wallet: req.userWallet, // Use authenticated wallet
+        campaignData: fundData,
+        verificationId: fundData.verificationId,
+        collateralAmount,
+        status: 'draft',
+      });
+
+      console.log(`💰 Pending fund created: ${pendingFund.id} for wallet ${fundData.wallet}`);
+      res.json(pendingFund);
+    } catch (error) {
+      console.error("Pending fund creation error:", error);
+      res.status(500).json({ error: "Failed to create pending fund" });
+    }
+  });
+
+  // Confirm collateral payment
+  app.post("/api/kyb/confirm-payment", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const { pendingFundId, txHash, amount } = req.body;
+      
+      if (!pendingFundId || !txHash) {
+        return res.status(400).json({ error: "pendingFundId and txHash are required" });
+      }
+      
+      // Basic txHash format validation
+      if (!/^0x[a-fA-F0-9]{64}$/.test(txHash)) {
+        return res.status(400).json({ error: "Invalid transaction hash format" });
+      }
+      
+      // Verify the pending fund belongs to the authenticated user
+      const pendingFund = await storage.getPendingFund(pendingFundId);
+      if (!pendingFund || pendingFund.wallet !== req.userWallet) {
+        return res.status(403).json({ error: "Access denied to this pending fund" });
+      }
+
+      await storage.updatePendingFund(pendingFundId, {
+        collateralPaid: true,
+        collateralTxHash: txHash,
+        status: 'awaiting_review',
+        updatedAt: new Date(),
+      });
+
+      console.log(`✅ Payment confirmed for pending fund ${pendingFundId}: ${txHash}`);
+      res.json({ success: true, message: "Payment confirmed" });
+    } catch (error) {
+      console.error("Payment confirmation error:", error);
+      res.status(500).json({ error: "Failed to confirm payment" });
+    }
+  });
+
+  // Get corporate verification status
+  app.get("/api/kyb/verification-status/:wallet", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const { wallet } = req.params;
+      
+      // Users can only access their own verification status
+      if (wallet !== req.userWallet) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      const verification = await storage.getCorporateVerification(wallet);
+      
+      if (!verification) {
+        return res.status(404).json({ error: "Verification not found" });
+      }
+
+      res.json(verification);
+    } catch (error) {
+      console.error("Verification status error:", error);
+      res.status(500).json({ error: "Failed to get verification status" });
+    }
+  });
+
+  // Get pending funds for wallet
+  app.get("/api/kyb/pending-funds/:wallet", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const { wallet } = req.params;
+      
+      // Users can only access their own pending funds
+      if (wallet !== req.userWallet) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      const pendingFunds = await storage.getPendingFundsByWallet(wallet);
+      res.json(pendingFunds);
+    } catch (error) {
+      console.error("Pending funds error:", error);
+      res.status(500).json({ error: "Failed to get pending funds" });
     }
   });
 

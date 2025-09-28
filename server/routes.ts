@@ -3075,16 +3075,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Create corporate verification
-  app.post("/api/kyb/create-verification", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+  app.post("/api/kyb/create-verification", async (req: Request, res) => {
     try {
       const verificationData = {
         ...req.body,
-        wallet: req.userWallet, // Use authenticated wallet
       };
       
       // Basic validation
-      if (!verificationData.companyName || !verificationData.companyEmail) {
-        return res.status(400).json({ error: "Company name and email are required" });
+      if (!verificationData.companyName || !verificationData.companyEmail || !verificationData.wallet) {
+        return res.status(400).json({ error: "Company name, email, and wallet address are required" });
       }
       
       const verification = await storage.createCorporateVerification({
@@ -3093,7 +3092,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         submittedAt: new Date(),
       });
       
-      console.log(`🏢 New corporate verification created: ${verification.id} for ${verification.companyName}`);
+      console.log(`🏢 New corporate verification created: ${verification.id} for ${verification.companyName} (${verification.wallet})`);
       res.json(verification);
     } catch (error) {
       console.error("KYB verification creation error:", error);
@@ -3102,18 +3101,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload document for verification
-  app.post("/api/kyb/upload-document", authenticateUser, upload.single('file'), async (req: UserAuthenticatedRequest, res) => {
+  app.post("/api/kyb/upload-document", upload.single('file'), async (req: Request, res) => {
     try {
-      const { documentType, verificationId } = req.body;
+      const { documentType, verificationId, wallet } = req.body;
       const file = req.file;
       
-      if (!documentType || !verificationId || !file) {
-        return res.status(400).json({ error: "documentType, verificationId and file are required" });
+      if (!documentType || !verificationId || !file || !wallet) {
+        return res.status(400).json({ error: "documentType, verificationId, wallet, and file are required" });
       }
 
-      // Verify the verification belongs to the authenticated user
+      // Verify the verification exists and belongs to the wallet
       const verification = await storage.getCorporateVerificationById(parseInt(verificationId));
-      if (!verification || verification.wallet !== req.userWallet) {
+      if (!verification || verification.wallet !== wallet) {
         return res.status(403).json({ error: "Access denied to this verification" });
       }
 
@@ -3125,10 +3124,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fileUrl: `/uploads/kyb/${verificationId}/${documentType}_${Date.now()}_${file.originalname}`,
         fileSize: file.size,
         mimeType: file.mimetype,
-        uploadedBy: req.userWallet,
+        uploadedBy: wallet,
       });
 
-      console.log(`📄 Document uploaded: ${document.fileName} for verification ${verificationId}`);
+      console.log(`📄 Document uploaded: ${document.fileName} for verification ${verificationId} (${wallet})`);
       res.json(document);
     } catch (error) {
       console.error("Document upload error:", error);
@@ -3137,18 +3136,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create pending fund
-  app.post("/api/kyb/create-pending-fund", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+  app.post("/api/kyb/create-pending-fund", async (req: Request, res) => {
     try {
       const fundData = req.body;
       
       // Validate required fields
-      if (!fundData.verificationId || !fundData.title) {
-        return res.status(400).json({ error: "verificationId and title are required" });
+      if (!fundData.verificationId || !fundData.title || !fundData.wallet) {
+        return res.status(400).json({ error: "verificationId, title, and wallet are required" });
       }
       
-      // Verify the verification belongs to the authenticated user
+      // Verify the verification belongs to the wallet
       const verification = await storage.getCorporateVerificationById(fundData.verificationId);
-      if (!verification || verification.wallet !== req.userWallet) {
+      if (!verification || verification.wallet !== fundData.wallet) {
         return res.status(403).json({ error: "Access denied to this verification" });
       }
       
@@ -3157,7 +3156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const collateralAmount = collateralSetting?.value || "100";
       
       const pendingFund = await storage.createPendingFund({
-        wallet: req.userWallet, // Use authenticated wallet
+        wallet: fundData.wallet,
         campaignData: fundData,
         verificationId: fundData.verificationId,
         collateralAmount,

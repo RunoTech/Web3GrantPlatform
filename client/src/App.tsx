@@ -88,13 +88,21 @@ function Router() {
       <Route path="/aml" component={AmlPage} />
       <Route path="/risk" component={RiskPage} />
       
-      {/* Admin Routes */}
+      {/* Admin Routes - Both /admin and /youhonor paths supported */}
       <Route path="/youhonor/login" component={AdminLoginPage} />
       <Route path="/youhonor" component={AdminDashboardPage} />
       <Route path="/youhonor/settings" component={AdminSettingsPage} />
       <Route path="/youhonor/daily-rewards" component={AdminDailyRewardsPage} />
       <Route path="/youhonor/database" component={AdminDatabasePage} />
       <Route path="/youhonor/kyb-verification" component={KYBVerificationPage} />
+      
+      {/* Alternative /admin paths for convenience */}
+      <Route path="/admin/login" component={AdminLoginPage} />
+      <Route path="/admin" component={AdminDashboardPage} />
+      <Route path="/admin/settings" component={AdminSettingsPage} />
+      <Route path="/admin/daily-rewards" component={AdminDailyRewardsPage} />
+      <Route path="/admin/database" component={AdminDatabasePage} />
+      <Route path="/admin/kyb-verification" component={KYBVerificationPage} />
       
       <Route component={NotFound} />
     </Switch>

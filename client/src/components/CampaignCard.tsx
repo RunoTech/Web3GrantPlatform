@@ -43,24 +43,25 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
               <Heart className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />
             </div>
           )}
-          {/* Location Badge - GoFundMe Style */}
-          <div className="absolute top-3 left-3">
-            <Badge variant="secondary" className="bg-black/70 text-white font-medium text-xs px-2 py-1 backdrop-blur-sm">
-              Blockchain Campaign
+          {/* Campaign Type Badge - Bottom Left */}
+          <div className="absolute bottom-3 left-3">
+            <Badge variant="secondary" className="bg-black/80 text-white font-medium text-xs px-2.5 py-1.5 backdrop-blur-sm border-0">
+              {campaign.campaignType === 'FUND' ? 'Company Fund' : 'Donation Campaign'}
             </Badge>
           </div>
           
-          {/* Status Badges - Top Right */}
-          <div className="absolute top-3 right-3 flex flex-col gap-1.5">
+          {/* Status Badges - Top Right with better spacing */}
+          <div className="absolute top-3 right-3 flex flex-col gap-2 max-w-[120px] sm:max-w-none">
             {campaign.featured && (
-              <Badge className="bg-primary text-primary-foreground font-semibold text-xs px-2 py-1 shadow-sm">
+              <Badge className="bg-primary text-primary-foreground font-semibold text-xs px-2.5 py-1.5 shadow-lg border-0">
                 Öne Çıkan
               </Badge>
             )}
             {campaign.creditCardEnabled && (
-              <Badge className="bg-green-600 text-white font-semibold flex items-center gap-1 text-xs px-2 py-1 shadow-sm">
-                <CreditCard className="w-2.5 h-2.5" />
-                <span className="hidden sm:inline">Credit Card</span>
+              <Badge className="bg-green-600 text-white font-semibold flex items-center gap-1.5 text-xs px-2.5 py-1.5 shadow-lg border-0">
+                <CreditCard className="w-3 h-3" />
+                <span className="hidden sm:inline whitespace-nowrap">Credit Card</span>
+                <span className="sm:hidden">Card</span>
               </Badge>
             )}
           </div>
@@ -71,6 +72,15 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
           {/* Main Content */}
           <div className="flex-1 space-y-4">
             <div className="space-y-2">
+              {/* Company info for FUND campaigns */}
+              {campaign.campaignType === 'FUND' && campaign.companyName && (
+                <div className="mb-2">
+                  <Badge variant="outline" className="text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700">
+                    {campaign.companyName}
+                  </Badge>
+                </div>
+              )}
+              
               <h3 className="text-lg md:text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
                 {campaign.title}
               </h3>

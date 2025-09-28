@@ -10,7 +10,11 @@ export const wagmiConfig = createConfig({
     metaMask(),
   ],
   transports: {
-    [mainnet.id]: http(),
-    [bsc.id]: http(),
+    [mainnet.id]: http(undefined, {
+      pollingInterval: 15000, // 15 seconds to reduce batch flooding
+    }),
+    [bsc.id]: http(undefined, {
+      pollingInterval: 15000, // 15 seconds to reduce batch flooding
+    }),
   },
 });

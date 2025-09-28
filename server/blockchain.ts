@@ -780,16 +780,8 @@ export async function processPendingPayment(pendingPayment: any, verificationRes
       return { success: true, campaignId: pendingPayment.campaignId };
     }
     
-    // Parse campaign data from pending payment
-    let campaignData;
-    try {
-      console.log(`🔍 Debug: pendingPayment object:`, JSON.stringify(pendingPayment, null, 2));
-      console.log(`🔍 Debug: formData value:`, pendingPayment.formData);
-      campaignData = JSON.parse(pendingPayment.formData);
-    } catch (error) {
-      console.error(`❌ Failed to parse campaign data for payment ${pendingPayment.id}:`, error);
-      return { success: false, error: "Invalid campaign data format" };
-    }
+    // Use campaign data from pending payment (already parsed from database)
+    const campaignData = pendingPayment.formData;
     
     // Create the campaign with verified payment info
     const campaign = await storage.createCampaign({
@@ -815,7 +807,7 @@ export async function processPendingPayment(pendingPayment: any, verificationRes
       txHash: pendingPayment.txHash,
       purpose: 'campaign_activation',
       amount: verificationResult.amount,
-      walletAddress: pendingPayment.ownerWallet,
+      wallet: pendingPayment.ownerWallet,
       processedAt: new Date()
     });
     

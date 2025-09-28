@@ -1659,6 +1659,55 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(pendingFunds.createdAt));
   }
 
+  // ===== FUNDS WITH VERIFICATION STATUS =====
+  
+  async getFundCampaignsWithVerification(): Promise<any[]> {
+    // Get all FUND campaigns with their verification status
+    const fundCampaigns = await db
+      .select({
+        // Campaign fields
+        id: campaigns.id,
+        title: campaigns.title,
+        description: campaigns.description,
+        imageUrl: campaigns.imageUrl,
+        ownerWallet: campaigns.ownerWallet,
+        campaignType: campaigns.campaignType,
+        creatorType: campaigns.creatorType,
+        targetAmount: campaigns.targetAmount,
+        totalDonations: campaigns.totalDonations,
+        donationCount: campaigns.donationCount,
+        featured: campaigns.featured,
+        active: campaigns.active,
+        approved: campaigns.approved,
+        approvedBy: campaigns.approvedBy,
+        approvedAt: campaigns.approvedAt,
+        createdAt: campaigns.createdAt,
+        updatedAt: campaigns.updatedAt,
+        creditCardEnabled: campaigns.creditCardEnabled,
+        
+        // Verification status from corporate verifications
+        verificationStatus: corporateVerifications.status,
+        verificationId: corporateVerifications.id,
+        verifiedAt: corporateVerifications.verifiedAt,
+        verifiedBy: corporateVerifications.verifiedBy,
+        companyName: corporateVerifications.companyName,
+      })
+      .from(campaigns)
+      .leftJoin(
+        corporateVerifications,
+        eq(campaigns.ownerWallet, corporateVerifications.wallet)
+      )
+      .where(
+        and(
+          eq(campaigns.campaignType, 'FUND'),
+          eq(campaigns.active, true)
+        )
+      )
+      .orderBy(desc(campaigns.createdAt));
+
+    return fundCampaigns;
+  }
+
   // Document Management
   async uploadFundDocument(document: InsertFundDocument): Promise<FundDocument> {
     const [result] = await db.insert(fundDocuments).values(document).returning();

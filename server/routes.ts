@@ -3248,6 +3248,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== FUNDS WITH VERIFICATION STATUS ENDPOINT =====
+  
+  // Get FUND campaigns with verification status
+  app.get("/api/get-fund-campaigns", async (req, res) => {
+    try {
+      const fundCampaigns = await storage.getFundCampaignsWithVerification();
+      res.json(fundCampaigns);
+    } catch (error) {
+      console.error("Error fetching fund campaigns:", error);
+      res.status(500).json({ error: "Failed to fetch fund campaigns" });
+    }
+  });
+
   // ===== ADMIN KYB MANAGEMENT ENDPOINTS =====
   
   // Admin: Get all corporate verifications

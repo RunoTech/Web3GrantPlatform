@@ -21,6 +21,9 @@ import {
   type UserSession, type InsertUserSession,
   type UsedTransaction, type InsertUsedTransaction,
   type PendingPayment, type InsertPendingPayment,
+  type CorporateVerification, type InsertCorporateVerification,
+  type FundDocument, type InsertFundDocument,
+  type PendingFund, type InsertPendingFund,
   admins,
   platformSettings,
   networkFees,
@@ -41,6 +44,9 @@ import {
   userSessions,
   usedTransactions,
   pendingPayments,
+  corporateVerifications,
+  fundDocuments,
+  pendingFunds,
 } from "../shared/schema";
 
 export interface IStorage {
@@ -218,6 +224,31 @@ export interface IStorage {
   createPaymentAttempt(attempt: InsertPaymentAttempt): Promise<PaymentAttempt>;
   getPaymentAttemptsByWallet(wallet: string): Promise<PaymentAttempt[]>;
   getPaymentAttemptsByCampaign(campaignId: number): Promise<PaymentAttempt[]>;
+
+  // ===== FUND KYB & VERIFICATION METHODS =====
+  
+  // Corporate Verification Management
+  createCorporateVerification(verification: InsertCorporateVerification): Promise<CorporateVerification>;
+  getCorporateVerification(wallet: string): Promise<CorporateVerification | undefined>;
+  getCorporateVerificationById(id: number): Promise<CorporateVerification | undefined>;
+  updateCorporateVerification(id: number, updates: Partial<CorporateVerification>): Promise<void>;
+  getAllCorporateVerifications(status?: string): Promise<CorporateVerification[]>;
+  approveCorporateVerification(id: number, adminId: number, notes?: string): Promise<void>;
+  rejectCorporateVerification(id: number, adminId: number, reason: string): Promise<void>;
+  
+  // Document Management
+  uploadFundDocument(document: InsertFundDocument): Promise<FundDocument>;
+  getFundDocuments(verificationId: number): Promise<FundDocument[]>;
+  getFundDocument(id: number): Promise<FundDocument | undefined>;
+  deleteFundDocument(id: number): Promise<void>;
+  
+  // Pending Funds Management
+  createPendingFund(fund: InsertPendingFund): Promise<PendingFund>;
+  getPendingFund(id: number): Promise<PendingFund | undefined>;
+  getPendingFundsByWallet(wallet: string): Promise<PendingFund[]>;
+  getPendingFundsByStatus(status: string): Promise<PendingFund[]>;
+  updatePendingFund(id: number, updates: Partial<PendingFund>): Promise<void>;
+  markPendingFundAsPublished(id: number, campaignId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1496,6 +1527,105 @@ export class DatabaseStorage implements IStorage {
         eq(pendingPayments.expectedAmount, amount),
         gte(pendingPayments.createdAt, hoursAgo)
       ));
+  }
+
+  // ===== FUND KYB & VERIFICATION IMPLEMENTATIONS =====
+  
+  // Corporate Verification Management
+  async createCorporateVerification(verification: InsertCorporateVerification): Promise<CorporateVerification> {
+    const [result] = await db.insert(corporateVerifications).values(verification).returning();
+    return result;
+  }
+
+  async getCorporateVerification(wallet: string): Promise<CorporateVerification | undefined> {
+    const [result] = await db.select().from(corporateVerifications).where(eq(corporateVerifications.wallet, wallet));
+    return result;
+  }
+
+  async getCorporateVerificationById(id: number): Promise<CorporateVerification | undefined> {
+    const [result] = await db.select().from(corporateVerifications).where(eq(corporateVerifications.id, id));
+    return result;
+  }
+
+  async updateCorporateVerification(id: number, updates: Partial<CorporateVerification>): Promise<void> {
+    await db.update(corporateVerifications).set({ ...updates, updatedAt: new Date() }).where(eq(corporateVerifications.id, id));
+  }
+
+  async getAllCorporateVerifications(status?: string): Promise<CorporateVerification[]> {
+    if (status) {
+      return await db.select().from(corporateVerifications).where(eq(corporateVerifications.status, status as any));
+    }
+    return await db.select().from(corporateVerifications).orderBy(desc(corporateVerifications.createdAt));
+  }
+
+  async approveCorporateVerification(id: number, adminId: number, notes?: string): Promise<void> {
+    await db.update(corporateVerifications).set({
+      status: 'approved',
+      verifiedBy: adminId,
+      verifiedAt: new Date(),
+      adminNotes: notes,
+      updatedAt: new Date()
+    }).where(eq(corporateVerifications.id, id));
+  }
+
+  async rejectCorporateVerification(id: number, adminId: number, reason: string): Promise<void> {
+    await db.update(corporateVerifications).set({
+      status: 'rejected',
+      verifiedBy: adminId,
+      verifiedAt: new Date(),
+      rejectionReason: reason,
+      updatedAt: new Date()
+    }).where(eq(corporateVerifications.id, id));
+  }
+
+  // Document Management
+  async uploadFundDocument(document: InsertFundDocument): Promise<FundDocument> {
+    const [result] = await db.insert(fundDocuments).values(document).returning();
+    return result;
+  }
+
+  async getFundDocuments(verificationId: number): Promise<FundDocument[]> {
+    return await db.select().from(fundDocuments).where(eq(fundDocuments.verificationId, verificationId)).orderBy(desc(fundDocuments.createdAt));
+  }
+
+  async getFundDocument(id: number): Promise<FundDocument | undefined> {
+    const [result] = await db.select().from(fundDocuments).where(eq(fundDocuments.id, id));
+    return result;
+  }
+
+  async deleteFundDocument(id: number): Promise<void> {
+    await db.delete(fundDocuments).where(eq(fundDocuments.id, id));
+  }
+
+  // Pending Funds Management
+  async createPendingFund(fund: InsertPendingFund): Promise<PendingFund> {
+    const [result] = await db.insert(pendingFunds).values(fund).returning();
+    return result;
+  }
+
+  async getPendingFund(id: number): Promise<PendingFund | undefined> {
+    const [result] = await db.select().from(pendingFunds).where(eq(pendingFunds.id, id));
+    return result;
+  }
+
+  async getPendingFundsByWallet(wallet: string): Promise<PendingFund[]> {
+    return await db.select().from(pendingFunds).where(eq(pendingFunds.wallet, wallet)).orderBy(desc(pendingFunds.createdAt));
+  }
+
+  async getPendingFundsByStatus(status: string): Promise<PendingFund[]> {
+    return await db.select().from(pendingFunds).where(eq(pendingFunds.status, status)).orderBy(desc(pendingFunds.createdAt));
+  }
+
+  async updatePendingFund(id: number, updates: Partial<PendingFund>): Promise<void> {
+    await db.update(pendingFunds).set({ ...updates, updatedAt: new Date() }).where(eq(pendingFunds.id, id));
+  }
+
+  async markPendingFundAsPublished(id: number, campaignId: number): Promise<void> {
+    await db.update(pendingFunds).set({
+      status: 'published',
+      publishedCampaignId: campaignId,
+      updatedAt: new Date()
+    }).where(eq(pendingFunds.id, id));
   }
 }
 

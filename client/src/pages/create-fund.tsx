@@ -77,7 +77,7 @@ export default function CreateFundPage() {
   });
 
   const collateralAmount = (settings as any)?.fund_collateral_amount || "100";
-  const platformWallet = "0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8";
+  const platformWallet = (settings as any)?.platform_wallet || "0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8";
 
   // Step 1: Company Information Form
   const companyForm = useForm({

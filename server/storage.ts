@@ -1559,23 +1559,104 @@ export class DatabaseStorage implements IStorage {
   }
 
   async approveCorporateVerification(id: number, adminId: number, notes?: string): Promise<void> {
-    await db.update(corporateVerifications).set({
-      status: 'approved',
-      verifiedBy: adminId,
-      verifiedAt: new Date(),
-      adminNotes: notes,
-      updatedAt: new Date()
-    }).where(eq(corporateVerifications.id, id));
+    // Start transaction to ensure atomicity
+    await db.transaction(async (tx) => {
+      // Approve the verification
+      await tx.update(corporateVerifications).set({
+        status: 'approved',
+        verifiedBy: adminId,
+        verifiedAt: new Date(),
+        adminNotes: notes,
+        updatedAt: new Date()
+      }).where(eq(corporateVerifications.id, id));
+
+      // Auto-publish any pending funds for this verification
+      await this.autoPublishPendingFunds(id, adminId, tx);
+    });
   }
 
   async rejectCorporateVerification(id: number, adminId: number, reason: string): Promise<void> {
-    await db.update(corporateVerifications).set({
-      status: 'rejected',
-      verifiedBy: adminId,
-      verifiedAt: new Date(),
-      rejectionReason: reason,
+    // Start transaction to ensure atomicity
+    await db.transaction(async (tx) => {
+      // Reject the verification
+      await tx.update(corporateVerifications).set({
+        status: 'rejected',
+        verifiedBy: adminId,
+        verifiedAt: new Date(),
+        rejectionReason: reason,
+        updatedAt: new Date()
+      }).where(eq(corporateVerifications.id, id));
+
+      // Update pending funds status to rejected
+      await tx.update(pendingFunds).set({
+        status: 'rejected',
+        updatedAt: new Date()
+      }).where(eq(pendingFunds.verificationId, id));
+    });
+  }
+
+  // ===== AUTO-PUBLISH SYSTEM FOR APPROVED FUNDS =====
+
+  async autoPublishPendingFunds(verificationId: number, adminId: number, tx: any): Promise<void> {
+    // Get all approved pending funds for this verification
+    const approvedFunds = await tx.select().from(pendingFunds)
+      .where(and(
+        eq(pendingFunds.verificationId, verificationId),
+        eq(pendingFunds.status, 'awaiting_review'),
+        eq(pendingFunds.collateralPaid, true)
+      ));
+
+    for (const pendingFund of approvedFunds) {
+      try {
+        // Create campaign from pending fund
+        const campaignId = await this.createCampaignFromPendingFund(pendingFund, adminId, tx);
+        
+        // Update pending fund status to published
+        await tx.update(pendingFunds).set({
+          status: 'published',
+          publishedCampaignId: campaignId,
+          updatedAt: new Date()
+        }).where(eq(pendingFunds.id, pendingFund.id));
+
+        console.log(`✅ Auto-published FUND campaign ${campaignId} from pending fund ${pendingFund.id}`);
+      } catch (error) {
+        console.error(`❌ Failed to auto-publish pending fund ${pendingFund.id}:`, error);
+        // Mark as failed but continue with other funds
+        await tx.update(pendingFunds).set({
+          status: 'auto_publish_failed',
+          updatedAt: new Date()
+        }).where(eq(pendingFunds.id, pendingFund.id));
+      }
+    }
+  }
+
+  async createCampaignFromPendingFund(pendingFund: any, approvedBy: number, tx: any): Promise<number> {
+    const campaignData = JSON.parse(pendingFund.campaignData);
+    
+    // Create campaign with approved status
+    const [newCampaign] = await tx.insert(campaigns).values({
+      ...campaignData,
+      approved: true,
+      approvedBy,
+      approvedAt: new Date(),
+      createdAt: new Date(),
       updatedAt: new Date()
-    }).where(eq(corporateVerifications.id, id));
+    }).returning({ id: campaigns.id });
+
+    return newCampaign.id;
+  }
+
+  async updatePendingFundStatus(id: number, status: string): Promise<void> {
+    await db.update(pendingFunds).set({
+      status,
+      updatedAt: new Date()
+    }).where(eq(pendingFunds.id, id));
+  }
+
+  async getPendingFundsForVerification(verificationId: number): Promise<any[]> {
+    return await db.select().from(pendingFunds)
+      .where(eq(pendingFunds.verificationId, verificationId))
+      .orderBy(desc(pendingFunds.createdAt));
   }
 
   // Document Management

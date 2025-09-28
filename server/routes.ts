@@ -3248,6 +3248,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== ADMIN KYB MANAGEMENT ENDPOINTS =====
+  
+  // Admin: Get all corporate verifications
+  app.get("/api/youhonor/kyb/verifications", authenticateAdmin, async (req, res) => {
+    try {
+      const status = req.query.status as string;
+      const verifications = await storage.getAllCorporateVerifications(status);
+      res.json(verifications);
+    } catch (error) {
+      console.error("Error fetching verifications:", error);
+      res.status(500).json({ error: "Failed to fetch verifications" });
+    }
+  });
+
+  // Admin: Get single corporate verification with documents
+  app.get("/api/youhonor/kyb/verification/:id", authenticateAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const verification = await storage.getCorporateVerificationById(id);
+      
+      if (!verification) {
+        return res.status(404).json({ error: "Verification not found" });
+      }
+      
+      // Get associated documents
+      const documents = await storage.getFundDocuments(id);
+      
+      res.json({ ...verification, documents });
+    } catch (error) {
+      console.error("Error fetching verification:", error);
+      res.status(500).json({ error: "Failed to fetch verification" });
+    }
+  });
+
+  // Admin: Approve corporate verification
+  app.post("/api/youhonor/kyb/verification/:id/approve", authenticateAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { notes } = req.body;
+      const adminId = 1; // For demo purposes
+      
+      const verification = await storage.getCorporateVerificationById(id);
+      if (!verification) {
+        return res.status(404).json({ error: "Verification not found" });
+      }
+      
+      await storage.approveCorporateVerification(id, adminId, notes);
+      
+      // Log admin action
+      await storage.createAdminLog({
+        adminId,
+        action: 'approve_kyb_verification',
+        description: `Approved KYB verification for ${verification.companyName}`,
+        tableName: 'corporate_verifications',
+        recordId: id.toString(),
+      });
+      
+      console.log(`✅ KYB verification approved: ${id} by admin ${adminId}`);
+      res.json({ success: true, message: "Verification approved successfully" });
+    } catch (error) {
+      console.error("Error approving verification:", error);
+      res.status(500).json({ error: "Failed to approve verification" });
+    }
+  });
+
+  // Admin: Reject corporate verification
+  app.post("/api/youhonor/kyb/verification/:id/reject", authenticateAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { reason } = req.body;
+      const adminId = 1; // For demo purposes
+      
+      if (!reason) {
+        return res.status(400).json({ error: "Rejection reason is required" });
+      }
+      
+      const verification = await storage.getCorporateVerificationById(id);
+      if (!verification) {
+        return res.status(404).json({ error: "Verification not found" });
+      }
+      
+      await storage.rejectCorporateVerification(id, adminId, reason);
+      
+      // Log admin action
+      await storage.createAdminLog({
+        adminId,
+        action: 'reject_kyb_verification',
+        description: `Rejected KYB verification for ${verification.companyName}: ${reason}`,
+        tableName: 'corporate_verifications',
+        recordId: id.toString(),
+      });
+      
+      console.log(`❌ KYB verification rejected: ${id} by admin ${adminId}`);
+      res.json({ success: true, message: "Verification rejected successfully" });
+    } catch (error) {
+      console.error("Error rejecting verification:", error);
+      res.status(500).json({ error: "Failed to reject verification" });
+    }
+  });
+
+  // Admin: Get all pending funds
+  app.get("/api/youhonor/kyb/pending-funds", authenticateAdmin, async (req, res) => {
+    try {
+      const status = req.query.status as string;
+      const pendingFunds = status 
+        ? await storage.getPendingFundsByStatus(status)
+        : await storage.getPendingFundsByStatus('awaiting_review');
+      res.json(pendingFunds);
+    } catch (error) {
+      console.error("Error fetching pending funds:", error);
+      res.status(500).json({ error: "Failed to fetch pending funds" });
+    }
+  });
+
 
   const httpServer = createServer(app);
   return httpServer;

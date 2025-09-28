@@ -24,6 +24,7 @@ import AdminDashboardPage from "@/pages/admin/index";
 import AdminSettingsPage from "@/pages/admin/settings";
 import AdminDailyRewardsPage from "@/pages/admin/daily-rewards";
 import AdminDatabasePage from "@/pages/admin/database";
+import KYBVerificationPage from "@/pages/admin/kyb-verification";
 
 // Static Pages
 import {
@@ -93,6 +94,7 @@ function Router() {
       <Route path="/youhonor/settings" component={AdminSettingsPage} />
       <Route path="/youhonor/daily-rewards" component={AdminDailyRewardsPage} />
       <Route path="/youhonor/database" component={AdminDatabasePage} />
+      <Route path="/youhonor/kyb-verification" component={KYBVerificationPage} />
       
       <Route component={NotFound} />
     </Switch>

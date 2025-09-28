@@ -238,6 +238,16 @@ export default function AdminDashboardPage() {
                 <span>Transactions</span>
               </Button>
 
+              <Button
+                variant="outline"
+                className="h-20 flex-col space-y-2"
+                onClick={() => setLocation("/youhonor/kyb-verification")}
+                data-testid="button-admin-kyb-verification"
+              >
+                <Shield className="h-6 w-6" />
+                <span>KYB Verification</span>
+              </Button>
+
             </div>
           </CardContent>
         </Card>

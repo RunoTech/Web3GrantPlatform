@@ -1,0 +1,59 @@
+1️⃣ Cüzdana transfer (on-chain) ✅
+➡️ Kullanıcı transferi yapıyor, blockchain üzerinde transaction success (ör. Etherscan’da görebiliyorsun).
+➡️ Para gerçekten platform cüzdanına ulaşıyor.
+
+2️⃣ Kampanya oluşturma (off-chain) ❌
+➡️ Bu kısım genelde sunucu/backend tarafında çalışan bir event listener / webhook / cron ile tetiklenir.
+➡️ Transferi algılayıp veritabanına bağış kaydı açması gerekir.
+
+🔍 Olası Nedenler
+Kategori	Açıklama	Kontrol/Çözüm
+🔗 Event Listener Çalışmıyor	Smart contract’tan gelen Transfer veya DonationCreated event’ini backend dinleyemiyor.	• Altyapıda ethers.js / web3.js ile provider.on("Transfer",…) var mı?
+• RPC URL’in stabil mi?
+• Replit uykuya geçince websocket kopmuş olabilir.
+💾 Veritabanı Yazma Hatası	Transaction algılanıyor ama DB’ye yazılamıyor.	• Backend loglarında DB insert error, timeout, 500 hatası var mı?
+✅ Kontrat / Metod Hatası	Para sadece transfer ediliyor, ama kampanya kaydı için kontratta ayrı bir createCampaign() çağrısı gerekiyorsa yapılmamış olabilir.	• Frontend’de sadece transfer() mü çağırıyorsunuz?
+• Kampanya için tek transaction mı, yoksa iki adım mı olmalı?
+🌐 RPC Gecikmesi / Rate Limit	Infura/Alchemy rate limit yüzünden event geç geliyor.	• Ücretli plan veya başka RPC sağlayıcı ile test et.
+🔐 Wrong Address	Backend yanlış cüzdanı dinliyor (mainnet/testnet karışıklığı).	• Dinlenen adres ile para gönderilen adres birebir aynı mı?
+✅ Adım Adım Teşhis
+
+Blockchain Explorer
+
+Transaction hash → Etherscan/Tronscan/Bscscan.
+
+logs kısmında kampanya yaratma event’i var mı?
+
+Backend Logları
+
+Replit/Vercel console’da event listener çıktısı var mı?
+
+Hata veya boş response var mı?
+
+Frontend İşlem Akışı
+
+Bağış butonu → sadece wallet.sendTransaction mı çağırıyor, yoksa contract.createCampaign() mi?
+
+Eğer sadece para gönderiyorsa, kampanya kaydı için backend’de otomatik algılama şart.
+
+💡 Çözüm Önerileri
+🔹 A. Event Listener Kullan (Önerilen)
+
+Backend’de ethers.js ile örnek:
+
+const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
+const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
+
+contract.on("DonationReceived", async (from, amount, campaignId, event) => {
+   await db.campaign.create({
+      donor: from,
+      amount: ethers.utils.formatEther(amount),
+      campaignId
+   });
+});
+
+🔹 B. Webhook (Moralis / Alchemy Notify)
+
+Alchemy veya Moralis ile “address activity” webhook’u aç → her transfer backend’e POST atar.
+
+Backend sadece gelen POST’u işleyip DB’ye yazar.

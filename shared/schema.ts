@@ -602,3 +602,131 @@ export type UsedTransaction = typeof usedTransactions.$inferSelect;
 export type InsertUsedTransaction = z.infer<typeof insertUsedTransactionSchema>;
 export type PendingPayment = typeof pendingPayments.$inferSelect;
 export type InsertPendingPayment = z.infer<typeof insertPendingPaymentSchema>;
+
+// ===== FUND SPECIFIC TABLES FOR KYB & VERIFICATION =====
+
+// Verification status enum
+export const verificationStatusEnum = pgEnum("verification_status", ["pending", "reviewing", "approved", "rejected"]);
+
+// Document type enum for KYB uploads
+export const documentTypeEnum = pgEnum("document_type", [
+  "id_card", 
+  "passport", 
+  "company_registry", 
+  "tax_certificate", 
+  "bank_statement", 
+  "business_license",
+  "authorization_letter",
+  "other"
+]);
+
+// Corporate verification tracking for FUND campaigns
+export const corporateVerifications = pgTable("corporate_verifications", {
+  id: serial("id").primaryKey(),
+  wallet: varchar("wallet", { length: 42 }).notNull(),
+  
+  // Company details for verification
+  companyName: varchar("company_name", { length: 200 }).notNull(),
+  companyRegistrationNumber: varchar("company_registration_number", { length: 100 }),
+  taxId: varchar("tax_id", { length: 50 }),
+  companyAddress: text("company_address"),
+  companyWebsite: varchar("company_website", { length: 300 }),
+  companyEmail: varchar("company_email", { length: 100 }),
+  companyPhone: varchar("company_phone", { length: 50 }),
+  contactPersonName: varchar("contact_person_name", { length: 100 }).notNull(),
+  contactPersonTitle: varchar("contact_person_title", { length: 100 }),
+  
+  // Verification status
+  status: verificationStatusEnum("status").notNull().default("pending"),
+  rejectionReason: text("rejection_reason"),
+  verifiedBy: integer("verified_by").references(() => admins.id),
+  verifiedAt: timestamp("verified_at"),
+  
+  // Notes for admin review
+  adminNotes: text("admin_notes"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_corporate_verifications_wallet").on(table.wallet),
+  index("idx_corporate_verifications_status").on(table.status),
+  uniqueIndex("idx_corporate_verifications_wallet_unique").on(table.wallet), // One verification per wallet
+]);
+
+// Document uploads for KYB process
+export const fundDocuments = pgTable("fund_documents", {
+  id: serial("id").primaryKey(),
+  verificationId: integer("verification_id").notNull().references(() => corporateVerifications.id),
+  
+  // Document details
+  documentType: documentTypeEnum("document_type").notNull(),
+  fileName: varchar("file_name", { length: 255 }).notNull(),
+  fileUrl: varchar("file_url", { length: 500 }).notNull(), // File storage URL
+  fileSize: integer("file_size"), // File size in bytes
+  mimeType: varchar("mime_type", { length: 100 }),
+  
+  // Upload info
+  uploadedBy: varchar("uploaded_by", { length: 42 }).notNull(), // Wallet address
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_fund_documents_verification_id").on(table.verificationId),
+  index("idx_fund_documents_type").on(table.documentType),
+]);
+
+// Pending FUND campaigns waiting for verification and payment
+export const pendingFunds = pgTable("pending_funds", {
+  id: serial("id").primaryKey(),
+  wallet: varchar("wallet", { length: 42 }).notNull(),
+  
+  // Campaign data (JSON format for flexibility)
+  campaignData: jsonb("campaign_data").notNull(), // Stores all campaign form fields
+  
+  // Verification linkage
+  verificationId: integer("verification_id").references(() => corporateVerifications.id),
+  
+  // Payment tracking
+  collateralAmount: decimal("collateral_amount", { precision: 18, scale: 8 }).notNull(),
+  collateralPaid: boolean("collateral_paid").default(false),
+  collateralTxHash: varchar("collateral_tx_hash", { length: 66 }),
+  
+  // Status tracking
+  status: varchar("status", { length: 20 }).notNull().default("draft"), // draft, awaiting_payment, awaiting_verification, ready_to_publish, published, rejected
+  publishedCampaignId: integer("published_campaign_id").references(() => campaigns.id),
+  
+  // Error handling
+  errorMessage: text("error_message"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_pending_funds_wallet").on(table.wallet),
+  index("idx_pending_funds_status").on(table.status),
+  index("idx_pending_funds_verification_id").on(table.verificationId),
+]);
+
+// Insert schemas for new tables
+export const insertCorporateVerificationSchema = createInsertSchema(corporateVerifications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFundDocumentSchema = createInsertSchema(fundDocuments).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPendingFundSchema = createInsertSchema(pendingFunds).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Types for new tables
+export type CorporateVerification = typeof corporateVerifications.$inferSelect;
+export type InsertCorporateVerification = z.infer<typeof insertCorporateVerificationSchema>;
+export type FundDocument = typeof fundDocuments.$inferSelect;
+export type InsertFundDocument = z.infer<typeof insertFundDocumentSchema>;
+export type PendingFund = typeof pendingFunds.$inferSelect;
+export type InsertPendingFund = z.infer<typeof insertPendingFundSchema>;

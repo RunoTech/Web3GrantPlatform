@@ -155,6 +155,37 @@ app.use((req, res, next) => {
           ownerWallet: c.ownerWallet,
           status: 'active'
         }));
+
+      // ALWAYS start platform wallet listener for pending payments
+      const { startWalletListener, getPlatformWallets } = await import("./blockchain");
+      
+      const platformWallets = await getPlatformWallets();
+      const platformWallet = platformWallets.ethereum;
+      
+      console.log("🔍 Starting platform wallet listener for pending payments...");
+      
+      const onPaymentReceived = async (payment: any) => {
+        try {
+          console.log(`💰 PLATFORM PAYMENT DETECTED! ${payment.amount} USDT from ${payment.from}`);
+          console.log(`🔗 Transaction: ${payment.txHash}`);
+          
+          // Update pending payment with transaction hash and process it
+          const { processPendingPaymentByTx } = await import("./blockchain");
+          await processPendingPaymentByTx(payment.txHash);
+          
+        } catch (error) {
+          console.error("Failed to process platform payment:", error);
+        }
+      };
+      
+      const walletListenerResult = await startWalletListener(platformWallet, onPaymentReceived);
+      
+      if (walletListenerResult.success) {
+        console.log(`✅ Platform wallet listener started via ${walletListenerResult.provider}`);
+        console.log(`📡 Monitoring USDT transfers to: ${platformWallet}`);
+      } else {
+        console.error("❌ Failed to start platform wallet listener:", walletListenerResult.error);
+      }
       
       if (campaignsToMonitor.length > 0) {
         // Donation received callback - automatically record donations

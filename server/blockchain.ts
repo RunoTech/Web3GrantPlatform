@@ -630,6 +630,98 @@ export function getCampaignListenersStatus() {
   };
 }
 
+/**
+ * Process a pending payment by transaction hash (real-time processing)
+ */
+export async function processPendingPaymentByTx(txHash: string): Promise<{
+  success: boolean;
+  campaignId?: number;
+  error?: string;
+}> {
+  try {
+    // Import storage here to avoid circular dependency
+    const { storage } = await import("./storage");
+    
+    console.log(`🔍 Looking up pending payment for tx: ${txHash}`);
+    
+    // Find pending payment with matching transaction hash
+    const pendingPayments = await storage.getPendingPayments('pending');
+    let targetPayment = null;
+    
+    // Check for exact tx hash match first
+    for (const payment of pendingPayments) {
+      if (payment.txHash === txHash) {
+        targetPayment = payment;
+        break;
+      }
+    }
+    
+    // If no exact match, try to match by wallet and update with tx hash
+    if (!targetPayment) {
+      console.log(`🔄 No exact tx match, checking wallet-based pending payments...`);
+      
+      // Get transaction details to match by wallet
+      const verificationResult = await verifyPayment(
+        'ethereum',
+        txHash,
+        '1.0',  // Expected amount (will be verified anyway)
+        '',     // Token address (will be detected)
+        ''      // Platform wallet (will be detected)
+      );
+      
+      if (verificationResult.success) {
+        // Find pending payment from the same wallet
+        for (const payment of pendingPayments) {
+          if (payment.ownerWallet === verificationResult.from && !payment.txHash) {
+            console.log(`✅ Found matching pending payment ${payment.id} from wallet ${payment.ownerWallet}`);
+            
+            // Update pending payment with transaction hash
+            await storage.updatePendingPayment(payment.id, {
+              txHash: txHash,
+              updatedAt: new Date()
+            });
+            
+            targetPayment = { ...payment, txHash: txHash };
+            break;
+          }
+        }
+      }
+    }
+    
+    if (!targetPayment) {
+      console.log(`❌ No pending payment found for tx: ${txHash}`);
+      return { success: false, error: "No pending payment found for this transaction" };
+    }
+    
+    console.log(`🎯 Found pending payment ${targetPayment.id} for tx: ${txHash}`);
+    
+    // Check if payment is confirmed on blockchain
+    const checkResult = await checkPendingPayment(targetPayment);
+    
+    if (!checkResult.success) {
+      return { success: false, error: checkResult.error };
+    }
+    
+    if (!checkResult.confirmed) {
+      console.log(`⏳ Transaction ${txHash} not yet confirmed on blockchain`);
+      return { success: false, error: "Transaction not yet confirmed" };
+    }
+    
+    // Process the confirmed payment
+    const processResult = await processPendingPayment(targetPayment, checkResult.verificationResult);
+    
+    if (processResult.success) {
+      console.log(`🎉 Successfully processed real-time payment: Campaign #${processResult.campaignId}`);
+    }
+    
+    return processResult;
+    
+  } catch (error) {
+    console.error(`❌ Failed to process payment by tx hash ${txHash}:`, error);
+    return { success: false, error: String(error) };
+  }
+}
+
 // ===== PENDING PAYMENT POLLING UTILITIES =====
 
 /**

@@ -75,6 +75,7 @@ export default function CreateCampaignPage() {
     platformWallet: '0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8'
   });
   
+  
   // Pending payment tracking
   const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
 
@@ -925,6 +926,28 @@ export default function CreateCampaignPage() {
                         </FormItem>
                       )}
                     />
+                  </div>
+                </div>
+              )}
+
+              {/* KYB Verification Notice - Only for FUND campaigns */}
+              {campaignType === "FUND" && (
+                <div className="p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <div className="flex items-start space-x-3">
+                    <Shield className="w-6 h-6 text-blue-600 mt-0.5" />
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-blue-800 dark:text-blue-200 mb-2">KYB Verification Required</h3>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 mb-4">
+                        FUND campaigns require Know Your Business (KYB) verification including document upload and admin approval. 
+                        Please use our dedicated FUND creation wizard for the complete verification process.
+                      </p>
+                      <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
+                        <Link href="/create-fund">
+                          <Building className="w-4 h-4 mr-2" />
+                          Complete FUND Creation with KYB
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}

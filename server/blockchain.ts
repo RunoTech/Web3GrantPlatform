@@ -783,7 +783,9 @@ export async function processPendingPayment(pendingPayment: any, verificationRes
     // Parse campaign data from pending payment
     let campaignData;
     try {
-      campaignData = JSON.parse(pendingPayment.campaignData);
+      console.log(`🔍 Debug: pendingPayment object:`, JSON.stringify(pendingPayment, null, 2));
+      console.log(`🔍 Debug: formData value:`, pendingPayment.formData);
+      campaignData = JSON.parse(pendingPayment.formData);
     } catch (error) {
       console.error(`❌ Failed to parse campaign data for payment ${pendingPayment.id}:`, error);
       return { success: false, error: "Invalid campaign data format" };

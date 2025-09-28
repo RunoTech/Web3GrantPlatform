@@ -2910,13 +2910,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // SECURITY: Validate wallet ownership by verifying the transaction on-chain
-        const verification = await verifyPayment(txHash, {
-          fromAddress: ownerWallet,
-          toAddress: platformWallet || '0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8',
-          expectedAmount: expectedAmount.toString(),
-          tokenAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT
-          chainId: chainId || 1
-        });
+        const verification = await verifyPayment(
+          'ethereum', // network
+          txHash,
+          expectedAmount.toString(),
+          '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT token address
+          platformWallet || '0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8' // platform wallet
+        );
         
         if (!verification.success) {
           console.log(`❌ Transaction verification failed: ${verification.error}`);

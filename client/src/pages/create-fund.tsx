@@ -178,6 +178,7 @@ export default function CreateFundPage() {
     formData.append('file', file);
     formData.append('documentType', documentType);
     formData.append('verificationId', verificationId.toString());
+    formData.append('wallet', address || '');
 
     try {
       const response = await fetch('/api/kyb/upload-document', {

@@ -887,6 +887,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (campaignData.campaignType === "DONATE" && campaignData.creatorType === "company") {
         return res.status(400).json({ error: "DONATE campaigns cannot be created by companies" });
       }
+
+      // CRITICAL: KYB verification requirement for FUND campaigns
+      if (campaignData.campaignType === "FUND") {
+        const verification = await storage.getCorporateVerification(campaignData.ownerWallet);
+        
+        if (!verification || verification.status !== 'approved') {
+          return res.status(403).json({ 
+            error: "KYB verification required", 
+            details: "FUND campaigns require approved Know Your Business (KYB) verification. Please complete the KYB process first.",
+            redirectTo: "/create-fund"
+          });
+        }
+
+        // Use verified company data instead of form data
+        campaignData.companyName = verification.companyName;
+        campaignData.companyRegistrationNumber = verification.companyRegistrationNumber;
+        campaignData.companyAddress = verification.companyAddress;
+        campaignData.companyWebsite = verification.companyWebsite;
+        campaignData.companyEmail = verification.companyEmail;
+        campaignData.companyPhone = verification.companyPhone;
+        campaignData.companyCEO = verification.contactPersonName; // Note: using contactPersonName as CEO
+        campaignData.companyIndustry = verification.companyIndustry;
+        campaignData.companyEmployeeCount = verification.companyEmployeeCount;
+        campaignData.companyFoundedYear = verification.companyFoundedYear;
+        campaignData.kybVerificationId = verification.id; // Link to KYB verification
+      }
       
       if (campaignData.campaignType === "DONATE" && (!campaignData.startDate || !campaignData.endDate)) {
         return res.status(400).json({ error: "DONATE campaigns must have start and end dates" });

@@ -860,7 +860,7 @@ export default function CreateCampaignPage() {
                     />
                   </div>
 
-                  <div className="grid md:grid-cols-3 gap-4">
+                  <div className="grid md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="companyFoundedYear"
@@ -896,32 +896,6 @@ export default function CreateCampaignPage() {
                               required
                             />
                           </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="companyEmployeeCount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-black dark:text-white">Employee Count</FormLabel>
-                          <Select value={field.value} onValueChange={field.onChange}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select range" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="1-10">1-10 employees</SelectItem>
-                              <SelectItem value="11-50">11-50 employees</SelectItem>
-                              <SelectItem value="51-200">51-200 employees</SelectItem>
-                              <SelectItem value="201-500">201-500 employees</SelectItem>
-                              <SelectItem value="501-1000">501-1000 employees</SelectItem>
-                              <SelectItem value="1000+">1000+ employees</SelectItem>
-                            </SelectContent>
-                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}

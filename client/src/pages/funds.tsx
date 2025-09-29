@@ -135,28 +135,18 @@ const getEmptyStateContent = (filter: string, totalCampaigns: number) => {
 };
 
 export default function FundsPage() {
-  const [selectedFilter, setSelectedFilter] = useState<string>('all');
+  // Only show verified campaigns in public view
+  const selectedFilter = 'verified';
 
   // Fetch FUND campaigns with verification status
   const { data: fundCampaigns = [], isLoading: fundsLoading } = useQuery<FundCampaignWithVerification[]>({
     queryKey: ["/api/get-fund-campaigns"]
   });
 
-  // Filter campaigns based on verification status
-  const filteredCampaigns = fundCampaigns.filter(campaign => {
-    switch (selectedFilter) {
-      case 'verified':
-        return campaign.verificationStatus === 'approved';
-      case 'pending':
-        return campaign.verificationStatus === 'pending' || campaign.verificationStatus === 'reviewing';
-      case 'rejected':
-        return campaign.verificationStatus === 'rejected';
-      case 'unverified':
-        return !campaign.verificationStatus;
-      default:
-        return true; // all
-    }
-  });
+  // Only show verified (approved) campaigns in public view
+  const filteredCampaigns = fundCampaigns.filter(campaign => 
+    campaign.verificationStatus === 'approved'
+  );
 
 
   return (
@@ -210,31 +200,15 @@ export default function FundsPage() {
               Active FUND Campaigns
             </h2>
             
-            {/* Filter Tabs */}
-            <Tabs value={selectedFilter} onValueChange={setSelectedFilter} className="w-full max-w-2xl mx-auto">
-              <TabsList className="grid grid-cols-5 w-full">
-                <TabsTrigger value="all" data-testid="filter-all">
-                  <Filter className="w-4 h-4 mr-2" />
-                  All
-                </TabsTrigger>
-                <TabsTrigger value="verified" data-testid="filter-verified">
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Verified
-                </TabsTrigger>
-                <TabsTrigger value="pending" data-testid="filter-pending">
-                  <Clock className="w-4 h-4 mr-2" />
-                  Pending
-                </TabsTrigger>
-                <TabsTrigger value="rejected" data-testid="filter-rejected">
-                  <XCircle className="w-4 h-4 mr-2" />
-                  Rejected
-                </TabsTrigger>
-                <TabsTrigger value="unverified" data-testid="filter-unverified">
-                  <AlertCircle className="w-4 h-4 mr-2" />
-                  Unverified
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+            {/* Only show verified FUND campaigns in public view */}
+            <div className="w-full max-w-2xl mx-auto mb-8">
+              <div className="inline-flex items-center px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                <span className="text-sm font-medium text-green-800 dark:text-green-200">
+                  Showing Verified Corporate Fundraising Campaigns
+                </span>
+              </div>
+            </div>
           </div>
 
           {fundsLoading ? (
@@ -286,7 +260,13 @@ export default function FundsPage() {
             </div>
           ) : (
             <Card className="card-standard p-12 text-center">
-              {getEmptyStateContent(selectedFilter, fundCampaigns.length)}
+              <>
+                <CheckCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-foreground mb-2">No Verified FUND Campaigns</h3>
+                <p className="text-muted-foreground mb-6">
+                  No companies have completed KYB verification yet. Corporate fundraising campaigns require document verification before going live.
+                </p>
+              </>
             </Card>
           )}
         </div>

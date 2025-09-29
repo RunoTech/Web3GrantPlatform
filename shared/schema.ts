@@ -130,6 +130,9 @@ export const accounts = pgTable("accounts", {
   lastDailyEntryDate: varchar("last_daily_entry_date", { length: 10 }), // Last daily reward entry date (YYYY-MM-DD)
   totalDailyEntries: integer("total_daily_entries").default(0), // Total daily entries count
   
+  // Company balance system for unified payments
+  balanceAvailable: decimal("balance_available", { precision: 18, scale: 8 }).default("0"), // Available balance for collateral reservations
+  balanceReserved: decimal("balance_reserved", { precision: 18, scale: 8 }).default("0"), // Reserved balance for active campaigns
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -351,6 +354,69 @@ export const dailyParticipants = pgTable("daily_participants", {
   joinedAt: timestamp("joined_at").defaultNow(),
 });
 
+// Collateral reservations for credit card enabled campaigns
+export const collateralReservations = pgTable("collateral_reservations", {
+  id: serial("id").primaryKey(),
+  campaignId: integer("campaign_id").notNull().references(() => campaigns.id),
+  wallet: varchar("wallet", { length: 42 }).notNull(),
+  amount: decimal("amount", { precision: 18, scale: 8 }).notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("active"), // active, released, forfeited
+  createdAt: timestamp("created_at").defaultNow(),
+  releasedAt: timestamp("released_at"),
+  notes: text("notes"), // For admin tracking
+}, (table) => [
+  index("idx_collateral_reservations_campaign").on(table.campaignId),
+  index("idx_collateral_reservations_wallet").on(table.wallet),
+  index("idx_collateral_reservations_status").on(table.status),
+]);
+
+// Payment intents for unified payment tracking
+export const paymentIntents = pgTable("payment_intents", {
+  id: serial("id").primaryKey(),
+  wallet: varchar("wallet", { length: 42 }).notNull(),
+  purpose: varchar("purpose", { length: 30 }).notNull(), // KYB_DEPOSIT, BALANCE_TOPUP, COLLATERAL_RESERVE
+  amount: decimal("amount", { precision: 18, scale: 8 }).notNull(),
+  method: varchar("method", { length: 20 }).notNull(), // USDT, STRIPE
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, confirmed, failed, expired
+  
+  // Payment method specific data
+  txHash: varchar("tx_hash", { length: 66 }), // For USDT payments
+  stripeSessionId: varchar("stripe_session_id", { length: 100 }), // For Stripe payments
+  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 100 }), // Stripe payment intent ID
+  
+  // Metadata
+  metadata: jsonb("metadata"), // Flexible data storage for campaign IDs, etc.
+  
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow(),
+  confirmedAt: timestamp("confirmed_at"),
+  expiresAt: timestamp("expires_at"), // Payment expiry time
+}, (table) => [
+  index("idx_payment_intents_wallet").on(table.wallet),
+  index("idx_payment_intents_purpose").on(table.purpose),
+  index("idx_payment_intents_status").on(table.status),
+  index("idx_payment_intents_tx_hash").on(table.txHash),
+]);
+
+// Balance ledger for audit trail of all balance movements
+export const balanceLedger = pgTable("balance_ledger", {
+  id: serial("id").primaryKey(),
+  wallet: varchar("wallet", { length: 42 }).notNull(),
+  type: varchar("type", { length: 20 }).notNull(), // credit, debit
+  amount: decimal("amount", { precision: 18, scale: 8 }).notNull(),
+  reason: varchar("reason", { length: 100 }).notNull(), // KYB_DEPOSIT, COLLATERAL_RESERVE, COLLATERAL_RELEASE, BALANCE_TOPUP, etc.
+  refId: integer("ref_id"), // Reference to related record (payment_intent_id, collateral_reservation_id, etc.)
+  refType: varchar("ref_type", { length: 30 }), // payment_intent, collateral_reservation, etc.
+  balanceBefore: decimal("balance_before", { precision: 18, scale: 8 }).notNull(), // Balance before this transaction
+  balanceAfter: decimal("balance_after", { precision: 18, scale: 8 }).notNull(), // Balance after this transaction
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_balance_ledger_wallet").on(table.wallet),
+  index("idx_balance_ledger_type").on(table.type),
+  index("idx_balance_ledger_reason").on(table.reason),
+  index("idx_balance_ledger_created").on(table.createdAt),
+]);
+
 // Relations
 export const platformSettingsRelations = relations(platformSettings, ({ one }) => ({
   updatedBy: one(admins, {
@@ -427,6 +493,21 @@ export const dailyParticipantsRelations = relations(dailyParticipants, ({ one })
     fields: [dailyParticipants.dailyRewardId],
     references: [dailyRewards.id],
   }),
+}));
+
+export const collateralReservationsRelations = relations(collateralReservations, ({ one }) => ({
+  campaign: one(campaigns, {
+    fields: [collateralReservations.campaignId],
+    references: [campaigns.id],
+  }),
+}));
+
+export const paymentIntentsRelations = relations(paymentIntents, ({ one }) => ({
+  // Relations can be added as needed based on usage
+}));
+
+export const balanceLedgerRelations = relations(balanceLedger, ({ one }) => ({
+  // Relations can be added as needed based on usage
 }));
 
 // Zod schemas for validation
@@ -561,6 +642,21 @@ export const insertPendingPaymentSchema = createInsertSchema(pendingPayments).om
   updatedAt: true,
 });
 
+export const insertCollateralReservationSchema = createInsertSchema(collateralReservations).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPaymentIntentSchema = createInsertSchema(paymentIntents).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertBalanceLedgerSchema = createInsertSchema(balanceLedger).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type Admin = typeof admins.$inferSelect;
 export type InsertAdmin = z.infer<typeof insertAdminSchema>;
@@ -592,6 +688,12 @@ export type DailyReward = typeof dailyRewards.$inferSelect;
 export type InsertDailyReward = z.infer<typeof insertDailyRewardSchema>;
 export type DailyParticipant = typeof dailyParticipants.$inferSelect;
 export type InsertDailyParticipant = z.infer<typeof insertDailyParticipantSchema>;
+export type CollateralReservation = typeof collateralReservations.$inferSelect;
+export type InsertCollateralReservation = z.infer<typeof insertCollateralReservationSchema>;
+export type PaymentIntent = typeof paymentIntents.$inferSelect;
+export type InsertPaymentIntent = z.infer<typeof insertPaymentIntentSchema>;
+export type BalanceLedger = typeof balanceLedger.$inferSelect;
+export type InsertBalanceLedger = z.infer<typeof insertBalanceLedgerSchema>;
 export type PaymentAttempt = typeof paymentAttempts.$inferSelect;
 export type InsertPaymentAttempt = z.infer<typeof insertPaymentAttemptSchema>;
 export type UserNonce = typeof userNonces.$inferSelect;

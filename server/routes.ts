@@ -3374,6 +3374,327 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== COMPANY BALANCE SYSTEM API ENDPOINTS =====
+
+  // GET /api/company/balance - Get company balance
+  app.get("/api/company/balance", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const userWallet = req.userWallet;
+      if (!userWallet) {
+        return res.status(401).json({ error: "Wallet authentication required" });
+      }
+
+      const balance = await storage.getCompanyBalance(userWallet);
+      
+      if (!balance) {
+        return res.status(404).json({ error: "Account not found" });
+      }
+
+      res.json({ 
+        success: true,
+        balance: {
+          available: balance.available,
+          reserved: balance.reserved,
+          total: balance.total
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching company balance:", error);
+      res.status(500).json({ error: "Failed to fetch balance" });
+    }
+  });
+
+  // POST /api/payment-intents - Create payment intent
+  app.post("/api/payment-intents", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const userWallet = req.userWallet;
+      if (!userWallet) {
+        return res.status(401).json({ error: "Wallet authentication required" });
+      }
+
+      const { purpose, amount, method, metadata } = req.body;
+
+      if (!purpose || !amount || !method) {
+        return res.status(400).json({ error: "Purpose, amount, and method are required" });
+      }
+
+      // Validate purpose
+      const validPurposes = ['KYB_DEPOSIT', 'BALANCE_TOPUP', 'COLLATERAL_RESERVE'];
+      if (!validPurposes.includes(purpose)) {
+        return res.status(400).json({ error: "Invalid purpose" });
+      }
+
+      // Validate method
+      const validMethods = ['USDT', 'STRIPE'];
+      if (!validMethods.includes(method)) {
+        return res.status(400).json({ error: "Invalid payment method" });
+      }
+
+      // Validate amount
+      if (parseFloat(amount) <= 0) {
+        return res.status(400).json({ error: "Amount must be greater than 0" });
+      }
+
+      const paymentIntent = await storage.createPaymentIntent({
+        wallet: userWallet,
+        purpose,
+        amount,
+        method,
+        metadata: metadata ? JSON.stringify(metadata) : null,
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000) // 30 minutes
+      });
+
+      res.json({
+        success: true,
+        paymentIntent: {
+          id: paymentIntent.id,
+          amount: paymentIntent.amount,
+          method: paymentIntent.method,
+          purpose: paymentIntent.purpose,
+          status: paymentIntent.status,
+          expiresAt: paymentIntent.expiresAt
+        }
+      });
+    } catch (error) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ error: "Failed to create payment intent" });
+    }
+  });
+
+  // POST /api/payment/confirm - Confirm payment
+  app.post("/api/payment/confirm", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const userWallet = req.userWallet;
+      if (!userWallet) {
+        return res.status(401).json({ error: "Wallet authentication required" });
+      }
+
+      const { paymentIntentId, txHash, stripeData } = req.body;
+
+      if (!paymentIntentId) {
+        return res.status(400).json({ error: "Payment intent ID is required" });
+      }
+
+      const paymentIntent = await storage.getPaymentIntent(paymentIntentId);
+      
+      if (!paymentIntent) {
+        return res.status(404).json({ error: "Payment intent not found" });
+      }
+
+      if (paymentIntent.wallet !== userWallet) {
+        return res.status(403).json({ error: "Unauthorized access to payment intent" });
+      }
+
+      if (paymentIntent.status !== 'pending') {
+        return res.status(400).json({ error: "Payment intent is not pending" });
+      }
+
+      // Check expiry
+      if (paymentIntent.expiresAt && new Date() > paymentIntent.expiresAt) {
+        return res.status(400).json({ error: "Payment intent has expired" });
+      }
+
+      // Validate transaction hash for USDT payments
+      if (paymentIntent.method === 'USDT') {
+        if (!txHash) {
+          return res.status(400).json({ error: "Transaction hash is required for USDT payments" });
+        }
+
+        // Check if transaction already used
+        const isUsed = await storage.isTransactionUsed(txHash);
+        if (isUsed) {
+          return res.status(400).json({ error: "Transaction hash already used" });
+        }
+      }
+
+      // Confirm payment intent
+      await storage.confirmPaymentIntent(paymentIntentId, txHash, stripeData);
+
+      // Credit company balance
+      await storage.creditBalance(
+        userWallet,
+        paymentIntent.amount,
+        paymentIntent.purpose,
+        paymentIntentId,
+        "payment_intent"
+      );
+
+      // Mark transaction as used for USDT payments
+      if (txHash) {
+        await storage.createUsedTransaction({
+          txHash,
+          network: 'ethereum',
+          purpose: paymentIntent.purpose,
+          wallet: userWallet,
+          amount: paymentIntent.amount,
+          blockNumber: null
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Payment confirmed and balance credited"
+      });
+    } catch (error) {
+      console.error("Error confirming payment:", error);
+      res.status(500).json({ error: "Failed to confirm payment" });
+    }
+  });
+
+  // POST /api/collateral/reserve - Reserve collateral for campaign
+  app.post("/api/collateral/reserve", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const userWallet = req.userWallet;
+      if (!userWallet) {
+        return res.status(401).json({ error: "Wallet authentication required" });
+      }
+
+      const { campaignId, amount } = req.body;
+
+      if (!campaignId || !amount) {
+        return res.status(400).json({ error: "Campaign ID and amount are required" });
+      }
+
+      if (parseFloat(amount) <= 0) {
+        return res.status(400).json({ error: "Amount must be greater than 0" });
+      }
+
+      // Check if campaign exists and belongs to user
+      const campaign = await storage.getCampaign(campaignId);
+      if (!campaign) {
+        return res.status(404).json({ error: "Campaign not found" });
+      }
+
+      if (campaign.ownerWallet !== userWallet) {
+        return res.status(403).json({ error: "Unauthorized - not campaign owner" });
+      }
+
+      // Check if collateral already reserved
+      const existingReservation = await storage.getCollateralReservation(campaignId);
+      if (existingReservation) {
+        return res.status(400).json({ error: "Collateral already reserved for this campaign" });
+      }
+
+      // Reserve collateral
+      const reservation = await storage.reserveCollateral(campaignId, userWallet, amount);
+
+      res.json({
+        success: true,
+        reservation: {
+          id: reservation.id,
+          campaignId: reservation.campaignId,
+          amount: reservation.amount,
+          status: reservation.status,
+          createdAt: reservation.createdAt
+        }
+      });
+    } catch (error) {
+      console.error("Error reserving collateral:", error);
+      
+      if (error.message.includes("Insufficient available balance")) {
+        return res.status(400).json({ error: "Insufficient available balance for collateral reservation" });
+      }
+      
+      res.status(500).json({ error: "Failed to reserve collateral" });
+    }
+  });
+
+  // POST /api/collateral/release - Release collateral for campaign
+  app.post("/api/collateral/release", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const userWallet = req.userWallet;
+      if (!userWallet) {
+        return res.status(401).json({ error: "Wallet authentication required" });
+      }
+
+      const { campaignId } = req.body;
+
+      if (!campaignId) {
+        return res.status(400).json({ error: "Campaign ID is required" });
+      }
+
+      // Check if campaign exists and belongs to user
+      const campaign = await storage.getCampaign(campaignId);
+      if (!campaign) {
+        return res.status(404).json({ error: "Campaign not found" });
+      }
+
+      if (campaign.ownerWallet !== userWallet) {
+        return res.status(403).json({ error: "Unauthorized - not campaign owner" });
+      }
+
+      // Release collateral
+      await storage.releaseCollateral(campaignId, userWallet);
+
+      res.json({
+        success: true,
+        message: "Collateral released and returned to available balance"
+      });
+    } catch (error) {
+      console.error("Error releasing collateral:", error);
+      res.status(500).json({ error: "Failed to release collateral" });
+    }
+  });
+
+  // GET /api/balance/history - Get balance transaction history
+  app.get("/api/balance/history", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const userWallet = req.userWallet;
+      if (!userWallet) {
+        return res.status(401).json({ error: "Wallet authentication required" });
+      }
+
+      const limit = parseInt(req.query.limit as string) || 50;
+      const maxLimit = Math.min(limit, 100); // Cap at 100
+
+      const history = await storage.getBalanceHistory(userWallet, maxLimit);
+
+      res.json({
+        success: true,
+        history: history.map(entry => ({
+          id: entry.id,
+          type: entry.type,
+          amount: entry.amount,
+          reason: entry.reason,
+          balanceBefore: entry.balanceBefore,
+          balanceAfter: entry.balanceAfter,
+          createdAt: entry.createdAt
+        }))
+      });
+    } catch (error) {
+      console.error("Error fetching balance history:", error);
+      res.status(500).json({ error: "Failed to fetch balance history" });
+    }
+  });
+
+  // GET /api/collateral/reservations - Get user's collateral reservations
+  app.get("/api/collateral/reservations", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const userWallet = req.userWallet;
+      if (!userWallet) {
+        return res.status(401).json({ error: "Wallet authentication required" });
+      }
+
+      const status = req.query.status as string;
+      const reservations = await storage.getCollateralReservations(userWallet, undefined, status);
+
+      res.json({
+        success: true,
+        reservations: reservations.map(reservation => ({
+          id: reservation.id,
+          campaignId: reservation.campaignId,
+          amount: reservation.amount,
+          status: reservation.status,
+          createdAt: reservation.createdAt,
+          releasedAt: reservation.releasedAt
+        }))
+      });
+    } catch (error) {
+      console.error("Error fetching collateral reservations:", error);
+      res.status(500).json({ error: "Failed to fetch reservations" });
+    }
+  });
+
 
   const httpServer = createServer(app);
   return httpServer;

@@ -24,6 +24,9 @@ import {
   type CorporateVerification, type InsertCorporateVerification,
   type FundDocument, type InsertFundDocument,
   type PendingFund, type InsertPendingFund,
+  type CollateralReservation, type InsertCollateralReservation,
+  type PaymentIntent, type InsertPaymentIntent,
+  type BalanceLedger, type InsertBalanceLedger,
   admins,
   platformSettings,
   networkFees,
@@ -47,6 +50,9 @@ import {
   corporateVerifications,
   fundDocuments,
   pendingFunds,
+  collateralReservations,
+  paymentIntents,
+  balanceLedger,
 } from "../shared/schema";
 
 export interface IStorage {
@@ -249,6 +255,33 @@ export interface IStorage {
   getPendingFundsByStatus(status: string): Promise<PendingFund[]>;
   updatePendingFund(id: number, updates: Partial<PendingFund>): Promise<void>;
   markPendingFundAsPublished(id: number, campaignId: number): Promise<void>;
+  
+  // ===== COMPANY BALANCE SYSTEM METHODS =====
+  
+  // Company Balance Operations
+  getCompanyBalance(wallet: string): Promise<{ available: string; reserved: string; total: string } | undefined>;
+  creditBalance(wallet: string, amount: string, reason: string, refId?: number, refType?: string): Promise<void>;
+  debitBalance(wallet: string, amount: string, reason: string, refId?: number, refType?: string): Promise<void>;
+  updateBalanceFields(wallet: string, availableDelta: string, reservedDelta: string): Promise<void>;
+  
+  // Collateral Reservation Operations
+  reserveCollateral(campaignId: number, wallet: string, amount: string): Promise<CollateralReservation>;
+  releaseCollateral(campaignId: number, wallet?: string): Promise<void>;
+  getCollateralReservations(wallet?: string, campaignId?: number, status?: string): Promise<CollateralReservation[]>;
+  getCollateralReservation(campaignId: number): Promise<CollateralReservation | undefined>;
+  
+  // Payment Intent Operations  
+  createPaymentIntent(intent: InsertPaymentIntent): Promise<PaymentIntent>;
+  getPaymentIntent(id: number): Promise<PaymentIntent | undefined>;
+  getPaymentIntentByTxHash(txHash: string): Promise<PaymentIntent | undefined>;
+  updatePaymentIntent(id: number, updates: Partial<PaymentIntent>): Promise<void>;
+  confirmPaymentIntent(id: number, txHash?: string, stripeData?: any): Promise<void>;
+  getPaymentIntentsByWallet(wallet: string, status?: string): Promise<PaymentIntent[]>;
+  
+  // Balance Ledger Operations
+  recordBalanceTransaction(entry: InsertBalanceLedger): Promise<BalanceLedger>;
+  getBalanceHistory(wallet: string, limit?: number): Promise<BalanceLedger[]>;
+  getBalanceTransactionsByReason(wallet: string, reason: string): Promise<BalanceLedger[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1756,6 +1789,288 @@ export class DatabaseStorage implements IStorage {
       publishedCampaignId: campaignId,
       updatedAt: new Date()
     }).where(eq(pendingFunds.id, id));
+  }
+
+  // ===== COMPANY BALANCE SYSTEM IMPLEMENTATION =====
+
+  // Company Balance Operations
+  async getCompanyBalance(wallet: string): Promise<{ available: string; reserved: string; total: string } | undefined> {
+    const [account] = await db.select({
+      balanceAvailable: accounts.balanceAvailable,
+      balanceReserved: accounts.balanceReserved
+    }).from(accounts).where(eq(accounts.wallet, wallet));
+
+    if (!account) return undefined;
+
+    const available = account.balanceAvailable || "0";
+    const reserved = account.balanceReserved || "0";
+    const total = (parseFloat(available) + parseFloat(reserved)).toString();
+
+    return { available, reserved, total };
+  }
+
+  async creditBalance(wallet: string, amount: string, reason: string, refId?: number, refType?: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      // Get current balance
+      const [account] = await tx.select({
+        balanceAvailable: accounts.balanceAvailable
+      }).from(accounts).where(eq(accounts.wallet, wallet));
+
+      const currentBalance = account?.balanceAvailable || "0";
+      const newBalance = (parseFloat(currentBalance) + parseFloat(amount)).toString();
+
+      // Update balance
+      await tx.update(accounts).set({
+        balanceAvailable: newBalance,
+        updatedAt: new Date()
+      }).where(eq(accounts.wallet, wallet));
+
+      // Record transaction
+      await tx.insert(balanceLedger).values({
+        wallet,
+        type: "credit",
+        amount,
+        reason,
+        refId,
+        refType,
+        balanceBefore: currentBalance,
+        balanceAfter: newBalance
+      });
+    });
+  }
+
+  async debitBalance(wallet: string, amount: string, reason: string, refId?: number, refType?: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      // Get current balance
+      const [account] = await tx.select({
+        balanceAvailable: accounts.balanceAvailable
+      }).from(accounts).where(eq(accounts.wallet, wallet));
+
+      const currentBalance = account?.balanceAvailable || "0";
+      const newBalance = (parseFloat(currentBalance) - parseFloat(amount)).toString();
+
+      if (parseFloat(newBalance) < 0) {
+        throw new Error("Insufficient balance");
+      }
+
+      // Update balance
+      await tx.update(accounts).set({
+        balanceAvailable: newBalance,
+        updatedAt: new Date()
+      }).where(eq(accounts.wallet, wallet));
+
+      // Record transaction
+      await tx.insert(balanceLedger).values({
+        wallet,
+        type: "debit",
+        amount,
+        reason,
+        refId,
+        refType,
+        balanceBefore: currentBalance,
+        balanceAfter: newBalance
+      });
+    });
+  }
+
+  async updateBalanceFields(wallet: string, availableDelta: string, reservedDelta: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      const [account] = await tx.select({
+        balanceAvailable: accounts.balanceAvailable,
+        balanceReserved: accounts.balanceReserved
+      }).from(accounts).where(eq(accounts.wallet, wallet));
+
+      const currentAvailable = account?.balanceAvailable || "0";
+      const currentReserved = account?.balanceReserved || "0";
+      
+      const newAvailable = (parseFloat(currentAvailable) + parseFloat(availableDelta)).toString();
+      const newReserved = (parseFloat(currentReserved) + parseFloat(reservedDelta)).toString();
+
+      if (parseFloat(newAvailable) < 0 || parseFloat(newReserved) < 0) {
+        throw new Error("Invalid balance operation");
+      }
+
+      await tx.update(accounts).set({
+        balanceAvailable: newAvailable,
+        balanceReserved: newReserved,
+        updatedAt: new Date()
+      }).where(eq(accounts.wallet, wallet));
+    });
+  }
+
+  // Collateral Reservation Operations
+  async reserveCollateral(campaignId: number, wallet: string, amount: string): Promise<CollateralReservation> {
+    return await db.transaction(async (tx) => {
+      // Check available balance
+      const [account] = await tx.select({
+        balanceAvailable: accounts.balanceAvailable
+      }).from(accounts).where(eq(accounts.wallet, wallet));
+
+      const availableBalance = account?.balanceAvailable || "0";
+      
+      if (parseFloat(availableBalance) < parseFloat(amount)) {
+        throw new Error("Insufficient available balance for collateral");
+      }
+
+      // Move funds from available to reserved
+      await this.updateBalanceFields(wallet, `-${amount}`, amount);
+
+      // Create collateral reservation
+      const [reservation] = await tx.insert(collateralReservations).values({
+        campaignId,
+        wallet,
+        amount,
+        status: "active"
+      }).returning();
+
+      // Record balance transaction
+      await tx.insert(balanceLedger).values({
+        wallet,
+        type: "debit",
+        amount,
+        reason: "COLLATERAL_RESERVE",
+        refId: reservation.id,
+        refType: "collateral_reservation",
+        balanceBefore: availableBalance,
+        balanceAfter: (parseFloat(availableBalance) - parseFloat(amount)).toString()
+      });
+
+      return reservation;
+    });
+  }
+
+  async releaseCollateral(campaignId: number, wallet?: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      // Find active reservation
+      const whereClause = wallet 
+        ? and(eq(collateralReservations.campaignId, campaignId), eq(collateralReservations.wallet, wallet))
+        : eq(collateralReservations.campaignId, campaignId);
+
+      const [reservation] = await tx.select()
+        .from(collateralReservations)
+        .where(and(whereClause, eq(collateralReservations.status, "active")));
+
+      if (!reservation) return;
+
+      // Move funds from reserved back to available
+      await this.updateBalanceFields(reservation.wallet, reservation.amount, `-${reservation.amount}`);
+
+      // Mark reservation as released
+      await tx.update(collateralReservations).set({
+        status: "released",
+        releasedAt: new Date()
+      }).where(eq(collateralReservations.id, reservation.id));
+
+      // Record balance transaction
+      const [account] = await tx.select({
+        balanceAvailable: accounts.balanceAvailable
+      }).from(accounts).where(eq(accounts.wallet, reservation.wallet));
+
+      await tx.insert(balanceLedger).values({
+        wallet: reservation.wallet,
+        type: "credit",
+        amount: reservation.amount,
+        reason: "COLLATERAL_RELEASE",
+        refId: reservation.id,
+        refType: "collateral_reservation",
+        balanceBefore: account?.balanceAvailable || "0",
+        balanceAfter: (parseFloat(account?.balanceAvailable || "0") + parseFloat(reservation.amount)).toString()
+      });
+    });
+  }
+
+  async getCollateralReservations(wallet?: string, campaignId?: number, status?: string): Promise<CollateralReservation[]> {
+    let query = db.select().from(collateralReservations);
+    
+    const conditions = [];
+    if (wallet) conditions.push(eq(collateralReservations.wallet, wallet));
+    if (campaignId) conditions.push(eq(collateralReservations.campaignId, campaignId));
+    if (status) conditions.push(eq(collateralReservations.status, status));
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    
+    return await query.orderBy(desc(collateralReservations.createdAt));
+  }
+
+  async getCollateralReservation(campaignId: number): Promise<CollateralReservation | undefined> {
+    const [reservation] = await db.select()
+      .from(collateralReservations)
+      .where(and(
+        eq(collateralReservations.campaignId, campaignId),
+        eq(collateralReservations.status, "active")
+      ));
+    return reservation;
+  }
+
+  // Payment Intent Operations
+  async createPaymentIntent(intent: InsertPaymentIntent): Promise<PaymentIntent> {
+    const [result] = await db.insert(paymentIntents).values(intent).returning();
+    return result;
+  }
+
+  async getPaymentIntent(id: number): Promise<PaymentIntent | undefined> {
+    const [result] = await db.select().from(paymentIntents).where(eq(paymentIntents.id, id));
+    return result;
+  }
+
+  async getPaymentIntentByTxHash(txHash: string): Promise<PaymentIntent | undefined> {
+    const [result] = await db.select().from(paymentIntents).where(eq(paymentIntents.txHash, txHash));
+    return result;
+  }
+
+  async updatePaymentIntent(id: number, updates: Partial<PaymentIntent>): Promise<void> {
+    await db.update(paymentIntents).set(updates).where(eq(paymentIntents.id, id));
+  }
+
+  async confirmPaymentIntent(id: number, txHash?: string, stripeData?: any): Promise<void> {
+    const updates: Partial<PaymentIntent> = {
+      status: "confirmed",
+      confirmedAt: new Date()
+    };
+    
+    if (txHash) updates.txHash = txHash;
+    if (stripeData) {
+      updates.stripeSessionId = stripeData.sessionId;
+      updates.stripePaymentIntentId = stripeData.paymentIntentId;
+    }
+
+    await db.update(paymentIntents).set(updates).where(eq(paymentIntents.id, id));
+  }
+
+  async getPaymentIntentsByWallet(wallet: string, status?: string): Promise<PaymentIntent[]> {
+    let query = db.select().from(paymentIntents).where(eq(paymentIntents.wallet, wallet));
+    
+    if (status) {
+      query = query.where(and(eq(paymentIntents.wallet, wallet), eq(paymentIntents.status, status)));
+    }
+    
+    return await query.orderBy(desc(paymentIntents.createdAt));
+  }
+
+  // Balance Ledger Operations
+  async recordBalanceTransaction(entry: InsertBalanceLedger): Promise<BalanceLedger> {
+    const [result] = await db.insert(balanceLedger).values(entry).returning();
+    return result;
+  }
+
+  async getBalanceHistory(wallet: string, limit: number = 50): Promise<BalanceLedger[]> {
+    return await db.select()
+      .from(balanceLedger)
+      .where(eq(balanceLedger.wallet, wallet))
+      .orderBy(desc(balanceLedger.createdAt))
+      .limit(limit);
+  }
+
+  async getBalanceTransactionsByReason(wallet: string, reason: string): Promise<BalanceLedger[]> {
+    return await db.select()
+      .from(balanceLedger)
+      .where(and(
+        eq(balanceLedger.wallet, wallet),
+        eq(balanceLedger.reason, reason)
+      ))
+      .orderBy(desc(balanceLedger.createdAt));
   }
 }
 

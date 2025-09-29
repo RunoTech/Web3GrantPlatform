@@ -64,10 +64,15 @@ export default function CreateCampaignPage() {
   // Lock campaign type if coming from specific page
   const isLocked = typeParam !== null;
   
-  // Credit card payment state
+  // Credit card payment state - Updated for balance system
   const [creditCardEnabled, setCreditCardEnabled] = useState(false);
   const [collateralPaid, setCollateralPaid] = useState(false);
   const [validatedFormData, setValidatedFormData] = useState<any>(null); // Store validated data
+  const [companyBalance, setCompanyBalance] = useState<{ available: number; reserved: number } | null>(null);
+  const [balanceLoading, setBalanceLoading] = useState(false);
+  const [showTopUpModal, setShowTopUpModal] = useState(false);
+  const [paymentIntentId, setPaymentIntentId] = useState<number | null>(null);
+  const [reservationId, setReservationId] = useState<number | null>(null);
   const [collateralInfo, setCollateralInfo] = useState({ 
     collateralAmount: 100, 
     collateralToken: 'USDT', 
@@ -78,6 +83,28 @@ export default function CreateCampaignPage() {
   
   // Pending payment tracking
   const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
+  
+  // Company balance fetch hook - Updated for balance system
+  const fetchCompanyBalance = async () => {
+    if (!isConnected) return null;
+    try {
+      setBalanceLoading(true);
+      const response = await api.get('/api/company/balance');
+      return response.balance;
+    } catch (error) {
+      console.error('Balance fetch error:', error);
+      return null;
+    } finally {
+      setBalanceLoading(false);
+    }
+  };
+  
+  // Load company balance when credit card is enabled
+  useEffect(() => {
+    if (creditCardEnabled && isConnected) {
+      fetchCompanyBalance().then(setCompanyBalance);
+    }
+  }, [creditCardEnabled, isConnected]);
 
   // Creator type options based on campaign type
   const getCreatorTypeOptions = () => {
@@ -167,230 +194,252 @@ export default function CreateCampaignPage() {
   }, [creditCardInfoData, form]);
 
   // Handle transaction confirmation with DEBUG
+  // LEGACY DIRECT PAYMENT EFFECT - DISABLED FOR BALANCE SYSTEM
+  // This effect is replaced by balance-based top-up confirmation
   React.useEffect(() => {
-    console.log('🔍 Transaction status:', { 
-      isConfirmed, 
-      txHash, 
-      validatedFormData: !!validatedFormData,
-      isConfirming
-    });
-    
-    if (isConfirmed && txHash && validatedFormData) {
-      console.log('✅ Payment confirmed! Creating campaign...', txHash);
-      setCollateralPaid(true);
+    // Only trigger for legacy direct payment (when paymentIntentId is NOT set)
+    if (isConfirmed && txHash && validatedFormData && !paymentIntentId) {
+      console.log('⚠️ Legacy direct payment detected - this should not happen in balance system');
       
-      // Update PendingPayment with confirmed txHash
-      api.put(`/api/pending-payments/check/${txHash}`, {
-        status: 'confirmed',
-        txHash: txHash
-      }).then(() => {
-        console.log('✅ PendingPayment updated with txHash');
-      }).catch(error => {
-        console.error('❌ Failed to update PendingPayment:', error);
+      // DISABLED: This path is deprecated in favor of balance system
+      console.log('❌ Legacy direct payment path disabled');
+      toast({
+        title: "Payment Error",
+        description: "Please use the balance system for collateral payments.",
+        variant: "destructive",
       });
+    }
+  }, [isConfirmed, txHash, validatedFormData, paymentIntentId, toast]);
+
+  // Handle top-up payment confirmation - Balance system
+  useEffect(() => {
+    if (isConfirmed && txHash && paymentIntentId && validatedFormData) {
+      handleTopUpConfirmation();
+    }
+  }, [isConfirmed, txHash, paymentIntentId, validatedFormData]);
+  
+  const handleTopUpConfirmation = async () => {
+    try {
+      console.log('✅ Top-up payment confirmed! Processing...');
+      setBalanceLoading(true);
+      
+      // Step 1: Confirm payment intent and credit balance
+      await api.post('/api/payment/confirm', {
+        paymentIntentId,
+        txHash
+      });
+      
+      // Step 2: Reserve collateral from newly credited balance
+      const collateralAmount = validatedFormData.collateralAmount.toString();
+      await api.post('/api/collateral/reserve', {
+        campaignId: null, // Will be linked to campaign after creation
+        collateralAmount,
+        purpose: 'CREDIT_CARD_COLLATERAL'
+      });
+      
+      // Step 3: Mark collateral as paid and close modal
+      setCollateralPaid(true);
+      setShowTopUpModal(false);
+      setBalanceLoading(false);
+      
+      // Refresh balance after top-up and reservation
+      fetchCompanyBalance().then(setCompanyBalance);
       
       toast({
-        title: "Payment Successful!",
-        description: "Collateral paid successfully. Creating campaign...",
+        title: "Top-up Successful!",
+        description: "Balance credited and collateral reserved. Ready to create campaign!",
       });
-
-      // Automatically create campaign with validated data + payment info
-      setTimeout(() => {
-        console.log('🚀 Sending campaign creation request...', {
-          ...validatedFormData,
-          campaignType,
-          creatorType,
-          creditCardEnabled: true,
-          collateralPaid: true,
-          collateralTxHash: txHash,
-        });
-        
-        // DISABLED: Backend poller handles campaign creation automatically
-        // createCampaignMutation.mutate({
-        //   ...validatedFormData,
-        //   campaignType,
-        //   creatorType,
-        //   creditCardEnabled: true,
-        //   collateralPaid: true,
-        //   collateralTxHash: txHash,
-        // });
-        
-        console.log('✅ Campaign creation will be handled by backend poller automatically');
-      }, 1000);
+      
+    } catch (error: any) {
+      console.error('Top-up confirmation error:', error);
+      setBalanceLoading(false);
+      toast({
+        title: "Top-up Error",
+        description: error?.response?.data?.error || "Failed to process top-up confirmation",
+        variant: "destructive",
+      });
     }
-  }, [isConfirmed, txHash, validatedFormData, createCampaignMutation, campaignType, creatorType, toast, isConfirming]);
-
-  // Handle write errors with DEBUG
+  };
+  
+  // Handle write contract errors - Restored error handling
   React.useEffect(() => {
     if (writeError) {
-      console.error("❌ Collateral payment error:", writeError);
-      setValidatedFormData(null); // Clear validated data on error
+      console.error("❌ Transaction error:", writeError);
+      setBalanceLoading(false);
+      setValidatedFormData(null);
       toast({
-        title: "Payment Failed",
-        description: writeError.message || "Failed to process collateral payment",
+        title: "Transaction Failed",
+        description: writeError.message || "Failed to process payment transaction",
         variant: "destructive",
       });
     }
   }, [writeError, toast]);
 
-  // Validate and pay collateral - FORM FIRST APPROACH
-  const handleCollateralPayment = async () => {
-    console.log('🚀 Starting handleCollateralPayment function...');
+  // Handle top-up transaction initiation
+  const handleTopUpPayment = async () => {
+    if (!paymentIntentId || !validatedFormData) return;
     
-    // STEP 1: Validate form FIRST (before wallet checks)
-    const formData = form.getValues();
-    console.log('📋 Form data retrieved:', formData);
-    
-    // Check required fields first
-    if (!formData.title?.trim()) {
-      console.log('❌ Validation failed: Title missing');
-      toast({
-        title: "Validation Error",
-        description: "Campaign title is required",
-        variant: "destructive",
-      });
-      return;
-    }
-    console.log('✅ Title validation passed');
-
-    if (!formData.description?.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Campaign description is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!formData.ownerWallet?.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Wallet address is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!formData.targetAmount || parseFloat(formData.targetAmount) <= 0) {
-      toast({
-        title: "Validation Error",
-        description: "Target amount must be greater than 0",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate FUND/DONATE business rules
-    if (campaignType === "FUND" && creatorType !== "company") {
-      toast({
-        title: "Validation Error",
-        description: "FUND campaigns can only be created by companies",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (campaignType === "DONATE" && creatorType === "company") {
-      toast({
-        title: "Validation Error", 
-        description: "DONATE campaigns cannot be created by companies",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (campaignType === "DONATE" && (!formData.startDate || !formData.endDate)) {
-      toast({
-        title: "Validation Error",
-        description: "Start and end dates are required for DONATE campaigns",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Check collateral amount
-    const collateralAmount = formData.collateralAmount;
-    const minAmount = collateralInfo.collateralAmount;
-    if (!collateralAmount || parseFloat(collateralAmount) < minAmount) {
-      toast({
-        title: "Validation Error",
-        description: `Minimum collateral amount is ${minAmount} ${collateralInfo.collateralToken}`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // STEP 2: Check wallet connection AFTER form validation
-    console.log('🔗 Checking wallet connection...', { isConnected, address });
-    if (!isConnected || !address) {
-      console.log('❌ Wallet not connected');
-      toast({
-        title: "Wallet Error",
-        description: "Please connect your wallet to proceed with payment",
-        variant: "destructive",
-      });
-      return;
-    }
-    console.log('✅ Wallet connection verified');
-
-    // STEP 3: Store validated data
-    console.log('💾 Storing validated form data...');
-    setValidatedFormData(formData);
-    console.log('✅ Validated form data stored');
-
-    // STEP 4: Execute payment
-    console.log('💰 Starting payment execution...');
     try {
-      const USDT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
-      const requiredAmount = parseUnits(collateralAmount, 6);
-
-      // STEP 4A: Create pending payment record BEFORE transaction
-      console.log('📝 Creating pending payment record...');
-      const pendingPayment = await api.post('/api/pending-payments', {
-        ownerWallet: address,
-        expectedAmount: collateralAmount,
-        chainId: 1,
-        platformWallet: collateralInfo.platformWallet,
-        tokenAddress: USDT_ADDRESS,
-        formData: formData
-      });
-      console.log('✅ Pending payment created:', pendingPayment.id);
-
-      toast({
-        title: "Processing...",
-        description: "Please confirm the transaction in your wallet",
-      });
-
-      // Execute USDT transfer with explicit chainId
-      console.log('💰 Sending payment transaction...', {
-        to: collateralInfo.platformWallet,
-        amount: collateralAmount,
-        chainId: 1
-      });
+      const requiredAmount = parseFloat(validatedFormData.collateralAmount);
+      const availableBalance = companyBalance?.available || 0;
+      const shortfall = requiredAmount - availableBalance;
+      const usdtContract = "0xdac17f958d2ee523a2206206994597c13d831ec7";
+      const amount = parseUnits(shortfall.toFixed(6), 6); // Ensure proper precision
       
-      await writeContract({
-        address: USDT_ADDRESS as `0x${string}`,
+      writeContract({
+        address: usdtContract as `0x${string}`,
         abi: erc20Abi,
-        functionName: 'transfer',
-        args: [collateralInfo.platformWallet as `0x${string}`, requiredAmount],
-        chainId: 1, // Ethereum Mainnet
+        functionName: "transfer",
+        args: [collateralInfo.platformWallet as `0x${string}`, amount],
+        chainId: 1,
       });
-      
-      console.log('📤 Transaction sent, waiting for confirmation...');
       
       toast({
         title: "Transaction Sent",
-        description: "Waiting for blockchain confirmation...",
+        description: "Processing top-up payment...",
       });
-
+      
     } catch (error: any) {
-      console.error("Collateral payment error:", error);
-      setValidatedFormData(null); // Clear on error
       toast({
         title: "Payment Failed",
-        description: error.message || "Failed to process collateral payment",
+        description: error?.message || "Failed to send top-up payment",
         variant: "destructive",
       });
+    }
+  };
+
+  // Handle collateral payment - UPDATED FOR BALANCE SYSTEM
+  const handleCollateralPayment = async () => {
+    console.log('🚀 Starting balance-based collateral handling...');
+    
+    // STEP 1: Validate form FIRST (keep existing validation)
+    const formData = form.getValues();
+    console.log('📋 Form data retrieved:', formData);
+    
+    // Form validation (unchanged)
+    if (!formData.title?.trim()) {
+      toast({ title: "Validation Error", description: "Campaign title is required", variant: "destructive" });
+      return;
+    }
+    if (!formData.description?.trim()) {
+      toast({ title: "Validation Error", description: "Campaign description is required", variant: "destructive" });
+      return;
+    }
+    if (!formData.ownerWallet?.trim()) {
+      toast({ title: "Validation Error", description: "Wallet address is required", variant: "destructive" });
+      return;
+    }
+    if (!formData.targetAmount || parseFloat(formData.targetAmount) <= 0) {
+      toast({ title: "Validation Error", description: "Target amount must be greater than 0", variant: "destructive" });
+      return;
+    }
+    if (campaignType === "FUND" && creatorType !== "company") {
+      toast({ title: "Validation Error", description: "FUND campaigns can only be created by companies", variant: "destructive" });
+      return;
+    }
+    if (campaignType === "DONATE" && creatorType === "company") {
+      toast({ title: "Validation Error", description: "DONATE campaigns cannot be created by companies", variant: "destructive" });
+      return;
+    }
+    if (campaignType === "DONATE" && (!formData.startDate || !formData.endDate)) {
+      toast({ title: "Validation Error", description: "Start and end dates are required for DONATE campaigns", variant: "destructive" });
+      return;
+    }
+    
+    const collateralAmount = formData.collateralAmount;
+    const minAmount = collateralInfo.collateralAmount;
+    if (!collateralAmount || parseFloat(collateralAmount) < minAmount) {
+      toast({ title: "Validation Error", description: `Minimum collateral amount is ${minAmount} ${collateralInfo.collateralToken}`, variant: "destructive" });
+      return;
+    }
+
+    // STEP 2: Check wallet connection
+    if (!isConnected || !address) {
+      toast({ title: "Wallet Error", description: "Please connect your wallet to proceed", variant: "destructive" });
+      return;
+    }
+
+    try {
+      setBalanceLoading(true);
+      
+      // STEP 3: Check company balance
+      console.log('💰 Checking company balance...');
+      const balance = await fetchCompanyBalance();
+      
+      if (!balance) {
+        toast({ title: "Balance Error", description: "Unable to fetch company balance. Please try again.", variant: "destructive" });
+        return;
+      }
+      
+      const requiredAmount = parseFloat(collateralAmount);
+      const availableBalance = balance.available;
+      
+      console.log(`💰 Balance check: Required=${requiredAmount}, Available=${availableBalance}`);
+      
+      // STEP 4: Handle sufficient vs insufficient balance
+      if (availableBalance >= requiredAmount) {
+        // STEP 4A: Sufficient balance - Reserve collateral directly
+        console.log('✅ Sufficient balance - reserving collateral directly');
+        
+        const reservationResponse = await api.post('/api/collateral/reserve', {
+          campaignId: null, // Will be linked to campaign after creation
+          collateralAmount: requiredAmount.toString(), // Use decimal string
+          purpose: 'CREDIT_CARD_COLLATERAL'
+        });
+        
+        console.log('✅ Collateral reserved:', reservationResponse);
+        
+        // Store reservation ID and validated data
+        if (reservationResponse.reservation?.id) {
+          setReservationId(reservationResponse.reservation.id);
+        }
+        setValidatedFormData(formData);
+        setCollateralPaid(true);
+        
+        // Refresh balance after reservation
+        fetchCompanyBalance().then(setCompanyBalance);
+        
+        toast({
+          title: "Collateral Reserved!",
+          description: `${requiredAmount} ${collateralInfo.collateralToken} reserved from your company balance.`,
+        });
+        
+      } else {
+        // STEP 4B: Insufficient balance - Show top-up modal
+        const shortfall = requiredAmount - availableBalance;
+        console.log(`💳 Insufficient balance - need to top up ${shortfall} USDT`);
+        
+        toast({
+          title: "Insufficient Balance",
+          description: `You need ${shortfall} more USDT. Please top up your balance.`,
+          variant: "destructive",
+        });
+        
+        // Create payment intent for top-up
+        const paymentIntentResponse = await api.post('/api/payment-intents', {
+          purpose: 'BALANCE_TOPUP',
+          amount: shortfall,
+          method: 'USDT',
+          metadata: { 
+            collateralAmount: requiredAmount,
+            formData: formData 
+          }
+        });
+        
+        setPaymentIntentId(paymentIntentResponse.paymentIntent.id);
+        setValidatedFormData(formData);
+        setShowTopUpModal(true);
+      }
+      
+    } catch (error: any) {
+      console.error('Balance system error:', error);
+      toast({
+        title: "Balance System Error", 
+        description: error?.response?.data?.error || "Failed to process balance operation",
+        variant: "destructive",
+      });
+    } finally {
+      setBalanceLoading(false);
     }
   };
 
@@ -823,6 +872,37 @@ export default function CreateCampaignPage() {
                         <DollarSign className="w-5 h-5 text-green-600" />
                         <h4 className="font-medium text-black dark:text-white">Collateral Payment Required</h4>
                       </div>
+                      
+                      {/* Company Balance Status */}
+                      {companyBalance && (
+                        <div className="surface-primary border border-primary/20 rounded-lg p-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <RefreshCw className="w-4 h-4 text-primary" />
+                              <span className="text-sm font-medium text-primary">Company Balance</span>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-semibold text-black dark:text-white">
+                                Available: {companyBalance.available} USDT
+                              </div>
+                              {companyBalance.reserved > 0 && (
+                                <div className="text-xs text-muted-foreground">
+                                  Reserved: {companyBalance.reserved} USDT
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {balanceLoading && (
+                        <div className="surface-primary border border-primary/20 rounded-lg p-3">
+                          <div className="flex items-center space-x-2">
+                            <RefreshCw className="w-4 h-4 text-primary animate-spin" />
+                            <span className="text-sm text-primary">Checking balance...</span>
+                          </div>
+                        </div>
+                      )}
                       
                       <FormField
                         control={form.control}

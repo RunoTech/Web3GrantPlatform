@@ -58,9 +58,11 @@ export default function CreateFundPage() {
   const [verificationId, setVerificationId] = useState<number | null>(null);
   const [uploadedDocuments, setUploadedDocuments] = useState<DocumentFile[]>([]);
   
-  // Payment state
+  // Payment state - Updated for balance system
   const [collateralPaid, setCollateralPaid] = useState(false);
   const [pendingFundId, setPendingFundId] = useState<number | null>(null);
+  const [paymentIntentId, setPaymentIntentId] = useState<number | null>(null);
+  const [balanceLoading, setBalanceLoading] = useState(false);
 
   // Wagmi hooks for payment
   const { writeContract, data: txHash } = useWriteContract();
@@ -265,6 +267,20 @@ export default function CreateFundPage() {
     }
 
     try {
+      setBalanceLoading(true);
+      
+      // Step 1: Create payment intent for KYB deposit
+      const paymentIntentResponse = await api.post('/api/payment-intents', {
+        purpose: 'KYB_DEPOSIT',
+        amount: collateralAmount,
+        method: 'USDT',
+        metadata: { pendingFundId }
+      });
+      
+      const intent = paymentIntentResponse.paymentIntent;
+      setPaymentIntentId(intent.id);
+      
+      // Step 2: Execute USDT transfer to platform wallet
       const usdtContract = "0xdac17f958d2ee523a2206206994597c13d831ec7"; // USDT Mainnet
       const amount = parseUnits(collateralAmount, 6); // USDT has 6 decimals
 
@@ -277,38 +293,66 @@ export default function CreateFundPage() {
       });
 
     } catch (error: any) {
+      console.error('Payment error:', error);
+      setBalanceLoading(false);
       toast({
         title: "Payment Failed",
-        description: error?.message || "Failed to process payment",
+        description: error?.response?.data?.error || error?.message || "Failed to process payment",
         variant: "destructive",
       });
     }
   };
 
-  // Handle payment confirmation
+  // Handle payment confirmation - Updated for balance system
   useEffect(() => {
-    if (isConfirmed && txHash && pendingFundId) {
-      // Update pending fund with payment details
-      api.post('/api/kyb/confirm-payment', {
+    if (isConfirmed && txHash && paymentIntentId && pendingFundId) {
+      handlePaymentConfirmation();
+    }
+  }, [isConfirmed, txHash, paymentIntentId, pendingFundId]);
+  
+  const handlePaymentConfirmation = async () => {
+    try {
+      setBalanceLoading(true);
+      
+      // Step 1: Confirm payment intent and credit balance
+      await api.post('/api/payment/confirm', {
+        paymentIntentId,
+        txHash
+      });
+      
+      // Step 2: Update KYB pending fund status
+      await api.post('/api/kyb/confirm-payment', {
         pendingFundId,
         txHash,
         amount: collateralAmount,
-      }).then(() => {
-        setCollateralPaid(true);
-        markStepCompleted(4);
-        toast({
-          title: "Payment Successful!",
-          description: "Your fund application has been submitted for admin review.",
-        });
-      }).catch((error) => {
-        toast({
-          title: "Confirmation Error",
-          description: "Payment sent but failed to update status. Please contact support.",
-          variant: "destructive",
-        });
+      });
+      
+      // Step 3: If credit card enabled, reserve collateral from balance
+      const creditCardEnabled = campaignForm.getValues('creditCardEnabled');
+      if (creditCardEnabled) {
+        // This will be handled in campaign creation step
+        // For now just mark payment as complete
+      }
+      
+      setCollateralPaid(true);
+      markStepCompleted(4);
+      setBalanceLoading(false);
+      
+      toast({
+        title: "Payment Successful!",
+        description: "Balance credited. Your fund application has been submitted for admin review.",
+      });
+      
+    } catch (error: any) {
+      console.error('Payment confirmation error:', error);
+      setBalanceLoading(false);
+      toast({
+        title: "Confirmation Error",
+        description: error?.response?.data?.error || "Payment sent but failed to update status. Please contact support.",
+        variant: "destructive",
       });
     }
-  }, [isConfirmed, txHash, pendingFundId]);
+  };
 
   // Calculate progress percentage
   const progressPercentage = (completedSteps.length / 4) * 100;

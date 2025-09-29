@@ -3140,6 +3140,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // GET /api/kyb/status - Get KYB verification status for wallet
+  app.get("/api/kyb/status", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const userWallet = req.userWallet;
+      if (!userWallet) {
+        return res.status(401).json({ error: "Wallet authentication required" });
+      }
+
+      const verification = await storage.getCorporateVerification(userWallet);
+      
+      if (!verification) {
+        return res.json({
+          status: 'NOT_STARTED',
+          hasKYB: false,
+          verificationId: null
+        });
+      }
+
+      res.json({
+        status: verification.status.toUpperCase(),
+        hasKYB: true,
+        verificationId: verification.id,
+        submittedAt: verification.submittedAt,
+        reviewedAt: verification.reviewedAt,
+        reviewedBy: verification.reviewedBy,
+        reviewNotes: verification.reviewNotes
+      });
+    } catch (error) {
+      console.error("Error fetching KYB status:", error);
+      res.status(500).json({ error: "Failed to fetch KYB status" });
+    }
+  });
+
+  // GET /api/company/profile - Get approved company profile for wallet
+  app.get("/api/company/profile", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const userWallet = req.userWallet;
+      if (!userWallet) {
+        return res.status(401).json({ error: "Wallet authentication required" });
+      }
+
+      const verification = await storage.getCorporateVerification(userWallet);
+      
+      if (!verification || verification.status !== 'approved') {
+        return res.status(404).json({ error: "No approved company profile found" });
+      }
+
+      // Return company profile data (excluding sensitive admin fields)
+      res.json({
+        id: verification.id,
+        companyName: verification.companyName,
+        companyRegistrationNumber: verification.companyRegistrationNumber,
+        companyAddress: verification.companyAddress,
+        companyWebsite: verification.companyWebsite,
+        companyEmail: verification.companyEmail,
+        companyPhone: verification.companyPhone,
+        contactPersonName: verification.contactPersonName,
+        contactPersonTitle: verification.contactPersonTitle,
+        companyIndustry: verification.companyIndustry,
+        companyEmployeeCount: verification.companyEmployeeCount,
+        companyFoundedYear: verification.companyFoundedYear,
+        wallet: verification.wallet,
+        approvedAt: verification.reviewedAt
+      });
+    } catch (error) {
+      console.error("Error fetching company profile:", error);
+      res.status(500).json({ error: "Failed to fetch company profile" });
+    }
+  });
+
+  // GET /api/pricing - Get database-driven pricing for different purposes
+  app.get("/api/pricing", async (req: Request, res) => {
+    try {
+      const { purpose } = req.query;
+      
+      if (!purpose) {
+        return res.status(400).json({ error: "Purpose parameter is required" });
+      }
+
+      // Get platform settings for pricing
+      const settingsMap = await storage.getSettingsMap();
+      
+      let pricing;
+      switch (purpose) {
+        case 'fund_collateral':
+          pricing = {
+            amount: parseFloat(settingsMap.fund_collateral_amount || '1'),
+            token: settingsMap.fund_collateral_token || 'USDT',
+            decimals: 18,
+            platformWallet: settingsMap.platform_wallet || '0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8'
+          };
+          break;
+        case 'account_activation':
+          pricing = {
+            amount: parseFloat(settingsMap.account_activation_fee || '50'),
+            token: settingsMap.account_activation_token || 'USDT',
+            decimals: 18,
+            platformWallet: settingsMap.platform_wallet || '0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8'
+          };
+          break;
+        case 'daily_reward':
+          pricing = {
+            amount: parseFloat(settingsMap.daily_reward_amount || '100'),
+            token: settingsMap.daily_reward_token || 'USDT',
+            decimals: 18,
+            platformWallet: settingsMap.platform_wallet || '0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8'
+          };
+          break;
+        default:
+          return res.status(400).json({ error: "Invalid purpose. Supported: fund_collateral, account_activation, daily_reward" });
+      }
+
+      res.json({
+        success: true,
+        purpose,
+        pricing
+      });
+    } catch (error) {
+      console.error("Error fetching pricing:", error);
+      res.status(500).json({ error: "Failed to fetch pricing" });
+    }
+  });
+
   // Upload document for verification
   app.post("/api/kyb/upload-document", upload.single('file'), async (req: Request, res) => {
     try {

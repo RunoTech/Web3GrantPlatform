@@ -3077,20 +3077,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create corporate verification
   app.post("/api/kyb/create-verification", async (req: Request, res) => {
     try {
-      const verificationData = {
-        ...req.body,
-      };
+      const {
+        companyName,
+        companyRegistrationNumber,
+        companyEmail,
+        companyCEO,
+        companyIndustry,
+        companyPhone,
+        companyAddress,
+        companyWebsite,
+        companyEmployeeCount,
+        wallet,
+        ...otherData
+      } = req.body;
       
       // Basic validation
-      if (!verificationData.companyName || !verificationData.companyEmail || !verificationData.wallet) {
-        return res.status(400).json({ error: "Company name, email, and wallet address are required" });
+      if (!companyName || !companyEmail || !wallet || !companyCEO) {
+        return res.status(400).json({ error: "Company name, email, CEO name, and wallet address are required" });
       }
       
-      const verification = await storage.createCorporateVerification({
-        ...verificationData,
+      // Map frontend field names to database field names
+      const verificationData = {
+        companyName,
+        companyRegistrationNumber,
+        companyEmail,
+        contactPersonName: companyCEO, // Map companyCEO to contactPersonName
+        contactPersonTitle: "CEO/Founder", // Set default title
+        companyPhone,
+        companyAddress,
+        companyWebsite,
+        wallet,
         status: 'pending',
         submittedAt: new Date(),
-      });
+        ...otherData
+      };
+      
+      const verification = await storage.createCorporateVerification(verificationData);
       
       console.log(`🏢 New corporate verification created: ${verification.id} for ${verification.companyName} (${verification.wallet})`);
       res.json(verification);

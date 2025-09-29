@@ -3077,6 +3077,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create corporate verification
   app.post("/api/kyb/create-verification", async (req: Request, res) => {
     try {
+      console.log("🔍 KYB Verification - Raw request body:", JSON.stringify(req.body, null, 2));
+      
       const {
         companyName,
         companyRegistrationNumber,
@@ -3091,8 +3093,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...otherData
       } = req.body;
       
+      console.log("🔍 KYB Verification - Extracted fields:", {
+        companyName,
+        companyRegistrationNumber,
+        companyEmail,
+        companyCEO,
+        companyIndustry,
+        companyPhone,
+        companyAddress,
+        companyWebsite,
+        companyEmployeeCount,
+        wallet
+      });
+      
       // Basic validation
       if (!companyName || !companyEmail || !wallet || !companyCEO) {
+        console.error("❌ KYB Validation failed:", { companyName: !!companyName, companyEmail: !!companyEmail, wallet: !!wallet, companyCEO: !!companyCEO });
         return res.status(400).json({ error: "Company name, email, CEO name, and wallet address are required" });
       }
       
@@ -3111,6 +3127,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         submittedAt: new Date(),
         ...otherData
       };
+      
+      console.log("🔍 KYB Verification - Final verificationData being sent to DB:", JSON.stringify(verificationData, null, 2));
       
       const verification = await storage.createCorporateVerification(verificationData);
       

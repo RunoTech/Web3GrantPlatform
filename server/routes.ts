@@ -3444,12 +3444,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // POST /api/payment-intents - Create payment intent
-  app.post("/api/payment-intents", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+  // POST /api/payment-intents - Create payment intent (KYB collateral payments)
+  app.post("/api/payment-intents", async (req: Request, res) => {
     try {
-      const userWallet = req.userWallet;
-      if (!userWallet) {
-        return res.status(401).json({ error: "Wallet authentication required" });
+      // Get wallet from request body for KYB collateral payments
+      const { wallet } = req.body;
+      if (!wallet) {
+        return res.status(400).json({ error: "Wallet address required" });
       }
 
       const { purpose, amount, method, metadata } = req.body;
@@ -3476,7 +3477,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const paymentIntent = await storage.createPaymentIntent({
-        wallet: userWallet,
+        wallet: wallet,
         purpose,
         amount,
         method,

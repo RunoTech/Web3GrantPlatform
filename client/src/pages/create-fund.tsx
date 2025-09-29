@@ -702,9 +702,13 @@ export default function CreateFundPage() {
                                   type="file"
                                   accept=".pdf,.jpg,.jpeg,.png"
                                   onChange={(e) => {
+                                    console.log("📁 File input onChange triggered", e.target.files);
                                     const file = e.target.files?.[0];
                                     if (file) {
+                                      console.log("✅ File selected, calling handleDocumentUpload");
                                       handleDocumentUpload(file, doc.type);
+                                    } else {
+                                      console.log("❌ No file selected");
                                     }
                                   }}
                                   className="hidden"

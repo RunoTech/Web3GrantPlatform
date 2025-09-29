@@ -84,6 +84,20 @@ export default function CreateCampaignPage() {
   // Pending payment tracking
   const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
   
+  // KYB Status Query - Check if user has approved KYB
+  const { data: kybStatus, isLoading: kybLoading } = useQuery({
+    queryKey: ['/api/kyb/status'],
+    enabled: isConnected && campaignType === 'FUND',
+    retry: false
+  });
+
+  // Company Profile Query - Get approved company data
+  const { data: companyProfile, isLoading: companyLoading } = useQuery({
+    queryKey: ['/api/company/profile'], 
+    enabled: isConnected && campaignType === 'FUND' && kybStatus && (kybStatus as any)?.status === 'APPROVED',
+    retry: false
+  });
+
   // Company balance fetch hook - Updated for balance system
   const fetchCompanyBalance = async () => {
     if (!isConnected) return null;
@@ -636,8 +650,85 @@ export default function CreateCampaignPage() {
           </div>
         )}
 
-        {/* Campaign Form */}
-        <div className="card-standard">
+        {/* KYB Gating for FUND Campaigns */}
+        {campaignType === 'FUND' && isConnected && (
+          <>
+            {/* Loading State */}
+            {kybLoading && (
+              <div className="card-standard">
+                <div className="flex items-center justify-center py-8">
+                  <RefreshCw className="w-6 h-6 text-primary animate-spin mr-3" />
+                  <span className="text-lg text-black dark:text-white">Checking KYB verification status...</span>
+                </div>
+              </div>
+            )}
+
+            {/* KYB Not Started or Not Approved */}
+            {!kybLoading && (!kybStatus || (kybStatus as any).status !== 'APPROVED') && (
+              <div className="card-standard">
+                <div className="text-center py-8 space-y-6">
+                  <div className="flex items-center justify-center">
+                    <Shield className="w-16 h-16 text-red-500" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-black dark:text-white mb-4">KYB Verification Required</h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                      FUND campaigns require approved Know Your Business (KYB) verification. Complete the KYB process to continue with campaign creation.
+                    </p>
+                    {(kybStatus as any)?.status === 'PENDING' && (
+                      <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg mb-6">
+                        <p className="text-yellow-800 dark:text-yellow-200 font-medium">
+                          Your KYB verification is pending review. You'll be able to create FUND campaigns once approved.
+                        </p>
+                      </div>
+                    )}
+                    <Button asChild className="bg-primary hover:bg-primary/90 text-white px-8 py-3">
+                      <Link href="/create-fund">
+                        <Building className="w-5 h-5 mr-2" />
+                        Complete KYB Verification
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Approved Company Profile Display */}
+            {!kybLoading && (kybStatus as any)?.status === 'APPROVED' && companyProfile && (
+              <div className="card-standard mb-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <CheckCircle className="w-6 h-6 text-green-500" />
+                  <h3 className="text-lg font-semibold text-black dark:text-white">Verified Company Profile</h3>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Company Name</p>
+                    <p className="font-medium text-black dark:text-white">{(companyProfile as any).companyName}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Registration Number</p>
+                    <p className="font-medium text-black dark:text-white">{(companyProfile as any).companyRegistrationNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Industry</p>
+                    <p className="font-medium text-black dark:text-white">{(companyProfile as any).companyIndustry}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Contact Person</p>
+                    <p className="font-medium text-black dark:text-white">{(companyProfile as any).contactPersonName}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+                  ✓ This company information will be used for your FUND campaign
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Campaign Form - Only show if not FUND or if FUND with approved KYB */}
+        {(campaignType !== 'FUND' || ((kybStatus as any)?.status === 'APPROVED' && companyProfile)) && (
+          <div className="card-standard">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               
@@ -979,7 +1070,8 @@ export default function CreateCampaignPage() {
 
             </form>
           </Form>
-        </div>
+          </div>
+        )}
 
         {/* Campaign Type Info - Only show when not locked */}
         {!isLocked && (

@@ -165,7 +165,10 @@ export default function CreateFundPage() {
 
   // Document upload handler
   const handleDocumentUpload = async (file: File, documentType: string) => {
+    console.log("🔍 Document upload started:", { fileName: file.name, fileSize: file.size, documentType, verificationId });
+    
     if (!verificationId) {
+      console.log("❌ No verification ID available");
       toast({
         title: "Error",
         description: "Please complete company information first",
@@ -181,12 +184,17 @@ export default function CreateFundPage() {
     formData.append('wallet', address || '');
 
     try {
+      console.log("📤 Sending upload request to /api/kyb/upload-document");
       const response = await fetch('/api/kyb/upload-document', {
         method: 'POST',
         body: formData,
       });
       
+      console.log("📥 Upload response received:", { status: response.status, ok: response.ok });
+      
       if (!response.ok) {
+        const errorText = await response.text();
+        console.log("❌ Upload failed, response:", errorText);
         throw new Error('Upload failed');
       }
       

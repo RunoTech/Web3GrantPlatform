@@ -879,6 +879,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // NO AUTH: Allow anyone to create campaigns for any wallet
       
+      // Validate target amount
+      if (!campaignData.targetAmount || parseFloat(campaignData.targetAmount) <= 0) {
+        return res.status(400).json({ 
+          error: "Target amount must be greater than 0" 
+        });
+      }
+      
       // Validate FUND/DONATE rules
       if (campaignData.campaignType === "FUND" && campaignData.creatorType !== "company") {
         return res.status(400).json({ error: "FUND campaigns can only be created by companies" });

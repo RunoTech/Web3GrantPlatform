@@ -80,6 +80,9 @@ export default function CreateCampaignPage() {
     platformWallet: '0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8'
   });
   
+  // Image upload state
+  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   
   // Pending payment tracking
   const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
@@ -136,10 +139,8 @@ export default function CreateCampaignPage() {
     defaultValues: {
       title: "",
       description: "",
-      imageUrl: "",
+      imageUrl: uploadedImageUrl || "",
       targetAmount: "0",
-      startDate: "",
-      endDate: "",
       // Wallet information - auto-populate if available
       ownerWallet: address || "",
       // Company information fields
@@ -206,6 +207,66 @@ export default function CreateCampaignPage() {
       form.setValue("collateralAmount", creditCardInfoData.collateralAmount.toString());
     }
   }, [creditCardInfoData, form]);
+
+  // File upload handler
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please upload an image smaller than 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('campaignImage', file);
+
+      const response = await fetch('/api/upload-campaign-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      setUploadedImageUrl(data.imageUrl);
+      form.setValue("imageUrl", data.imageUrl);
+
+      toast({
+        title: "Upload Successful",
+        description: "Image uploaded successfully",
+      });
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   // Handle transaction confirmation with DEBUG
   // LEGACY DIRECT PAYMENT EFFECT - DISABLED FOR BALANCE SYSTEM
@@ -355,10 +416,6 @@ export default function CreateCampaignPage() {
       toast({ title: "Validation Error", description: "DONATE campaigns cannot be created by companies", variant: "destructive" });
       return;
     }
-    if (campaignType === "DONATE" && (!formData.startDate || !formData.endDate)) {
-      toast({ title: "Validation Error", description: "Start and end dates are required for DONATE campaigns", variant: "destructive" });
-      return;
-    }
     
     const collateralAmount = formData.collateralAmount;
     const minAmount = collateralInfo.collateralAmount;
@@ -477,10 +534,11 @@ export default function CreateCampaignPage() {
       return;
     }
 
-    if (campaignType === "DONATE" && (!data.startDate || !data.endDate)) {
+    if (false) {
+      // Date validation removed
       toast({
         title: "Error",
-        description: "Start and end dates are required for DONATE campaigns",
+        description: "Validation error",
         variant: "destructive",
       });
       return;
@@ -814,21 +872,42 @@ export default function CreateCampaignPage() {
                 )}
               />
 
-              {/* Campaign Image */}
+              {/* Campaign Image Upload */}
               <FormField
                 control={form.control}
                 name="imageUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-black dark:text-white">Campaign Image URL</FormLabel>
+                    <FormLabel className="text-black dark:text-white">Campaign Image</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="https://example.com/image.jpg" 
-                        {...field} 
-                        className="border-gray-300 dark:border-gray-600"
-                      />
+                      <div className="space-y-4">
+                        <Input 
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          disabled={isUploading}
+                          className="border-gray-300 dark:border-gray-600 cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                          data-testid="input-campaign-image"
+                        />
+                        {isUploading && (
+                          <p className="text-sm text-muted-foreground">Uploading image...</p>
+                        )}
+                        {uploadedImageUrl && (
+                          <div className="space-y-2">
+                            <p className="text-sm text-green-600 dark:text-green-400">✓ Image uploaded successfully</p>
+                            <img 
+                              src={uploadedImageUrl} 
+                              alt="Campaign preview" 
+                              className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                            />
+                          </div>
+                        )}
+                      </div>
                     </FormControl>
                     <FormMessage />
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Upload an image (max 10MB). Supported formats: JPG, PNG, GIF
+                    </p>
                   </FormItem>
                 )}
               />
@@ -874,47 +953,6 @@ export default function CreateCampaignPage() {
                       </Button>
                     </div>
                   </div>
-                </div>
-              )}
-
-              {/* Date Fields - Only for DONATE campaigns */}
-              {campaignType === "DONATE" && (
-                <div className="grid md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="startDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-black dark:text-white">Start Date</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="date" 
-                            {...field} 
-                            className="border-gray-300 dark:border-gray-600"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="endDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-black dark:text-white">End Date</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="date" 
-                            {...field} 
-                            className="border-gray-300 dark:border-gray-600"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
               )}
 

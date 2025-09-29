@@ -78,8 +78,31 @@ export default function CreateFundPage() {
     refetchOnWindowFocus: false
   });
 
-  const collateralAmount = (settings as any)?.fund_collateral_amount || "100";
-  const platformWallet = (settings as any)?.platform_wallet || "0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8";
+  // Database-driven pricing for FUND collateral
+  const { data: pricingData } = useQuery({
+    queryKey: ['/api/pricing', 'fund_collateral'],
+    queryFn: () => api.get('/api/pricing?purpose=fund_collateral'),
+    refetchOnWindowFocus: false
+  });
+
+  // KYB Status Query
+  const { data: kybStatus, refetch: refetchKybStatus } = useQuery({
+    queryKey: ['/api/kyb/status'],
+    enabled: isConnected,
+    refetchInterval: 5000, // Check status every 5 seconds
+    retry: false
+  });
+
+  // Company Balance Query
+  const { data: companyBalance, refetch: refetchBalance } = useQuery({
+    queryKey: ['/api/company/balance'],
+    enabled: isConnected,
+    retry: false
+  });
+
+  const collateralAmount = pricingData?.pricing?.amount || settings?.fund_collateral_amount || "100";
+  const collateralToken = pricingData?.pricing?.token || "USDT";
+  const platformWallet = pricingData?.pricing?.platformWallet || settings?.platform_wallet || "0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8";
 
   // Step 1: Company Information Form
   const companyForm = useForm({
@@ -163,6 +186,62 @@ export default function CreateFundPage() {
     },
   });
 
+  // Balance Top-up Payment Handler
+  const handleBalanceTopUp = useMutation({
+    mutationFn: async (amount: number) => {
+      if (!address || !pricingData?.pricing) {
+        throw new Error("Missing wallet address or pricing data");
+      }
+
+      // Create payment intent for balance top-up
+      const paymentIntent = await api.post('/api/payment-intents', {
+        amount: amount.toString(),
+        token: collateralToken,
+        wallet: address,
+        purpose: 'balance_topup',
+        description: `Balance top-up: ${amount} ${collateralToken}`
+      });
+
+      return paymentIntent;
+    },
+    onSuccess: (data) => {
+      setPaymentIntentId(data.id);
+      
+      // Trigger blockchain payment
+      const tokenAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // USDT
+      const amountInWei = parseUnits(collateralAmount.toString(), 6); // USDT has 6 decimals
+      
+      writeContract({
+        address: tokenAddress as `0x${string}`,
+        abi: erc20Abi,
+        functionName: 'transfer',
+        args: [platformWallet as `0x${string}`, amountInWei],
+        chainId: 1,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Payment Error",
+        description: error?.message || "Failed to initiate payment",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Watch for payment confirmation
+  useEffect(() => {
+    if (isConfirmed && paymentIntentId) {
+      toast({
+        title: "Payment Confirmed",
+        description: `${collateralAmount} ${collateralToken} added to your company balance`,
+      });
+      setCollateralPaid(true);
+      markStepCompleted(3); // Complete balance top-up step
+      refetchBalance(); // Refresh balance
+      queryClient.invalidateQueries({ queryKey: ['/api/company/balance'] });
+    }
+  }, [isConfirmed, paymentIntentId, collateralAmount, collateralToken]);
+
   // Document upload handler
   const handleDocumentUpload = async (file: File, documentType: string) => {
     console.log("🔍 Document upload started:", { fileName: file.name, fileSize: file.size, documentType, verificationId });
@@ -224,6 +303,7 @@ export default function CreateFundPage() {
       
       if (requiredDocs.every(type => uploadedTypes.includes(type))) {
         markStepCompleted(2);
+        setCurrentStep(3); // Move to Balance Top-up step
       }
 
     } catch (error: any) {
@@ -235,16 +315,60 @@ export default function CreateFundPage() {
     }
   };
 
-  // Submit campaign details and create pending fund
-  const submitCampaignDetails = useMutation({
+  // Auto-advance to approval waiting when balance is topped up
+  useEffect(() => {
+    if (collateralPaid && completedSteps.includes(3)) {
+      setCurrentStep(4); // Move to Approval Waiting step
+      // Start monitoring KYB status
+      refetchKybStatus();
+    }
+  }, [collateralPaid, completedSteps]);
+
+  // Auto-advance to campaign creation when KYB is approved
+  useEffect(() => {
+    if (kybStatus && (kybStatus as any).status === 'APPROVED' && completedSteps.includes(3)) {
+      markStepCompleted(4); // Complete approval waiting
+      setCurrentStep(5); // Move to Campaign Creation step
+    }
+  }, [kybStatus, completedSteps]);
+
+  // Enhanced Campaign Creation (Final Step)
+  const createFinalCampaign = useMutation({
     mutationFn: async (data: any) => {
-      return api.post('/api/kyb/create-pending-fund', {
+      // Use the unified campaign creation endpoint that now enforces KYB
+      return api.post('/api/create-campaign', {
         ...data,
-        wallet: address,
-        verificationId,
+        ownerWallet: address,
         campaignType: 'FUND',
         creatorType: 'company',
+        creditCardEnabled: true, // FUND campaigns have credit card enabled by default
+        // Company data will be automatically filled from approved KYB
       });
+    },
+    onSuccess: (data) => {
+      markStepCompleted(5);
+      toast({
+        title: "FUND Campaign Created Successfully!",
+        description: "Your FUND campaign is now live and accepting donations.",
+      });
+      // Redirect to campaign page or dashboard
+      setTimeout(() => {
+        setLocation(`/campaign/${data.id}`);
+      }, 2000);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Campaign Creation Failed",
+        description: error?.message || "Failed to create FUND campaign",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Submit campaign details and create pending fund (Legacy - now for step 5)
+  const submitCampaignDetails = useMutation({
+    mutationFn: async (data: any) => {
+      return createFinalCampaign.mutateAsync(data);
     },
     onSuccess: (data) => {
       setPendingFundId(data.id);

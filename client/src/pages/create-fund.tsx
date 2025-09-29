@@ -113,11 +113,11 @@ export default function CreateFundPage() {
 
   // Document types required for KYB
   const requiredDocuments = [
-    { type: "company_registration", name: "Company Registration Certificate", required: true },
+    { type: "company_registry", name: "Company Registration Certificate", required: true },
     { type: "tax_certificate", name: "Tax Registration Certificate", required: true },
-    { type: "ceo_id", name: "CEO/Founder ID Document", required: true },
+    { type: "id_card", name: "CEO/Founder ID Document", required: true },
     { type: "bank_statement", name: "Company Bank Statement", required: false },
-    { type: "business_license", name: "Business License", required: false },
+    { type: "passport", name: "Business License", required: false },
   ];
 
   // Step management

@@ -77,6 +77,9 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 // Security: Cookie parser for secure authentication
 app.use(cookieParser());
 
+// Serve uploaded files statically
+app.use('/uploads', express.static('uploads'));
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

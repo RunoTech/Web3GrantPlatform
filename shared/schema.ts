@@ -188,10 +188,6 @@ export const campaigns = pgTable("campaigns", {
   companyIndustry: varchar("company_industry", { length: 100 }),
   companyEmployeeCount: varchar("company_employee_count", { length: 50 }),
   
-  // Time-limited fields (only for DONATE campaigns)
-  startDate: timestamp("start_date"), // Required for DONATE, null for FUND
-  endDate: timestamp("end_date"), // Required for DONATE, null for FUND
-  
   // Credit card payment system
   creditCardEnabled: boolean("credit_card_enabled").default(false), // Whether campaign accepts credit card payments
   collateralAmount: decimal("collateral_amount", { precision: 18, scale: 8 }).default("0"), // Required collateral amount in USDT

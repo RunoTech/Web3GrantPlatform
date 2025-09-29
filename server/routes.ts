@@ -921,10 +921,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         campaignData.kybVerificationId = verification.id; // Link to KYB verification
       }
       
-      if (campaignData.campaignType === "DONATE" && (!campaignData.startDate || !campaignData.endDate)) {
-        return res.status(400).json({ error: "DONATE campaigns must have start and end dates" });
-      }
-      
       // Validate credit card payment fields with dynamic fees
       if (campaignData.creditCardEnabled) {
         // Get dynamic collateral amount from platform settings
@@ -3092,10 +3088,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ===== KYB (Know Your Business) ENDPOINTS =====
+  // ===== FILE UPLOAD SYSTEM =====
   
-  // Multer setup for document uploads
+  // Multer setup for all uploads (campaigns + documents)
+  const storage_multer = multer.diskStorage({
+    destination: (req, file, cb) => {
+      const uploadPath = file.fieldname === 'campaignImage' 
+        ? 'uploads/campaigns' 
+        : 'uploads/documents';
+      
+      // Create directory if it doesn't exist
+      const fs = require('fs');
+      if (!fs.existsSync(uploadPath)) {
+        fs.mkdirSync(uploadPath, { recursive: true });
+      }
+      
+      cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const ext = file.originalname.split('.').pop();
+      cb(null, `${uniqueSuffix}.${ext}`);
+    }
+  });
+  
   const upload = multer({
+    storage: storage_multer,
     limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
     fileFilter: (req, file, cb) => {
       if (file.mimetype === 'application/pdf' || 
@@ -3106,6 +3124,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   });
+  
+  // Campaign image upload endpoint
+  app.post("/api/upload-campaign-image", upload.single('campaignImage'), async (req: Request, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+      
+      // Return the file path
+      const imagePath = `/uploads/campaigns/${req.file.filename}`;
+      res.json({ 
+        success: true, 
+        imageUrl: imagePath,
+        message: "Image uploaded successfully"
+      });
+    } catch (error) {
+      console.error("Error uploading campaign image:", error);
+      res.status(500).json({ error: "Failed to upload image" });
+    }
+  });
+  
+  // ===== KYB (Know Your Business) ENDPOINTS =====
   
   // Create corporate verification
   app.post("/api/kyb/create-verification", async (req: Request, res) => {

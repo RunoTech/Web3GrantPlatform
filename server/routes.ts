@@ -3184,6 +3184,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("❌ KYB Validation failed:", { companyName: !!companyName, companyEmail: !!companyEmail, wallet: !!wallet, companyCEO: !!companyCEO });
         return res.status(400).json({ error: "Company name, email, CEO name, and wallet address are required" });
       }
+
+      // Check if verification already exists for this wallet
+      const existingVerification = await storage.getCorporateVerification(wallet);
+      
+      if (existingVerification) {
+        const status = existingVerification.status.toUpperCase();
+        
+        if (status === 'APPROVED') {
+          return res.status(409).json({ 
+            error: "KYB already approved",
+            message: "You already have an approved KYB verification. You can create FUND campaigns directly.",
+            verificationId: existingVerification.id,
+            status: 'APPROVED'
+          });
+        }
+        
+        if (status === 'PENDING' || status === 'REVIEWING') {
+          return res.status(409).json({ 
+            error: "KYB verification pending",
+            message: "You already have a verification in progress. Please wait for admin review.",
+            verificationId: existingVerification.id,
+            status: existingVerification.status
+          });
+        }
+        
+        // If REJECTED, inform user to contact admin
+        if (status === 'REJECTED') {
+          return res.status(409).json({ 
+            error: "KYB verification rejected",
+            message: "Your previous KYB verification was rejected. Please review the feedback and contact support to resubmit.",
+            verificationId: existingVerification.id,
+            status: 'REJECTED',
+            adminNotes: existingVerification.adminNotes
+          });
+        }
+      }
       
       // Map frontend field names to database field names
       const verificationData = {

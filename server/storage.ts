@@ -357,6 +357,15 @@ export class DatabaseStorage implements IStorage {
       .where(eq(platformSettings.key, key));
   }
 
+  async getSettingsMap(): Promise<Record<string, string>> {
+    const settings = await db.select().from(platformSettings);
+    const settingsMap: Record<string, string> = {};
+    for (const setting of settings) {
+      settingsMap[setting.key] = setting.value;
+    }
+    return settingsMap;
+  }
+
   // Network Fees
   async getNetworkFees(): Promise<NetworkFee[]> {
     return await db.select().from(networkFees).orderBy(networkFees.network);

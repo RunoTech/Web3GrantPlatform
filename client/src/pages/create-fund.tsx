@@ -561,7 +561,7 @@ export default function CreateFundPage() {
       
       // Step 2: Execute USDT transfer to platform wallet
       const usdtContract = "0xdac17f958d2ee523a2206206994597c13d831ec7"; // USDT Mainnet
-      const amount = parseUnits(collateralAmount, 6); // USDT has 6 decimals
+      const amount = parseUnits(collateralAmount.toString(), 6); // USDT has 6 decimals
 
       writeContract({
         address: usdtContract as `0x${string}`,

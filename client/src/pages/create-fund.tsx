@@ -500,8 +500,13 @@ export default function CreateFundPage() {
   // Submit campaign details and create pending fund (Step 3)
   const submitCampaignDetails = useMutation({
     mutationFn: async (data: any) => {
+      if (!verificationId) {
+        throw new Error("Verification ID is required. Please complete company information first.");
+      }
+      
       // Create pending fund (not actual campaign yet)
       return api.post('/api/kyb/create-pending-fund', {
+        verificationId,
         wallet: address,
         ...data,
       });

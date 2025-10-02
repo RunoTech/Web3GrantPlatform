@@ -368,13 +368,13 @@ export default function CreateFundPage() {
         description: `${file.name} has been uploaded successfully`,
       });
 
-      // Check if all required documents are uploaded
+      // Check if all required documents are uploaded - just mark as completed, don't auto-advance
       const requiredDocs = requiredDocuments.filter(doc => doc.required).map(doc => doc.type);
       const uploadedTypes = [...uploadedDocuments.filter(doc => doc.type !== documentType).map(doc => doc.type), documentType];
       
       if (requiredDocs.every(type => uploadedTypes.includes(type))) {
         markStepCompleted(2);
-        setCurrentStep(3); // Move to Balance Top-up step
+        // DON'T auto-advance - let user click Continue button
       }
 
     } catch (error: any) {
@@ -972,17 +972,21 @@ export default function CreateFundPage() {
                         );
                       })}
                       
-                      {completedSteps.includes(2) && (
-                        <div className="flex justify-end">
-                          <Button 
-                            onClick={() => setCurrentStep(3)}
-                            data-testid="button-continue-to-step-3"
-                          >
-                            Continue to Campaign Details
-                            <ArrowRight className="h-4 w-4 ml-2" />
-                          </Button>
-                        </div>
-                      )}
+                      <div className="flex justify-end mt-6">
+                        <Button 
+                          onClick={() => {
+                            markStepCompleted(2);
+                            setCurrentStep(3);
+                          }}
+                          disabled={!requiredDocuments.filter(doc => doc.required).every(doc => 
+                            uploadedDocuments.some(uploaded => uploaded.type === doc.type)
+                          )}
+                          data-testid="button-continue-to-step-3"
+                        >
+                          Continue to Campaign Details
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </CardContent>

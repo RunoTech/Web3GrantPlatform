@@ -900,15 +900,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (campaignData.campaignType === "FUND") {
         const verification = await storage.getCorporateVerification(campaignData.ownerWallet);
         
-        if (!verification || verification.status !== 'approved') {
+        // Allow campaign creation if KYB process is started (PENDING/REVIEWING) or approved
+        // Only block if no verification exists or if it was REJECTED
+        if (!verification) {
           return res.status(403).json({ 
             error: "KYB verification required", 
-            details: "FUND campaigns require approved Know Your Business (KYB) verification. Please complete the KYB process first.",
+            details: "FUND campaigns require Know Your Business (KYB) verification. Please start the KYB process first.",
             redirectTo: "/create-fund"
           });
         }
 
-        // Use verified company data instead of form data
+        if (verification.status === 'rejected') {
+          return res.status(403).json({ 
+            error: "KYB verification rejected", 
+            details: "Your KYB verification was rejected. Please reset and submit a new application.",
+            redirectTo: "/create-fund"
+          });
+        }
+
+        // Use verified company data from KYB application
         campaignData.companyName = verification.companyName;
         campaignData.companyRegistrationNumber = verification.companyRegistrationNumber;
         campaignData.companyAddress = verification.companyAddress;

@@ -3200,24 +3200,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
-        if (status === 'PENDING' || status === 'REVIEWING') {
+        if (status === 'REVIEWING') {
           return res.status(409).json({ 
-            error: "KYB verification pending",
-            message: "You already have a verification in progress. Please wait for admin review.",
+            error: "KYB verification under review",
+            message: "Your application is currently being reviewed by our team. Please wait for the review to complete.",
             verificationId: existingVerification.id,
-            status: existingVerification.status
+            status: 'REVIEWING'
           });
         }
         
-        // If REJECTED, inform user to contact admin
-        if (status === 'REJECTED') {
-          return res.status(409).json({ 
-            error: "KYB verification rejected",
-            message: "Your previous KYB verification was rejected. Please review the feedback and contact support to resubmit.",
+        // If PENDING or REJECTED, allow user to continue with existing verification or restart
+        if (status === 'PENDING') {
+          return res.status(200).json({ 
+            message: "You have an incomplete application. Continuing with existing verification.",
             verificationId: existingVerification.id,
-            status: 'REJECTED',
-            adminNotes: existingVerification.adminNotes
+            status: 'PENDING',
+            existing: true
           });
+        }
+        
+        // If REJECTED, delete old verification and allow new submission
+        if (status === 'REJECTED') {
+          console.log(`🔄 Deleting rejected verification ${existingVerification.id} for wallet ${wallet}`);
+          await storage.deleteCorporateVerification(existingVerification.id);
+          console.log(`✅ Deleted rejected verification - allowing new submission`);
         }
       }
       

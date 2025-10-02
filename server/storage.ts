@@ -238,6 +238,7 @@ export interface IStorage {
   getCorporateVerification(wallet: string): Promise<CorporateVerification | undefined>;
   getCorporateVerificationById(id: number): Promise<CorporateVerification | undefined>;
   updateCorporateVerification(id: number, updates: Partial<CorporateVerification>): Promise<void>;
+  deleteCorporateVerification(id: number): Promise<void>;
   getAllCorporateVerifications(status?: string): Promise<CorporateVerification[]>;
   approveCorporateVerification(id: number, adminId: number, notes?: string): Promise<void>;
   rejectCorporateVerification(id: number, adminId: number, reason: string): Promise<void>;
@@ -1591,6 +1592,11 @@ export class DatabaseStorage implements IStorage {
 
   async updateCorporateVerification(id: number, updates: Partial<CorporateVerification>): Promise<void> {
     await db.update(corporateVerifications).set({ ...updates, updatedAt: new Date() }).where(eq(corporateVerifications.id, id));
+  }
+
+  async deleteCorporateVerification(id: number): Promise<void> {
+    await db.delete(fundDocuments).where(eq(fundDocuments.verificationId, id));
+    await db.delete(corporateVerifications).where(eq(corporateVerifications.id, id));
   }
 
   async getAllCorporateVerifications(status?: string): Promise<CorporateVerification[]> {

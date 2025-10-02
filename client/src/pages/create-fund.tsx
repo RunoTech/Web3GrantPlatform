@@ -180,6 +180,41 @@ export default function CreateFundPage() {
     return currentStep >= step || completedSteps.includes(step - 1);
   };
 
+  // Rehydrate state from backend on page load
+  useEffect(() => {
+    if (!address) return;
+
+    const rehydrateState = async () => {
+      try {
+        // Fetch user's pending funds
+        const response = await fetch(`/api/kyb/pending-funds/${address}`);
+        if (!response.ok) return;
+
+        const pendingFunds = await response.json();
+        
+        // Find the most recent pending fund with payment confirmed
+        const paidPendingFund = pendingFunds
+          .filter((fund: any) => fund.paymentConfirmed)
+          .sort((a: any, b: any) => b.id - a.id)[0];
+
+        if (paidPendingFund) {
+          // Rehydrate state - restore all completed steps up to payment
+          setPendingFundId(paidPendingFund.id);
+          setCollateralPaid(true);
+          setCompletedSteps([1, 2, 3]); // User has completed company info, documents, and campaign details
+          setCurrentStep(4); // Position at payment step to show "awaiting approval" state
+          
+          // Check if we need to trigger campaign creation
+          refetchKybStatus();
+        }
+      } catch (error) {
+        console.error('State rehydration error:', error);
+      }
+    };
+
+    rehydrateState();
+  }, [address]);
+
   // Reset KYB application
   const resetApplication = useMutation({
     mutationFn: async () => {
@@ -386,13 +421,13 @@ export default function CreateFundPage() {
     }
   };
 
-  // Monitor KYB status after payment
+  // Monitor KYB status after payment (decoupled from step guards)
   useEffect(() => {
-    if (collateralPaid && completedSteps.includes(3)) {
-      // Start monitoring KYB status
+    if (collateralPaid) {
+      // Start monitoring KYB status - independent of UI wizard state
       refetchKybStatus();
     }
-  }, [collateralPaid, completedSteps]);
+  }, [collateralPaid]);
 
   // Auto-create campaign when KYB is approved
   useEffect(() => {

@@ -543,8 +543,13 @@ export default function CreateFundPage() {
     try {
       setBalanceLoading(true);
       
+      if (!address) {
+        throw new Error("Please connect your wallet first");
+      }
+      
       // Step 1: Create payment intent for KYB deposit
       const paymentIntentResponse = await api.post('/api/payment-intents', {
+        wallet: address,
         purpose: 'KYB_DEPOSIT',
         amount: collateralAmount,
         method: 'USDT',

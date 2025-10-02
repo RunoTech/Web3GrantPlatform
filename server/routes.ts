@@ -3554,6 +3554,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get single pending fund by ID
+  app.get("/api/kyb/pending-fund/:id", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      
+      const pendingFund = await storage.getPendingFund(parseInt(id));
+      
+      if (!pendingFund) {
+        return res.status(404).json({ error: "Pending fund not found" });
+      }
+
+      // Users can only access their own pending funds
+      if (pendingFund.wallet !== req.userWallet) {
+        return res.status(403).json({ error: "Access denied to this pending fund" });
+      }
+      
+      res.json(pendingFund);
+    } catch (error) {
+      console.error("Pending fund error:", error);
+      res.status(500).json({ error: "Failed to get pending fund" });
+    }
+  });
+
   // Get pending funds for wallet
   app.get("/api/kyb/pending-funds/:wallet", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {

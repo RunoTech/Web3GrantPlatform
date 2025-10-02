@@ -386,22 +386,48 @@ export default function CreateFundPage() {
     }
   };
 
-  // Auto-advance to approval waiting when balance is topped up
+  // Monitor KYB status after payment
   useEffect(() => {
     if (collateralPaid && completedSteps.includes(3)) {
-      setCurrentStep(4); // Move to Approval Waiting step
       // Start monitoring KYB status
       refetchKybStatus();
     }
   }, [collateralPaid, completedSteps]);
 
-  // Auto-advance to campaign creation when KYB is approved
+  // Auto-create campaign when KYB is approved
   useEffect(() => {
-    if (kybStatus && (kybStatus as any).status === 'APPROVED' && completedSteps.includes(3)) {
-      markStepCompleted(4); // Complete approval waiting
-      setCurrentStep(5); // Move to Campaign Creation step
+    if (kybStatus && (kybStatus as any).status === 'APPROVED' && collateralPaid && pendingFundId && !createFinalCampaign.isPending) {
+      // Fetch pending fund data and create campaign
+      createCampaignFromPendingFund();
     }
-  }, [kybStatus, completedSteps]);
+  }, [kybStatus, collateralPaid, pendingFundId]);
+
+  // Create campaign from approved pending fund
+  const createCampaignFromPendingFund = async () => {
+    try {
+      // Fetch pending fund data
+      const pendingFundResponse = await fetch(`/api/kyb/pending-fund/${pendingFundId}`);
+      const pendingFund = await pendingFundResponse.json();
+
+      // Create campaign with pending fund data
+      await createFinalCampaign.mutateAsync({
+        title: pendingFund.title,
+        description: pendingFund.description,
+        category: pendingFund.category,
+        targetAmount: pendingFund.targetAmount,
+        imageUrl: pendingFund.imageUrl,
+        startDate: pendingFund.startDate,
+        endDate: pendingFund.endDate,
+      });
+    } catch (error) {
+      console.error('Failed to create campaign from pending fund:', error);
+      toast({
+        title: "Campaign Creation Failed",
+        description: "Failed to create campaign after KYB approval. Please contact support.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Enhanced Campaign Creation (Final Step)
   const createFinalCampaign = useMutation({
@@ -436,10 +462,14 @@ export default function CreateFundPage() {
     },
   });
 
-  // Submit campaign details and create pending fund (Legacy - now for step 5)
+  // Submit campaign details and create pending fund (Step 3)
   const submitCampaignDetails = useMutation({
     mutationFn: async (data: any) => {
-      return createFinalCampaign.mutateAsync(data);
+      // Create pending fund (not actual campaign yet)
+      return api.post('/api/kyb/create-pending-fund', {
+        wallet: address,
+        ...data,
+      });
     },
     onSuccess: (data) => {
       setPendingFundId(data.id);
@@ -531,20 +561,12 @@ export default function CreateFundPage() {
         amount: collateralAmount,
       });
       
-      // Step 3: If credit card enabled, reserve collateral from balance
-      const creditCardEnabled = campaignForm.getValues('creditCardEnabled');
-      if (creditCardEnabled) {
-        // This will be handled in campaign creation step
-        // For now just mark payment as complete
-      }
-      
       setCollateralPaid(true);
-      markStepCompleted(4);
       setBalanceLoading(false);
       
       toast({
         title: "Payment Successful!",
-        description: "Balance credited. Your fund application has been submitted for admin review.",
+        description: "Your fund application has been submitted for admin review. Please wait for approval.",
       });
       
     } catch (error: any) {

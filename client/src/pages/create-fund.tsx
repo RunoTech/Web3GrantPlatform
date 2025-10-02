@@ -104,6 +104,26 @@ export default function CreateFundPage() {
   const collateralToken = pricingData?.pricing?.token || "USDT";
   const platformWallet = pricingData?.pricing?.platformWallet || settings?.platform_wallet || "0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8";
 
+  // Load existing KYB application if present
+  useEffect(() => {
+    if (kybStatus && isConnected) {
+      const status = (kybStatus as any).status;
+      const hasKYB = (kybStatus as any).hasKYB;
+      const verificationIdFromKYB = (kybStatus as any).verificationId;
+      
+      if (hasKYB && verificationIdFromKYB) {
+        setVerificationId(verificationIdFromKYB);
+        
+        if (status === 'PENDING') {
+          markStepCompleted(1);
+        } else if (status === 'APPROVED') {
+          markStepCompleted(1);
+          markStepCompleted(2);
+        }
+      }
+    }
+  }, [kybStatus, isConnected]);
+
   // Step 1: Company Information Form
   const companyForm = useForm({
     defaultValues: {
@@ -160,6 +180,31 @@ export default function CreateFundPage() {
     return currentStep >= step || completedSteps.includes(step - 1);
   };
 
+  // Reset KYB application
+  const resetApplication = useMutation({
+    mutationFn: async () => {
+      return api.delete('/api/kyb/reset');
+    },
+    onSuccess: () => {
+      setVerificationId(null);
+      setCompletedSteps([]);
+      setCurrentStep(1);
+      setUploadedDocuments([]);
+      toast({
+        title: "Application Reset",
+        description: "You can now start a new application from scratch.",
+      });
+      refetchKybStatus();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Reset Failed",
+        description: error?.response?.data?.message || "Failed to reset application",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Submit company information (Step 1)
   const submitCompanyInfo = useMutation({
     mutationFn: async (data: any) => {
@@ -169,20 +214,46 @@ export default function CreateFundPage() {
       });
     },
     onSuccess: (data) => {
-      setVerificationId(data.id);
+      setVerificationId(data.id || data.verificationId);
+      
+      if (data.existing) {
+        toast({
+          title: "Continuing Existing Application",
+          description: "You have an incomplete application. Continuing where you left off.",
+        });
+      } else {
+        toast({
+          title: "Company Information Saved",
+          description: "Your company information has been recorded. Please upload required documents.",
+        });
+      }
+      
       markStepCompleted(1);
       setCurrentStep(2);
-      toast({
-        title: "Company Information Saved",
-        description: "Your company information has been recorded. Please upload required documents.",
-      });
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error?.message || "Failed to save company information",
-        variant: "destructive",
-      });
+      const status = error?.response?.data?.status;
+      const message = error?.response?.data?.message || error?.message;
+      
+      if (status === 'APPROVED') {
+        toast({
+          title: "Already Approved",
+          description: message || "Your company is already verified. You can create campaigns directly.",
+          variant: "default",
+        });
+      } else if (status === 'REVIEWING') {
+        toast({
+          title: "Under Review",
+          description: message || "Your application is being reviewed. Please wait.",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: message || "Failed to save company information",
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -578,17 +649,62 @@ export default function CreateFundPage() {
           <div className="space-y-6">
             {/* Step 1: Company Information */}
             {currentStep === 1 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Building2 className="h-5 w-5" />
-                    Company Information
-                  </CardTitle>
-                  <CardDescription>
-                    Please provide accurate company details for KYB verification
-                  </CardDescription>
-                </CardHeader>
-                <Form {...companyForm}>
+              <>
+                {/* Existing Application Notice */}
+                {kybStatus && (kybStatus as any).hasKYB && (kybStatus as any).status === 'PENDING' && (
+                  <Card className="bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start gap-4">
+                        <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-amber-900 dark:text-amber-100 mb-2">
+                            You have an incomplete application
+                          </h3>
+                          <p className="text-sm text-amber-700 dark:text-amber-300 mb-4">
+                            Your previous application is still in progress. You can continue where you left off or start over with a new application.
+                          </p>
+                          <div className="flex gap-3">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                toast({
+                                  title: "Continuing",
+                                  description: "Continue with your existing application",
+                                });
+                              }}
+                              className="bg-white dark:bg-gray-900"
+                              data-testid="button-continue-existing"
+                            >
+                              Continue Application
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => resetApplication.mutate()}
+                              disabled={resetApplication.isPending}
+                              data-testid="button-reset-application"
+                            >
+                              {resetApplication.isPending ? "Resetting..." : "Start Over"}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Building2 className="h-5 w-5" />
+                      Company Information
+                    </CardTitle>
+                    <CardDescription>
+                      Please provide accurate company details for KYB verification
+                    </CardDescription>
+                  </CardHeader>
+                  <Form {...companyForm}>
                   <form onSubmit={companyForm.handleSubmit((data) => submitCompanyInfo.mutate(data))}>
                     <CardContent className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -769,6 +885,7 @@ export default function CreateFundPage() {
                   </form>
                 </Form>
               </Card>
+              </>
             )}
 
             {/* Step 2: Document Upload */}

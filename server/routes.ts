@@ -3288,6 +3288,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // DELETE /api/kyb/reset - Reset KYB verification (delete PENDING/REJECTED applications)
+  app.delete("/api/kyb/reset", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
+    try {
+      const userWallet = req.userWallet;
+      if (!userWallet) {
+        return res.status(401).json({ error: "Wallet authentication required" });
+      }
+
+      const verification = await storage.getCorporateVerification(userWallet);
+      
+      if (!verification) {
+        return res.status(404).json({ error: "No verification found" });
+      }
+
+      const status = verification.status.toUpperCase();
+      
+      if (status === 'APPROVED' || status === 'REVIEWING') {
+        return res.status(403).json({ 
+          error: "Cannot reset",
+          message: "Cannot reset approved or under-review applications"
+        });
+      }
+
+      await storage.deleteCorporateVerification(verification.id);
+      
+      console.log(`🔄 User ${userWallet} reset their ${status} verification (ID: ${verification.id})`);
+      
+      res.json({ 
+        success: true,
+        message: "Application reset successfully. You can now start a new application."
+      });
+    } catch (error) {
+      console.error("Error resetting KYB verification:", error);
+      res.status(500).json({ error: "Failed to reset verification" });
+    }
+  });
+
   // GET /api/company/profile - Get approved company profile for wallet
   app.get("/api/company/profile", authenticateUser, async (req: UserAuthenticatedRequest, res) => {
     try {

@@ -412,7 +412,7 @@ export default function CreateFundPage() {
         ownerWallet: address,
         campaignType: 'FUND',
         creatorType: 'company',
-        creditCardEnabled: true, // FUND campaigns have credit card enabled by default
+        creditCardEnabled: false, // FUND campaigns are crypto-only, no credit card payments
         // Company data will be automatically filled from approved KYB
       });
     },
@@ -1108,27 +1108,7 @@ export default function CreateFundPage() {
                         />
                       </div>
                       
-                      <FormField
-                        control={campaignForm.control}
-                        name="creditCardEnabled"
-                        render={({ field }) => (
-                          <FormItem>
-                            <div className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
-                                checked={field.value}
-                                onChange={field.onChange}
-                                className="rounded"
-                                data-testid="checkbox-credit-card"
-                              />
-                              <FormLabel>Enable Credit Card Payments</FormLabel>
-                            </div>
-                            <p className="text-sm text-gray-500">
-                              Allow donors to contribute using credit cards
-                            </p>
-                          </FormItem>
-                        )}
-                      />
+                      {/* Credit card payment is disabled for FUND campaigns - they are crypto-only */}
                     </CardContent>
                     
                     <CardFooter>

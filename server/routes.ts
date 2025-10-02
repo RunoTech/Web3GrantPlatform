@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import multer from 'multer';
+import fs from 'fs';
 import { storage } from "./storage";
 import { 
   insertNetworkFeeSchema,
@@ -3098,7 +3099,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : 'uploads/documents';
       
       // Create directory if it doesn't exist
-      const fs = require('fs');
       if (!fs.existsSync(uploadPath)) {
         fs.mkdirSync(uploadPath, { recursive: true });
       }

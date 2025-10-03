@@ -4356,33 +4356,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         searchColumns,
       });
       
-      // Apply data masking for sensitive fields
+      // Apply server-side data masking for sensitive fields
+      // CRITICAL SECURITY: Masking must happen on server, NOT client
       const maskedData = result.data.map(record => {
         const masked = { ...record };
         config.columns.forEach(col => {
-          if (col.mask && masked[col.key]) {
+          if (col.mask && masked[col.key] !== null && masked[col.key] !== undefined) {
             const value = masked[col.key];
             switch (col.mask) {
               case 'card':
-                // Show only first 6 and last 4 digits of card
-                if (typeof value === 'string' && value.length > 10) {
-                  masked[col.key] = `${value.substring(0, 50)}... [MASKED]`;
+                // Card numbers: show first 6 and last 4 only
+                if (typeof value === 'string') {
+                  if (value.length > 10) {
+                    masked[col.key] = `${value.substring(0, 6)}...${value.substring(value.length - 4)}`;
+                  } else {
+                    masked[col.key] = '****';
+                  }
                 }
                 break;
               case 'session':
-                // Show only first 8 characters
+                // Session IDs: show only first 8 characters
                 if (typeof value === 'string') {
-                  masked[col.key] = `${value.substring(0, 8)}...`;
+                  masked[col.key] = value.length > 8 ? `${value.substring(0, 8)}...` : value;
                 }
                 break;
               case 'cvv':
-                // Completely mask CVV
+                // CVV: completely mask
                 masked[col.key] = '***';
                 break;
               case 'full':
-                // Completely mask
+                // Full masking: completely redact
                 masked[col.key] = '[REDACTED]';
                 break;
+              default:
+                // Unknown mask type: fully redact for safety
+                masked[col.key] = '[PROTECTED]';
             }
           }
         });
@@ -4424,20 +4432,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Record not found" });
       }
       
-      // Apply masking
+      // Apply server-side masking (same logic as list view)
       const masked = { ...record };
       config.columns.forEach(col => {
-        if (col.mask && masked[col.key]) {
+        if (col.mask && masked[col.key] !== null && masked[col.key] !== undefined) {
           const value = masked[col.key];
           switch (col.mask) {
             case 'card':
-              if (typeof value === 'string' && value.length > 10) {
-                masked[col.key] = `${value.substring(0, 50)}... [MASKED]`;
+              if (typeof value === 'string') {
+                if (value.length > 10) {
+                  masked[col.key] = `${value.substring(0, 6)}...${value.substring(value.length - 4)}`;
+                } else {
+                  masked[col.key] = '****';
+                }
               }
               break;
             case 'session':
               if (typeof value === 'string') {
-                masked[col.key] = `${value.substring(0, 8)}...`;
+                masked[col.key] = value.length > 8 ? `${value.substring(0, 8)}...` : value;
               }
               break;
             case 'cvv':
@@ -4446,6 +4458,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             case 'full':
               masked[col.key] = '[REDACTED]';
               break;
+            default:
+              masked[col.key] = '[PROTECTED]';
           }
         }
       });
@@ -4549,12 +4563,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const data = await storage.exportTableData(tableName);
       
-      // Apply masking for sensitive fields
+      // Apply server-side masking for exports (consistent with API)
       const maskedData = data.map(record => {
         const masked = { ...record };
         config.columns.forEach(col => {
-          if (col.mask && masked[col.key]) {
-            masked[col.key] = '[REDACTED]';
+          if (col.mask && masked[col.key] !== null && masked[col.key] !== undefined) {
+            const value = masked[col.key];
+            switch (col.mask) {
+              case 'card':
+                if (typeof value === 'string') {
+                  if (value.length > 10) {
+                    masked[col.key] = `${value.substring(0, 6)}...${value.substring(value.length - 4)}`;
+                  } else {
+                    masked[col.key] = '****';
+                  }
+                }
+                break;
+              case 'session':
+                if (typeof value === 'string') {
+                  masked[col.key] = value.length > 8 ? `${value.substring(0, 8)}...` : value;
+                }
+                break;
+              case 'cvv':
+                masked[col.key] = '***';
+                break;
+              case 'full':
+                masked[col.key] = '[REDACTED]';
+                break;
+              default:
+                masked[col.key] = '[PROTECTED]';
+            }
           }
         });
         return masked;

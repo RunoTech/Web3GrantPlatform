@@ -787,15 +787,15 @@ export async function pollPendingPayments(): Promise<{
     // Import storage here to avoid circular dependency
     const { storage } = await import("./storage");
     
-    console.log(`🔄 Starting pending payments poll...`);
-    
     // Get all pending payments
     const pendingPayments = await storage.getPendingPayments('pending');
     
     if (pendingPayments.length === 0) {
-      console.log(`📭 No pending payments to process`);
+      // Silent when no payments - only log when there's activity
       return { success: true, processed: 0, errors: 0, results: [] };
     }
+    
+    console.log(`🔄 Starting pending payments poll...`);
     
     console.log(`📋 Found ${pendingPayments.length} pending payments to check`);
     

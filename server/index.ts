@@ -21,8 +21,11 @@ app.use((req, res, next) => {
   const allowedOrigins = [
     'http://localhost:5000',
     'https://localhost:5000',
+    'http://duxxan.com',
+    'https://duxxan.com',
+    'http://www.duxxan.com',
+    'https://www.duxxan.com',
     process.env.FRONTEND_URL,
-    // Add your production domains here
   ].filter(Boolean);
 
   const origin = req.headers.origin;

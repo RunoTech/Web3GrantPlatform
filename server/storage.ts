@@ -196,6 +196,23 @@ export interface IStorage {
   updateRecord(tableName: string, id: string, data: any): Promise<any>;
   deleteRecord(tableName: string, id: string): Promise<void>;
   exportTableData(tableName: string): Promise<any[]>;
+  
+  // Enhanced generic table operations for Data Explorer
+  getGenericTableData(
+    tableName: string,
+    options: {
+      page: number;
+      limit: number;
+      sortColumn?: string;
+      sortDirection?: 'asc' | 'desc';
+      filters?: Record<string, any>;
+      search?: string;
+      searchColumns?: string[];
+    }
+  ): Promise<{ data: any[]; total: number }>;
+  getGenericTableRecord(tableName: string, id: number): Promise<any>;
+  deleteGenericTableRecord(tableName: string, id: number): Promise<void>;
+  updateGenericTableRecord(tableName: string, id: number, data: any): Promise<any>;
 
 
   // ===== NEW ADMIN ENDPOINTS METHODS =====
@@ -890,82 +907,167 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  // Database Administration
-  async getTableData(tableName: string, options: { page: number; limit: number; search: string }): Promise<any[]> {
-    const offset = (options.page - 1) * options.limit;
-    
+  // Database Administration - Helper to get table reference
+  private getTableReference(tableName: string): any {
     const tableMap: Record<string, any> = {
-      accounts, campaigns, donations, dailyEntries, dailyWinners,
-      admins, platformSettings, networkFees, footerLinks, announcements, adminLogs
+      accounts,
+      campaigns,
+      donations,
+      daily_entries: dailyEntries,
+      daily_winners: dailyWinners,
+      daily_rewards: dailyRewards,
+      daily_participants: dailyParticipants,
+      admins,
+      platform_settings: platformSettings,
+      network_fees: networkFees,
+      footer_links: footerLinks,
+      announcements,
+      admin_logs: adminLogs,
+      wallets,
+      transactions,
+      payment_attempts: paymentAttempts,
+      payment_intents: paymentIntents,
+      user_nonces: userNonces,
+      user_sessions: userSessions,
+      used_transactions: usedTransactions,
+      pending_payments: pendingPayments,
+      corporate_verifications: corporateVerifications,
+      fund_documents: fundDocuments,
+      pending_funds: pendingFunds,
+      collateral_reservations: collateralReservations,
+      balance_ledger: balanceLedger,
+      failed_card_attempts: failedCardAttempts,
     };
     
     const table = tableMap[tableName];
-    if (!table) throw new Error(`Table ${tableName} not found`);
+    if (!table) throw new Error(`Table ${tableName} not accessible`);
+    return table;
+  }
 
+  // Database Administration
+  async getTableData(tableName: string, options: { page: number; limit: number; search: string }): Promise<any[]> {
+    const offset = (options.page - 1) * options.limit;
+    const table = this.getTableReference(tableName);
     return await db.select().from(table).limit(options.limit).offset(offset);
   }
 
   async getTableStats(tableName: string): Promise<{ total: number }> {
-    const tableMap: Record<string, any> = {
-      accounts, campaigns, donations, dailyEntries, dailyWinners,
-      admins, platformSettings, networkFees, footerLinks, announcements, adminLogs
-    };
-    
-    const table = tableMap[tableName];
-    if (!table) throw new Error(`Table ${tableName} not found`);
-
+    const table = this.getTableReference(tableName);
     const [result] = await db.select({ count: sql<number>`count(*)` }).from(table);
     return { total: result.count };
   }
 
   async createRecord(tableName: string, data: any): Promise<any> {
-    const tableMap: Record<string, any> = {
-      accounts, campaigns, donations, dailyEntries, dailyWinners,
-      admins, platformSettings, networkFees, footerLinks, announcements, adminLogs
-    };
-    
-    const table = tableMap[tableName];
-    if (!table) throw new Error(`Table ${tableName} not found`);
-
+    const table = this.getTableReference(tableName);
     const result = await db.insert(table).values(data).returning();
     return result[0];
   }
 
   async updateRecord(tableName: string, id: string, data: any): Promise<any> {
-    const tableMap: Record<string, any> = {
-      accounts, campaigns, donations, dailyEntries, dailyWinners,
-      admins, platformSettings, networkFees, footerLinks, announcements, adminLogs
-    };
-    
-    const table = tableMap[tableName];
-    if (!table) throw new Error(`Table ${tableName} not found`);
-
+    const table = this.getTableReference(tableName);
     const [result] = await db.update(table).set(data).where(eq(table.id, parseInt(id))).returning();
     return result;
   }
 
   async deleteRecord(tableName: string, id: string): Promise<void> {
-    const tableMap: Record<string, any> = {
-      accounts, campaigns, donations, dailyEntries, dailyWinners,
-      admins, platformSettings, networkFees, footerLinks, announcements, adminLogs
-    };
-    
-    const table = tableMap[tableName];
-    if (!table) throw new Error(`Table ${tableName} not found`);
-
+    const table = this.getTableReference(tableName);
     await db.delete(table).where(eq(table.id, parseInt(id)));
   }
 
   async exportTableData(tableName: string): Promise<any[]> {
-    const tableMap: Record<string, any> = {
-      accounts, campaigns, donations, dailyEntries, dailyWinners,
-      admins, platformSettings, networkFees, footerLinks, announcements, adminLogs
-    };
-    
-    const table = tableMap[tableName];
-    if (!table) throw new Error(`Table ${tableName} not found`);
-
+    const table = this.getTableReference(tableName);
     return await db.select().from(table);
+  }
+
+  // Enhanced generic table operations for Data Explorer
+  async getGenericTableData(
+    tableName: string,
+    options: {
+      page: number;
+      limit: number;
+      sortColumn?: string;
+      sortDirection?: 'asc' | 'desc';
+      filters?: Record<string, any>;
+      search?: string;
+      searchColumns?: string[];
+    }
+  ): Promise<{ data: any[]; total: number }> {
+    const table = this.getTableReference(tableName);
+    const offset = (options.page - 1) * options.limit;
+
+    let query = db.select().from(table);
+
+    // Apply search if provided
+    if (options.search && options.searchColumns && options.searchColumns.length > 0) {
+      const searchConditions = options.searchColumns.map(col => 
+        ilike(table[col], `%${options.search}%`)
+      );
+      query = query.where(or(...searchConditions));
+    }
+
+    // Apply filters if provided
+    if (options.filters) {
+      const filterConditions = Object.entries(options.filters)
+        .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => eq(table[key], value));
+      
+      if (filterConditions.length > 0) {
+        query = query.where(and(...filterConditions));
+      }
+    }
+
+    // Get total count with filters applied
+    const countQuery = db.select({ count: sql<number>`count(*)` }).from(table);
+    if (options.search && options.searchColumns && options.searchColumns.length > 0) {
+      const searchConditions = options.searchColumns.map(col => 
+        ilike(table[col], `%${options.search}%`)
+      );
+      countQuery.where(or(...searchConditions));
+    }
+    if (options.filters) {
+      const filterConditions = Object.entries(options.filters)
+        .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => eq(table[key], value));
+      
+      if (filterConditions.length > 0) {
+        countQuery.where(and(...filterConditions));
+      }
+    }
+    const [countResult] = await countQuery;
+    const total = countResult.count;
+
+    // Apply sorting
+    if (options.sortColumn && table[options.sortColumn]) {
+      const sortFn = options.sortDirection === 'asc' ? asc : desc;
+      query = query.orderBy(sortFn(table[options.sortColumn]));
+    } else {
+      // Default sort by ID descending if exists
+      if (table.id) {
+        query = query.orderBy(desc(table.id));
+      }
+    }
+
+    // Apply pagination
+    const data = await query.limit(options.limit).offset(offset);
+
+    return { data, total };
+  }
+
+  async getGenericTableRecord(tableName: string, id: number): Promise<any> {
+    const table = this.getTableReference(tableName);
+    const [record] = await db.select().from(table).where(eq(table.id, id));
+    return record || null;
+  }
+
+  async deleteGenericTableRecord(tableName: string, id: number): Promise<void> {
+    const table = this.getTableReference(tableName);
+    await db.delete(table).where(eq(table.id, id));
+  }
+
+  async updateGenericTableRecord(tableName: string, id: number, data: any): Promise<any> {
+    const table = this.getTableReference(tableName);
+    const [result] = await db.update(table).set(data).where(eq(table.id, id)).returning();
+    return result;
   }
 
 

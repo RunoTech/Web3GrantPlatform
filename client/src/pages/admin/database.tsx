@@ -133,6 +133,26 @@ export default function AdminDatabase() {
     },
   });
 
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: async (data: { id: number; updates: any }) => {
+      return apiRequest("PUT", `/api/youhonor/data/${selectedTable}/${data.id}`, data.updates);
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Record updated successfully" });
+      refetchData();
+      setIsEditDialogOpen(false);
+      setSelectedRecord(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update record",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -204,6 +224,11 @@ export default function AdminDatabase() {
       setSortDirection("desc");
     }
     setCurrentPage(1);
+  };
+
+  const handleEdit = (record: any) => {
+    setSelectedRecord(record);
+    setIsEditDialogOpen(true);
   };
 
   const handleDelete = (record: any) => {
@@ -490,6 +515,16 @@ export default function AdminDatabase() {
                                     ))}
                                   <TableCell>
                                     <div className="flex items-center gap-2">
+                                      {tableConfig?.permissions.update && (
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => handleEdit(record)}
+                                          data-testid={`button-edit-${record.id}`}
+                                        >
+                                          <Edit className="h-4 w-4 text-primary" />
+                                        </Button>
+                                      )}
                                       {tableConfig?.permissions.delete && (
                                         <Button
                                           variant="ghost"
@@ -546,6 +581,104 @@ export default function AdminDatabase() {
             )}
           </div>
         </div>
+
+        {/* Edit Record Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Record</DialogTitle>
+              <DialogDescription>
+                Update the record fields below. Only editable fields are shown.
+              </DialogDescription>
+            </DialogHeader>
+            {selectedRecord && tableConfig && (
+              <div className="space-y-4 py-4">
+                {tableConfig.columns
+                  .filter((col) => !col.hidden && col.key !== tableConfig.primaryKey)
+                  .map((column) => (
+                    <div key={column.key} className="space-y-2">
+                      <label className="text-sm font-medium">
+                        {column.label}
+                        {column.mask && <Lock className="inline-block w-3 h-3 ml-1 text-muted-foreground" />}
+                      </label>
+                      {column.type === "boolean" ? (
+                        <Select
+                          value={selectedRecord[column.key]?.toString() || "false"}
+                          onValueChange={(value) =>
+                            setSelectedRecord({ ...selectedRecord, [column.key]: value === "true" })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="true">Yes</SelectItem>
+                            <SelectItem value="false">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : column.enumValues ? (
+                        <Select
+                          value={selectedRecord[column.key] || ""}
+                          onValueChange={(value) =>
+                            setSelectedRecord({ ...selectedRecord, [column.key]: value })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {column.enumValues.map((val) => (
+                              <SelectItem key={val} value={val}>
+                                {val}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input
+                          type={column.type === "number" || column.type === "decimal" ? "number" : "text"}
+                          value={selectedRecord[column.key]?.toString() || ""}
+                          onChange={(e) =>
+                            setSelectedRecord({
+                              ...selectedRecord,
+                              [column.key]:
+                                column.type === "number" || column.type === "decimal"
+                                  ? parseFloat(e.target.value) || 0
+                                  : e.target.value,
+                            })
+                          }
+                          disabled={column.mask && !showSensitiveData}
+                        />
+                      )}
+                    </div>
+                  ))}
+              </div>
+            )}
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsEditDialogOpen(false);
+                  setSelectedRecord(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (selectedRecord) {
+                    const updates = { ...selectedRecord };
+                    delete updates[tableConfig?.primaryKey || "id"];
+                    updateMutation.mutate({ id: selectedRecord.id, updates });
+                  }
+                }}
+                disabled={updateMutation.isPending}
+              >
+                {updateMutation.isPending ? "Saving..." : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

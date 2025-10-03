@@ -244,28 +244,28 @@ export default function AdminCampaignsPage() {
                       <TableHead>ID</TableHead>
                       <TableHead>Title</TableHead>
                       <TableHead>Type</TableHead>
-                      <TableHead>Target</TableHead>
-                      <TableHead>Raised</TableHead>
-                      <TableHead>Donations</TableHead>
+                      <TableHead>Target / Raised</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredCampaigns.map((campaign) => (
                       <TableRow key={campaign.id} data-testid={`row-campaign-${campaign.id}`}>
                         <TableCell className="font-mono text-sm">{campaign.id}</TableCell>
-                        <TableCell className="max-w-xs truncate">{campaign.title}</TableCell>
+                        <TableCell className="max-w-xs">
+                          <div className="truncate">{campaign.title}</div>
+                          <div className="text-xs text-muted-foreground truncate">{campaign.donationCount} donations</div>
+                        </TableCell>
                         <TableCell>
                           <Badge variant={campaign.campaignType === 'FUND' ? 'default' : 'secondary'}>
                             {campaign.campaignType}
                           </Badge>
                         </TableCell>
-                        <TableCell>${campaign.targetAmount.toLocaleString()}</TableCell>
-                        <TableCell className="text-green-600 font-medium">
-                          ${campaign.totalDonations.toLocaleString()}
+                        <TableCell>
+                          <div className="text-sm">${campaign.targetAmount.toLocaleString()}</div>
+                          <div className="text-xs text-green-600 font-medium">${campaign.totalDonations.toLocaleString()}</div>
                         </TableCell>
-                        <TableCell>{campaign.donationCount}</TableCell>
                         <TableCell>
                           {campaign.approved ? (
                             <Badge className="bg-green-500">Approved</Badge>
@@ -276,52 +276,17 @@ export default function AdminCampaignsPage() {
                           )}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center space-x-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setLocation(`/campaign/${campaign.id}`)}
-                              data-testid={`button-view-${campaign.id}`}
-                              title="View Campaign"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
+                          <div className="flex items-center justify-end space-x-1">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => setLocation(`/youhonor/campaigns/${campaign.id}/edit`)}
                               data-testid={`button-edit-${campaign.id}`}
-                              title="Edit Campaign"
-                              className="text-blue-600 hover:text-blue-700"
+                              title="Edit"
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            {!campaign.approved && (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => approveMutation.mutate(campaign.id)}
-                                  disabled={approveMutation.isPending}
-                                  className="text-green-600 hover:text-green-700"
-                                  data-testid={`button-approve-${campaign.id}`}
-                                  title="Approve Campaign"
-                                >
-                                  <Check className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => rejectMutation.mutate(campaign.id)}
-                                  disabled={rejectMutation.isPending}
-                                  className="text-red-600 hover:text-red-700"
-                                  data-testid={`button-reject-${campaign.id}`}
-                                  title="Reject Campaign"
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </>
-                            )}
                             <Button
                               variant="ghost"
                               size="sm"
@@ -331,9 +296,9 @@ export default function AdminCampaignsPage() {
                                 }
                               }}
                               disabled={deleteMutation.isPending}
-                              className="text-red-600 hover:text-red-700"
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
                               data-testid={`button-delete-${campaign.id}`}
-                              title="Delete Campaign"
+                              title="Delete"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>

@@ -2707,8 +2707,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-
-
+  // Get all donations (admin only)
+  app.get("/api/youhonor/donations", authenticateAdmin, async (req, res) => {
+    try {
+      const donations = await storage.getAllDonations();
+      res.json(donations);
+    } catch (error) {
+      console.error("Error fetching donations:", error);
+      res.status(500).json({ error: "Failed to fetch donations" });
+    }
+  });
 
   // Activity Logs
   app.get("/api/youhonor/logs", authenticateAdmin, async (req, res) => {

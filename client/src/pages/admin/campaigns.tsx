@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -47,6 +48,7 @@ export default function AdminCampaignsPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -113,6 +115,27 @@ export default function AdminCampaignsPage() {
     }
   });
 
+  const deleteBulkMutation = useMutation({
+    mutationFn: async (ids: number[]) => {
+      await Promise.all(ids.map(id => apiRequest("DELETE", `/api/youhonor/campaigns/${id}`)));
+    },
+    onSuccess: (_, ids) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/youhonor/campaigns"] });
+      setSelectedIds([]);
+      toast({
+        title: "Campaigns Deleted",
+        description: `${ids.length} campaigns have been permanently deleted.`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete selected campaigns.",
+        variant: "destructive",
+      });
+    }
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -134,6 +157,28 @@ export default function AdminCampaignsPage() {
                          (statusFilter === "pending" && !campaign.approved);
     return matchesSearch && matchesType && matchesStatus;
   }) || [];
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(filteredCampaigns.map(c => c.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: number, checked: boolean) => {
+    if (checked) {
+      setSelectedIds([...selectedIds, id]);
+    } else {
+      setSelectedIds(selectedIds.filter(selectedId => selectedId !== id));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (confirm(`Are you sure you want to delete ${selectedIds.length} campaigns? This action cannot be undone.`)) {
+      deleteBulkMutation.mutate(selectedIds);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -215,16 +260,29 @@ export default function AdminCampaignsPage() {
               <div>
                 <CardTitle>Campaigns ({filteredCampaigns.length})</CardTitle>
                 <CardDescription>
-                  Manage campaign approvals and view details
+                  {selectedIds.length > 0 ? `${selectedIds.length} selected` : 'Manage campaign approvals and view details'}
                 </CardDescription>
               </div>
-              <Button
-                onClick={() => setLocation("/youhonor/campaigns/create")}
-                data-testid="button-create-campaign"
-              >
-                <Shield className="h-4 w-4 mr-2" />
-                Create New Campaign
-              </Button>
+              <div className="flex items-center gap-2">
+                {selectedIds.length > 0 && (
+                  <Button
+                    variant="destructive"
+                    onClick={handleBulkDelete}
+                    disabled={deleteBulkMutation.isPending}
+                    data-testid="button-delete-selected"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Selected ({selectedIds.length})
+                  </Button>
+                )}
+                <Button
+                  onClick={() => setLocation("/youhonor/campaigns/create")}
+                  data-testid="button-create-campaign"
+                >
+                  <Shield className="h-4 w-4 mr-2" />
+                  Create New Campaign
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -241,6 +299,13 @@ export default function AdminCampaignsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-12">
+                        <Checkbox
+                          checked={selectedIds.length === filteredCampaigns.length && filteredCampaigns.length > 0}
+                          onCheckedChange={handleSelectAll}
+                          data-testid="checkbox-select-all"
+                        />
+                      </TableHead>
                       <TableHead>ID</TableHead>
                       <TableHead>Title</TableHead>
                       <TableHead>Type</TableHead>
@@ -252,6 +317,13 @@ export default function AdminCampaignsPage() {
                   <TableBody>
                     {filteredCampaigns.map((campaign) => (
                       <TableRow key={campaign.id} data-testid={`row-campaign-${campaign.id}`}>
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedIds.includes(campaign.id)}
+                            onCheckedChange={(checked) => handleSelectOne(campaign.id, checked as boolean)}
+                            data-testid={`checkbox-${campaign.id}`}
+                          />
+                        </TableCell>
                         <TableCell className="font-mono text-sm">{campaign.id}</TableCell>
                         <TableCell className="max-w-xs">
                           <div className="truncate">{campaign.title}</div>

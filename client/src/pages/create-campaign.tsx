@@ -1037,133 +1037,135 @@ export default function CreateCampaignPage() {
                 </div>
               )}
 
-              {/* Credit Card Payment Section */}
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                <div className="flex items-center space-x-3 mb-4">
-                  <CreditCard className="w-6 h-6 text-primary" />
-                  <h3 className="text-lg font-semibold text-black dark:text-white">Credit Card Payment Option</h3>
-                </div>
-                
-                <div className="surface-primary border border-primary/20 rounded-lg p-4 mb-4">
-                  <div className="flex items-start space-x-3">
-                    <Shield className="w-5 h-5 text-primary mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-primary mb-1">Enable Credit Card Donations</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Allow donors to contribute using credit cards. Requires a {collateralInfo.collateralAmount} {collateralInfo.collateralToken} collateral payment to activate this feature. Your campaign will be created automatically after payment confirmation.
-                      </p>
-                    </div>
+              {/* Credit Card Payment Section - Only for FUND campaigns */}
+              {campaignType === "FUND" && (
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <CreditCard className="w-6 h-6 text-primary" />
+                    <h3 className="text-lg font-semibold text-black dark:text-white">Credit Card Payment Option</h3>
                   </div>
-                </div>
-
-                <div className="space-y-4">
-                  {/* Enable Credit Card Toggle */}
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      id="creditCardEnabled"
-                      checked={creditCardEnabled}
-                      onChange={(e) => {
-                        setCreditCardEnabled(e.target.checked);
-                        form.setValue("creditCardEnabled", e.target.checked);
-                      }}
-                      className="w-4 h-4 text-primary border-border rounded focus:ring-primary/50"
-                      data-testid="checkbox-credit-card-enabled"
-                    />
-                    <label htmlFor="creditCardEnabled" className="text-black dark:text-white font-medium cursor-pointer">
-                      Enable credit card payments for this campaign
-                    </label>
-                  </div>
-
-                  {/* Collateral Section */}
-                  {creditCardEnabled && (
-                    <div className="surface-secondary border border-border rounded-lg p-4 space-y-4">
-                      <div className="flex items-center space-x-2">
-                        <DollarSign className="w-5 h-5 text-green-600" />
-                        <h4 className="font-medium text-black dark:text-white">Collateral Payment Required</h4>
+                  
+                  <div className="surface-primary border border-primary/20 rounded-lg p-4 mb-4">
+                    <div className="flex items-start space-x-3">
+                      <Shield className="w-5 h-5 text-primary mt-0.5" />
+                      <div>
+                        <h4 className="font-medium text-primary mb-1">Enable Credit Card Donations</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Allow donors to contribute using credit cards. Requires a {collateralInfo.collateralAmount} {collateralInfo.collateralToken} collateral payment to activate this feature. Your campaign will be created automatically after payment confirmation.
+                        </p>
                       </div>
-                      
-                      {/* Company Balance Status */}
-                      {companyBalance && (
-                        <div className="surface-primary border border-primary/20 rounded-lg p-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <RefreshCw className="w-4 h-4 text-primary" />
-                              <span className="text-sm font-medium text-primary">Company Balance</span>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-sm font-semibold text-black dark:text-white">
-                                Available: {companyBalance.available} USDT
-                              </div>
-                              {companyBalance.reserved > 0 && (
-                                <div className="text-xs text-muted-foreground">
-                                  Reserved: {companyBalance.reserved} USDT
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {balanceLoading && (
-                        <div className="surface-primary border border-primary/20 rounded-lg p-3">
-                          <div className="flex items-center space-x-2">
-                            <RefreshCw className="w-4 h-4 text-primary animate-spin" />
-                            <span className="text-sm text-primary">Checking balance...</span>
-                          </div>
-                        </div>
-                      )}
-                      
-                      <FormField
-                        control={form.control}
-                        name="collateralAmount"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-black dark:text-white">Collateral Amount (USDT)</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="number"
-                                min={collateralInfo.collateralAmount?.toString() || "1"}
-                                step="1"
-                                placeholder={collateralInfo.collateralAmount?.toString() || "1"} 
-                                {...field} 
-                                className="border-gray-300 dark:border-gray-600"
-                                data-testid="input-collateral-amount"
-                              />
-                            </FormControl>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Required: {collateralInfo.collateralAmount} {collateralInfo.collateralToken} to platform wallet</p>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      {!collateralPaid && (
-                        <Button
-                          type="button"
-                          onClick={handleCollateralPayment}
-                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors"
-                          data-testid="button-pay-collateral"
-                        >
-                          <DollarSign className="w-4 h-4 mr-2" />
-                          Pay Collateral & Create Campaign ({form.watch("collateralAmount") || collateralInfo.collateralAmount} {collateralInfo.collateralToken})
-                        </Button>
-                      )}
-
-                      {collateralPaid && (
-                        <div className="surface-primary border border-emerald-200 dark:border-emerald-800 rounded-lg p-3">
-                          <div className="flex items-center space-x-2">
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                            <span className="text-green-800 dark:text-green-200 font-medium">Collateral Paid Successfully ({collateralInfo.collateralAmount} {collateralInfo.collateralToken})</span>
-                          </div>
-                          <p className="text-xs text-green-700 dark:text-green-300 mt-1">
-                            TX: {form.watch("collateralTxHash")?.slice(0, 20)}...
-                          </p>
-                        </div>
-                      )}
                     </div>
-                  )}
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* Enable Credit Card Toggle */}
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        id="creditCardEnabled"
+                        checked={creditCardEnabled}
+                        onChange={(e) => {
+                          setCreditCardEnabled(e.target.checked);
+                          form.setValue("creditCardEnabled", e.target.checked);
+                        }}
+                        className="w-4 h-4 text-primary border-border rounded focus:ring-primary/50"
+                        data-testid="checkbox-credit-card-enabled"
+                      />
+                      <label htmlFor="creditCardEnabled" className="text-black dark:text-white font-medium cursor-pointer">
+                        Enable credit card payments for this campaign
+                      </label>
+                    </div>
+
+                    {/* Collateral Section */}
+                    {creditCardEnabled && (
+                      <div className="surface-secondary border border-border rounded-lg p-4 space-y-4">
+                        <div className="flex items-center space-x-2">
+                          <DollarSign className="w-5 h-5 text-green-600" />
+                          <h4 className="font-medium text-black dark:text-white">Collateral Payment Required</h4>
+                        </div>
+                        
+                        {/* Company Balance Status */}
+                        {companyBalance && (
+                          <div className="surface-primary border border-primary/20 rounded-lg p-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <RefreshCw className="w-4 h-4 text-primary" />
+                                <span className="text-sm font-medium text-primary">Company Balance</span>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-sm font-semibold text-black dark:text-white">
+                                  Available: {companyBalance.available} USDT
+                                </div>
+                                {companyBalance.reserved > 0 && (
+                                  <div className="text-xs text-muted-foreground">
+                                    Reserved: {companyBalance.reserved} USDT
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {balanceLoading && (
+                          <div className="surface-primary border border-primary/20 rounded-lg p-3">
+                            <div className="flex items-center space-x-2">
+                              <RefreshCw className="w-4 h-4 text-primary animate-spin" />
+                              <span className="text-sm text-primary">Checking balance...</span>
+                            </div>
+                          </div>
+                        )}
+                        
+                        <FormField
+                          control={form.control}
+                          name="collateralAmount"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-black dark:text-white">Collateral Amount (USDT)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number"
+                                  min={collateralInfo.collateralAmount?.toString() || "1"}
+                                  step="1"
+                                  placeholder={collateralInfo.collateralAmount?.toString() || "1"} 
+                                  {...field} 
+                                  className="border-gray-300 dark:border-gray-600"
+                                  data-testid="input-collateral-amount"
+                                />
+                              </FormControl>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Required: {collateralInfo.collateralAmount} {collateralInfo.collateralToken} to platform wallet</p>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {!collateralPaid && (
+                          <Button
+                            type="button"
+                            onClick={handleCollateralPayment}
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors"
+                            data-testid="button-pay-collateral"
+                          >
+                            <DollarSign className="w-4 h-4 mr-2" />
+                            Pay Collateral & Create Campaign ({form.watch("collateralAmount") || collateralInfo.collateralAmount} {collateralInfo.collateralToken})
+                          </Button>
+                        )}
+
+                        {collateralPaid && (
+                          <div className="surface-primary border border-emerald-200 dark:border-emerald-800 rounded-lg p-3">
+                            <div className="flex items-center space-x-2">
+                              <CheckCircle className="w-5 h-5 text-green-600" />
+                              <span className="text-green-800 dark:text-green-200 font-medium">Collateral Paid Successfully ({collateralInfo.collateralAmount} {collateralInfo.collateralToken})</span>
+                            </div>
+                            <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+                              TX: {form.watch("collateralTxHash")?.slice(0, 20)}...
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
 
               {/* Submit Button - Only show when credit card is disabled OR collateral is paid */}

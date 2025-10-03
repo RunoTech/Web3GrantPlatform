@@ -96,6 +96,7 @@ export interface IStorage {
   getPlatformSetting(key: string): Promise<PlatformSetting | undefined>;
   setPlatformSetting(setting: InsertPlatformSetting): Promise<PlatformSetting>;
   updatePlatformSetting(key: string, value: string, updatedBy: number): Promise<void>;
+  getAllPublicPlatformSettings(): Promise<Record<string, string>>;
 
   // Network Fees
   getNetworkFees(): Promise<NetworkFee[]>;
@@ -377,6 +378,20 @@ export class DatabaseStorage implements IStorage {
       .update(platformSettings)
       .set({ value, updatedAt: new Date(), updatedBy })
       .where(eq(platformSettings.key, key));
+  }
+
+  async getAllPublicPlatformSettings(): Promise<Record<string, string>> {
+    const publicCategories = ['general', 'homepage', 'features', 'contact', 'social', 'payment', 'pricing', 'payments', 'rewards', 'ui'];
+    
+    const settings = await db.select()
+      .from(platformSettings)
+      .where(sql`${platformSettings.category} IN (${sql.join(publicCategories.map(c => sql`${c}`), sql`, `)})`);
+    
+    const settingsMap: Record<string, string> = {};
+    for (const setting of settings) {
+      settingsMap[setting.key] = setting.value || '';
+    }
+    return settingsMap;
   }
 
   async getSettingsMap(): Promise<Record<string, string>> {

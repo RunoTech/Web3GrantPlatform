@@ -42,6 +42,8 @@ export function useSettings() {
     activationFeeEthereum: getNumberSetting('activation_fee_ethereum', 50),
     minDonationAmount: getNumberSetting('min_donation_amount', 1),
     maxCampaignGoal: getNumberSetting('max_campaign_goal', 1000000),
+    campaignFeeDonate: getNumberSetting('campaign_fee_donate', 0),
+    campaignFeeFund: getNumberSetting('campaign_fee_fund', 100),
     
     // Contact info
     contactEmail: getSetting('contact_email', 'info@duxxan.com'),

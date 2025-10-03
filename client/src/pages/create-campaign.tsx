@@ -17,6 +17,7 @@ import { useWriteContract, useWaitForTransactionReceipt, usePublicClient } from 
 import { parseUnits, formatUnits } from "viem";
 import { erc20Abi } from "viem";
 import { Heart, ArrowLeft, Building, Users, Calendar, CheckCircle, Lock, CreditCard, Shield, DollarSign, RefreshCw } from "lucide-react";
+import { useSettings } from "@/hooks/useSettings";
 
 // Add Header component import
 import Header from "@/components/Header";
@@ -28,6 +29,7 @@ export default function CreateCampaignPage() {
   const { isConnected, address } = useWallet();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { campaignFeeDonate, campaignFeeFund, isLoading: settingsLoading } = useSettings();
   
   // Wagmi hooks for contract interaction with DEBUG
   const { writeContract, data: txHash, error: writeError } = useWriteContract();
@@ -159,6 +161,8 @@ export default function CreateCampaignPage() {
       collateralAmount: "100", // Default from API
       collateralTxHash: "",
       collateralPaid: false,
+      // Campaign creation fee
+      campaignFeeTxHash: "",
     },
   });
 
@@ -932,7 +936,84 @@ export default function CreateCampaignPage() {
                 )}
               />
 
+              {/* Campaign Creation Fee Section */}
+              {(() => {
+                const campaignFee = campaignType === "FUND" ? campaignFeeFund : campaignFeeDonate;
+                if (settingsLoading || campaignFee === undefined) return null;
+                
+                return (
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-6 space-y-4">
+                    <div className="flex items-center space-x-3">
+                      <DollarSign className="w-6 h-6 text-primary" />
+                      <h3 className="text-lg font-semibold text-black dark:text-white">Campaign Creation Fee</h3>
+                    </div>
+                    
+                    {campaignFee > 0 ? (
+                      <>
+                        <div className="surface-primary border border-primary/20 rounded-lg p-4">
+                          <div className="flex items-start space-x-3">
+                            <Shield className="w-5 h-5 text-primary mt-0.5" />
+                            <div className="flex-1">
+                              <h4 className="font-medium text-primary mb-1">
+                                {campaignType} Campaign Fee: {campaignFee} USDT
+                              </h4>
+                              <p className="text-sm text-muted-foreground">
+                                A one-time fee of {campaignFee} USDT is required to create a {campaignType} campaign. 
+                                This fee helps maintain the platform and ensure quality campaigns. Payment is verified on the blockchain.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
 
+                        <FormField
+                          control={form.control}
+                          name="campaignFeeTxHash"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-black dark:text-white flex items-center space-x-2">
+                                <span>Campaign Fee Payment Transaction Hash</span>
+                                <Badge variant="destructive" className="text-xs">Required</Badge>
+                              </FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="0x... (Transaction hash after sending USDT to platform wallet)" 
+                                  {...field} 
+                                  className="border-gray-300 dark:border-gray-600 font-mono text-sm"
+                                  data-testid="input-campaign-fee-tx"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                              <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                                <p><strong>How to pay:</strong></p>
+                                <ol className="list-decimal list-inside space-y-1 ml-2">
+                                  <li>Send <strong>{campaignFee} USDT</strong> to the platform wallet</li>
+                                  <li>Copy the transaction hash from your wallet</li>
+                                  <li>Paste it above and submit the form</li>
+                                  <li>We'll verify your payment on the blockchain</li>
+                                </ol>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    ) : (
+                      <div className="surface-primary border border-green-200 dark:border-green-800 rounded-lg p-4">
+                        <div className="flex items-start space-x-3">
+                          <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                          <div>
+                            <h4 className="font-medium text-green-700 dark:text-green-300 mb-1">
+                              Free Campaign Creation
+                            </h4>
+                            <p className="text-sm text-green-600 dark:text-green-400">
+                              {campaignType} campaigns are currently free to create. No payment required!
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* KYB Verification Notice - Only for FUND campaigns */}
               {campaignType === "FUND" && (

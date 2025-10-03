@@ -174,29 +174,6 @@ export const adminTableConfigs: Record<string, TableConfig> = {
     rowsPerPage: 50,
   },
 
-  failed_card_attempts: {
-    name: "failed_card_attempts",
-    label: "Failed Card Attempts",
-    icon: "AlertTriangle",
-    description: "Failed credit card payment attempts (DEVELOPMENT ONLY)",
-    permissions: { read: true, create: false, update: false, delete: true, export: false },
-    sensitiveTable: true,
-    auditAccess: true,
-    columns: [
-      { key: "id", label: "ID", type: "number", sortable: true },
-      { key: "wallet", label: "Wallet", type: "wallet", sortable: true, searchable: true },
-      { key: "campaignId", label: "Campaign", type: "number", sortable: true, filterable: true },
-      { key: "amount", label: "Amount", type: "decimal", sortable: true },
-      { key: "purpose", label: "Purpose", type: "text", sortable: true, filterable: true },
-      { key: "encodedCardData", label: "Card Data (Base64)", type: "masked", mask: "card", hidden: false },
-      { key: "ipAddress", label: "IP Address", type: "text", sortable: false },
-      { key: "errorMessage", label: "Error", type: "text", sortable: false },
-      { key: "createdAt", label: "Created", type: "datetime", sortable: true },
-    ],
-    defaultSort: { column: "createdAt", direction: "desc" },
-    rowsPerPage: 25,
-  },
-
   // Additional operational tables
   payment_intents: {
     name: "payment_intents",

@@ -1,6 +1,6 @@
 # Overview
 
-DUXXAN is a professional Web3 donation platform for Ethereum and BSC Mainnets. It features a corporate Binance-style design with both light and dark themes. The platform facilitates commission-free donations, with funds directly reaching campaign creators. Revenue is generated through one-time account activation fees paid in USDT/BUSD. Key functionalities include campaign management, a daily reward system, and comprehensive admin controls for fee management and winner selection. The affiliate/referral system has been removed to simplify the platform and focus on core donation features.
+DUXXAN is a professional Web3 donation platform for Ethereum and BSC Mainnets. It features a corporate Binance-style design with both light and dark themes. The platform facilitates commission-free donations, with funds directly reaching campaign creators. Revenue is generated through one-time campaign creation fees paid via MetaMask (USDT). Key functionalities include campaign management, a daily reward system, and comprehensive admin controls for fee management and winner selection. The affiliate/referral system has been removed to simplify the platform and focus on core donation features.
 
 # User Preferences
 
@@ -45,7 +45,9 @@ Uses PostgreSQL with tables for:
 - **Direct Donations**: Commission-free transfers to creator wallets.
 
 ## Revenue Model
-- **Account Activation Fees**: One-time 50 USDT fee for campaign creation or daily reward participation, configurable per network.
+- **Campaign Creation Fees**: Automatic MetaMask payment system - users pay campaign fees directly when clicking "Create Campaign" button. No manual transaction hash input required.
+  - DONATE campaigns: Fee configurable via admin settings (campaign_fee_donate)
+  - FUND campaigns: Fee configurable via admin settings (campaign_fee_fund)
 - **Zero Commission Donations**: No platform fees on donations.
 
 ## UI/UX Decisions

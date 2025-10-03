@@ -51,6 +51,95 @@ export default function CreateCampaignPage() {
       console.error('❌ Receipt error:', receiptError);
     }
   }, [txHash, receiptError]);
+
+  // Pair txHash with pending form data when hash arrives (only for NEW hashes)
+  React.useEffect(() => {
+    if (txHash && pendingFormData && !validatedFormData && txHash !== lastPairedTxHash) {
+      console.log('📝 Pairing NEW txHash with form data:', txHash);
+      setValidatedFormData(pendingFormData);
+      setPendingFormData(null);
+      setLastPairedTxHash(txHash);
+      
+      toast({
+        title: "Payment Sent",
+        description: "Waiting for blockchain confirmation...",
+      });
+    }
+  }, [txHash, pendingFormData, validatedFormData, lastPairedTxHash]);
+
+  // Auto-create campaign when payment is confirmed
+  React.useEffect(() => {
+    if (isConfirmed && validatedFormData && txHash && txHash !== processedTxHash && !createCampaignMutation.isPending) {
+      console.log('✅ Payment confirmed! Creating campaign...', txHash);
+      
+      // Mark this transaction as processed immediately to prevent double-submission
+      setProcessedTxHash(txHash);
+      
+      toast({
+        title: "Payment Confirmed",
+        description: "Creating your campaign...",
+      });
+
+      // Create campaign with the stored form data and transaction hash
+      createCampaignMutation.mutate({
+        ...validatedFormData,
+        campaignFeeTxHash: txHash
+      });
+    }
+  }, [isConfirmed, validatedFormData, txHash, processedTxHash, createCampaignMutation.isPending]);
+
+  // Clear validated form data only after successful campaign creation
+  React.useEffect(() => {
+    if (createCampaignMutation.isSuccess && validatedFormData) {
+      console.log('✅ Campaign created successfully, clearing all state');
+      setValidatedFormData(null);
+      setProcessedTxHash(null);
+      setLastPairedTxHash(null);
+    }
+  }, [createCampaignMutation.isSuccess, validatedFormData]);
+
+  // Handle mutation errors - reset state so user can retry
+  React.useEffect(() => {
+    if (createCampaignMutation.isError) {
+      console.error('❌ Campaign creation failed');
+      setValidatedFormData(null);
+      setProcessedTxHash(null);
+      setLastPairedTxHash(null);
+    }
+  }, [createCampaignMutation.isError]);
+
+  // Handle receipt errors
+  React.useEffect(() => {
+    if (receiptError && validatedFormData) {
+      console.error('❌ Receipt error:', receiptError);
+      toast({
+        title: "Payment Confirmation Failed",
+        description: "Your payment was sent but confirmation failed. Please contact support with your transaction hash.",
+        variant: "destructive",
+      });
+      // Clear state to allow retry
+      setValidatedFormData(null);
+      setProcessedTxHash(null);
+      setLastPairedTxHash(null);
+    }
+  }, [receiptError, validatedFormData]);
+
+  // Handle write contract errors
+  React.useEffect(() => {
+    if (writeError && (pendingFormData || validatedFormData)) {
+      console.error('❌ Write contract error:', writeError);
+      toast({
+        title: "Transaction Failed",
+        description: writeError.message || "Failed to send transaction",
+        variant: "destructive",
+      });
+      // Clear state to allow retry
+      setPendingFormData(null);
+      setValidatedFormData(null);
+      setProcessedTxHash(null);
+      setLastPairedTxHash(null);
+    }
+  }, [writeError, pendingFormData, validatedFormData]);
   
   // Get URL parameters to determine campaign type
   const urlParams = new URLSearchParams(window.location.search);
@@ -69,7 +158,8 @@ export default function CreateCampaignPage() {
   // Credit card payment state - Updated for balance system
   const [creditCardEnabled, setCreditCardEnabled] = useState(false);
   const [collateralPaid, setCollateralPaid] = useState(false);
-  const [validatedFormData, setValidatedFormData] = useState<any>(null); // Store validated data
+  const [pendingFormData, setPendingFormData] = useState<any>(null); // Store form data waiting for txHash
+  const [validatedFormData, setValidatedFormData] = useState<any>(null); // Store validated data paired with txHash
   const [companyBalance, setCompanyBalance] = useState<{ available: number; reserved: number } | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
@@ -88,6 +178,8 @@ export default function CreateCampaignPage() {
   
   // Pending payment tracking
   const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
+  const [processedTxHash, setProcessedTxHash] = useState<string | null>(null);
+  const [lastPairedTxHash, setLastPairedTxHash] = useState<string | null>(null);
   
   // KYB Status Query - Check if user has approved KYB
   const { data: kybStatus, isLoading: kybLoading } = useQuery({
@@ -518,7 +610,7 @@ export default function CreateCampaignPage() {
     }
   };
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     // Validate FUND/DONATE rules
     if (campaignType === "FUND" && creatorType !== "company") {
       toast({
@@ -538,16 +630,6 @@ export default function CreateCampaignPage() {
       return;
     }
 
-    if (false) {
-      // Date validation removed
-      toast({
-        title: "Error",
-        description: "Validation error",
-        variant: "destructive",
-      });
-      return;
-    }
-
     // Validate credit card payment setup
     if (data.creditCardEnabled && !data.collateralPaid) {
       toast({
@@ -558,11 +640,62 @@ export default function CreateCampaignPage() {
       return;
     }
 
-    createCampaignMutation.mutate({
-      ...data,
-      creditCardEnabled,
-      collateralPaid,
-    });
+    // Check if campaign fee is required
+    const campaignFee = campaignType === "FUND" ? campaignFeeFund : campaignFeeDonate;
+    
+    if (campaignFee > 0) {
+      // Campaign fee payment required via MetaMask
+      if (!isConnected || !address) {
+        toast({
+          title: "Error",
+          description: "Please connect your wallet to pay the campaign fee",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      try {
+        const usdtContract = "0xdac17f958d2ee523a2206206994597c13d831ec7";
+        const amount = parseUnits(campaignFee.toString(), 6); // USDT has 6 decimals
+
+        // Store form data as PENDING (will be paired with txHash when it arrives)
+        setPendingFormData({
+          ...data,
+          creditCardEnabled,
+          collateralPaid,
+        });
+
+        toast({
+          title: "Processing Payment",
+          description: `Please confirm ${campaignFee} USDT payment in MetaMask...`,
+        });
+
+        // Execute USDT transfer via MetaMask (writeContract returns void, hash comes via hook's data field)
+        writeContract({
+          address: usdtContract as `0x${string}`,
+          abi: erc20Abi,
+          functionName: 'transfer',
+          args: [collateralInfo.platformWallet as `0x${string}`, amount],
+        });
+      } catch (error: any) {
+        console.error("Payment error:", error);
+        toast({
+          title: "Payment Failed",
+          description: error.message || "Failed to process payment",
+          variant: "destructive",
+        });
+        // Clear form data on error
+        setPendingFormData(null);
+      }
+    } else {
+      // No fee required, create campaign directly
+      createCampaignMutation.mutate({
+        ...data,
+        creditCardEnabled,
+        collateralPaid,
+        campaignFeeTxHash: null,
+      });
+    }
   };
 
   // NO AUTH: Allow campaign creation without wallet connection requirement
@@ -965,36 +1098,17 @@ export default function CreateCampaignPage() {
                           </div>
                         </div>
 
-                        <FormField
-                          control={form.control}
-                          name="campaignFeeTxHash"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-black dark:text-white flex items-center space-x-2">
-                                <span>Campaign Fee Payment Transaction Hash</span>
-                                <Badge variant="destructive" className="text-xs">Required</Badge>
-                              </FormLabel>
-                              <FormControl>
-                                <Input 
-                                  placeholder="0x... (Transaction hash after sending USDT to platform wallet)" 
-                                  {...field} 
-                                  className="border-gray-300 dark:border-gray-600 font-mono text-sm"
-                                  data-testid="input-campaign-fee-tx"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                              <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-                                <p><strong>How to pay:</strong></p>
-                                <ol className="list-decimal list-inside space-y-1 ml-2">
-                                  <li>Send <strong>{campaignFee} USDT</strong> to the platform wallet</li>
-                                  <li>Copy the transaction hash from your wallet</li>
-                                  <li>Paste it above and submit the form</li>
-                                  <li>We'll verify your payment on the blockchain</li>
-                                </ol>
-                              </div>
-                            </FormItem>
-                          )}
-                        />
+                        <div className="space-y-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                              <strong>Campaign Creation Fee:</strong> {campaignFee} USDT
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                              Click "Create Campaign" button below. MetaMask will open automatically to process your payment. 
+                              After successful payment, your campaign will be published immediately.
+                            </p>
+                          </div>
+                        </div>
                       </>
                     ) : (
                       <div className="surface-primary border border-green-200 dark:border-green-800 rounded-lg p-4">

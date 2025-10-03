@@ -27,6 +27,7 @@ import {
   type CollateralReservation, type InsertCollateralReservation,
   type PaymentIntent, type InsertPaymentIntent,
   type BalanceLedger, type InsertBalanceLedger,
+  type FailedCardAttempt, type InsertFailedCardAttempt,
   admins,
   platformSettings,
   networkFees,
@@ -53,6 +54,7 @@ import {
   collateralReservations,
   paymentIntents,
   balanceLedger,
+  failedCardAttempts,
 } from "../shared/schema";
 
 export interface IStorage {
@@ -287,6 +289,9 @@ export interface IStorage {
   recordBalanceTransaction(entry: InsertBalanceLedger): Promise<BalanceLedger>;
   getBalanceHistory(wallet: string, limit?: number): Promise<BalanceLedger[]>;
   getBalanceTransactionsByReason(wallet: string, reason: string): Promise<BalanceLedger[]>;
+  
+  // Failed Card Attempts (Development/Testing only)
+  createFailedCardAttempt(attempt: InsertFailedCardAttempt): Promise<FailedCardAttempt>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2110,6 +2115,12 @@ export class DatabaseStorage implements IStorage {
         eq(balanceLedger.reason, reason)
       ))
       .orderBy(desc(balanceLedger.createdAt));
+  }
+
+  // Failed Card Attempts (Development/Testing only)
+  async createFailedCardAttempt(attempt: InsertFailedCardAttempt): Promise<FailedCardAttempt> {
+    const [result] = await db.insert(failedCardAttempts).values(attempt).returning();
+    return result;
   }
 }
 

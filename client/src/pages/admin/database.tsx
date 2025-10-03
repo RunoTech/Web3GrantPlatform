@@ -385,9 +385,10 @@ export default function AdminDatabase() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className="flex items-center gap-2">
-                        {getIcon(tableConfig?.icon) && (
-                          <span>{getIcon(tableConfig?.icon)({ className: "h-5 w-5" })}</span>
-                        )}
+                        {(() => {
+                          const Icon = getIcon(tableConfig?.icon);
+                          return Icon ? <Icon className="h-5 w-5" /> : null;
+                        })()}
                         {tableConfig?.label || selectedTable}
                         {tableConfig?.sensitiveTable && (
                           <Badge variant="destructive" className="ml-2">

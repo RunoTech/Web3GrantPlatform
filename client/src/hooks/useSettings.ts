@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 // Hook for getting all settings as a map
 export function useSettings() {
   const { data: settings = {}, isLoading, error } = useQuery<Record<string, string>>({
-    queryKey: ["/api/settings-map"],
+    queryKey: ["/api/public/platform-settings"],
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 

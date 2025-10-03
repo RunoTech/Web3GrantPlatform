@@ -115,7 +115,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
               <div 
                 className="w-full bg-secondary rounded-full h-2.5 progress-bar"
                 role="progressbar"
-                aria-valuenow={Math.min((parseFloat(campaign.totalDonations || "0") / 10000) * 100, 100)}
+                aria-valuenow={Math.min((parseFloat(campaign.totalDonations || "0") / parseFloat(campaign.targetAmount || "1")) * 100, 100)}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 data-testid={`progress-bar-${campaign.id}`}
@@ -123,7 +123,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
                 <div 
                   className="bg-primary h-2.5 rounded-full transition-all duration-300"
                   style={{ 
-                    width: `${Math.min((parseFloat(campaign.totalDonations || "0") / 10000) * 100, 100)}%` 
+                    width: `${Math.min((parseFloat(campaign.totalDonations || "0") / parseFloat(campaign.targetAmount || "1")) * 100, 100)}%` 
                   }}
                 ></div>
               </div>

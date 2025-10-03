@@ -76,10 +76,12 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  // Serve static files (js, css, images, etc.)
+  app.use(express.static(distPath, { index: false }));
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
+  // SPA fallback: serve index.html for all routes that aren't API or static files
+  // This enables client-side routing for /youhonor, /campaigns, etc.
+  app.get("*", (req, res) => {
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }

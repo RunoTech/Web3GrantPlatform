@@ -225,6 +225,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Public API Routes (existing functionality)
   
+  // Platform Settings Cache
+  let platformSettingsCache: { data: Record<string, string> | null; timestamp: number } = {
+    data: null,
+    timestamp: 0
+  };
+  const PLATFORM_SETTINGS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+  // Get platform settings (public) - For global UI configuration
+  app.get("/api/public/platform-settings", async (req, res) => {
+    try {
+      const now = Date.now();
+      
+      // Return cached data if valid
+      if (platformSettingsCache.data && (now - platformSettingsCache.timestamp) < PLATFORM_SETTINGS_CACHE_TTL) {
+        return res.json(platformSettingsCache.data);
+      }
+      
+      // Fetch fresh data from database
+      const settings = await storage.getAllPublicPlatformSettings();
+      
+      // Update cache
+      platformSettingsCache = {
+        data: settings,
+        timestamp: now
+      };
+      
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching platform settings:", error);
+      res.status(500).json({ error: "Failed to fetch platform settings" });
+    }
+  });
+  
   // Get network fees (public) - Ethereum only
   app.get("/api/get-fees", async (req, res) => {
     try {

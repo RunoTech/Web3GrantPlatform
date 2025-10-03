@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CampaignCard from "@/components/CampaignCard";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { updateMetaTags } from "@/utils/seo";
 import { 
   Search, 
   Users,
@@ -22,6 +23,15 @@ import type { Campaign } from "@shared/schema";
 
 export default function DonationsPage() {
   const { t } = useLanguage();
+
+  // SEO meta tags
+  useEffect(() => {
+    updateMetaTags({
+      title: 'Bağış Kampanyaları - DUXXAN',
+      description: 'Blockchain tabanlı şeffaf ve güvenli bağış platformunda aktif kampanyaları keşfedin. Sağlık, eğitim, sosyal sorumluluk ve daha fazlası için bağış yapın.',
+      url: `${window.location.origin}/donations`,
+    });
+  }, []);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("recent");
   const [filterCategory, setFilterCategory] = useState("all");

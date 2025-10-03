@@ -59,7 +59,7 @@ function Router() {
       <Route path="/payment" component={PaymentPage} />
       <Route path="/virtual-pos" component={VirtualPosPage} />
       <Route path="/profile" component={ProfilePage} />
-      <Route path="/campaign/:id" component={CampaignDetailPage} />
+      <Route path="/campaign/:id/:slug?" component={CampaignDetailPage} />
       <Route path="/create-campaign" component={CreateCampaignPage} />
       <Route path="/create-fund" component={CreateFundPage} />
       

@@ -14,10 +14,12 @@ import { useWallet } from "@/hooks/useWallet";
 import DonationForm from "@/components/DonationForm";
 import { VirtualPosModal } from "@/components/VirtualPosModal";
 import { generateCampaignShareLink } from "@/utils/share";
+import { createSlug, getCampaignUrl } from "@/utils/slug";
+import { updateMetaTags, getCampaignMetaTags } from "@/utils/seo";
 import type { Campaign } from "@shared/schema";
 
 export default function CampaignDetailPage() {
-  const { id } = useParams();
+  const { id, slug } = useParams();
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
   const [isVirtualPosOpen, setIsVirtualPosOpen] = useState(false);
@@ -50,6 +52,26 @@ export default function CampaignDetailPage() {
   const { data: campaign, isLoading } = useQuery({
     queryKey: ["/api/campaign", id],
   });
+
+  // Update SEO meta tags when campaign loads
+  useEffect(() => {
+    if (campaign) {
+      const metaTags = getCampaignMetaTags(campaign);
+      updateMetaTags(metaTags);
+
+      // Redirect to correct URL with slug if missing
+      const correctSlug = createSlug(campaign.title);
+      if (!slug || slug !== correctSlug) {
+        const correctUrl = getCampaignUrl(campaign.id, campaign.title);
+        const params = new URLSearchParams(location.split('?')[1] || '');
+        const queryString = params.toString();
+        const newUrl = queryString ? `${correctUrl}?${queryString}` : correctUrl;
+        
+        // Use replace to avoid adding to history
+        window.history.replaceState({}, '', newUrl);
+      }
+    }
+  }, [campaign, slug, location]);
 
 
   if (isLoading) {

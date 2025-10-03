@@ -13,6 +13,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
+import { updateMetaTags } from "@/utils/seo";
 import { Heart, Search, ArrowLeft, CreditCard, Filter, X, SlidersHorizontal } from "lucide-react";
 import type { Campaign } from "@shared/schema";
 import CampaignGridSkeleton from "@/components/skeletons/CampaignGridSkeleton";
@@ -43,6 +44,15 @@ export default function CampaignsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const { t } = useLanguage();
   const { toast } = useToast();
+
+  // SEO meta tags
+  useEffect(() => {
+    updateMetaTags({
+      title: 'Tüm Kampanyalar - DUXXAN',
+      description: 'Blockchain tabanlı şeffaf bağış platformunda aktif kampanyaları keşfedin. Bağış ve kurumsal fon kampanyalarını inceleyin, filtreleyin ve destek olun.',
+      url: `${window.location.origin}/campaigns`,
+    });
+  }, []);
 
   // Build hierarchical query key and fetch URL
   const buildQueryParams = () => {

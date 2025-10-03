@@ -1,12 +1,13 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { updateMetaTags } from "@/utils/seo";
 import { 
   Heart, 
   ArrowLeft, 
@@ -135,6 +136,15 @@ const getEmptyStateContent = (filter: string, totalCampaigns: number) => {
 };
 
 export default function FundsPage() {
+  // SEO meta tags
+  useEffect(() => {
+    updateMetaTags({
+      title: 'Kurumsal Fon Kampanyaları - DUXXAN',
+      description: 'KYB doğrulamalı kurumsal fon kampanyalarını keşfedin. Teknoloji, sağlık, sürdürülebilirlik ve sosyal etki projelerine yatırım yapın.',
+      url: `${window.location.origin}/funds`,
+    });
+  }, []);
+
   // Only show verified campaigns in public view
   const selectedFilter = 'verified';
 

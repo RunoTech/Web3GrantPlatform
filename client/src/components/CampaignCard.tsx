@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, Target, CreditCard } from "lucide-react";
 import ShareButton from "@/components/ShareButton";
 import { generateCampaignShareLink } from "@/utils/share";
+import { getCampaignUrl } from "@/utils/slug";
 import ProgressiveImage from "@/components/enhanced/ProgressiveImage";
 import type { Campaign } from "@shared/schema";
 
@@ -21,9 +22,10 @@ const professionalBackgrounds = [
 
 export default function CampaignCard({ campaign }: CampaignCardProps) {
   const bgClass = professionalBackgrounds[campaign.id % professionalBackgrounds.length];
+  const campaignUrl = getCampaignUrl(campaign.id, campaign.title);
   
   return (
-    <Link href={`/campaign/${campaign.id}`}>
+    <Link href={campaignUrl}>
       <div 
         className="campaign-card group cursor-pointer"
         data-testid={`campaign-card-${campaign.id}`}

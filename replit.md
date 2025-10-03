@@ -1,190 +1,81 @@
 # Overview
 
-DUXXAN is a professional Web3 donation platform built for Ethereum Mainnet and BSC Mainnet networks. The platform features a corporate Binance-style design with white/yellow light theme and black/yellow dark theme, ensuring a clean and professional user experience. The platform enables commission-free donations where funds go directly to campaign creators. Revenue is generated through one-time account activation fees paid in USDT/BUSD. The system includes campaign management, daily reward mechanisms, and admin controls for fee management and winner selection. **The platform has been simplified by completely removing the affiliate/referral system to focus exclusively on core donation and campaign functionality.**
+DUXXAN is a professional Web3 donation platform for Ethereum and BSC Mainnets. It features a corporate Binance-style design with both light and dark themes. The platform facilitates commission-free donations, with funds directly reaching campaign creators. Revenue is generated through one-time account activation fees paid in USDT/BUSD. Key functionalities include campaign management, a daily reward system, and comprehensive admin controls for fee management and winner selection. The affiliate/referral system has been removed to simplify the platform and focus on core donation features.
 
-## User Preferences
+# User Preferences
 
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes
+# System Architecture
 
-### Complete Affiliate System Removal (September 26, 2025)
-- **MAJOR SIMPLIFICATION**: Completely removed affiliate/referral system from entire platform
-- Removed affiliate database schema including tables: affiliateActivities, affiliateApplications
-- Removed all affiliate-related fields from accounts table (referralCode, referredBy, totalReferrals, etc.)
-- Removed all affiliate API endpoints from server/routes.ts (/api/affiliate/*, /api/youhonor/affiliate/*)
-- Removed all affiliate storage functions from server/storage.ts (activateAffiliateSystem, getReferralStats, etc.)
-- Removed affiliate system platform setting from admin seed configuration
-- Platform now focuses exclusively on core donation and campaign functionality without affiliate complexity
-- System successfully compiles and runs without affiliate dependencies
+## Frontend Architecture
+- **Framework**: React with Vite
+- **Styling**: Tailwind CSS with a Binance-inspired corporate design system (white/yellow light, black/yellow dark themes)
+- **UI Components**: Radix UI primitives via shadcn/ui
+- **State Management**: TanStack React Query
+- **Routing**: Wouter
+- **Wallet Integration**: ethers.js (MetaMask, Trust Wallet, WalletConnect)
 
-### SEO and Social Sharing Improvements (September 16, 2025)
-- **CRITICAL FIX**: Resolved link sharing display issues when opened from external sources
-- Added comprehensive meta tags to index.html including SEO, Open Graph, and Twitter Card tags
-- Updated page title to "DUXXAN - Next-Generation Blockchain Donation Platform" for better SEO
-- Added proper meta description, keywords, and social media preview support
-- Implemented theme color (#F0B90B) and canonical URL for better mobile and SEO experience
-- Fixed "Sanal POS Sistemi" wording in credit card payment popup to "Kredi Kartı ile Ödeme"
-- Enhanced payment modal and page descriptions to "Güvenli SSL şifreleme ile korunmaktadır"
+## Backend Architecture
+- **Runtime**: Node.js with Express.js
+- **Development**: TypeScript with tsx
+- **Database**: PostgreSQL with Drizzle ORM
+- **Session Management**: Express sessions with PostgreSQL store
+- **Authentication**: JWT-based admin authentication with bcrypt
+- **API Design**: RESTful endpoints with structured error handling
+- **Admin System**: Comprehensive admin panel with role-based access and activity logging, including a dynamic Data Explorer for managing 17+ database tables with CRUD, filtering, sorting, and server-side security (permissions, data masking, audit logging).
 
-### Credit Card Badge System for Campaign Cards (September 16, 2025)
-- **FEATURE**: Added visual indicator for credit card payment support on campaign cards
-- Implemented "Pay with Credit Card" badge with CreditCard icon for campaigns with `creditCardEnabled=true`
-- Enhanced badge system to support multiple badges simultaneously (featured + credit card)
-- Added vertical stacking layout for badges using `flex-col gap-2`
-- Badge priority system: Featured badge + Credit Card badge can appear together on same campaign
-- Green-colored badge with icon for clear visual distinction from other badge types
-- System dynamically reads `creditCardEnabled` field from campaigns table schema
+## Database Design
+Uses PostgreSQL with tables for:
+- **Core Platform**: Admins, Platform Settings, Network Fees, Sessions
+- **User & Campaign**: Accounts, Campaigns, Donations, Daily Entries, Daily Winners
+- **Content Management**: Footer Links, Announcements, Admin Logs
 
-### Daily Rewards System Database-Driven Implementation (September 16, 2025)
-- **CRITICAL CLEANUP**: Successfully removed all demo/mock data from daily rewards system
-- Cleared all test entries from `daily_winners` and `daily_entries` tables, reset sequences to start fresh
-- Replaced all hardcoded "100 USDT" values with dynamic settings from `platform_settings` table
-- Added dynamic reward amount fetching via `/api/settings-map` endpoint integration
-- Updated all UI text to use database-driven values: hero descriptions, participation rules, winner displays, and empty states
-- Platform now shows actual `daily_reward_amount` (currently 100 USDT) from settings instead of hardcoded values
-- Enhanced winner display to show actual `winner.amount` from database records rather than static text
-- System ready for real reward distribution with no placeholder/demo data remaining
+## Authentication & Authorization
+- **Dual Authentication**: Wallet-based for users, JWT-based for admins.
+- **Account Activation**: Pay-to-activate model via blockchain token transfers.
+- **Admin Access**: Role-based permissions (admin, super_admin).
+- **Session Management**: PostgreSQL-based storage.
+- **Security**: bcrypt password hashing, activity logging, token-based API access.
 
-### Blockchain Infrastructure Assessment (August 28, 2025)
-- **STATUS**: System ready for demo, missing only production environment variables
-- **RPC CONNECTION**: Ethereum mainnet active via public RPC (eth.llamarpc.com)
-- **PLATFORM WALLET**: Updated address - 0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8
-- **PAYMENT SYSTEM**: USDT contract integration complete, verification system coded
-- **MISSING FOR PRODUCTION**: ETH_RPC_URL, admin wallet with private key, real-time monitoring setup
-- **DEMO READY**: Wallet connection, UI flows, database operations all functional
+## Blockchain Integration
+- **Multi-chain Support**: Ethereum Mainnet (Chain ID: 1), BSC Mainnet (Chain ID: 56).
+- **Token Standards**: ERC-20 for USDT/BUSD.
+- **Payment Verification**: Transaction hash validation for account activation.
+- **Direct Donations**: Commission-free transfers to creator wallets.
 
-## Recent Changes
+## Revenue Model
+- **Account Activation Fees**: One-time 50 USDT fee for campaign creation or daily reward participation, configurable per network.
+- **Zero Commission Donations**: No platform fees on donations.
 
-### Light Mode Icon Visibility Fix (August 28, 2025)
-- **CRITICAL UI FIX**: Fixed icon visibility issues in light mode across all pages
-- Replaced hardcoded `text-black` and `text-white` with theme-aware classes
-- Added comprehensive theme-aware icon color system:
-  - `.icon-primary`: Uses foreground color for main icons
-  - `.icon-on-primary`: Uses primary-foreground for icons on primary backgrounds
-  - `.icon-secondary`: Uses muted-foreground for secondary icons
-  - `.icon-accent`: Uses primary color for accent icons
-- Fixed all major pages: index, donations, funds, profile, daily-rewards, create-campaign
-- Ensured proper contrast ratios in both light and dark themes
-- Enhanced cyber theme colors with proper gradients and visibility
+## UI/UX Decisions
+- Corporate Binance-style design with white/yellow light and black/yellow dark themes.
+- Clean typography and compact spacing.
+- SEO and social sharing improvements with comprehensive meta tags (Open Graph, Twitter Card).
+- Visual indicators for credit card payment support on campaign cards.
+- Icon visibility fix for light mode using theme-aware classes.
+- Separation of FUND and DONATE campaign creation flows based on URL parameters.
+- Company information for FUND campaigns is private and admin-only.
 
-### Campaign Creation Flow Separation (August 28, 2025)
-- **CRITICAL UPDATE**: Successfully separated FUND and DONATE campaign creation flows
-- Implemented URL parameter-based campaign type locking system (?type=fund or ?type=donate)
-- Updated all navigation links to direct to appropriate campaign creation type:
-  - FUNDS page → creates only FUND campaigns for companies
-  - CAMPAIGNS/DONATIONS/PROFILE pages → creates only DONATE campaigns for individuals/organizations
-  - Homepage maintains general campaign creation (defaults to DONATE)
-- Enhanced create-campaign page with conditional rendering based URL parameters
-- Added locked campaign type indicator with visual feedback when coming from specific sections
+# External Dependencies
 
-### Company Information Privacy Implementation (August 28, 2025)  
-- **CRITICAL PRIVACY UPDATE**: Company information collection for FUND campaigns is now private and only accessible through admin panel
-- Implemented data privacy filter system to exclude company details from public APIs
-- Updated public API endpoints (`/api/get-campaigns`, `/api/get-popular-campaigns`, `/api/campaign/:id`) to filter out sensitive company information
-- Added dedicated admin-only endpoints (`/api/admin/campaign/:id`, `/api/admin/campaigns`) for full campaign details including company data
-- Enhanced security for FUND campaign company information: name, registration number, address, email, phone, CEO, industry, employee count are now protected
-- Maintained DEX platform privacy standards ensuring donor anonymity and company information confidentiality
+## Blockchain Services
+- **Ethereum RPC**: eth.llamarpc.com
+- **BSC RPC**: bsc.llamarpc.com
+- **ethers.js**: Blockchain interaction library.
 
-### Company Information Collection System (August 28, 2025)
-- Enhanced FUND campaign creation with comprehensive company information fields
-- Added required fields: company name, registration number, address, email, CEO name, industry
-- Added optional fields: website, phone, founded year, employee count selection
-- Implemented professional form layout with validation and proper field grouping
-- Updated database schema with company-specific fields for FUND campaigns
-- Completed English translation for all FUND/DONATE campaign interfaces
-- Fixed FUNDS page translation and improved corporate messaging
+## Database & Storage
+- **SQLite**: (Local development)
+- **Drizzle ORM**: Type-safe database operations.
+- **Neon Database**: (Optional PostgreSQL provider).
 
-### Navigation Architecture Fix (August 19, 2025)
-- Fixed "Create Campaign" button navigation issue where buttons incorrectly redirected to `/funds` instead of `/create-campaign`
-- Updated all "Create Campaign" buttons across the platform:
-  - Homepage hero section: Now redirects to `/create-campaign`
-  - Donations page: Both campaign creation buttons now redirect to `/create-campaign`  
-  - Profile page: Campaign creation buttons now redirect to `/create-campaign`
-  - Campaigns page: Already correctly linked to `/create-campaign`
-- Ensured proper separation between donation workflow (`/donations`) and funding workflow (`/funds`)
+## UI & Styling
+- **Radix UI**: Primitive components.
+- **Tailwind CSS**: Utility-first CSS framework.
+- **Lucide Icons**: Icon library.
+- **Google Fonts**: Inter and Poppins.
 
-## System Architecture
-
-### Frontend Architecture
-- **Framework**: React with Vite as the build tool
-- **Styling**: Tailwind CSS with Binance-inspired corporate design system
-- **Design System**: Professional white/yellow light theme and black/yellow dark theme with clean typography and compact spacing
-- **UI Components**: Radix UI primitives through shadcn/ui component library with Binance-style corporate theming
-- **State Management**: TanStack React Query for server state management and caching
-- **Routing**: Wouter for lightweight client-side routing
-- **Wallet Integration**: ethers.js for blockchain interactions with support for MetaMask, Trust Wallet, and WalletConnect
-
-### Backend Architecture
-- **Runtime**: Node.js with Express.js framework
-- **Development**: TypeScript with tsx for development server
-- **Database**: PostgreSQL with Drizzle ORM for type-safe database operations
-- **Session Management**: Express sessions with PostgreSQL session store (connect-pg-simple)
-- **Authentication**: JWT-based admin authentication with bcrypt password hashing
-- **API Design**: RESTful endpoints with structured error handling and comprehensive admin management
-- **Admin System**: Complete admin panel with role-based access, activity logging, and platform control
-
-### Database Design
-The system uses PostgreSQL as the primary database with the following comprehensive entities:
-
-**Core Platform Tables:**
-- **Admins**: System administrators with roles and authentication
-- **Platform Settings**: Dynamic configuration management for all platform aspects
-- **Network Fees**: Multi-network activation fee management
-- **Sessions**: Admin and user session storage
-
-**User & Campaign Tables:**
-- **Accounts**: Wallet-based user accounts with activation tracking
-- **Campaigns**: Donation campaigns with approval workflow and statistics
-- **Donations**: Comprehensive donation tracking with blockchain verification
-- **Daily Entries**: Daily reward participation system
-- **Daily Winners**: Admin-managed winner selection with rewards
-
-**Content Management Tables:**
-- **Footer Links**: Dynamic footer management with sections and ordering
-- **Announcements**: Platform announcements with scheduling
-- **Admin Logs**: Comprehensive audit trail for all admin actions
-
-### Authentication & Authorization
-- **Dual Authentication System**: 
-  - **User Level**: Wallet-based identity for public platform access
-  - **Admin Level**: JWT-based authentication with username/password
-- **Account Activation**: Pay-to-activate model using blockchain token transfers
-- **Admin Access**: Complete admin panel with role-based permissions (admin, super_admin)
-- **Session Management**: PostgreSQL-based session storage for both users and admins
-- **Security Features**: bcrypt password hashing, activity logging, and token-based API access
-
-### Blockchain Integration
-- **Multi-chain Support**: Ethereum Mainnet (Chain ID: 1) and BSC Mainnet (Chain ID: 56)
-- **Token Standards**: ERC-20 token interactions for USDT/BUSD payments
-- **Payment Verification**: Transaction hash validation for account activation
-- **Direct Donations**: Commission-free transfers directly to campaign creator wallets
-
-### Revenue Model
-- **Account Activation Fees**: One-time payment of 50 USDT required to create campaigns or participate in daily rewards (consistent across both Ethereum and BSC networks)
-- **Dynamic Fee Management**: Admin-configurable fees per network with token flexibility
-- **Zero Commission Donations**: All donations transfer directly to campaign creators without platform fees
-
-## External Dependencies
-
-### Blockchain Services
-- **Ethereum RPC**: eth.llamarpc.com (configurable via ETH_RPC_URL)
-- **BSC RPC**: bsc.llamarpc.com (configurable via BSC_RPC_URL)
-- **ethers.js**: Blockchain interaction library for wallet connections and contract calls
-
-### Database & Storage
-- **SQLite**: Local file-based database with better-sqlite3 driver
-- **Drizzle ORM**: Type-safe database operations with schema-first approach
-- **Neon Database**: Optional PostgreSQL provider support via @neondatabase/serverless
-
-### UI & Styling
-- **Radix UI**: Comprehensive primitive components for accessible interface building
-- **Tailwind CSS**: Utility-first CSS framework with custom design system
-- **Lucide Icons**: Modern icon library for consistent visual elements
-- **Google Fonts**: Inter and Poppins font families for typography
-
-### Development Tools
-- **Vite**: Fast build tool with HMR and development server
-- **TypeScript**: Type safety across frontend and backend
-- **Replit Integration**: Platform-specific development tools and error handling
-- **React Hook Form**: Form state management with Zod validation schemas
+## Development Tools
+- **Vite**: Build tool.
+- **TypeScript**: Type safety.
+- **React Hook Form**: Form management with Zod validation.

@@ -99,8 +99,9 @@ export default function AdminCampaignsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/youhonor/campaigns/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/youhonor/campaigns"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/youhonor/campaigns"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/youhonor/campaigns"] });
       toast({
         title: "Campaign Deleted",
         description: "Campaign has been permanently deleted.",
@@ -117,10 +118,12 @@ export default function AdminCampaignsPage() {
 
   const deleteBulkMutation = useMutation({
     mutationFn: async (ids: number[]) => {
-      await Promise.all(ids.map(id => apiRequest("DELETE", `/api/youhonor/campaigns/${id}`)));
+      const results = await Promise.all(ids.map(id => apiRequest("DELETE", `/api/youhonor/campaigns/${id}`)));
+      return results;
     },
-    onSuccess: (_, ids) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/youhonor/campaigns"] });
+    onSuccess: async (_, ids) => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/youhonor/campaigns"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/youhonor/campaigns"] });
       setSelectedIds([]);
       toast({
         title: "Campaigns Deleted",

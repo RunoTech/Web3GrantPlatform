@@ -26,6 +26,7 @@ import AdminDailyRewardsPage from "@/pages/admin/daily-rewards";
 import AdminDatabasePage from "@/pages/admin/database";
 import KYBVerificationPage from "@/pages/admin/kyb-verification";
 import AdminCampaignsPage from "@/pages/admin/campaigns";
+import AdminCampaignForm from "@/pages/admin/campaign-form";
 import AdminTransactionsPage from "@/pages/admin/transactions";
 
 // Static Pages
@@ -95,6 +96,12 @@ function Router() {
       <Route path="/youhonor" component={AdminDashboardPage} />
       <Route path="/youhonor/settings" component={AdminSettingsPage} />
       <Route path="/youhonor/campaigns" component={AdminCampaignsPage} />
+      <Route path="/youhonor/campaigns/create">
+        {() => <AdminCampaignForm />}
+      </Route>
+      <Route path="/youhonor/campaigns/:id/edit">
+        {(params: any) => <AdminCampaignForm campaignId={params.id} />}
+      </Route>
       <Route path="/youhonor/transactions" component={AdminTransactionsPage} />
       <Route path="/youhonor/daily-rewards" component={AdminDailyRewardsPage} />
       <Route path="/youhonor/database" component={AdminDatabasePage} />

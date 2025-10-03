@@ -2667,6 +2667,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/youhonor/campaigns/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const campaignId = parseInt(id);
+      
+      await storage.deleteCampaign(campaignId);
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "delete_campaign",
+        details: `Deleted campaign ID ${id}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting campaign:", error);
+      res.status(500).json({ error: "Failed to delete campaign" });
+    }
+  });
+
+  app.put("/api/youhonor/campaigns/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const campaignId = parseInt(id);
+      const updates = req.body;
+      
+      await storage.updateCampaign(campaignId, updates);
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "update_campaign",
+        details: `Updated campaign ID ${id}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating campaign:", error);
+      res.status(500).json({ error: "Failed to update campaign" });
+    }
+  });
+
+  app.post("/api/youhonor/campaigns", authenticateAdmin, async (req: any, res) => {
+    try {
+      const campaignData = req.body;
+      
+      const newCampaign = await storage.createCampaign({
+        ...campaignData,
+        totalDonations: "0",
+        donationCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "create_campaign",
+        details: `Created campaign: ${newCampaign.title}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json(newCampaign);
+    } catch (error) {
+      console.error("Error creating campaign:", error);
+      res.status(500).json({ error: "Failed to create campaign" });
+    }
+  });
+
   app.post("/api/youhonor/campaigns/:id/reject", authenticateAdmin, async (req: any, res) => {
     try {
       const { id } = req.params;
@@ -2715,6 +2787,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching donations:", error);
       res.status(500).json({ error: "Failed to fetch donations" });
+    }
+  });
+
+  app.delete("/api/youhonor/donations/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const donationId = parseInt(id);
+      
+      await storage.deleteDonation(donationId);
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "delete_donation",
+        details: `Deleted donation ID ${id}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting donation:", error);
+      res.status(500).json({ error: "Failed to delete donation" });
+    }
+  });
+
+  app.put("/api/youhonor/donations/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const donationId = parseInt(id);
+      const updates = req.body;
+      
+      await storage.updateDonation(donationId, updates);
+      
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: "update_donation",
+        details: `Updated donation ID ${id}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating donation:", error);
+      res.status(500).json({ error: "Failed to update donation" });
     }
   });
 

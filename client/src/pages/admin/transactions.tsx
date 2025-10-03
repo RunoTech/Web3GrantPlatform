@@ -8,13 +8,18 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { 
   ArrowLeft,
   Search,
   CreditCard,
   DollarSign,
   Filter,
-  ExternalLink
+  ExternalLink,
+  Edit,
+  Trash2
 } from "lucide-react";
 
 interface Donation {
@@ -33,6 +38,8 @@ export default function AdminTransactionsPage() {
   const { isAuthenticated, isLoading } = useAdminAuth();
   const [search, setSearch] = useState("");
   const [networkFilter, setNetworkFilter] = useState<string>("all");
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -43,6 +50,24 @@ export default function AdminTransactionsPage() {
   const { data: donations, isLoading: donationsLoading } = useQuery<Donation[]>({
     queryKey: ["/api/youhonor/donations"],
     enabled: isAuthenticated,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/youhonor/donations/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/youhonor/donations"] });
+      toast({
+        title: "Donation Deleted",
+        description: "Donation has been permanently deleted.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete donation.",
+        variant: "destructive",
+      });
+    }
   });
 
   if (isLoading) {
@@ -202,6 +227,7 @@ export default function AdminTransactionsPage() {
                       <TableHead>Status</TableHead>
                       <TableHead>TX Hash</TableHead>
                       <TableHead>Date</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -247,6 +273,35 @@ export default function AdminTransactionsPage() {
                         </TableCell>
                         <TableCell className="text-sm">
                           {new Date(donation.createdAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setLocation(`/youhonor/donations/${donation.id}/edit`)}
+                              data-testid={`button-edit-${donation.id}`}
+                              title="Edit Donation"
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                if (confirm('Are you sure you want to delete this donation? This action cannot be undone.')) {
+                                  deleteMutation.mutate(donation.id);
+                                }
+                              }}
+                              disabled={deleteMutation.isPending}
+                              className="text-red-600 hover:text-red-700"
+                              data-testid={`button-delete-${donation.id}`}
+                              title="Delete Donation"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

@@ -132,6 +132,7 @@ export interface IStorage {
   getCampaignByTxHash(txHash: string): Promise<Campaign | undefined>;
   createCampaign(campaign: InsertCampaign): Promise<Campaign>;
   updateCampaign(id: number, updates: Partial<Campaign>): Promise<void>;
+  deleteCampaign(id: number): Promise<void>;
   getPopularCampaigns(limit: number): Promise<Campaign[]>;
   getPendingCampaigns(): Promise<Campaign[]>;
   approveCampaign(id: number, adminId: number): Promise<void>;
@@ -142,6 +143,8 @@ export interface IStorage {
   getDonationsByWallet(wallet: string): Promise<Donation[]>;
   getAllDonations(): Promise<Donation[]>;
   getTotalDonations(): Promise<{ total: string; count: number }>;
+  updateDonation(id: number, updates: Partial<Donation>): Promise<void>;
+  deleteDonation(id: number): Promise<void>;
 
   // Daily Rewards
   createDailyEntry(entry: InsertDailyEntry): Promise<DailyEntry>;
@@ -606,6 +609,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(campaigns.id, id));
   }
 
+  async deleteCampaign(id: number): Promise<void> {
+    await db.delete(campaigns).where(eq(campaigns.id, id));
+  }
+
   async getPopularCampaigns(limit: number): Promise<Campaign[]> {
     return await db.select().from(campaigns)
       .where(and(eq(campaigns.active, true), eq(campaigns.approved, true)))
@@ -663,6 +670,17 @@ export class DatabaseStorage implements IStorage {
   async getAllDonations(): Promise<Donation[]> {
     return await db.select().from(donations)
       .orderBy(desc(donations.createdAt));
+  }
+
+  async updateDonation(id: number, updates: Partial<Donation>): Promise<void> {
+    await db
+      .update(donations)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(donations.id, id));
+  }
+
+  async deleteDonation(id: number): Promise<void> {
+    await db.delete(donations).where(eq(donations.id, id));
   }
 
   async getTotalDonations(): Promise<{ total: string; count: number }> {

@@ -20,7 +20,9 @@ import {
   Briefcase,
   DollarSign,
   Users,
-  Filter
+  Filter,
+  Edit,
+  Trash2
 } from "lucide-react";
 
 interface Campaign {
@@ -88,6 +90,24 @@ export default function AdminCampaignsPage() {
       toast({
         title: "Error",
         description: "Failed to reject campaign.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/youhonor/campaigns/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/youhonor/campaigns"] });
+      toast({
+        title: "Campaign Deleted",
+        description: "Campaign has been permanently deleted.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete campaign.",
         variant: "destructive",
       });
     }
@@ -191,10 +211,21 @@ export default function AdminCampaignsPage() {
         {/* Campaigns Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Campaigns ({filteredCampaigns.length})</CardTitle>
-            <CardDescription>
-              Manage campaign approvals and view details
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Campaigns ({filteredCampaigns.length})</CardTitle>
+                <CardDescription>
+                  Manage campaign approvals and view details
+                </CardDescription>
+              </div>
+              <Button
+                onClick={() => setLocation("/youhonor/campaigns/create")}
+                data-testid="button-create-campaign"
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                Create New Campaign
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {campaignsLoading ? (
@@ -245,14 +276,25 @@ export default function AdminCampaignsPage() {
                           )}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-1">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => setLocation(`/campaign/${campaign.id}`)}
                               data-testid={`button-view-${campaign.id}`}
+                              title="View Campaign"
                             >
                               <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setLocation(`/youhonor/campaigns/${campaign.id}/edit`)}
+                              data-testid={`button-edit-${campaign.id}`}
+                              title="Edit Campaign"
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <Edit className="h-4 w-4" />
                             </Button>
                             {!campaign.approved && (
                               <>
@@ -263,6 +305,7 @@ export default function AdminCampaignsPage() {
                                   disabled={approveMutation.isPending}
                                   className="text-green-600 hover:text-green-700"
                                   data-testid={`button-approve-${campaign.id}`}
+                                  title="Approve Campaign"
                                 >
                                   <Check className="h-4 w-4" />
                                 </Button>
@@ -273,11 +316,27 @@ export default function AdminCampaignsPage() {
                                   disabled={rejectMutation.isPending}
                                   className="text-red-600 hover:text-red-700"
                                   data-testid={`button-reject-${campaign.id}`}
+                                  title="Reject Campaign"
                                 >
                                   <X className="h-4 w-4" />
                                 </Button>
                               </>
                             )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                if (confirm('Are you sure you want to delete this campaign? This action cannot be undone.')) {
+                                  deleteMutation.mutate(campaign.id);
+                                }
+                              }}
+                              disabled={deleteMutation.isPending}
+                              className="text-red-600 hover:text-red-700"
+                              data-testid={`button-delete-${campaign.id}`}
+                              title="Delete Campaign"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>

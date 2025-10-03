@@ -4228,6 +4228,345 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+  // ===== GENERIC DATA EXPLORER ENDPOINTS =====
+  
+  // GET /api/youhonor/data/tables - Get list of accessible tables
+  app.get("/api/youhonor/data/tables", authenticateAdmin, async (req, res) => {
+    try {
+      const { getAllTableNames, getTableConfig } = await import("../shared/adminTableConfig");
+      const tableNames = getAllTableNames();
+      
+      // Get summary for each table
+      const tables = await Promise.all(
+        tableNames.map(async (tableName) => {
+          const config = getTableConfig(tableName);
+          if (!config) return null;
+          
+          try {
+            const stats = await storage.getTableStats(tableName);
+            return {
+              name: tableName,
+              label: config.label,
+              icon: config.icon,
+              description: config.description,
+              recordCount: stats.total,
+              permissions: config.permissions,
+              sensitiveTable: config.sensitiveTable || false,
+            };
+          } catch (error) {
+            console.error(`Error getting stats for ${tableName}:`, error);
+            return {
+              name: tableName,
+              label: config.label,
+              icon: config.icon,
+              description: config.description,
+              recordCount: 0,
+              permissions: config.permissions,
+              sensitiveTable: config.sensitiveTable || false,
+            };
+          }
+        })
+      );
+      
+      res.json({ success: true, tables: tables.filter(t => t !== null) });
+    } catch (error) {
+      console.error("Error fetching table list:", error);
+      res.status(500).json({ error: "Failed to fetch table list" });
+    }
+  });
+
+  // GET /api/youhonor/data/:tableName/config - Get table configuration
+  app.get("/api/youhonor/data/:tableName/config", authenticateAdmin, async (req, res) => {
+    try {
+      const { tableName } = req.params;
+      const { getTableConfig } = await import("../shared/adminTableConfig");
+      
+      const config = getTableConfig(tableName);
+      if (!config) {
+        return res.status(404).json({ error: "Table configuration not found" });
+      }
+      
+      res.json({ success: true, config });
+    } catch (error) {
+      console.error("Error fetching table config:", error);
+      res.status(500).json({ error: "Failed to fetch table configuration" });
+    }
+  });
+
+  // GET /api/youhonor/data/:tableName - Get table data with advanced filtering
+  app.get("/api/youhonor/data/:tableName", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { tableName } = req.params;
+      const { getTableConfig, isTableAccessible } = await import("../shared/adminTableConfig");
+      
+      // Check if table is accessible
+      if (!isTableAccessible(tableName)) {
+        return res.status(403).json({ error: "Table not accessible" });
+      }
+      
+      const config = getTableConfig(tableName);
+      if (!config || !config.permissions.read) {
+        return res.status(403).json({ error: "Read permission denied" });
+      }
+      
+      // Log access for sensitive tables
+      if (config.auditAccess) {
+        await storage.createAdminLog({
+          adminId: req.admin.id,
+          action: `data_explorer_access_${tableName}`,
+          details: { tableName, query: req.query },
+          ipAddress: req.ip,
+          userAgent: req.get('user-agent') || null,
+        });
+      }
+      
+      // Parse query parameters
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || config.rowsPerPage || 50;
+      const sortColumn = req.query.sortColumn as string || config.defaultSort?.column;
+      const sortDirection = (req.query.sortDirection as 'asc' | 'desc') || config.defaultSort?.direction || 'desc';
+      const search = req.query.search as string;
+      
+      // Parse filters from query
+      const filters: Record<string, any> = {};
+      if (req.query.filters) {
+        try {
+          const parsedFilters = typeof req.query.filters === 'string' 
+            ? JSON.parse(req.query.filters) 
+            : req.query.filters;
+          Object.assign(filters, parsedFilters);
+        } catch (e) {
+          console.error("Error parsing filters:", e);
+        }
+      }
+      
+      // Get searchable columns
+      const searchColumns = config.columns
+        .filter(col => col.searchable)
+        .map(col => col.key);
+      
+      // Fetch data
+      const result = await storage.getGenericTableData(tableName, {
+        page,
+        limit: Math.min(limit, 200), // Cap at 200
+        sortColumn,
+        sortDirection,
+        filters,
+        search,
+        searchColumns,
+      });
+      
+      // Apply data masking for sensitive fields
+      const maskedData = result.data.map(record => {
+        const masked = { ...record };
+        config.columns.forEach(col => {
+          if (col.mask && masked[col.key]) {
+            const value = masked[col.key];
+            switch (col.mask) {
+              case 'card':
+                // Show only first 6 and last 4 digits of card
+                if (typeof value === 'string' && value.length > 10) {
+                  masked[col.key] = `${value.substring(0, 50)}... [MASKED]`;
+                }
+                break;
+              case 'session':
+                // Show only first 8 characters
+                if (typeof value === 'string') {
+                  masked[col.key] = `${value.substring(0, 8)}...`;
+                }
+                break;
+              case 'cvv':
+                // Completely mask CVV
+                masked[col.key] = '***';
+                break;
+              case 'full':
+                // Completely mask
+                masked[col.key] = '[REDACTED]';
+                break;
+            }
+          }
+        });
+        return masked;
+      });
+      
+      res.json({
+        success: true,
+        data: maskedData,
+        total: result.total,
+        page,
+        limit,
+        totalPages: Math.ceil(result.total / limit),
+      });
+    } catch (error) {
+      console.error("Error fetching table data:", error);
+      res.status(500).json({ error: "Failed to fetch table data" });
+    }
+  });
+
+  // GET /api/youhonor/data/:tableName/:id - Get single record
+  app.get("/api/youhonor/data/:tableName/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { tableName, id } = req.params;
+      const { getTableConfig, isTableAccessible } = await import("../shared/adminTableConfig");
+      
+      if (!isTableAccessible(tableName)) {
+        return res.status(403).json({ error: "Table not accessible" });
+      }
+      
+      const config = getTableConfig(tableName);
+      if (!config || !config.permissions.read) {
+        return res.status(403).json({ error: "Read permission denied" });
+      }
+      
+      const record = await storage.getGenericTableRecord(tableName, parseInt(id));
+      
+      if (!record) {
+        return res.status(404).json({ error: "Record not found" });
+      }
+      
+      // Apply masking
+      const masked = { ...record };
+      config.columns.forEach(col => {
+        if (col.mask && masked[col.key]) {
+          const value = masked[col.key];
+          switch (col.mask) {
+            case 'card':
+              if (typeof value === 'string' && value.length > 10) {
+                masked[col.key] = `${value.substring(0, 50)}... [MASKED]`;
+              }
+              break;
+            case 'session':
+              if (typeof value === 'string') {
+                masked[col.key] = `${value.substring(0, 8)}...`;
+              }
+              break;
+            case 'cvv':
+              masked[col.key] = '***';
+              break;
+            case 'full':
+              masked[col.key] = '[REDACTED]';
+              break;
+          }
+        }
+      });
+      
+      res.json({ success: true, record: masked });
+    } catch (error) {
+      console.error("Error fetching record:", error);
+      res.status(500).json({ error: "Failed to fetch record" });
+    }
+  });
+
+  // PUT /api/youhonor/data/:tableName/:id - Update record
+  app.put("/api/youhonor/data/:tableName/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { tableName, id } = req.params;
+      const { getTableConfig, isTableAccessible } = await import("../shared/adminTableConfig");
+      
+      if (!isTableAccessible(tableName)) {
+        return res.status(403).json({ error: "Table not accessible" });
+      }
+      
+      const config = getTableConfig(tableName);
+      if (!config || !config.permissions.update) {
+        return res.status(403).json({ error: "Update permission denied" });
+      }
+      
+      // Log action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: `data_explorer_update_${tableName}`,
+        details: { tableName, id, updates: req.body },
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent') || null,
+      });
+      
+      const updated = await storage.updateGenericTableRecord(tableName, parseInt(id), req.body);
+      
+      res.json({ success: true, record: updated });
+    } catch (error) {
+      console.error("Error updating record:", error);
+      res.status(500).json({ error: "Failed to update record" });
+    }
+  });
+
+  // DELETE /api/youhonor/data/:tableName/:id - Delete record
+  app.delete("/api/youhonor/data/:tableName/:id", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { tableName, id } = req.params;
+      const { getTableConfig, isTableAccessible } = await import("../shared/adminTableConfig");
+      
+      if (!isTableAccessible(tableName)) {
+        return res.status(403).json({ error: "Table not accessible" });
+      }
+      
+      const config = getTableConfig(tableName);
+      if (!config || !config.permissions.delete) {
+        return res.status(403).json({ error: "Delete permission denied" });
+      }
+      
+      // Log action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: `data_explorer_delete_${tableName}`,
+        details: { tableName, id },
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent') || null,
+      });
+      
+      await storage.deleteGenericTableRecord(tableName, parseInt(id));
+      
+      res.json({ success: true, message: "Record deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting record:", error);
+      res.status(500).json({ error: "Failed to delete record" });
+    }
+  });
+
+  // GET /api/youhonor/data/:tableName/export - Export table data
+  app.get("/api/youhonor/data/:tableName/export", authenticateAdmin, async (req: any, res) => {
+    try {
+      const { tableName } = req.params;
+      const { getTableConfig, isTableAccessible } = await import("../shared/adminTableConfig");
+      
+      if (!isTableAccessible(tableName)) {
+        return res.status(403).json({ error: "Table not accessible" });
+      }
+      
+      const config = getTableConfig(tableName);
+      if (!config || !config.permissions.export) {
+        return res.status(403).json({ error: "Export permission denied" });
+      }
+      
+      // Log action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: `data_explorer_export_${tableName}`,
+        details: { tableName },
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent') || null,
+      });
+      
+      const data = await storage.exportTableData(tableName);
+      
+      // Apply masking for sensitive fields
+      const maskedData = data.map(record => {
+        const masked = { ...record };
+        config.columns.forEach(col => {
+          if (col.mask && masked[col.key]) {
+            masked[col.key] = '[REDACTED]';
+          }
+        });
+        return masked;
+      });
+      
+      res.json({ success: true, data: maskedData });
+    } catch (error) {
+      console.error("Error exporting table data:", error);
+      res.status(500).json({ error: "Failed to export table data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

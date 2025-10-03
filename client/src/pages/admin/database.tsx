@@ -94,13 +94,13 @@ export default function AdminDatabase() {
   const [showSensitiveData, setShowSensitiveData] = useState(false);
 
   // Fetch table list
-  const { data: tablesData, isLoading: isLoadingTables } = useQuery({
+  const { data: tablesData, isLoading: isLoadingTables } = useQuery<{ success: boolean; tables: TableInfo[] }>({
     queryKey: ["/api/youhonor/data/tables"],
     retry: 1,
   });
 
   // Fetch table configuration
-  const { data: configData } = useQuery({
+  const { data: configData } = useQuery<{ success: boolean; config: TableConfig }>({
     queryKey: ["/api/youhonor/data", selectedTable, "config"],
     enabled: !!selectedTable,
   });
@@ -136,9 +136,7 @@ export default function AdminDatabase() {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/youhonor/data/${selectedTable}/${id}`, {
-        method: "DELETE",
-      });
+      return apiRequest("DELETE", `/api/youhonor/data/${selectedTable}/${id}`);
     },
     onSuccess: () => {
       toast({ title: "Success", description: "Record deleted successfully" });

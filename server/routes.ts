@@ -929,6 +929,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "DONATE campaigns cannot be created by companies" });
       }
 
+      // CAMPAIGN CREATION FEE CHECK (Dynamic from platform settings)
+      const campaignFeeKey = campaignData.campaignType === "FUND" ? "campaign_fee_fund" : "campaign_fee_donate";
+      const feeSetting = await storage.getPlatformSetting(campaignFeeKey);
+      const campaignFee = parseFloat(feeSetting?.value || "0");
+
+      // If campaign fee is required (> 0), validate payment
+      if (campaignFee > 0) {
+        if (!campaignData.campaignFeeTxHash) {
+          return res.status(400).json({ 
+            error: "Campaign creation fee required",
+            details: `${campaignData.campaignType} campaigns require a ${campaignFee} USDT payment`,
+            requiredFee: campaignFee,
+            feeType: campaignData.campaignType
+          });
+        }
+
+        // Security: Validate transaction hash format
+        if (!/^0x[a-fA-F0-9]{64}$/.test(campaignData.campaignFeeTxHash)) {
+          return res.status(400).json({ error: "Invalid campaign fee transaction hash format" });
+        }
+
+        // Security: Check transaction idempotency
+        const transactionAlreadyUsed = await storage.isTransactionUsed(campaignData.campaignFeeTxHash);
+        if (transactionAlreadyUsed) {
+          return res.status(409).json({ 
+            error: "Campaign fee transaction already processed", 
+            code: "TRANSACTION_ALREADY_USED"
+          });
+        }
+
+        // Get platform wallet and USDT contract settings
+        const paymentSettings = await storage.getPlatformSettings("payment");
+        const platformWalletSetting = paymentSettings.find(s => s.key === "ethereum_wallet_address");
+        const usdtContractSetting = paymentSettings.find(s => s.key === "ethereum_usdt_contract");
+        
+        if (!platformWalletSetting?.value) {
+          return res.status(500).json({ error: "Platform wallet not configured" });
+        }
+
+        const usdtContract = usdtContractSetting?.value || "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+
+        // Verify campaign fee payment
+        try {
+          const { verifyPayment } = await import("./blockchain");
+          const verification = await verifyPayment(
+            "ethereum",
+            campaignData.campaignFeeTxHash,
+            campaignFee.toString(),
+            usdtContract,
+            platformWalletSetting.value
+          );
+          
+          if (!verification.success) {
+            return res.status(400).json({ 
+              error: `Campaign fee payment verification failed: ${verification.error}. Required: ${campaignFee} USDT with minimum 3 confirmations.` 
+            });
+          }
+
+          // Mark transaction as used
+          await storage.createUsedTransaction({
+            txHash: campaignData.campaignFeeTxHash,
+            network: "ethereum",
+            purpose: `campaign_fee_${campaignData.campaignType}`,
+            wallet: campaignData.ownerWallet,
+            amount: verification.amount || campaignFee.toString(),
+            tokenAddress: usdtContract,
+            blockNumber: verification.blockNumber
+          });
+          
+        } catch (error) {
+          console.error('Campaign fee verification error:', error);
+          return res.status(400).json({ 
+            error: `Failed to verify campaign fee payment: ${error}. Please ensure you sent ${campaignFee} USDT to the platform wallet.` 
+          });
+        }
+      }
+
       // CRITICAL: KYB verification requirement for FUND campaigns
       if (campaignData.campaignType === "FUND") {
         const verification = await storage.getCorporateVerification(campaignData.ownerWallet);

@@ -36,7 +36,9 @@ export default function AdminSettingsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/youhonor/settings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/youhonor/settings-categorized"] });
       queryClient.invalidateQueries({ queryKey: ["/api/settings-map"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/public/platform-settings"] });
       toast({
         title: "Başarılı",
         description: "Ayar güncellendi",

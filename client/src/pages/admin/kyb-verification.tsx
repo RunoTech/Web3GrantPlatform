@@ -396,19 +396,48 @@ export default function KYBVerificationPage() {
               <div>
                 <h3 className="font-medium mb-3">Uploaded Documents</h3>
                 {selectedVerification.documents?.length ? (
-                  <div className="space-y-2">
-                    {selectedVerification.documents.map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between p-3 border rounded">
-                        <div className="flex items-center gap-3">
-                          <FileText className="h-5 w-5 text-gray-400" />
-                          <div>
-                            <p className="font-medium">{getDocumentTypeName(doc.documentType)}</p>
-                            <p className="text-sm text-gray-500">{doc.fileName} • {Math.round(doc.fileSize / 1024)} KB</p>
+                  <div className="space-y-4">
+                    {selectedVerification.documents.map((doc) => {
+                      const isImage = doc.mimeType?.startsWith('image/');
+                      
+                      return (
+                        <div key={doc.id} className="border rounded-lg overflow-hidden">
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800">
+                            <div className="flex items-center gap-3">
+                              <FileText className="h-5 w-5 text-gray-400" />
+                              <div>
+                                <p className="font-medium">{getDocumentTypeName(doc.documentType)}</p>
+                                <p className="text-sm text-gray-500">{doc.fileName} • {Math.round(doc.fileSize / 1024)} KB</p>
+                              </div>
+                            </div>
+                            <Badge variant="outline">{doc.mimeType}</Badge>
                           </div>
+                          
+                          {isImage ? (
+                            <div className="p-4 bg-white dark:bg-gray-900">
+                              <img 
+                                src={doc.fileUrl} 
+                                alt={doc.fileName}
+                                className="max-w-full h-auto max-h-96 rounded border"
+                                loading="lazy"
+                              />
+                            </div>
+                          ) : (
+                            <div className="p-3 bg-white dark:bg-gray-900">
+                              <a 
+                                href={doc.fileUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline flex items-center gap-2"
+                              >
+                                <FileText className="h-4 w-4" />
+                                Open document in new tab
+                              </a>
+                            </div>
+                          )}
                         </div>
-                        <Badge variant="outline">{doc.mimeType}</Badge>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-gray-500">No documents uploaded</p>

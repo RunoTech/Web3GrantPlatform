@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { useAdminSettings } from "@/hooks/useSettings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Settings, Save, Plus, Trash2, Edit3, Database } from "lucide-react";
+import { Settings, Save, Plus, Trash2, Edit3, Database, ArrowLeft } from "lucide-react";
 
 interface PlatformSetting {
   id: number;
@@ -23,6 +24,7 @@ interface PlatformSetting {
 }
 
 export default function AdminSettingsPage() {
+  const [, setLocation] = useLocation();
   const { data: categorizedSettings, isLoading } = useAdminSettings();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -216,32 +218,31 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-6 space-y-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Settings className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Platform Administration</h1>
+    <div className="min-h-screen bg-background">
+      <header className="border-b bg-card/50 backdrop-blur">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setLocation("/youhonor")}
+              data-testid="button-back"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <Settings className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Platform Settings</h1>
+              <p className="text-sm text-muted-foreground">Configure platform behavior and appearance</p>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-4">
-          <Button variant="secondary" size="lg" className="text-foreground" asChild>
-            <a href="/youhonor/database" className="flex items-center gap-2">
-              <Database className="w-4 h-4" />
-              Database Management
-            </a>
-          </Button>
-          <Button variant="secondary" size="lg" className="text-foreground" asChild>
-            <a href="/youhonor/daily-rewards" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
-              Daily Rewards
-            </a>
-          </Button>
-        </div>
-      </div>
-      <div>
-        <p className="text-sm text-muted-foreground">
-          Sitenin tüm dinamik içeriklerini buradan yönetebilirsiniz
-        </p>
-      </div>
+      </header>
+      
+      <div className="container mx-auto px-4 py-8 space-y-6">
 
       <Tabs defaultValue="general" className="bg-muted/40 rounded-lg space-y-4">
         <TabsList className="bg-transparent grid w-full grid-cols-8">

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,7 +32,8 @@ import {
   Filter,
   Download,
   Upload,
-  RefreshCw
+  RefreshCw,
+  ArrowLeft
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -125,6 +127,7 @@ const databaseTables: DatabaseTable[] = [
 ];
 
 export default function DatabaseAdminPage() {
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedTable, setSelectedTable] = useState<string>("accounts");

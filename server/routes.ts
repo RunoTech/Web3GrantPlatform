@@ -20,7 +20,6 @@ import {
   insertUserNonceSchema,
   insertUserSessionSchema,
   insertPendingPaymentSchema,
-  insertFailedCardAttemptSchema,
   type Admin,
   type UserNonce,
   type UserSession,

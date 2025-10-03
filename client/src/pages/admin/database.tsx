@@ -1,553 +1,574 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Database, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Users, 
-  Settings, 
-  Coins, 
-  Calendar,
-  Trophy,
-  Building,
-  UserCheck,
-  FileText,
-  MessageSquare,
-  Activity,
-  Search,
-  Filter,
+  Search, 
+  ChevronLeft, 
+  ChevronRight,
+  Edit,
+  Trash2,
   Download,
-  Upload,
   RefreshCw,
-  ArrowLeft
+  AlertTriangle,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowUpDown,
+  Filter
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import * as Icons from "lucide-react";
 
-interface DatabaseTable {
+interface TableInfo {
   name: string;
-  icon: any;
-  description: string;
-  columns: string[];
-  primaryKey: string;
+  label: string;
+  icon?: string;
+  description?: string;
+  recordCount: number;
+  permissions: {
+    read: boolean;
+    create: boolean;
+    update: boolean;
+    delete: boolean;
+    export: boolean;
+  };
+  sensitiveTable: boolean;
 }
 
-// Database table definitions
-const databaseTables: DatabaseTable[] = [
-  {
-    name: "accounts",
-    icon: Users,
-    description: "User wallet accounts and activation status",
-    columns: ["id", "wallet", "active", "activationTxHash", "activationDate", "createdAt"],
-    primaryKey: "id"
-  },
-  {
-    name: "campaigns",
-    icon: Building,
-    description: "Donation and fund campaigns",
-    columns: ["id", "title", "description", "targetAmount", "raisedAmount", "creatorWallet", "campaignType", "status", "endDate", "createdAt"],
-    primaryKey: "id"
-  },
-  {
-    name: "donations",
-    icon: Coins,
-    description: "All donation transactions",
-    columns: ["id", "campaignId", "donorWallet", "amount", "txHash", "blockNumber", "createdAt"],
-    primaryKey: "id"
-  },
-  {
-    name: "dailyEntries",
-    icon: Calendar,
-    description: "Daily reward participation entries",
-    columns: ["id", "wallet", "date", "entryHash", "createdAt"],
-    primaryKey: "id"
-  },
-  {
-    name: "dailyWinners",
-    icon: Trophy,
-    description: "Daily reward winners and prizes",
-    columns: ["id", "wallet", "date", "amount", "txHash", "drawType", "position", "createdAt"],
-    primaryKey: "id"
-  },
-  {
-    name: "admins",
-    icon: UserCheck,
-    description: "Admin user accounts and roles",
-    columns: ["id", "username", "email", "role", "active", "createdAt", "updatedAt"],
-    primaryKey: "id"
-  },
-  {
-    name: "platformSettings",
-    icon: Settings,
-    description: "Platform configuration settings",
-    columns: ["id", "key", "value", "description", "category", "dataType", "updatedAt", "updatedBy"],
-    primaryKey: "id"
-  },
-  {
-    name: "networkFees",
-    icon: Coins,
-    description: "Network activation fees configuration",
-    columns: ["id", "network", "tokenSymbol", "tokenAddress", "decimals", "amount", "active", "createdAt", "updatedAt"],
-    primaryKey: "id"
-  },
-  {
-    name: "footerLinks",
-    icon: FileText,
-    description: "Footer navigation links",
-    columns: ["id", "title", "url", "section", "orderIndex", "active", "createdAt", "updatedAt"],
-    primaryKey: "id"
-  },
-  {
-    name: "announcements",
-    icon: MessageSquare,
-    description: "Platform announcements",
-    columns: ["id", "title", "content", "type", "active", "startDate", "endDate", "createdAt", "updatedAt"],
-    primaryKey: "id"
-  },
-  {
-    name: "adminLogs",
-    icon: Activity,
-    description: "Admin activity logs",
-    columns: ["id", "adminId", "action", "tableName", "recordId", "changes", "ipAddress", "userAgent", "createdAt"],
-    primaryKey: "id"
-  }
-];
+interface ColumnConfig {
+  key: string;
+  label: string;
+  type: string;
+  sortable?: boolean;
+  filterable?: boolean;
+  searchable?: boolean;
+  hidden?: boolean;
+  mask?: string;
+  enumValues?: string[];
+}
 
-export default function DatabaseAdminPage() {
-  const [, setLocation] = useLocation();
+interface TableConfig {
+  name: string;
+  label: string;
+  icon?: string;
+  description?: string;
+  permissions: {
+    read: boolean;
+    create: boolean;
+    update: boolean;
+    delete: boolean;
+    export: boolean;
+  };
+  columns: ColumnConfig[];
+  defaultSort?: { column: string; direction: "asc" | "desc" };
+  rowsPerPage?: number;
+  primaryKey?: string;
+  sensitiveTable?: boolean;
+  auditAccess?: boolean;
+}
+
+export default function AdminDatabase() {
+  const [location, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedTable, setSelectedTable] = useState<string>("accounts");
-  const [searchTerm, setSearchTerm] = useState("");
+
+  const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(50);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<any>(null);
-  const [formData, setFormData] = useState<any>({});
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortColumn, setSortColumn] = useState<string | undefined>();
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [filters, setFilters] = useState<Record<string, any>>({});
+  const [selectedRecord, setSelectedRecord] = useState<any>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [showSensitiveData, setShowSensitiveData] = useState(false);
+
+  // Fetch table list
+  const { data: tablesData, isLoading: isLoadingTables } = useQuery({
+    queryKey: ["/api/youhonor/data/tables"],
+    retry: 1,
+  });
+
+  // Fetch table configuration
+  const { data: configData } = useQuery({
+    queryKey: ["/api/youhonor/data", selectedTable, "config"],
+    enabled: !!selectedTable,
+  });
+
+  const tableConfig: TableConfig | undefined = configData?.config;
 
   // Fetch table data
-  const { data: tableData = [], isLoading, refetch } = useQuery({
-    queryKey: ["admin-table", selectedTable, currentPage, pageSize, searchTerm],
+  const { data: tableData, isLoading: isLoadingData, refetch: refetchData } = useQuery({
+    queryKey: ["/api/youhonor/data", selectedTable, currentPage, searchTerm, sortColumn, sortDirection, filters],
+    enabled: !!selectedTable && !!tableConfig,
     queryFn: async () => {
-      const response = await apiRequest("GET", `/api/youhonor/database/${selectedTable}?page=${currentPage}&limit=${pageSize}&search=${searchTerm}`);
-      return Array.isArray(response) ? response : [];
-    },
-  });
+      const params = new URLSearchParams();
+      params.append("page", currentPage.toString());
+      params.append("limit", (tableConfig?.rowsPerPage || 50).toString());
+      if (searchTerm) params.append("search", searchTerm);
+      if (sortColumn) {
+        params.append("sortColumn", sortColumn);
+        params.append("sortDirection", sortDirection);
+      }
+      if (Object.keys(filters).length > 0) {
+        params.append("filters", JSON.stringify(filters));
+      }
 
-  // Fetch table stats
-  const { data: tableStats = { total: 0 } } = useQuery<{ total: number }>({
-    queryKey: ["admin-table-stats", selectedTable],
-    queryFn: async () => {
-      const response = await apiRequest("GET", `/api/youhonor/database/${selectedTable}/stats`);
-      return response || { total: 0 };
-    },
-  });
+      const response = await fetch(`/api/youhonor/data/${selectedTable}?${params.toString()}`, {
+        credentials: "include",
+      });
 
-  // Create/Update mutation
-  const createUpdateMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const endpoint = editingRecord 
-        ? `/api/youhonor/database/${selectedTable}/${editingRecord.id}`
-        : `/api/youhonor/database/${selectedTable}`;
-      const method = editingRecord ? "PUT" : "POST";
-      return apiRequest(method, endpoint, data);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: editingRecord ? "Record updated successfully" : "Record created successfully",
-      });
-      setIsDialogOpen(false);
-      setEditingRecord(null);
-      setFormData({});
-      refetch();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Operation failed",
-        variant: "destructive",
-      });
+      if (!response.ok) throw new Error("Failed to fetch table data");
+      return response.json();
     },
   });
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => apiRequest("DELETE", `/api/youhonor/database/${selectedTable}/${id}`),
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Record deleted successfully",
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/youhonor/data/${selectedTable}/${id}`, {
+        method: "DELETE",
       });
-      refetch();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Record deleted successfully" });
+      refetchData();
+      setIsDeleteDialogOpen(false);
+      setSelectedRecord(null);
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Delete failed",
+        description: error.message || "Failed to delete record",
         variant: "destructive",
       });
     },
   });
 
-  // Export data mutation
+  // Export mutation
   const exportMutation = useMutation({
-    mutationFn: () => apiRequest("GET", `/api/youhonor/database/${selectedTable}/export`),
+    mutationFn: async () => {
+      const response = await fetch(`/api/youhonor/data/${selectedTable}/export`, {
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to export data");
+      return response.json();
+    },
     onSuccess: (data) => {
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      // Download as JSON
+      const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `${selectedTable}_export_${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `${selectedTable}_${new Date().toISOString()}.json`;
       a.click();
-      window.URL.revokeObjectURL(url);
-      
+      URL.revokeObjectURL(url);
+      toast({ title: "Success", description: "Data exported successfully" });
+    },
+    onError: (error: any) => {
       toast({
-        title: "Success",
-        description: "Data exported successfully",
+        title: "Error",
+        description: error.message || "Failed to export data",
+        variant: "destructive",
       });
     },
   });
 
-  const currentTable = databaseTables.find(table => table.name === selectedTable);
-  const IconComponent = currentTable?.icon || Database;
+  const tables: TableInfo[] = tablesData?.tables || [];
+  const records = tableData?.data || [];
+  const total = tableData?.total || 0;
+  const totalPages = tableData?.totalPages || 1;
 
-  const handleEdit = (record: any) => {
-    setEditingRecord(record);
-    setFormData(record);
-    setIsDialogOpen(true);
+  const handleTableSelect = (tableName: string) => {
+    setSelectedTable(tableName);
+    setCurrentPage(1);
+    setSearchTerm("");
+    setFilters({});
+    setSortColumn(undefined);
+    setSortDirection("desc");
   };
 
-  const handleCreate = () => {
-    setEditingRecord(null);
-    setFormData({});
-    setIsDialogOpen(true);
-  };
-
-  const handleSave = () => {
-    createUpdateMutation.mutate(formData);
-  };
-
-  const handleDelete = (id: string) => {
-    deleteMutation.mutate(id);
-  };
-
-  const formatValue = (value: any, column: string) => {
-    if (value === null || value === undefined) return "-";
-    if (column.includes("Date") || column.includes("At")) {
-      return new Date(value).toLocaleString();
+  const handleSort = (columnKey: string) => {
+    if (sortColumn === columnKey) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(columnKey);
+      setSortDirection("desc");
     }
-    if (column.includes("Hash") || column.includes("wallet")) {
-      return typeof value === 'string' && value.length > 20 
-        ? `${value.slice(0, 8)}...${value.slice(-6)}`
-        : value;
+    setCurrentPage(1);
+  };
+
+  const handleDelete = (record: any) => {
+    setSelectedRecord(record);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedRecord) {
+      deleteMutation.mutate(selectedRecord.id);
     }
-    if (typeof value === 'boolean') {
+  };
+
+  const renderCellValue = (value: any, column: ColumnConfig) => {
+    if (value === null || value === undefined) {
+      return <span className="text-muted-foreground">—</span>;
+    }
+
+    // Handle masked values
+    if (column.mask && !showSensitiveData) {
       return (
-        <Badge variant={value ? "default" : "secondary"}>
-          {value ? "Yes" : "No"}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Lock className="h-3 w-3 text-muted-foreground" />
+          <span className="text-muted-foreground">[Protected]</span>
+        </div>
       );
     }
-    if (typeof value === 'object') {
-      return JSON.stringify(value).substring(0, 50) + "...";
+
+    switch (column.type) {
+      case "boolean":
+        return (
+          <Badge variant={value ? "default" : "secondary"}>
+            {value ? "Yes" : "No"}
+          </Badge>
+        );
+      case "date":
+      case "datetime":
+        return new Date(value).toLocaleString();
+      case "decimal":
+      case "number":
+        return typeof value === "number" ? value.toLocaleString() : value;
+      case "wallet":
+      case "txhash":
+        return (
+          <code className="text-xs bg-muted px-2 py-1 rounded">
+            {value.substring(0, 10)}...{value.substring(value.length - 8)}
+          </code>
+        );
+      case "json":
+        return (
+          <code className="text-xs bg-muted px-2 py-1 rounded max-w-xs truncate block">
+            {JSON.stringify(value).substring(0, 50)}...
+          </code>
+        );
+      case "enum":
+        return <Badge variant="outline">{value}</Badge>;
+      default:
+        if (typeof value === "string" && value.length > 100) {
+          return <span className="truncate block max-w-xs">{value.substring(0, 100)}...</span>;
+        }
+        return value.toString();
     }
-    return String(value);
+  };
+
+  const getIcon = (iconName?: string) => {
+    if (!iconName) return Database;
+    const Icon = (Icons as any)[iconName];
+    return Icon || Database;
   };
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Database Administration</h1>
-          <p className="text-muted-foreground">Complete database management and control</p>
-        </div>
-        <div className="flex items-center space-x-4">
-          <Button 
-            variant="outline" 
-            onClick={() => refetch()}
-            disabled={isLoading}
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto p-6">
+        {/* Header */}
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/youhonor")}
+            className="mb-4"
+            data-testid="button-back-admin"
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            Back to Admin
           </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => exportMutation.mutate()}
-            disabled={exportMutation.isPending}
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Export
-          </Button>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <Database className="h-8 w-8" />
+                Database Explorer
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Browse and manage all platform database tables
+              </p>
+            </div>
+            {selectedTable && tableConfig?.permissions.export && (
+              <Button
+                onClick={() => exportMutation.mutate()}
+                disabled={exportMutation.isPending}
+                data-testid="button-export"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export Data
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
 
-      <Tabs value={selectedTable} onValueChange={setSelectedTable} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 lg:grid-cols-11">
-          {databaseTables.map((table) => {
-            const Icon = table.icon;
-            return (
-              <TabsTrigger key={table.name} value={table.name} className="flex items-center space-x-2">
-                <Icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{table.name}</span>
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
-
-        {databaseTables.map((table) => (
-          <TabsContent key={table.name} value={table.name} className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar - Table List */}
+          <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <IconComponent className="w-8 h-8 text-primary" />
-                    <div>
-                      <CardTitle className="text-xl">{table.name}</CardTitle>
-                      <CardDescription>{table.description}</CardDescription>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="outline">
-                      Total: {tableStats.total || 0}
-                    </Badge>
-                    <Button onClick={handleCreate}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add New
-                    </Button>
-                  </div>
-                </div>
+                <CardTitle className="text-sm">Tables ({tables.length})</CardTitle>
+                <CardDescription>Select a table to view</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Search and Filter */}
-                <div className="flex items-center space-x-4">
-                  <div className="flex-1">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input
-                        placeholder={`Search ${table.name}...`}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
+              <CardContent className="p-0">
+                {isLoadingTables ? (
+                  <div className="p-4 text-center text-sm text-muted-foreground">
+                    Loading tables...
                   </div>
-                  <Select value={pageSize.toString()} onValueChange={(value) => setPageSize(Number(value))}>
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="25">25 rows</SelectItem>
-                      <SelectItem value="50">50 rows</SelectItem>
-                      <SelectItem value="100">100 rows</SelectItem>
-                      <SelectItem value="200">200 rows</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Data Table */}
-                <div className="border rounded-lg overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          {table.columns.map((column) => (
-                            <TableHead key={column} className="whitespace-nowrap">
-                              {column}
-                            </TableHead>
-                          ))}
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {isLoading ? (
-                          <TableRow>
-                            <TableCell colSpan={table.columns.length + 1} className="text-center py-8">
-                              <RefreshCw className="w-6 h-6 animate-spin mx-auto" />
-                              <p className="mt-2 text-muted-foreground">Loading...</p>
-                            </TableCell>
-                          </TableRow>
-                        ) : tableData.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={table.columns.length + 1} className="text-center py-8">
-                              <Database className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                              <p className="text-muted-foreground">No records found</p>
-                            </TableCell>
-                          </TableRow>
-                        ) : (
-                          tableData.map((record: any) => (
-                            <TableRow key={record[table.primaryKey]}>
-                              {table.columns.map((column) => (
-                                <TableCell key={column} className="max-w-xs truncate">
-                                  {formatValue(record[column], column)}
-                                </TableCell>
-                              ))}
-                              <TableCell className="text-right space-x-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleEdit(record)}
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="text-destructive hover:text-destructive"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Delete Record</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Are you sure you want to delete this record? This action cannot be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        onClick={() => handleDelete(record[table.primaryKey])}
-                                        className="bg-destructive hover:bg-destructive/90"
-                                      >
-                                        Delete
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
+                ) : (
+                  <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
+                    {tables.map((table) => {
+                      const Icon = getIcon(table.icon);
+                      const isSelected = selectedTable === table.name;
+                      return (
+                        <button
+                          key={table.name}
+                          onClick={() => handleTableSelect(table.name)}
+                          className={`w-full text-left p-3 border-b hover:bg-accent transition-colors ${
+                            isSelected ? "bg-accent" : ""
+                          }`}
+                          data-testid={`button-select-${table.name}`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <Icon className="h-4 w-4 shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-sm truncate">{table.label}</div>
+                                <div className="text-xs text-muted-foreground truncate">
+                                  {table.description}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-1 shrink-0">
+                              <Badge variant="secondary" className="text-xs">
+                                {table.recordCount}
+                              </Badge>
+                              {table.sensitiveTable && (
+                                <Lock className="h-3 w-3 text-yellow-500" />
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
-                </div>
-
-                {/* Pagination */}
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
-                    Showing {Math.min((currentPage - 1) * pageSize + 1, tableStats.total || 0)} to{' '}
-                    {Math.min(currentPage * pageSize, tableStats.total || 0)} of {tableStats.total || 0} entries
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      disabled={currentPage <= 1}
-                    >
-                      Previous
-                    </Button>
-                    <div className="flex items-center space-x-1">
-                      <Input
-                        type="number"
-                        value={currentPage}
-                        onChange={(e) => setCurrentPage(Number(e.target.value) || 1)}
-                        className="w-16 text-center"
-                        min="1"
-                        max={Math.ceil((tableStats.total || 0) / pageSize)}
-                      />
-                      <span className="text-sm text-muted-foreground">
-                        of {Math.ceil((tableStats.total || 0) / pageSize)}
-                      </span>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(p => p + 1)}
-                      disabled={currentPage >= Math.ceil((tableStats.total || 0) / pageSize)}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
-          </TabsContent>
-        ))}
-      </Tabs>
-
-      {/* Create/Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingRecord ? "Edit Record" : "Create New Record"}
-            </DialogTitle>
-            <DialogDescription>
-              {editingRecord ? "Update the selected record" : `Add a new record to ${selectedTable}`}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
-            {currentTable?.columns.map((column) => {
-              if (column === "id" && !editingRecord) return null;
-              if (column.includes("createdAt") || column.includes("updatedAt")) return null;
-              
-              return (
-                <div key={column} className="grid gap-2">
-                  <Label htmlFor={column}>{column}</Label>
-                  {column.includes("description") || column.includes("content") ? (
-                    <Textarea
-                      id={column}
-                      value={formData[column] || ""}
-                      onChange={(e) => setFormData({...formData, [column]: e.target.value})}
-                      placeholder={`Enter ${column}...`}
-                    />
-                  ) : column.includes("active") || column.includes("boolean") ? (
-                    <Select
-                      value={formData[column]?.toString() || "false"}
-                      onValueChange={(value) => setFormData({...formData, [column]: value === "true"})}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="true">Yes</SelectItem>
-                        <SelectItem value="false">No</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Input
-                      id={column}
-                      value={formData[column] || ""}
-                      onChange={(e) => setFormData({...formData, [column]: e.target.value})}
-                      placeholder={`Enter ${column}...`}
-                      type={column.includes("amount") || column.includes("decimals") || column.includes("orderIndex") ? "number" : "text"}
-                    />
-                  )}
-                </div>
-              );
-            })}
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave} disabled={createUpdateMutation.isPending}>
-              {createUpdateMutation.isPending ? "Saving..." : "Save"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          {/* Main Content - Table Data */}
+          <div className="lg:col-span-3">
+            {!selectedTable ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Database className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Table Selected</h3>
+                  <p className="text-muted-foreground">
+                    Select a table from the sidebar to view its data
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="flex items-center gap-2">
+                        {getIcon(tableConfig?.icon) && (
+                          <span>{getIcon(tableConfig?.icon)({ className: "h-5 w-5" })}</span>
+                        )}
+                        {tableConfig?.label || selectedTable}
+                        {tableConfig?.sensitiveTable && (
+                          <Badge variant="destructive" className="ml-2">
+                            <AlertTriangle className="h-3 w-3 mr-1" />
+                            Sensitive
+                          </Badge>
+                        )}
+                      </CardTitle>
+                      <CardDescription>{tableConfig?.description}</CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                      {tableConfig?.sensitiveTable && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowSensitiveData(!showSensitiveData)}
+                          data-testid="button-toggle-sensitive"
+                        >
+                          {showSensitiveData ? (
+                            <EyeOff className="h-4 w-4 mr-2" />
+                          ) : (
+                            <Eye className="h-4 w-4 mr-2" />
+                          )}
+                          {showSensitiveData ? "Hide" : "Show"} Sensitive
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => refetchData()}
+                        data-testid="button-refresh"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {/* Search and Filters */}
+                  <div className="mb-4 flex gap-2">
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Search..."
+                        value={searchTerm}
+                        onChange={(e) => {
+                          setSearchTerm(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        className="max-w-sm"
+                        data-testid="input-search"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Table */}
+                  {isLoadingData ? (
+                    <div className="py-12 text-center text-muted-foreground">
+                      Loading data...
+                    </div>
+                  ) : records.length === 0 ? (
+                    <div className="py-12 text-center text-muted-foreground">
+                      No records found
+                    </div>
+                  ) : (
+                    <>
+                      <div className="border rounded-lg overflow-hidden">
+                        <div className="overflow-x-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                {tableConfig?.columns
+                                  .filter((col) => !col.hidden)
+                                  .map((column) => (
+                                    <TableHead
+                                      key={column.key}
+                                      className={column.sortable ? "cursor-pointer select-none" : ""}
+                                      onClick={() => column.sortable && handleSort(column.key)}
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        {column.label}
+                                        {column.sortable && (
+                                          <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
+                                        )}
+                                      </div>
+                                    </TableHead>
+                                  ))}
+                                <TableHead className="w-[100px]">Actions</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {records.map((record: any, idx: number) => (
+                                <TableRow key={record.id || idx}>
+                                  {tableConfig?.columns
+                                    .filter((col) => !col.hidden)
+                                    .map((column) => (
+                                      <TableCell key={column.key}>
+                                        {renderCellValue(record[column.key], column)}
+                                      </TableCell>
+                                    ))}
+                                  <TableCell>
+                                    <div className="flex items-center gap-2">
+                                      {tableConfig?.permissions.delete && (
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => handleDelete(record)}
+                                          data-testid={`button-delete-${record.id}`}
+                                        >
+                                          <Trash2 className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </div>
+
+                      {/* Pagination */}
+                      <div className="mt-4 flex items-center justify-between">
+                        <div className="text-sm text-muted-foreground">
+                          Showing {((currentPage - 1) * (tableConfig?.rowsPerPage || 50)) + 1} to{" "}
+                          {Math.min(currentPage * (tableConfig?.rowsPerPage || 50), total)} of {total} records
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                            disabled={currentPage === 1}
+                            data-testid="button-prev-page"
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+                          <span className="text-sm">
+                            Page {currentPage} of {totalPages}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                            disabled={currentPage === totalPages}
+                            data-testid="button-next-page"
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Record</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this record? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </div>
   );
 }

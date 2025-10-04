@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWallet } from "@/hooks/useWallet";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ interface DonationFilters {
 
 export default function DonationHistoryTable() {
   const { address, isConnected } = useWallet();
+  const { t } = useLanguage();
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<DonationFilters>({
     startDate: '',
@@ -101,8 +103,8 @@ export default function DonationHistoryTable() {
       <Card>
         <CardContent className="p-8 text-center">
           <DollarSign className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-semibold mb-2">Connect Your Wallet</h3>
-          <p className="text-muted-foreground">Connect your wallet to view your donation history</p>
+          <h3 className="text-lg font-semibold mb-2">{t('donations.history.connect_wallet')}</h3>
+          <p className="text-muted-foreground">{t('donations.history.connect_desc')}</p>
         </CardContent>
       </Card>
     );
@@ -114,7 +116,7 @@ export default function DonationHistoryTable() {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Calendar className="w-5 h-5" />
-            Donation History
+            {t('donations.history.title')}
           </CardTitle>
           <div className="flex items-center gap-2">
             <Button
@@ -124,7 +126,7 @@ export default function DonationHistoryTable() {
               data-testid="button-toggle-filters"
             >
               <Filter className="w-4 h-4 mr-2" />
-              Filters
+              {t('donations.history.filters')}
               {getActiveFilterCount() > 0 && (
                 <Badge variant="secondary" className="ml-2">
                   {getActiveFilterCount()}
@@ -142,7 +144,7 @@ export default function DonationHistoryTable() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Date Range */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Start Date</label>
+                <label className="text-sm font-medium">{t('donations.history.start_date')}</label>
                 <Input
                   type="date"
                   value={filters.startDate}
@@ -152,7 +154,7 @@ export default function DonationHistoryTable() {
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium">End Date</label>
+                <label className="text-sm font-medium">{t('donations.history.end_date')}</label>
                 <Input
                   type="date"
                   value={filters.endDate}
@@ -163,7 +165,7 @@ export default function DonationHistoryTable() {
 
               {/* Min Amount */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Min Amount (USDT)</label>
+                <label className="text-sm font-medium">{t('donations.history.min_amount')}</label>
                 <Input
                   type="number"
                   placeholder="0.00"
@@ -175,15 +177,15 @@ export default function DonationHistoryTable() {
 
               {/* Campaign Type */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Campaign Type</label>
+                <label className="text-sm font-medium">{t('donations.history.campaign_type')}</label>
                 <Select value={filters.campaignType} onValueChange={(value) => updateFilter('campaignType', value)}>
                   <SelectTrigger data-testid="select-campaign-type">
-                    <SelectValue placeholder="All Types" />
+                    <SelectValue placeholder={t('donations.history.all_types')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
-                    <SelectItem value="DONATE">Donations</SelectItem>
-                    <SelectItem value="FUND">Business Funding</SelectItem>
+                    <SelectItem value="">{t('donations.history.all_types')}</SelectItem>
+                    <SelectItem value="DONATE">{t('donations.history.donations')}</SelectItem>
+                    <SelectItem value="FUND">{t('donations.history.business_funding')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -191,11 +193,11 @@ export default function DonationHistoryTable() {
             
             <div className="flex items-center gap-2">
               <Button onClick={() => refetch()} data-testid="button-apply-filters">
-                Apply Filters
+                {t('donations.history.apply_filters')}
               </Button>
               {getActiveFilterCount() > 0 && (
                 <Button variant="ghost" onClick={clearFilters} data-testid="button-clear-filters">
-                  Clear All
+                  {t('donations.history.clear_all')}
                 </Button>
               )}
             </div>
@@ -216,12 +218,12 @@ export default function DonationHistoryTable() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Campaign</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Network</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Transaction</TableHead>
+                  <TableHead>{t('donations.history.campaign')}</TableHead>
+                  <TableHead>{t('donations.history.amount')}</TableHead>
+                  <TableHead>{t('donations.history.type')}</TableHead>
+                  <TableHead>{t('donations.history.network')}</TableHead>
+                  <TableHead>{t('donations.history.date')}</TableHead>
+                  <TableHead className="text-right">{t('donations.history.transaction')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -284,9 +286,9 @@ export default function DonationHistoryTable() {
         ) : (
           <div className="text-center py-8">
             <Search className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">No Donations Found</h3>
+            <h3 className="text-lg font-semibold mb-2">{t('donations.history.no_donations')}</h3>
             <p className="text-muted-foreground">
-              {getActiveFilterCount() > 0 ? 'Try adjusting your filters' : 'No donations made yet'}
+              {getActiveFilterCount() > 0 ? t('donations.history.try_adjusting') : t('donations.history.no_donations_yet')}
             </p>
           </div>
         )}

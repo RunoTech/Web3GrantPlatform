@@ -796,3 +796,8 @@ div.card-standard:hover,
 .nav-icon {
   @apply text-muted-foreground hover:text-foreground;
 }
+
+/* Radix UI Dropdown wrapper background fix */
+[data-radix-popper-content-wrapper] {
+  background: hsl(var(--popover)) !important;
+}

@@ -31,6 +31,13 @@ export default function CreateCampaignPage() {
   const queryClient = useQueryClient();
   const { campaignFeeDonate, campaignFeeFund, isLoading: settingsLoading } = useSettings();
   
+  // Pending payment tracking - MUST BE DECLARED BEFORE useEffect hooks
+  const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
+  const [processedTxHash, setProcessedTxHash] = useState<string | null>(null);
+  const [lastPairedTxHash, setLastPairedTxHash] = useState<string | null>(null);
+  const [pendingFormData, setPendingFormData] = useState<any>(null); // Store form data waiting for txHash
+  const [validatedFormData, setValidatedFormData] = useState<any>(null); // Store validated data paired with txHash
+
   // Wagmi hooks for contract interaction with DEBUG
   const { writeContract, data: txHash, error: writeError } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed, error: receiptError } = useWaitForTransactionReceipt({
@@ -41,105 +48,6 @@ export default function CreateCampaignPage() {
   
   // Public client for manual transaction verification
   const publicClient = usePublicClient({ chainId: 1 });
-  
-  // Debug receipt status
-  React.useEffect(() => {
-    if (txHash) {
-      console.log('⏳ Waiting for transaction receipt...', txHash);
-    }
-    if (receiptError) {
-      console.error('❌ Receipt error:', receiptError);
-    }
-  }, [txHash, receiptError]);
-
-  // Pair txHash with pending form data when hash arrives (only for NEW hashes)
-  React.useEffect(() => {
-    if (txHash && pendingFormData && !validatedFormData && txHash !== lastPairedTxHash) {
-      console.log('📝 Pairing NEW txHash with form data:', txHash);
-      setValidatedFormData(pendingFormData);
-      setPendingFormData(null);
-      setLastPairedTxHash(txHash);
-      
-      toast({
-        title: "Payment Sent",
-        description: "Waiting for blockchain confirmation...",
-      });
-    }
-  }, [txHash, pendingFormData, validatedFormData, lastPairedTxHash]);
-
-  // Auto-create campaign when payment is confirmed
-  React.useEffect(() => {
-    if (isConfirmed && validatedFormData && txHash && txHash !== processedTxHash && !createCampaignMutation.isPending) {
-      console.log('✅ Payment confirmed! Creating campaign...', txHash);
-      
-      // Mark this transaction as processed immediately to prevent double-submission
-      setProcessedTxHash(txHash);
-      
-      toast({
-        title: "Payment Confirmed",
-        description: "Creating your campaign...",
-      });
-
-      // Create campaign with the stored form data and transaction hash
-      createCampaignMutation.mutate({
-        ...validatedFormData,
-        campaignFeeTxHash: txHash
-      });
-    }
-  }, [isConfirmed, validatedFormData, txHash, processedTxHash, createCampaignMutation.isPending]);
-
-  // Clear validated form data only after successful campaign creation
-  React.useEffect(() => {
-    if (createCampaignMutation.isSuccess && validatedFormData) {
-      console.log('✅ Campaign created successfully, clearing all state');
-      setValidatedFormData(null);
-      setProcessedTxHash(null);
-      setLastPairedTxHash(null);
-    }
-  }, [createCampaignMutation.isSuccess, validatedFormData]);
-
-  // Handle mutation errors - reset state so user can retry
-  React.useEffect(() => {
-    if (createCampaignMutation.isError) {
-      console.error('❌ Campaign creation failed');
-      setValidatedFormData(null);
-      setProcessedTxHash(null);
-      setLastPairedTxHash(null);
-    }
-  }, [createCampaignMutation.isError]);
-
-  // Handle receipt errors
-  React.useEffect(() => {
-    if (receiptError && validatedFormData) {
-      console.error('❌ Receipt error:', receiptError);
-      toast({
-        title: "Payment Confirmation Failed",
-        description: "Your payment was sent but confirmation failed. Please contact support with your transaction hash.",
-        variant: "destructive",
-      });
-      // Clear state to allow retry
-      setValidatedFormData(null);
-      setProcessedTxHash(null);
-      setLastPairedTxHash(null);
-    }
-  }, [receiptError, validatedFormData]);
-
-  // Handle write contract errors
-  React.useEffect(() => {
-    if (writeError && (pendingFormData || validatedFormData)) {
-      console.error('❌ Write contract error:', writeError);
-      toast({
-        title: "Transaction Failed",
-        description: writeError.message || "Failed to send transaction",
-        variant: "destructive",
-      });
-      // Clear state to allow retry
-      setPendingFormData(null);
-      setValidatedFormData(null);
-      setProcessedTxHash(null);
-      setLastPairedTxHash(null);
-    }
-  }, [writeError, pendingFormData, validatedFormData]);
   
   // Get URL parameters to determine campaign type
   const urlParams = new URLSearchParams(window.location.search);
@@ -158,8 +66,6 @@ export default function CreateCampaignPage() {
   // Credit card payment state - Updated for balance system
   const [creditCardEnabled, setCreditCardEnabled] = useState(false);
   const [collateralPaid, setCollateralPaid] = useState(false);
-  const [pendingFormData, setPendingFormData] = useState<any>(null); // Store form data waiting for txHash
-  const [validatedFormData, setValidatedFormData] = useState<any>(null); // Store validated data paired with txHash
   const [companyBalance, setCompanyBalance] = useState<{ available: number; reserved: number } | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
@@ -175,11 +81,6 @@ export default function CreateCampaignPage() {
   // Image upload state
   const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  
-  // Pending payment tracking
-  const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
-  const [processedTxHash, setProcessedTxHash] = useState<string | null>(null);
-  const [lastPairedTxHash, setLastPairedTxHash] = useState<string | null>(null);
   
   // KYB Status Query - Check if user has approved KYB
   const { data: kybStatus, isLoading: kybLoading } = useQuery({
@@ -283,6 +184,105 @@ export default function CreateCampaignPage() {
       });
     },
   });
+
+  // Debug receipt status
+  React.useEffect(() => {
+    if (txHash) {
+      console.log('⏳ Waiting for transaction receipt...', txHash);
+    }
+    if (receiptError) {
+      console.error('❌ Receipt error:', receiptError);
+    }
+  }, [txHash, receiptError]);
+
+  // Pair txHash with pending form data when hash arrives (only for NEW hashes)
+  React.useEffect(() => {
+    if (txHash && pendingFormData && !validatedFormData && txHash !== lastPairedTxHash) {
+      console.log('📝 Pairing NEW txHash with form data:', txHash);
+      setValidatedFormData(pendingFormData);
+      setPendingFormData(null);
+      setLastPairedTxHash(txHash);
+      
+      toast({
+        title: "Payment Sent",
+        description: "Waiting for blockchain confirmation...",
+      });
+    }
+  }, [txHash, pendingFormData, validatedFormData, lastPairedTxHash]);
+
+  // Auto-create campaign when payment is confirmed
+  React.useEffect(() => {
+    if (isConfirmed && validatedFormData && txHash && txHash !== processedTxHash && !createCampaignMutation.isPending) {
+      console.log('✅ Payment confirmed! Creating campaign...', txHash);
+      
+      // Mark this transaction as processed immediately to prevent double-submission
+      setProcessedTxHash(txHash);
+      
+      toast({
+        title: "Payment Confirmed",
+        description: "Creating your campaign...",
+      });
+
+      // Create campaign with the stored form data and transaction hash
+      createCampaignMutation.mutate({
+        ...validatedFormData,
+        campaignFeeTxHash: txHash
+      });
+    }
+  }, [isConfirmed, validatedFormData, txHash, processedTxHash, createCampaignMutation.isPending]);
+
+  // Clear validated form data only after successful campaign creation
+  React.useEffect(() => {
+    if (createCampaignMutation.isSuccess && validatedFormData) {
+      console.log('✅ Campaign created successfully, clearing all state');
+      setValidatedFormData(null);
+      setProcessedTxHash(null);
+      setLastPairedTxHash(null);
+    }
+  }, [createCampaignMutation.isSuccess, validatedFormData]);
+
+  // Handle mutation errors - reset state so user can retry
+  React.useEffect(() => {
+    if (createCampaignMutation.isError) {
+      console.error('❌ Campaign creation failed');
+      setValidatedFormData(null);
+      setProcessedTxHash(null);
+      setLastPairedTxHash(null);
+    }
+  }, [createCampaignMutation.isError]);
+
+  // Handle receipt errors
+  React.useEffect(() => {
+    if (receiptError && validatedFormData) {
+      console.error('❌ Receipt error:', receiptError);
+      toast({
+        title: "Payment Confirmation Failed",
+        description: "Your payment was sent but confirmation failed. Please contact support with your transaction hash.",
+        variant: "destructive",
+      });
+      // Clear state to allow retry
+      setValidatedFormData(null);
+      setProcessedTxHash(null);
+      setLastPairedTxHash(null);
+    }
+  }, [receiptError, validatedFormData]);
+
+  // Handle write contract errors
+  React.useEffect(() => {
+    if (writeError && (pendingFormData || validatedFormData)) {
+      console.error('❌ Write contract error:', writeError);
+      toast({
+        title: "Transaction Failed",
+        description: writeError.message || "Failed to send transaction",
+        variant: "destructive",
+      });
+      // Clear state to allow retry
+      setPendingFormData(null);
+      setValidatedFormData(null);
+      setProcessedTxHash(null);
+      setLastPairedTxHash(null);
+    }
+  }, [writeError, pendingFormData, validatedFormData]);
 
 
   // Fetch dynamic collateral info

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import Header from "@/components/Header";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/utils/api";
@@ -46,6 +47,36 @@ export default function AdminDailyRewardsPage() {
   // Get overall stats
   const { data: dailyStats } = useQuery<any>({
     queryKey: ["/api/youhonor/daily-stats"],
+  });
+
+  // Get daily rewards enabled status
+  const { data: dailyRewardSettings } = useQuery<any>({
+    queryKey: ["/api/youhonor/settings-categorized"],
+  });
+
+  const isDailyRewardsEnabled = dailyRewardSettings?.features?.find((s: any) => s.key === 'daily_reward_enabled')?.value === 'true';
+
+  // Toggle daily rewards mutation
+  const toggleDailyRewardsMutation = useMutation({
+    mutationFn: (enabled: boolean) => 
+      api.put('/api/youhonor/settings', {
+        key: 'daily_reward_enabled',
+        value: enabled ? 'true' : 'false'
+      }),
+    onSuccess: (_, enabled) => {
+      toast({
+        title: enabled ? "Daily Rewards Enabled" : "Daily Rewards Disabled",
+        description: enabled ? "Daily rewards system is now active" : "Daily rewards system is now inactive",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/youhonor/settings-categorized"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update daily rewards status",
+        variant: "destructive",
+      });
+    },
   });
 
   // Auto winner selection mutation
@@ -213,6 +244,44 @@ export default function AdminDailyRewardsPage() {
               </Card>
             </div>
           )}
+
+          {/* System Control */}
+          <Card className="border-2 border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="w-5 h-5 text-primary" />
+                  <span>System Control</span>
+                </div>
+                <Badge variant={isDailyRewardsEnabled ? "default" : "secondary"}>
+                  {isDailyRewardsEnabled ? "Active" : "Inactive"}
+                </Badge>
+              </CardTitle>
+              <CardDescription>
+                Enable or disable the daily rewards system platform-wide
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <div className="space-y-1">
+                  <div className="font-medium text-black dark:text-white">
+                    Daily Rewards System
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    {isDailyRewardsEnabled 
+                      ? "Users can join daily draws and win rewards" 
+                      : "Daily rewards are currently disabled"}
+                  </div>
+                </div>
+                <Switch
+                  checked={isDailyRewardsEnabled}
+                  onCheckedChange={(checked) => toggleDailyRewardsMutation.mutate(checked)}
+                  disabled={toggleDailyRewardsMutation.isPending}
+                  data-testid="toggle-daily-rewards"
+                />
+              </div>
+            </CardContent>
+          </Card>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Date Selection and Winner Management */}

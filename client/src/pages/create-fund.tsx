@@ -63,6 +63,10 @@ export default function CreateFundPage() {
   const [pendingFundId, setPendingFundId] = useState<number | null>(null);
   const [paymentIntentId, setPaymentIntentId] = useState<number | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(false);
+  
+  // Image upload state
+  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
   // Wagmi hooks for payment
   const { writeContract, data: txHash } = useWriteContract();
@@ -418,6 +422,66 @@ export default function CreateFundPage() {
         description: error?.message || "Failed to upload document",
         variant: "destructive",
       });
+    }
+  };
+
+  // Image upload handler
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please upload an image smaller than 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('campaignImage', file);
+
+      const response = await fetch('/api/upload-campaign-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      setUploadedImageUrl(data.imageUrl);
+      campaignForm.setValue("imageUrl", data.imageUrl);
+
+      toast({
+        title: "Upload Successful",
+        description: "Image uploaded successfully",
+      });
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -1133,9 +1197,31 @@ export default function CreateFundPage() {
                           name="imageUrl"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Campaign Image URL</FormLabel>
+                              <FormLabel>Campaign Image</FormLabel>
                               <FormControl>
-                                <Input {...field} data-testid="input-image-url" />
+                                <div className="space-y-4">
+                                  <Input 
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                    disabled={isUploading}
+                                    className="border-gray-300 dark:border-gray-600 cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                                    data-testid="input-campaign-image"
+                                  />
+                                  {isUploading && (
+                                    <p className="text-sm text-muted-foreground">Uploading image...</p>
+                                  )}
+                                  {uploadedImageUrl && (
+                                    <div className="space-y-2">
+                                      <p className="text-sm text-green-600 dark:text-green-400">✓ Image uploaded successfully</p>
+                                      <img 
+                                        src={uploadedImageUrl} 
+                                        alt="Campaign preview" 
+                                        className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                                      />
+                                    </div>
+                                  )}
+                                </div>
                               </FormControl>
                               <FormMessage />
                             </FormItem>

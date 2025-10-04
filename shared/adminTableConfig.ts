@@ -60,7 +60,7 @@ export const adminTableConfigs: Record<string, TableConfig> = {
     label: "User Accounts",
     icon: "Users",
     description: "Platform user accounts and wallet information",
-    permissions: { read: true, create: false, update: true, delete: false, export: true },
+    permissions: { read: true, create: false, update: true, delete: true, export: true },
     columns: [
       { key: "id", label: "ID", type: "number", sortable: true },
       { key: "wallet", label: "Wallet Address", type: "wallet", sortable: true, searchable: true },
@@ -106,7 +106,7 @@ export const adminTableConfigs: Record<string, TableConfig> = {
     label: "Corporate Verifications",
     icon: "Building",
     description: "KYB verification requests for FUND campaigns",
-    permissions: { read: true, create: false, update: true, delete: false, export: true },
+    permissions: { read: true, create: false, update: true, delete: true, export: true },
     columns: [
       { key: "id", label: "ID", type: "number", sortable: true },
       { key: "wallet", label: "Wallet", type: "wallet", sortable: true, searchable: true },
@@ -180,7 +180,7 @@ export const adminTableConfigs: Record<string, TableConfig> = {
     label: "Payment Intents",
     icon: "DollarSign",
     description: "Unified payment intent tracking",
-    permissions: { read: true, create: false, update: true, delete: false, export: true },
+    permissions: { read: true, create: false, update: true, delete: true, export: true },
     columns: [
       { key: "id", label: "ID", type: "number", sortable: true },
       { key: "wallet", label: "Wallet", type: "wallet", sortable: true, searchable: true },
@@ -203,7 +203,7 @@ export const adminTableConfigs: Record<string, TableConfig> = {
     label: "Collateral Reservations",
     icon: "Lock",
     description: "Campaign collateral tracking",
-    permissions: { read: true, create: false, update: true, delete: false, export: true },
+    permissions: { read: true, create: false, update: true, delete: true, export: true },
     columns: [
       { key: "id", label: "ID", type: "number", sortable: true },
       { key: "campaignId", label: "Campaign", type: "number", sortable: true, filterable: true },
@@ -346,7 +346,7 @@ export const adminTableConfigs: Record<string, TableConfig> = {
     label: "Daily Winners",
     icon: "Award",
     description: "Selected daily reward winners",
-    permissions: { read: true, create: false, update: true, delete: false, export: true },
+    permissions: { read: true, create: false, update: true, delete: true, export: true },
     columns: [
       { key: "id", label: "ID", type: "number", sortable: true },
       { key: "wallet", label: "Wallet", type: "wallet", sortable: true, searchable: true },
@@ -365,7 +365,7 @@ export const adminTableConfigs: Record<string, TableConfig> = {
     label: "Daily Rewards",
     icon: "Gift",
     description: "Daily reward configuration",
-    permissions: { read: true, create: false, update: true, delete: false, export: true },
+    permissions: { read: true, create: false, update: true, delete: true, export: true },
     columns: [
       { key: "id", label: "ID", type: "number", sortable: true },
       { key: "rewardDate", label: "Date", type: "date", sortable: true, filterable: true },
@@ -385,7 +385,7 @@ export const adminTableConfigs: Record<string, TableConfig> = {
     label: "Daily Participants",
     icon: "Users",
     description: "Daily reward participants",
-    permissions: { read: true, create: false, update: false, delete: false, export: true },
+    permissions: { read: true, create: false, update: false, delete: true, export: true },
     columns: [
       { key: "id", label: "ID", type: "number", sortable: true },
       { key: "dailyRewardId", label: "Reward ID", type: "number", sortable: true, filterable: true },

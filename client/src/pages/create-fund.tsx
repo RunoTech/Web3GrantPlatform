@@ -33,6 +33,7 @@ import {
   DollarSign,
   RefreshCw
 } from "lucide-react";
+import { useSettings } from "@/hooks/useSettings";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -51,6 +52,7 @@ export default function CreateFundPage() {
   const { isConnected, address } = useWallet();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { campaignFeeDonate, campaignFeeFund, isLoading: settingsLoading } = useSettings();
 
   // Multi-step wizard state
   const [currentStep, setCurrentStep] = useState(1);
@@ -104,7 +106,7 @@ export default function CreateFundPage() {
     retry: false
   });
 
-  const collateralAmount = pricingData?.pricing?.amount || settings?.fund_collateral_amount || "100";
+  const collateralAmount = campaignFeeFund || pricingData?.pricing?.amount || settings?.fund_collateral_amount || "100";
   const collateralToken = pricingData?.pricing?.token || "USDT";
   const platformWallet = pricingData?.pricing?.platformWallet || settings?.platform_wallet || "0x21e1f57a753fE27F7d8068002F65e8a830E2e6A8";
 

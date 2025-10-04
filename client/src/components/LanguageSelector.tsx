@@ -38,7 +38,7 @@ export default function LanguageSelector() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="card-standard border border-border bg-background dark:bg-gray-900 min-w-[150px]"
+        className="card-standard border border-border bg-background dark:bg-gray-900 min-w-[150px] z-[100]"
       >
         {languages.map((lang) => (
           <DropdownMenuItem

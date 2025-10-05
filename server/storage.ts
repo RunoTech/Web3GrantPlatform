@@ -27,6 +27,7 @@ import {
   type CollateralReservation, type InsertCollateralReservation,
   type PaymentIntent, type InsertPaymentIntent,
   type BalanceLedger, type InsertBalanceLedger,
+  type SystemMessage, type InsertSystemMessage,
   admins,
   platformSettings,
   networkFees,
@@ -53,6 +54,7 @@ import {
   collateralReservations,
   paymentIntents,
   balanceLedger,
+  systemMessages,
 } from "../shared/schema";
 
 export interface IStorage {
@@ -305,6 +307,16 @@ export interface IStorage {
   recordBalanceTransaction(entry: InsertBalanceLedger): Promise<BalanceLedger>;
   getBalanceHistory(wallet: string, limit?: number): Promise<BalanceLedger[]>;
   getBalanceTransactionsByReason(wallet: string, reason: string): Promise<BalanceLedger[]>;
+  
+  // System Messages
+  createSystemMessage(message: InsertSystemMessage): Promise<SystemMessage>;
+  getSystemMessage(id: number): Promise<SystemMessage | undefined>;
+  getUserSystemMessages(userId: number): Promise<SystemMessage[]>;
+  getUnreadMessageCount(userId: number): Promise<number>;
+  markSystemMessageAsRead(id: number): Promise<void>;
+  deleteSystemMessage(id: number): Promise<void>;
+  getAllSystemMessages(): Promise<SystemMessage[]>;
+  getAccountByWallet(wallet: string): Promise<Account | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2226,6 +2238,55 @@ export class DatabaseStorage implements IStorage {
         eq(balanceLedger.reason, reason)
       ))
       .orderBy(desc(balanceLedger.createdAt));
+  }
+
+  // System Messages Operations
+  async createSystemMessage(message: InsertSystemMessage): Promise<SystemMessage> {
+    const [result] = await db.insert(systemMessages).values(message).returning();
+    return result;
+  }
+
+  async getSystemMessage(id: number): Promise<SystemMessage | undefined> {
+    const [message] = await db.select().from(systemMessages).where(eq(systemMessages.id, id));
+    return message || undefined;
+  }
+
+  async getUserSystemMessages(userId: number): Promise<SystemMessage[]> {
+    return await db.select()
+      .from(systemMessages)
+      .where(eq(systemMessages.userId, userId))
+      .orderBy(desc(systemMessages.createdAt));
+  }
+
+  async getUnreadMessageCount(userId: number): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(systemMessages)
+      .where(and(
+        eq(systemMessages.userId, userId),
+        eq(systemMessages.isRead, false)
+      ));
+    return Number(result[0]?.count || 0);
+  }
+
+  async markSystemMessageAsRead(id: number): Promise<void> {
+    await db.update(systemMessages)
+      .set({ isRead: true })
+      .where(eq(systemMessages.id, id));
+  }
+
+  async deleteSystemMessage(id: number): Promise<void> {
+    await db.delete(systemMessages).where(eq(systemMessages.id, id));
+  }
+
+  async getAllSystemMessages(): Promise<SystemMessage[]> {
+    return await db.select()
+      .from(systemMessages)
+      .orderBy(desc(systemMessages.createdAt));
+  }
+
+  async getAccountByWallet(wallet: string): Promise<Account | undefined> {
+    const [account] = await db.select().from(accounts).where(eq(accounts.wallet, wallet));
+    return account || undefined;
   }
 }
 

@@ -20,9 +20,11 @@ import {
   insertUserNonceSchema,
   insertUserSessionSchema,
   insertPendingPaymentSchema,
+  insertSystemMessageSchema,
   type Admin,
   type UserNonce,
   type UserSession,
+  type SystemMessage,
 } from "../shared/schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -4711,6 +4713,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error exporting table data:", error);
       res.status(500).json({ error: "Failed to export table data" });
+    }
+  });
+
+  // ======================
+  // SYSTEM MESSAGES ROUTES
+  // ======================
+
+  // POST /api/youhonor/send-system-message - Admin sends system message to user
+  app.post("/api/youhonor/send-system-message", authenticateAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertSystemMessageSchema.parse(req.body);
+      
+      // Log action
+      await storage.createAdminLog({
+        adminId: req.admin.id,
+        action: 'send_system_message',
+        details: { userId: parsed.userId, messageType: parsed.messageType },
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent') || null,
+      });
+      
+      const message = await storage.createSystemMessage({
+        ...parsed,
+        createdBy: req.admin.id,
+      });
+      
+      res.json(message);
+    } catch (error: any) {
+      console.error("Error sending system message:", error);
+      res.status(400).json({ error: error.message || "Failed to send message" });
+    }
+  });
+
+  // GET /api/system-messages - User gets their own messages
+  app.get("/api/system-messages", authenticateWallet, async (req: any, res) => {
+    try {
+      const userWallet = req.userWallet;
+      
+      // Get user account ID
+      const account = await storage.getAccountByWallet(userWallet);
+      if (!account) {
+        return res.status(404).json({ error: "Account not found" });
+      }
+      
+      const messages = await storage.getUserSystemMessages(account.id);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching system messages:", error);
+      res.status(500).json({ error: "Failed to fetch messages" });
+    }
+  });
+
+  // GET /api/system-messages/unread-count - Get unread message count
+  app.get("/api/system-messages/unread-count", authenticateWallet, async (req: any, res) => {
+    try {
+      const userWallet = req.userWallet;
+      
+      // Get user account ID
+      const account = await storage.getAccountByWallet(userWallet);
+      if (!account) {
+        return res.json({ count: 0 });
+      }
+      
+      const count = await storage.getUnreadMessageCount(account.id);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+      res.status(500).json({ error: "Failed to fetch unread count" });
+    }
+  });
+
+  // PUT /api/system-messages/:id/mark-read - Mark message as read
+  app.put("/api/system-messages/:id/mark-read", authenticateWallet, async (req: any, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      const userWallet = req.userWallet;
+      
+      // Get user account ID
+      const account = await storage.getAccountByWallet(userWallet);
+      if (!account) {
+        return res.status(404).json({ error: "Account not found" });
+      }
+      
+      // Verify message belongs to user
+      const message = await storage.getSystemMessage(messageId);
+      if (!message || message.userId !== account.id) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      await storage.markSystemMessageAsRead(messageId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+      res.status(500).json({ error: "Failed to mark message as read" });
+    }
+  });
+
+  // DELETE /api/system-messages/:id - Delete message
+  app.delete("/api/system-messages/:id", authenticateWallet, async (req: any, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      const userWallet = req.userWallet;
+      
+      // Get user account ID
+      const account = await storage.getAccountByWallet(userWallet);
+      if (!account) {
+        return res.status(404).json({ error: "Account not found" });
+      }
+      
+      // Verify message belongs to user
+      const message = await storage.getSystemMessage(messageId);
+      if (!message || message.userId !== account.id) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      await storage.deleteSystemMessage(messageId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      res.status(500).json({ error: "Failed to delete message" });
+    }
+  });
+
+  // GET /api/youhonor/system-messages - Admin gets all system messages
+  app.get("/api/youhonor/system-messages", authenticateAdmin, async (req: any, res) => {
+    try {
+      const messages = await storage.getAllSystemMessages();
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching all system messages:", error);
+      res.status(500).json({ error: "Failed to fetch messages" });
     }
   });
 

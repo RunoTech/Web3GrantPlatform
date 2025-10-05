@@ -17,7 +17,8 @@ import {
   Activity,
   TrendingUp,
   DollarSign,
-  Calendar
+  Calendar,
+  Send
 } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 
@@ -246,6 +247,16 @@ export default function AdminDashboardPage() {
               >
                 <Shield className="h-6 w-6" />
                 <span>KYB Verification</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="h-20 flex-col space-y-2"
+                onClick={() => setLocation("/youhonor/send-message")}
+                data-testid="button-admin-send-message"
+              >
+                <Send className="h-6 w-6" />
+                <span>Send Message</span>
               </Button>
 
             </div>

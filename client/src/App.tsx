@@ -28,6 +28,7 @@ import KYBVerificationPage from "@/pages/admin/kyb-verification";
 import AdminCampaignsPage from "@/pages/admin/campaigns";
 import AdminCampaignForm from "@/pages/admin/campaign-form";
 import AdminTransactionsPage from "@/pages/admin/transactions";
+import SendMessagePage from "@/pages/admin/send-message";
 
 // Static Pages
 import {
@@ -106,6 +107,7 @@ function Router() {
       <Route path="/youhonor/daily-rewards" component={AdminDailyRewardsPage} />
       <Route path="/youhonor/database" component={AdminDatabasePage} />
       <Route path="/youhonor/kyb-verification" component={KYBVerificationPage} />
+      <Route path="/youhonor/send-message" component={SendMessagePage} />
       
       <Route component={NotFound} />
     </Switch>

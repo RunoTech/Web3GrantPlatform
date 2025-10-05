@@ -58,6 +58,7 @@ Uses PostgreSQL with tables for:
 - Icon visibility fix for light mode using theme-aware classes.
 - Separation of FUND and DONATE campaign creation flows based on URL parameters.
 - Company information for FUND campaigns is private and admin-only.
+- **Terms & Conditions**: Mandatory terms acceptance during campaign creation. Separate terms for DONATE and FUND campaigns, editable via admin panel (Platform Settings > Legal tab). Users must read and accept terms via checkbox before submitting campaign creation form.
 
 # External Dependencies
 

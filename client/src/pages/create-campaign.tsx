@@ -8,6 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import { useWallet } from "@/hooks/useWallet";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -29,7 +32,13 @@ export default function CreateCampaignPage() {
   const { isConnected, address } = useWallet();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { campaignFeeDonate, campaignFeeFund, isLoading: settingsLoading } = useSettings();
+  const { 
+    campaignFeeDonate, 
+    campaignFeeFund, 
+    donateCampaignTerms, 
+    fundCampaignTerms, 
+    isLoading: settingsLoading 
+  } = useSettings();
   
   // Pending payment tracking - MUST BE DECLARED BEFORE useEffect hooks
   const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
@@ -156,6 +165,8 @@ export default function CreateCampaignPage() {
       collateralPaid: false,
       // Campaign creation fee
       campaignFeeTxHash: "",
+      // Terms agreement
+      termsAccepted: false,
     },
   });
 
@@ -611,6 +622,16 @@ export default function CreateCampaignPage() {
   };
 
   const onSubmit = async (data: any) => {
+    // Validate terms acceptance
+    if (!data.termsAccepted) {
+      toast({
+        title: "Sözleşme Onayı Gerekli",
+        description: "Devam etmek için kampanya oluşturma sözleşmesini okumalı ve onaylamalısınız",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Validate FUND/DONATE rules
     if (campaignType === "FUND" && creatorType !== "company") {
       toast({
@@ -1281,6 +1302,50 @@ export default function CreateCampaignPage() {
                 </div>
               )}
 
+              {/* Campaign Terms Acceptance */}
+              <FormField
+                control={form.control}
+                name="termsAccepted"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border border-border p-4 bg-surface-secondary">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        data-testid="checkbox-terms-accepted"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-sm font-medium text-foreground">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <button type="button" className="text-primary hover:underline">
+                              Kampanya oluşturma sözleşmesini
+                            </button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-3xl max-h-[80vh]">
+                            <DialogHeader>
+                              <DialogTitle className="text-xl font-bold">
+                                {campaignType === 'FUND' ? 'FUND Kampanya Oluşturma Sözleşmesi' : 'DONATE Kampanya Oluşturma Sözleşmesi'}
+                              </DialogTitle>
+                              <DialogDescription>
+                                Lütfen devam etmeden önce aşağıdaki şartları dikkatlice okuyun
+                              </DialogDescription>
+                            </DialogHeader>
+                            <ScrollArea className="max-h-[60vh] pr-4">
+                              <div className="space-y-4 text-sm text-muted-foreground whitespace-pre-line">
+                                {campaignType === 'FUND' ? fundCampaignTerms : donateCampaignTerms}
+                              </div>
+                            </ScrollArea>
+                          </DialogContent>
+                        </Dialog>
+                        {' '}okudum, kabul ediyorum
+                      </FormLabel>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
 
               {/* Submit Button - Only show when credit card is disabled OR collateral is paid */}
               {(!creditCardEnabled || collateralPaid) && (

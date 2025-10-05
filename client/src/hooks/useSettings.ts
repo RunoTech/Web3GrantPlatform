@@ -66,6 +66,10 @@ export function useSettings() {
     morningDrawPrize: getNumberSetting('morning_draw_prize', 0),
     afternoonDrawPrize: getNumberSetting('afternoon_draw_prize', 0),
     eveningDrawPrize: getNumberSetting('evening_draw_prize', 0),
+    
+    // Campaign Terms & Agreements
+    donateCampaignTerms: getSetting('donate_campaign_terms', ''),
+    fundCampaignTerms: getSetting('fund_campaign_terms', ''),
   };
 }
 

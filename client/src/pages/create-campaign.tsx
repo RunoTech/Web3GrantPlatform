@@ -101,7 +101,7 @@ export default function CreateCampaignPage() {
   // Company Profile Query - Get approved company data
   const { data: companyProfile, isLoading: companyLoading } = useQuery({
     queryKey: ['/api/company/profile'], 
-    enabled: isConnected && campaignType === 'FUND' && kybStatus && (kybStatus as any)?.status === 'APPROVED',
+    enabled: !!(isConnected && campaignType === 'FUND' && kybStatus && (kybStatus as any)?.status === 'APPROVED'),
     retry: false
   });
 
@@ -809,62 +809,62 @@ export default function CreateCampaignPage() {
         )}
 
         {/* Campaign Type Info - Show when locked */}
-        {isLocked && (
+        {isLocked ? (
           <div className="mb-8 p-6 border-2 border-primary bg-primary/10 rounded-xl">
-            <div className="flex items-center space-x-3 mb-4">
-              {campaignType === "FUND" ? (
-                <Building className="w-8 h-8 text-primary" />
-              ) : (
-                <Users className="w-8 h-8 text-primary" />
-              )}
-              <h3 className="text-xl font-bold text-black dark:text-white">
-                Creating {campaignType} Campaign
-              </h3>
-              {isLocked && (
-                <Lock className="w-5 h-5 text-gray-500" />
-              )}
+              <div className="flex items-center space-x-3 mb-4">
+                {campaignType === "FUND" ? (
+                  <Building className="w-8 h-8 text-primary" />
+                ) : (
+                  <Users className="w-8 h-8 text-primary" />
+                )}
+                <h3 className="text-xl font-bold text-black dark:text-white">
+                  Creating {campaignType} Campaign
+                </h3>
+                {isLocked && (
+                  <Lock className="w-5 h-5 text-gray-500" />
+                )}
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                {campaignType === "FUND" 
+                  ? "Unlimited funding campaign for companies"
+                  : "Time-limited donation campaign for individuals and organizations"
+                }
+              </p>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                {campaignType === "FUND" ? (
+                  <>
+                    <li className="flex items-center space-x-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>Only companies can create</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>Unlimited (permanent) campaign</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>Continuous funding opportunity</span>
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    <li className="flex items-center space-x-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>Individuals, associations, foundations</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <Calendar className="w-4 h-4 text-blue-500" />
+                      <span>Start and end dates required</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>Time-limited donation campaign</span>
+                    </li>
+                  </>
+                )}
+              </ul>
             </div>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              {campaignType === "FUND" 
-                ? "Unlimited funding campaign for companies"
-                : "Time-limited donation campaign for individuals and organizations"
-              }
-            </p>
-            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-              {campaignType === "FUND" ? (
-                <>
-                  <li className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Only companies can create</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Unlimited (permanent) campaign</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Continuous funding opportunity</span>
-                  </li>
-                </>
-              ) : (
-                <>
-                  <li className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Individuals, associations, foundations</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4 text-blue-500" />
-                    <span>Start and end dates required</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Time-limited donation campaign</span>
-                  </li>
-                </>
-              )}
-            </ul>
-          </div>
-        )}
+        ) : null}
 
         {/* KYB Gating for FUND Campaigns */}
         {campaignType === 'FUND' && isConnected && (

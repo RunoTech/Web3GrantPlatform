@@ -4747,7 +4747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GET /api/system-messages - User gets their own messages
-  app.get("/api/system-messages", authenticateWallet, async (req: any, res) => {
+  app.get("/api/system-messages", authenticateUser, async (req: any, res) => {
     try {
       const userWallet = req.userWallet;
       
@@ -4766,7 +4766,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GET /api/system-messages/unread-count - Get unread message count
-  app.get("/api/system-messages/unread-count", authenticateWallet, async (req: any, res) => {
+  app.get("/api/system-messages/unread-count", authenticateUser, async (req: any, res) => {
     try {
       const userWallet = req.userWallet;
       
@@ -4785,7 +4785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PUT /api/system-messages/:id/mark-read - Mark message as read
-  app.put("/api/system-messages/:id/mark-read", authenticateWallet, async (req: any, res) => {
+  app.put("/api/system-messages/:id/mark-read", authenticateUser, async (req: any, res) => {
     try {
       const messageId = parseInt(req.params.id);
       const userWallet = req.userWallet;
@@ -4811,7 +4811,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // DELETE /api/system-messages/:id - Delete message
-  app.delete("/api/system-messages/:id", authenticateWallet, async (req: any, res) => {
+  app.delete("/api/system-messages/:id", authenticateUser, async (req: any, res) => {
     try {
       const messageId = parseInt(req.params.id);
       const userWallet = req.userWallet;

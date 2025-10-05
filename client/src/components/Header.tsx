@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import LanguageSelector from "@/components/LanguageSelector";
 import ThemeToggle from "@/components/ThemeToggle";
+import SystemMessagesDropdown from "@/components/SystemMessagesDropdown";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useWallet } from "@/hooks/useWallet";
 import { Heart, User, Settings, BarChart3, Target, Trophy, Users, LogOut, ChevronDown, Menu, X } from "lucide-react";
@@ -81,6 +82,7 @@ export default function Header({ currentPage }: HeaderProps) {
           <div className="flex items-center gap-4 flex-shrink-0">
             <ThemeToggle />
             <LanguageSelector />
+            {isConnected && <SystemMessagesDropdown />}
             {isConnected && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

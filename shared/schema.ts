@@ -821,7 +821,30 @@ export const insertPendingFundSchema = createInsertSchema(pendingFunds).omit({
   updatedAt: true,
 });
 
+// System messages table - Admin to user notifications
+export const systemMessages = pgTable("system_messages", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => accounts.id).notNull(),
+  message: text("message").notNull(),
+  messageType: varchar("message_type", { length: 20 }).notNull().default("info"), // info, warning, error, success, security, ban
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  createdBy: integer("created_by").references(() => admins.id),
+}, (table) => [
+  index("idx_system_messages_user_id").on(table.userId),
+  index("idx_system_messages_is_read").on(table.isRead),
+  index("idx_system_messages_created_at").on(table.createdAt),
+]);
+
+// Insert schema for system messages
+export const insertSystemMessageSchema = createInsertSchema(systemMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types for new tables
+export type SystemMessage = typeof systemMessages.$inferSelect;
+export type InsertSystemMessage = z.infer<typeof insertSystemMessageSchema>;
 export type CorporateVerification = typeof corporateVerifications.$inferSelect;
 export type InsertCorporateVerification = z.infer<typeof insertCorporateVerificationSchema>;
 export type FundDocument = typeof fundDocuments.$inferSelect;
